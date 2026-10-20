@@ -52,6 +52,8 @@ A pasta `game` é o APK Android extraído, conforme informado pelo autor. Não �
 
 Para testar uma instalação existente, execute **[Testar Destinia.bat](Testar%20Destinia.bat)** na raiz do projeto. Ele verifica a inicialização dos dois hosts, usa cópias dos saves e reúne logs/capturas em `relatorios`. O modo guiado acompanha testes de gameplay, salvar/reabrir, câmera, mouse, áudio e controle. Veja o [roteiro completo](diagnostico/COMO_TESTAR.md). Não instala dependências nem altera o código do jogo; testes visuais dependem da sua observação.
 
+O relatório é salvo ao longo da sessão e informa quando está parcial. Após cada execução, o diagnóstico também destaca compras observadas, alterações de cash e a rede aguardando resposta; esses avisos não significam que o problema da loja foi corrigido.
+
 [Baixar o pacote de testes](https://raw.githubusercontent.com/sugyua/destinia/main/diagnostico/pacotes/testes-destinia.zip) e extrair na raiz do projeto existente. O pacote contém somente o BAT, seu executor PowerShell e as instruções.
 
 Consulte [INSTALL.md](INSTALL.md) para compilar e executar com dados próprios compatíveis. Os launchers existentes continuam voltados ao ambiente de desenvolvimento MSYS2 em `C:\msys64\ucrt64\bin`; não são launchers portáteis.

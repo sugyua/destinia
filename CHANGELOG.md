@@ -6,6 +6,14 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 
 ## Próxima atualização — limpeza e diagnóstico, sem nova release
 
+### Ajustes após os testes de gameplay
+
+- O diagnóstico agora destaca compras observadas nos logs, alterações de cash e rede ainda aguardando resposta na última sonda. Uma espera já encerrada não é marcada como pendente.
+- Relatórios gravados desde o início e atualizados a cada resultado, antes das perguntas e das janelas de teste, com indicação explícita de sessão parcial e etapa atual.
+- Resumo com contagem de falhas, avisos e pendências; código zero não é apresentado como aprovação de todos os recursos.
+- Preservação de resultados parciais testada com encerramento real de um processo auxiliar, além dos testes de detecção de compra/rede.
+- Pacote de testes atualizado, sem exigir recompilação dos hosts. Nenhuma alteração no gameplay, na loja ou nos saves originais.
+
 ### Limpeza do repositório
 
 - Removidos logs de testes, relatórios de uso de CPU, backups dos fontes, cópias antigas não usadas no build, configuração local do editor, arquivo vazio e material pessoal de continuidade/exportação de conversas.

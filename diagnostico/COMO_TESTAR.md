@@ -18,7 +18,9 @@ Ao baixar o pacote de testes, extraia todos os arquivos **na raiz do projeto exi
 
 Em host_zoom, o teste ativa PT e o trace de viewport. Na falha visual, pressione F9 antes da transicao, atravesse a borda e pressione F9 para parar. Pressione F9 outra vez para capturar o estado posterior e novamente para encerrar. Os arquivos ficam na pasta da sessao.
 
-Compras e rede nao sao acionadas automaticamente. Ainda podem travar ou alterar cash local; exigem teste separado e voluntario. O BAT nao injeta fread/fwrite de tamanho zero ou ELF corrompido: esses problemas continuam pendentes de testes de codigo.
+Compras e rede nao sao acionadas automaticamente. Se voce abrir esses menus durante o teste, o diagnostico passa a destacar mudancas de cash e o ultimo estado de rede observado no log. `rede=1` no fim gera AVISO de operacao aguardando resposta; nao e prova de crash ou espera infinita. Se a ultima sonda voltar a `rede=0`, nao anuncia uma espera ainda pendente. Mudanca de cash nao comprova gravacao em arquivo nem sucesso de compra online.
+
+Esses menus ainda podem travar ou alterar cash local; exigem teste separado e voluntario. O BAT nao injeta fread/fwrite de tamanho zero ou ELF corrompido: esses problemas continuam pendentes de testes de codigo. Nao e necessario abrir a loja para completar o roteiro de gameplay.
 
 ## Opcoes pelo Prompt de Comando
 
@@ -52,6 +54,10 @@ ExecutionPolicy vale apenas para esse processo, sem mudar a politica do sistema.
 
 Cada sessao cria `relatorios/testes_DATA_HORA_ID/`. Ha copias separadas para os testes automaticos e guiados de cada host. Salvar/reabrir reutiliza apenas a copia guiada. Nenhuma pasta antiga de teste e sobrescrita.
 
+O relatorio e criado no inicio, atualizado apos cada resultado e antes de abrir janelas ou fazer perguntas. Enquanto a sessao nao terminar, o texto informa PARCIAL e o JSON registra `Concluido=false`, a etapa atual e `Codigo=null`. Se fechar o terminal, os resultados ja gravados permanecem; nao devem ser tratados como uma sessao aprovada. Cada arquivo e substituido por uma nova versao completa, evitando salvar JSON pela metade durante atualizacoes normais.
+
+Os logs do processo do jogo continuam sendo gravados ao encerrar cada execucao. Um fechamento abrupto do terminal pode perder os logs dessa ultima execucao, mesmo com o relatorio parcial preservado. A deteccao de compra/rede e feita apos o retorno do processo, nao em tempo real.
+
 O script compara hashes da origem antes/depois. Nao restaura nem migra saves. Nao abra outra instancia sobre o save original durante o teste. Saves com links simbolicos/junctions sao recusados para evitar copiar caminhos externos.
 
 Arquivos gerados:
@@ -65,8 +71,8 @@ Arquivos gerados:
 
 `OK` automatico confirma somente a verificacao indicada; `MANUAL_OK` e uma resposta sua. `PENDENTE` e `NAO_TESTADO` nao significam aprovado. BMPs sao verificados quanto a formato, dimensoes e integridade basica, nao a correcao visual da cena. Como o host pode retornar zero apos uma falha, o teste tambem exige inicializacao/contagem no log, procura erros conhecidos e verifica as capturas esperadas.
 
-Codigo final 1 indica falha automatica ou manual. Codigo 0 significa que nenhuma falha foi registrada; ainda pode haver pendencias. Revise relatorio/logs/capturas antes de compartilhar. Nada e enviado a internet e nenhuma dependencia e instalada.
+Codigo final 1 indica falha automatica ou manual. Codigo 0 significa que nenhuma falha foi registrada; ainda pode haver AVISOS ou pendencias, destacados no resumo. Codigo 2 e reservado a uma interrupcao detectada antes da conclusao. Um relatorio parcial com `Codigo=null` nao e sucesso. Revise relatorio/logs/capturas antes de compartilhar. Nada e enviado a internet e nenhuma dependencia e instalada.
 
 ## Verificacao desta ferramenta
 
-Funcoes testadas com PowerShell 7 em Linux: isolamento e copia de saves, deteccao de erro com exit zero, BMP ausente/incorreto/truncado, captura real de stdout/stderr e timeout do proprio processo. O duplo clique em CMD/Windows PowerShell 5.1 e o gameplay real ainda precisam ser confirmados no Windows. Nenhuma correcao do host e anunciada por esses testes.
+Funcoes testadas com PowerShell 7 em Linux: isolamento e copia de saves, deteccao de erro com exit zero, BMP ausente/incorreto/truncado, captura real de stdout/stderr e timeout do proprio processo. Tambem foram testados os avisos de compra/rede, a atualizacao do relatorio e sua preservacao apos encerrar um processo de teste. O roteiro anterior ja foi exercitado pelo usuario no Windows; os ajustes de relatorio desta atualizacao ainda precisam de confirmacao no Windows PowerShell 5.1. Nenhuma correcao do host e anunciada por esses testes.

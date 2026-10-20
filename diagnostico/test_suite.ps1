@@ -119,12 +119,78 @@ function Get-HeadlessVerdict($ProcessResult, [string]$Log, [string]$FrameDirecto
     [pscustomobject]@{ Passed = $passed; Detail = $reason }
 }
 
+function Get-SessionObservations([string]$Log) {
+    $purchases = [regex]::Matches($Log, '\[host\] cash local (\d+) -> (\d+)')
+    if ($purchases.Count) {
+        $last = $purchases[$purchases.Count - 1]
+        $detail = 'Compra acionada durante a execucao; alteracoes de cash: ' + $purchases.Count + '. Ultima alteracao: ' + $last.Groups[1].Value + ' -> ' + $last.Groups[2].Value + '. Persistencia em arquivo nao verificada.'
+        if ($Log -match 'resposta da loja nao simulada|callback nativo desativado') { $detail += ' O host informou que nao concluiu a resposta nativa da loja.' }
+        [pscustomobject]@{ Teste = 'Compra observada'; Estado = 'AVISO'; Detalhe = $detail }
+    }
+    $network = [regex]::Matches($Log, '(?m)^\[sonda\][^\r\n]*\brede=(\d+)\b')
+    if ($network.Count) {
+        $lastState = $network[$network.Count - 1].Groups[1].Value
+        if ($lastState -eq '1') {
+            [pscustomobject]@{ Teste = 'Espera de rede'; Estado = 'AVISO'; Detalhe = 'Ultima sonda do log registra rede=1 (aguardando). A operacao nao aparece como concluida; isso nao confirma crash ou espera infinita.' }
+        } elseif ($lastState -in @('2', '3')) {
+            [pscustomobject]@{ Teste = 'Estado de rede'; Estado = 'AVISO'; Detalhe = ('Ultima sonda registra rede=' + $lastState + ' (erro/aviso). Revise a operacao iniciada no jogo.') }
+        }
+    }
+}
+
+function Write-ReportFile([string]$Path, [string]$Text) {
+    $temporary = $Path + '.tmp'
+    $encoding = New-Object Text.UTF8Encoding -ArgumentList $true
+    [IO.File]::WriteAllText($temporary, $Text, $encoding)
+    if ([IO.File]::Exists($Path)) { [IO.File]::Replace($temporary, $Path, [NullString]::Value) }
+    else { [IO.File]::Move($temporary, $Path) }
+}
+
+function Initialize-TestReport([string]$Directory, [string]$ReportMode, [string]$ReportVariant) {
+    [void][IO.Directory]::CreateDirectory($Directory)
+    $script:TestResults = New-Object 'System.Collections.Generic.List[object]'
+    $script:ReportState = [pscustomobject]@{ Directory = $Directory; Started = (Get-Date -Format 'o'); Stage = 'Preparacao'; Completed = $false; Mode = $ReportMode; Variant = $ReportVariant }
+    Save-TestReport
+}
+
+function Save-TestReport([switch]$Complete) {
+    if (-not $script:ReportState) { return }
+    $state = $script:ReportState
+    if ($Complete) { $state.Completed = $true; $state.Stage = 'Finalizado' }
+    $failures = @($script:TestResults | Where-Object { $_.Estado -in @('FALHA', 'MANUAL_FALHA') }).Count
+    $warnings = @($script:TestResults | Where-Object { $_.Estado -eq 'AVISO' }).Count
+    $pending = @($script:TestResults | Where-Object { $_.Estado -in @('PENDENTE', 'NAO_TESTADO') }).Count
+    $code = $null
+    if ($state.Completed) { $code = 0; if ($failures) { $code = 1 } }
+    $report = [pscustomobject]@{ Data = $state.Started; Atualizado = (Get-Date -Format 'o'); PowerShell = $PSVersionTable.PSVersion.ToString(); Modo = $state.Mode; Variante = $state.Variant; Concluido = $state.Completed; Etapa = $state.Stage; Codigo = $code; Falhas = $failures; Avisos = $warnings; Pendentes = $pending; Resultados = @($script:TestResults.ToArray()) }
+    Write-ReportFile (Join-Path $state.Directory 'resultados.json') ($report | ConvertTo-Json -Depth 6)
+    $condition = 'PARCIAL - sessao ainda nao concluida. Nao considerar como aprovada.'
+    if ($state.Completed) { $condition = 'FINALIZADO - consulte falhas, avisos e pendencias; nao e aprovacao de todos os recursos.' }
+    $lines = @('DESTINIA - RELATORIO DE TESTES', ('Data: ' + $report.Data), ('Atualizado: ' + $report.Atualizado), ('Modo: ' + $state.Mode), $condition, ('Etapa: ' + $state.Stage), ('Falhas: {0} | Avisos: {1} | Pendencias/nao testados: {2}' -f $failures, $warnings, $pending), '', 'OK automatico nao confirma gameplay. MANUAL_OK e relato do usuario. AVISO/PENDENTE/NAO_TESTADO nao significam aprovado.', '')
+    $lines += @($script:TestResults | ForEach-Object { '[{0}] {1}: {2}' -f $_.Estado, $_.Teste, $_.Detalhe })
+    $lines += @('', 'Nao envie pastas de save. Revise relatorio/logs/capturas antes de compartilhar.', 'Nenhum arquivo e enviado a internet por este script.')
+    Write-ReportFile (Join-Path $state.Directory 'relatorio.txt') ($lines -join [Environment]::NewLine)
+}
+
+function Set-TestStage([string]$Stage) {
+    if ($script:ReportState) { $script:ReportState.Stage = $Stage; Save-TestReport }
+    Write-Host ('Etapa: ' + $Stage)
+}
+
 function Add-TestResult([string]$Name, [string]$Status, [string]$Detail) {
     $script:TestResults.Add([pscustomobject]@{ Teste = $Name; Estado = $Status; Detalhe = $Detail }) | Out-Null
     Write-Host ('[{0}] {1}: {2}' -f $Status, $Name, $Detail)
+    Save-TestReport
+}
+
+function Add-LogObservations([string]$Label, [string]$Log) {
+    foreach ($observation in @(Get-SessionObservations $Log)) {
+        Add-TestResult ($Label + ' - ' + $observation.Teste) $observation.Estado $observation.Detalhe
+    }
 }
 
 function Read-ManualResult([string]$Name, [string]$Question) {
+    Set-TestStage ('Aguardando resposta: ' + $Name)
     $answer = (Read-Host ($Question + ' [S=sim/N=falhou/P=nao testado]')).Trim().ToUpperInvariant()
     $status = 'PENDENTE'
     if ($answer -eq 'S') { $status = 'MANUAL_OK' }
@@ -137,9 +203,9 @@ function Invoke-DestiniaSuite {
     $rootPath = [IO.Path]::GetFullPath($Root)
     $session = Join-Path $rootPath ('relatorios/testes_' + (Get-Date -Format 'yyyyMMdd_HHmmss') + '_' + [guid]::NewGuid().ToString('N').Substring(0, 8))
     [void][IO.Directory]::CreateDirectory($session)
-    $script:TestResults = New-Object 'System.Collections.Generic.List[object]'
+    Initialize-TestReport $session $Mode $Variant
     $oldPath = $env:PATH; $source = ''; $saveBefore = $null
-    $exitCode = 0
+    $exitCode = 0; $reachedEnd = $false; $caughtFailure = $false
     try {
         Write-Host 'DESTINIA - TESTES AUTOMATICOS E ROTEIRO GUIADO'
         Write-Host ('Resultados: ' + $session)
@@ -185,20 +251,24 @@ function Invoke-DestiniaSuite {
             $frameDir = Join-Path $session ($name + '_frames')
             $arguments = @('--game', $game, '--save', $save, '--headless', [string]$Frames, '--out', $frameDir)
             if ($name -eq 'host_zoom') { $arguments += @('--lang', 'pt') }
+            Set-TestStage ($name + ': inicializacao sem janela em execucao')
             $run = Invoke-OwnedProcess $exe $arguments $hostDirectory (Join-Path $session ($name + '_automatico')) $TimeoutSeconds
             $log = [IO.File]::ReadAllText($run.Stdout) + "`n" + [IO.File]::ReadAllText($run.Stderr)
             $verdict = Get-HeadlessVerdict $run $log $frameDir $width $height $Frames
             $state = 'FALHA'; if ($verdict.Passed) { $state = 'OK' }
             Add-TestResult ($name + ' inicializacao sem janela') $state $verdict.Detail
+            Add-LogObservations ($name + ' automatico') $log
             if ($Mode -eq 'Automatico') {
                 Add-TestResult ($name + ' gameplay, saves, camera e entradas') 'PENDENTE' 'Requer o modo Guiado e observacao humana.'
                 continue
             }
             Write-Host ''
             Write-Host 'ROTEIRO: iniciar/carregar partida, mover, atacar, abrir inventario/equipar, trocar de mapa e salvar.'
+            Write-Host 'Na janela do jogo, clique em TAP TO START e jogue manualmente. O roteiro nao faz os cliques por voce.'
             Write-Host 'Teste mouse (DPI 100/150% e janela redimensionada), audio, controle/desconexao e Alt+Tab segurando direcao.'
             if ($name -eq 'host_zoom') { Write-Host 'Teste PT. Na falha de mapa: F9 antes da transicao, F9 para parar; F9 outra vez captura o estado posterior.' }
             Write-Host 'Compras/rede NAO sao acionadas por este roteiro. Use somente o save de teste. Feche a janela ao terminar.'
+            Set-TestStage ($name + ': aguardando permissao para abrir janela guiada')
             if ((Read-Host ('Abrir teste guiado de ' + $name + '? [S/N]')).Trim().ToUpperInvariant() -ne 'S') {
                 Add-TestResult ($name + ' teste guiado') 'PENDENTE' 'Usuario optou por nao abrir.'
                 continue
@@ -207,8 +277,10 @@ function Invoke-DestiniaSuite {
             Copy-IsolatedSave $source $guiSave
             $guiArgs = @('--game', $game, '--save', $guiSave, '--probe', '--profile')
             if ($name -eq 'host_zoom') { $guiArgs += @('--lang', 'pt', '--trace-viewport', '--trace-frames', '1200', '--trace-out', (Join-Path $session 'trace_viewport')) }
+            Set-TestStage ($name + ': janela guiada em execucao; feche o jogo ao concluir o roteiro')
             $gui = Invoke-OwnedProcess $exe $guiArgs $hostDirectory (Join-Path $session ($name + '_guiado')) $InteractiveTimeoutSeconds
             $guiLog = [IO.File]::ReadAllText($gui.Stdout) + [IO.File]::ReadAllText($gui.Stderr)
+            Add-LogObservations ($name + ' guiado') $guiLog
             if ($gui.Error -or $gui.TimedOut -or $gui.ExitCode -ne 0 -or $guiLog -match '=== PROBLEMA:|JNI nao implementado|funcao nao implementada|heap esgotado|SDL_Init:') {
                 Add-TestResult ($name + ' processo guiado') 'FALHA' 'Erro, timeout ou falha no log. Verifique stdout/stderr; o roteiro nao confirma sucesso.'
                 continue
@@ -219,17 +291,22 @@ function Invoke-DestiniaSuite {
             Read-ManualResult ($name + ' audio') 'Musica e efeitos funcionaram?'
             Read-ManualResult ($name + ' controle e foco') 'Controle/desconexao e Alt+Tab funcionaram sem direcao presa?'
             if ($name -eq 'host_zoom') { Read-ManualResult 'host_zoom PT e F9' 'Textos PT e captura/trace F9 funcionaram?' }
+            Set-TestStage ($name + ': aguardando decisao de salvar/reabrir')
             if ((Read-Host 'Salvou e quer reabrir a MESMA copia para conferir o progresso? [S/N]').Trim().ToUpperInvariant() -eq 'S') {
+                Set-TestStage ($name + ': reabertura em execucao; carregue a partida e confira o progresso')
                 $reload = Invoke-OwnedProcess $exe $guiArgs $hostDirectory (Join-Path $session ($name + '_reabrir')) $InteractiveTimeoutSeconds
                 $reloadLog = [IO.File]::ReadAllText($reload.Stdout) + [IO.File]::ReadAllText($reload.Stderr)
+                Add-LogObservations ($name + ' reabrir') $reloadLog
                 if ($reload.Error -or $reload.TimedOut -or $reload.ExitCode -ne 0 -or $reloadLog -match '=== PROBLEMA:|JNI nao implementado|funcao nao implementada|heap esgotado|SDL_Init:') {
                     Add-TestResult ($name + ' salvar/reabrir') 'FALHA' 'Falha ao executar a segunda abertura; confira logs.'
                 } else { Read-ManualResult ($name + ' salvar/reabrir') 'O progresso salvo permaneceu apos fechar e carregar novamente?' }
             } else { Add-TestResult ($name + ' salvar/reabrir') 'PENDENTE' 'Segunda abertura nao executada.' }
         }
-        Add-TestResult 'Compras e rede' 'NAO_TESTADO' 'Nao acionadas automaticamente. Podem travar ou alterar cash mesmo em copia de teste.'
+        Add-TestResult 'Validacao completa de compras e rede' 'NAO_TESTADO' 'Menus nao sao acionados automaticamente. Eventos observados nos logs aparecem separadamente como avisos; isso nao valida os recursos online.'
         Add-TestResult 'Casos internos de libc/ELF/SDL' 'NAO_TESTADO' 'fread/fwrite tamanho zero, entradas ELF corrompidas e falhas forjadas de SDL exigem testes de codigo; este BAT nao os valida.'
+        $reachedEnd = $true
     } catch {
+        $caughtFailure = $true
         Add-TestResult 'Execucao do diagnostico' 'FALHA' $_.Exception.Message
     } finally {
         $env:PATH = $oldPath
@@ -241,13 +318,11 @@ function Invoke-DestiniaSuite {
             } catch { Add-TestResult 'Save de origem' 'FALHA' ('Nao foi possivel conferir hashes: ' + $_.Exception.Message) }
         }
         if (@($script:TestResults | Where-Object { $_.Estado -in @('FALHA', 'MANUAL_FALHA') }).Count) { $exitCode = 1 }
-        $report = [pscustomobject]@{ Data = (Get-Date -Format 'o'); PowerShell = $PSVersionTable.PSVersion.ToString(); Modo = $Mode; Variante = $Variant; Codigo = $exitCode; Resultados = @($script:TestResults.ToArray()) }
-        $report | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $session 'resultados.json') -Encoding UTF8
-        $lines = @('DESTINIA - RELATORIO DE TESTES', ('Data: ' + $report.Data), ('Modo: ' + $Mode), '', 'OK automatico nao confirma gameplay. MANUAL_OK e relato do usuario. PENDENTE/NAO_TESTADO nao significam aprovado.', '')
-        $lines += @($script:TestResults | ForEach-Object { '[{0}] {1}: {2}' -f $_.Estado, $_.Teste, $_.Detalhe })
-        $lines += @('', 'Nao envie pastas de save. Revise relatorio/logs/capturas antes de compartilhar.', 'Nenhum arquivo e enviado a internet por este script.')
-        $lines | Set-Content -LiteralPath (Join-Path $session 'relatorio.txt') -Encoding UTF8
-        Write-Host ('Relatorio final: ' + (Join-Path $session 'relatorio.txt'))
+        Save-TestReport -Complete:($reachedEnd -or $caughtFailure)
+        if (-not $script:ReportState.Completed) { $exitCode = 2 }
+        Write-Host ('Relatorio salvo: ' + (Join-Path $session 'relatorio.txt'))
+        $warningCount = @($script:TestResults | Where-Object { $_.Estado -eq 'AVISO' }).Count
+        if ($warningCount) { Write-Host ('ATENCAO: {0} aviso(s) registrado(s). Codigo zero nao elimina avisos ou testes pendentes.' -f $warningCount) }
     }
     return $exitCode
 }

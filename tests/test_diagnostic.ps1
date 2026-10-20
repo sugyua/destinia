@@ -28,6 +28,34 @@ function Write-TestBmp($Path, $Width, $Height) {
     [IO.File]::WriteAllBytes($Path, $bytes)
 }
 try {
+    $shopLog = "[host] cash local 0 -> 170000; resposta da loja nao simulada (spinner pode permanecer).`n[sonda] quadro 100: rede=1 menu.estado=2"
+    $observations = @(Get-SessionObservations $shopLog)
+    Assert-True (@($observations | Where-Object { $_.Teste -eq 'Compra observada' -and $_.Estado -eq 'AVISO' }).Count -eq 1) 'Compra com cash alterado nao foi destacada'
+    Assert-True (@($observations | Where-Object { $_.Teste -eq 'Espera de rede' -and $_.Estado -eq 'AVISO' }).Count -eq 1) 'Rede pendente no fim do log nao foi destacada'
+    $recovered = @(Get-SessionObservations ($shopLog + "`n[sonda] quadro 110: rede=0 menu.estado=2"))
+    Assert-True (@($recovered | Where-Object { $_.Teste -eq 'Espera de rede' }).Count -eq 0) 'Espera que terminou foi marcada como ainda pendente'
+    Assert-True (@(Get-SessionObservations '[host] initGame ok.').Count -eq 0) 'Compra ou rede inventada sem evidencia'
+    $passed++; Write-Host 'OK: compra observada, espera final e recuperacao de rede'
+
+    $reportDir = Join-Path $temp 'relatorio parcial'
+    Initialize-TestReport $reportDir 'Guiado' 'host'
+    Add-TestResult 'Inicializacao' 'OK' 'Resultado ja concluido'
+    Set-TestStage 'Aguardando resposta do usuario'
+    $partial = Get-Content -LiteralPath (Join-Path $reportDir 'resultados.json') -Raw | ConvertFrom-Json
+    Assert-True (-not $partial.Concluido -and $null -eq $partial.Codigo) 'Sessao ainda em andamento foi marcada como concluida'
+    Assert-True ($partial.Resultados.Count -eq 1 -and $partial.Etapa -eq 'Aguardando resposta do usuario') 'Resultado parcial nao foi persistido antes da pergunta'
+    Add-TestResult 'Loja' 'AVISO' 'Operacao nao concluida'
+    Save-TestReport -Complete
+    $final = Get-Content -LiteralPath (Join-Path $reportDir 'resultados.json') -Raw | ConvertFrom-Json
+    Assert-True ($final.Concluido -and $final.Avisos -eq 1 -and $final.Codigo -eq 0) 'Aviso ou estado final incorreto'
+    Assert-True ((Get-Content -LiteralPath (Join-Path $reportDir 'relatorio.txt') -Raw) -match 'AVISO') 'Aviso nao consta no relatorio legivel'
+    Add-TestResult 'Erro de execucao' 'FALHA' 'Falha controlada de teste'
+    Save-TestReport -Complete
+    $failed = Get-Content -LiteralPath (Join-Path $reportDir 'resultados.json') -Raw | ConvertFrom-Json
+    Assert-True ($failed.Codigo -eq 1 -and $failed.Resultados.Count -eq 3) 'Falha nao atualizou o relatorio ou apagou os resultados anteriores'
+    $script:ReportState = $null
+    $passed++; Write-Host 'OK: resultados parciais duraveis, estado final, avisos e falhas'
+
     $source = Join-Path $temp 'save original'
     [void][IO.Directory]::CreateDirectory($source)
     [IO.File]::WriteAllText((Join-Path $source 'msave.dat'), 'progresso original')
@@ -76,6 +104,18 @@ try {
     Assert-True $proc.TimedOut 'Limite de tempo nao foi respeitado'
     Assert-True (-not (Get-Process -Id $proc.ProcessId -ErrorAction SilentlyContinue)) 'Processo criado pelo teste ficou rodando'
     $passed++; Write-Host 'OK: captura real de stdout/stderr e encerramento do proprio processo por timeout'
+
+    $interruptedDir = Join-Path $temp 'sessao interrompida'
+    $escapedScript = $scriptPath.Replace("'", "''")
+    $escapedDirectory = $interruptedDir.Replace("'", "''")
+    $fixtureText = ". '$escapedScript'`nInitialize-TestReport '$escapedDirectory' 'Guiado' 'host'`nAdd-TestResult 'Inicializacao' 'OK' 'Concluida antes da interrupcao'`nSet-TestStage 'Janela guiada em execucao'`nStart-Sleep -Seconds 30"
+    [IO.File]::WriteAllText($fixture, $fixtureText)
+    $interrupted = Invoke-OwnedProcess $shell @('-NoProfile', '-File', $fixture) $temp (Join-Path $temp 'interrompido') 5
+    Assert-True $interrupted.TimedOut 'Sessao de teste deveria ter sido interrompida'
+    $saved = Get-Content -LiteralPath (Join-Path $interruptedDir 'resultados.json') -Raw | ConvertFrom-Json
+    Assert-True (-not $saved.Concluido -and $null -eq $saved.Codigo -and $saved.Resultados.Count -eq 1) 'Interrupcao apagou o resultado parcial ou anunciou sucesso'
+    Assert-True ($saved.Etapa -eq 'Janela guiada em execucao') 'Etapa interrompida nao foi preservada'
+    $passed++; Write-Host 'OK: relatorio parcial sobrevive ao encerramento do processo'
 
     Write-Host "$passed grupos de testes aprovados. Nenhum jogo foi executado."
 } finally {
