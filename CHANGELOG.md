@@ -6,6 +6,13 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 
 ## Próxima atualização — zoom, limpeza e diagnóstico, sem nova release
 
+### Tela cheia proporcional no zoom
+
+- Opção `--fullscreen` abre o host_zoom em tela cheia sem bordas, na resolução atual do monitor; F11 alterna entre janela e tela cheia.
+- Launcher do zoom e teste focado de câmera passam a iniciar em tela cheia. O nome antigo do launcher é preservado para manter atalhos existentes.
+- Proporção original preservada: no monitor 3440×1440, imagem 2400×1440 centralizada, com barras laterais de 520 pixels; sem esticar ou cortar a imagem.
+- Framebuffer e capturas permanecem em 400×240. A apresentação ampliada continua usando o mapeamento proporcional do mouse.
+
 ### Zoom com enquadramento original
 
 - host_zoom passa a renderizar em 400×240 e ampliar a apresentação para uma janela inicial de 800×480, com pixels nítidos. Antes, renderizava uma área de 800×480: mapas de 480 pixels ficavam alinhados à direita pela câmera original, deixando 320 pixels vazios à esquerda.

@@ -29,7 +29,7 @@ function Write-TestBmp($Path, $Width, $Height) {
 }
 try {
     $cameraArgs = @(Get-GuidedArguments 'host_zoom' 'Camera' 'game path' 'save path' 'trace path')
-    Assert-True ($cameraArgs -contains '--trace-camera' -and $cameraArgs -contains '--trace-viewport') 'Modo Camera precisa registrar camera e viewport'
+    Assert-True ($cameraArgs -contains '--trace-camera' -and $cameraArgs -contains '--trace-viewport' -and $cameraArgs -contains '--fullscreen') 'Modo Camera precisa registrar camera e viewport'
     Assert-True ($cameraArgs -contains 'save path' -and $cameraArgs -notcontains '--headless') 'Camera precisa usar save isolado e janela interativa'
     $normalArgs = @(Get-GuidedArguments 'host' 'Guiado' 'game path' 'save path' 'trace path')
     Assert-True ($normalArgs -notcontains '--trace-camera' -and $normalArgs -notcontains '--trace-viewport') 'Host normal recebeu flags exclusivas do zoom'

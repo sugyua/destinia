@@ -202,7 +202,7 @@ function Get-GuidedArguments([string]$Name, [string]$TestMode, [string]$GamePath
     $arguments = @('--game', $GamePath, '--save', $SavePath, '--probe', '--profile')
     if ($Name -eq 'host_zoom') {
         $arguments += @('--lang', 'pt', '--trace-viewport', '--trace-frames', '1200', '--trace-out', $TracePath)
-        if ($TestMode -eq 'Camera') { $arguments += '--trace-camera' }
+        if ($TestMode -eq 'Camera') { $arguments += @('--trace-camera', '--fullscreen') }
     }
     return $arguments
 }
@@ -283,6 +283,7 @@ function Invoke-DestiniaSuite {
                 Write-Host '2. Atravesse, espere o defeito aparecer e aperte F9 para parar.'
                 Write-Host '3. F9 NOVAMENTE, ainda com o defeito visivel: captura a tela posterior e inicia outro trecho.'
                 Write-Host '4. Espere alguns segundos, aperte F9 para parar e feche o jogo normalmente.'
+                Write-Host 'F11 alterna tela cheia/janela. Confira o mouse na imagem central e Alt+Tab.'
                 Write-Host 'Nao e necessario testar audio, controles, salvar/reabrir ou acessar a loja.'
             } else {
                 Write-Host 'ROTEIRO: iniciar/carregar partida, mover, atacar, abrir inventario/equipar, trocar de mapa e salvar.'
@@ -305,6 +306,10 @@ function Invoke-DestiniaSuite {
             Add-LogObservations ($name + ' guiado') $guiLog
             if ($gui.Error -or $gui.TimedOut -or $gui.ExitCode -ne 0 -or $guiLog -match '=== PROBLEMA:|JNI nao implementado|funcao nao implementada|heap esgotado|SDL_Init:') {
                 Add-TestResult ($name + ' processo guiado') 'FALHA' 'Erro, timeout ou falha no log. Verifique stdout/stderr; o roteiro nao confirma sucesso.'
+                continue
+            }
+            if ($name -eq 'host_zoom' -and $Mode -eq 'Camera' -and $guiLog -notmatch 'initGame ok em 400x240') {
+                Add-TestResult 'host_zoom janela guiada' 'FALHA' 'Inicializacao 400x240 nao confirmada. Confira logs e recompile o host_zoom atual com suporte a --fullscreen.'
                 continue
             }
             if ($Mode -eq 'Camera') {

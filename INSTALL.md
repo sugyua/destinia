@@ -113,3 +113,11 @@ cmake --build host_zoom/build
 ```
 
 Feche o jogo antes de compilar. Depois abra `Testar Destinia.bat`, escolha **1** e repita apenas a passagem que apresentou a faixa preta. Os BMPs e as coordenadas F9 agora são de 400×240; a ampliação ocorre somente na apresentação. O diagnóstico recusa o EXE antigo de 800×480 e pede recompilação. O host normal não foi alterado.
+
+## Tela cheia no monitor ultrawide
+
+O launcher `Abrir Destinia Zoom 800x480.bat` inicia o host_zoom com `--fullscreen`, em tela cheia sem bordas, usando a resolução atual do monitor. O nome antigo do BAT foi mantido para preservar atalhos. **F11** alterna entre tela cheia e janela. Pelo terminal, omita `--fullscreen` para iniciar em janela.
+
+A proporção original é preservada, sem esticar nem cortar. Em um monitor 3440×1440, a área do jogo ocupa **2400×1440**, centralizada, com barras pretas externas de **520 pixels em cada lado**. O framebuffer e as capturas F9 continuam em 400×240. O mouse considera a área central, e cliques nas barras não acionam o jogo. Não é suporte nativo a ultrawide.
+
+Recompile o host_zoom após atualizar os fontes. Para testar o mesmo modo no diagnóstico de câmera, escolha a opção 1 do `Testar Destinia.bat`: ela agora abre em tela cheia. Na janela guiada, confira também F11, clique em TAP TO START, Alt+Tab e o alinhamento do mouse.

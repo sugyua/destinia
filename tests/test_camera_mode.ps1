@@ -30,7 +30,7 @@ try {
         $script:launches++
         if ($Exe -notlike '*host_zoom*') { throw 'Host normal nao deveria ser exigido' }
         if ($Arguments -notcontains '--headless') {
-            if ($Arguments -notcontains '--trace-camera') { throw 'Falta log de camera' }
+            if ($Arguments -notcontains '--trace-camera' -or $Arguments -notcontains '--fullscreen') { throw 'Falta log de camera' }
             $savePath = $Arguments[[array]::IndexOf($Arguments, '--save') + 1]
             if ($savePath -eq $SaveSource) { throw 'Tentativa de usar save original' }
             [IO.File]::WriteAllText((Join-Path $savePath 'msave.dat'), 'progresso de teste')

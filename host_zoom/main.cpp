@@ -1981,6 +1981,7 @@ static bool getCharacterExperience(uint32_t& current, uint32_t& required) {
 
 // ---------------------------------------------------------------- principal
 int main(int argc, char** argv) {
+  bool fullscreen = false;
   int scale = 3, headlessFrames = 0; std::string outDir = "frames";
   for (int i = 1; i < argc; i++) {
     std::string a = argv[i];
@@ -1988,6 +1989,7 @@ int main(int argc, char** argv) {
     if (a == "--game") gameDir = next(); else if (a == "--so") soPath = next(); else if (a == "--save") saveDir = next();
     else if (a == "--scale") scale = atoi(next().c_str()); else if (a == "--headless") headlessFrames = atoi(next().c_str());
     else if (a == "--out") outDir = next(); else if (a == "-v") verbose = true;
+    else if (a == "--fullscreen") fullscreen = true;
     else if (a == "--probe") probe = true;
     else if (a == "--trace-camera") traceCamera = true;
     else if (a == "--no-fix-map-edge") fixMapEdge = false;
@@ -2006,7 +2008,7 @@ int main(int argc, char** argv) {
     else if (a == "--trace-out") traceViewportOutDir = next();
     else if (a == "--autotap") { if (sscanf(next().c_str(), "%d,%d,%d", &autoFrame, &autoX, &autoY) != 3) { printf("--autotap precisa de QUADRO,X,Y\n"); return 0; } }
     else if (a == "--autotap2") { if (sscanf(next().c_str(), "%d,%d,%d", &autoFrame2, &autoX2, &autoY2) != 3) { printf("--autotap2 precisa de QUADRO,X,Y\n"); return 0; } }
-    else { printf("Uso: destinia_host [--game PASTA] [--so ARQUIVO] [--save PASTA] [--scale N] [--lang pt] [--headless QUADROS --out PASTA] [--trace-viewport --trace-frames N --trace-out PASTA] [-v] [--probe] [--profile] [--mute] [--autotap QUADRO,X,Y] [--autotap2 QUADRO,X,Y]\n"); return 0; }
+    else { printf("Uso: destinia_host [--game PASTA] [--so ARQUIVO] [--save PASTA] [--scale N] [--fullscreen] [--lang pt] [--headless QUADROS --out PASTA] [--trace-viewport --trace-frames N --trace-out PASTA] [-v] [--probe] [--profile] [--mute] [--autotap QUADRO,X,Y] [--autotap2 QUADRO,X,Y]\n"); return 0; }
   }
   if (soPath.empty()) soPath = gameDir + "/lib/armeabi/libdestinia_jni.so";
   assetsDir = gameDir + "/assets";
@@ -2082,6 +2084,14 @@ int main(int argc, char** argv) {
   };
 
   SDL_Window* win = nullptr; SDL_Renderer* ren = nullptr; SDL_Texture* tex = nullptr; SDL_GameController* controller = nullptr;
+  auto setFullscreen = [&](bool enabled) {
+    if (SDL_SetWindowFullscreen(win, enabled ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
+      fprintf(stderr, "[host] Nao foi possivel alternar tela cheia: %s\n", SDL_GetError());
+      return false;
+    }
+    fprintf(stderr, "[host] modo de exibicao: %s (proporcao original preservada).\n", enabled ? "tela cheia" : "janela");
+    return true;
+  };
   if (!headlessFrames) {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK) != 0) { fprintf(stderr, "SDL_Init: %s\n", SDL_GetError()); return 1; }
     if (!muteAudio) {
@@ -2095,13 +2105,14 @@ int main(int argc, char** argv) {
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  // pixels nitidos
     win = SDL_CreateWindow("Destinia 0.2 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_W, WINDOW_H, SDL_WINDOW_RESIZABLE);
+    if (fullscreen) setFullscreen(true);
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_PRESENTVSYNC);
     tex = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGB565, SDL_TEXTUREACCESS_STREAMING, SCREEN_W, SCREEN_H);
     for (int i = 0; i < SDL_NumJoysticks(); i++) { if (SDL_IsGameController(i)) { controller = SDL_GameControllerOpen(i); if (controller) { fprintf(stderr, "[host] Controle conectado: %s\n", SDL_GameControllerName(controller)); break; } } }
     if (traceViewport)
-      fprintf(stderr, "[host] Teclado: WASD/setas mover, Enter/Z confirmar, Esc/X voltar, I menu, F5 save, F9 iniciar/parar trace viewport. DualSense: analogico mover, X atacar, O voltar, triangulo menu, Share save, L1 acelerar.\n");
+      fprintf(stderr, "[host] Teclado: WASD/setas mover, Enter/Z confirmar, Esc/X voltar, I menu, F5 save, F11 tela cheia, F9 iniciar/parar trace viewport. DualSense: analogico mover, X atacar, O voltar, triangulo menu, Share save, L1 acelerar.\n");
     else
-      fprintf(stderr, "[host] Teclado: WASD/setas mover, Enter/Z confirmar, Esc/X voltar, I menu, F5 save. DualSense: analogico mover, X atacar, O voltar, triangulo menu, Share save, L1 acelerar.\n");
+      fprintf(stderr, "[host] Teclado: WASD/setas mover, Enter/Z confirmar, Esc/X voltar, I menu, F5 save, F11 tela cheia. DualSense: analogico mover, X atacar, O voltar, triangulo menu, Share save, L1 acelerar.\n");
   } else fs::create_directories(outDir);
 
   auto gameViewport = [&]() {
@@ -2166,6 +2177,9 @@ int main(int argc, char** argv) {
           if (ev.key.repeat) continue;
           bool down = ev.type == SDL_KEYDOWN;
           switch (ev.key.keysym.sym) {
+            case SDLK_F11:
+              if (down) setFullscreen((SDL_GetWindowFlags(win) & SDL_WINDOW_FULLSCREEN) == 0);
+              break;
             case SDLK_F9:
               if (traceViewport && down) toggleTraceViewportRecording(frame, arrays[hScreen]);
               break;

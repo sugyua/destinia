@@ -12,7 +12,7 @@ No duplo clique, escolha **1 — Camera host_zoom**. A opcao 2 conserva o roteir
 
 Os BMPs agora sao 400x240, a resolucao original; a janela amplia a apresentacao para 800x480.
 
-Este modo verifica a inicializacao apenas do host_zoom, abre uma copia isolada do save e ativa `--trace-camera` junto com o trace de viewport. A correcao de enquadramento exige recompilar host_zoom com os fontes atuais; consulte INSTALL.md. Um EXE antigo com framebuffer 800x480 e recusado. Nao solicita os testes gerais nem reabertura do save.
+Este modo verifica a inicializacao apenas do host_zoom, abre uma copia isolada do save e ativa `--trace-camera` junto com o trace de viewport. A correcao de enquadramento exige recompilar host_zoom com os fontes atuais; consulte INSTALL.md. Um EXE antigo com framebuffer 800x480 e recusado. Abre em tela cheia proporcional; F11 alterna para janela. Confira o alinhamento do mouse e Alt+Tab. Nao solicita os testes gerais nem reabertura do save.
 
 1. Clique em TAP TO START e carregue a partida. Va ate a passagem com defeito.
 2. Pressione **F9 antes da transicao**: captura a tela e inicia a gravacao.

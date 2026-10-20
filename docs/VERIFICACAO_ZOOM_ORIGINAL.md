@@ -36,3 +36,17 @@ Verificação realizada em Linux, com SDL2 2.32.4 e Unicorn 2.1.4. A compilaçã
 Ainda falta a confirmação visual da passagem relatada no Windows, incluindo F9, PT, HUD e entradas durante gameplay. O mapa passou a usar o enquadramento original: não se tenta inventar cenário para completar uma área maior. Barras externas continuam possíveis em janelas com proporção diferente de 5:3; regiões pretas desenhadas pelo próprio mapa também podem existir.
 
 Nenhuma nova tag/release é criada por esta alteração. O problema de compras/rede permanece separado.
+
+## Tela cheia proporcional
+
+Adicionado `--fullscreen` usando SDL_WINDOW_FULLSCREEN_DESKTOP, sem trocar a resolução do desktop. F11 usa o estado real da janela para alternar o modo. Falhas de alternância são registradas no stderr e preservam a execução. O launcher e o diagnóstico focado iniciam nesse modo; a execução direta sem a opção permanece em janela.
+
+O fixture `zoom_native_smoke.cpp` foi ampliado: antes da implementação, a execução com `--fullscreen` falhou por ausência de suporte. Após a mudança, passou em modo janela e em tela cheia com duas alternâncias F11. Usando SDL dummy/software e dimensões de saída/janela simuladas de 3440×1440, o retângulo enviado ao renderizador foi (520,0,2400,1440), e o centro (1720,720) chegou ao JNI como (200,120). A textura permaneceu 400×240 e o teste ARM de câmera continuou passando. A simulação verifica geometria e fluxo SDL, não comprova comportamento de um monitor físico ultrawide no Windows.
+
+Para repetir o fluxo em tela cheia com o fixture compilado conforme acima:
+
+```sh
+DESTINIA_TEST_FULLSCREEN=1 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy SDL_RENDER_DRIVER=software /tmp/destinia-zoom-smoke --game "$PWD/game" --save /tmp/destinia-fullscreen-smoke-save --mute --probe --fullscreen
+```
+
+CMake, sete testes Python (incluindo execução real de dez quadros) e os testes PowerShell do diagnóstico passaram. Confirmação no Windows pendente: abertura no monitor desejado, F11, Alt+Tab, alinhamento do mouse e passagem de mapa. Áudio não foi retestado nesta alteração.

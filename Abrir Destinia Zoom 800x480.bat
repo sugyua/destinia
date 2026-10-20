@@ -32,13 +32,13 @@ if not exist "%MSYS2_BIN%\SDL2.dll" (
 set "PATH=%MSYS2_BIN%;%PATH%"
 cd /d "%HOST_DIR%"
 
-echo Abrindo Destinia em 400x240, ampliado para janela inicial 800x480.
+echo Abrindo Destinia em tela cheia com proporcao original. F11 alterna para janela.
 echo A imagem mantem a proporcao original ao redimensionar a janela.
 echo Save compartilhado: "%SHARED_SAVE%"
 echo O host de zoom e independente; o save e compartilhado com as demais versoes.
 echo O diretorio game original sera apenas lido.
 echo.
-"%EXE%" --save "%SHARED_SAVE%"
+"%EXE%" --save "%SHARED_SAVE%" --fullscreen
 set "RESULT=%ERRORLEVEL%"
 
 echo.
