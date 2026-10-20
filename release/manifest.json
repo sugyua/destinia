@@ -19,6 +19,10 @@
     "release/NOTAS_0.2.md",
     "docs/RELEASE_0.2.md",
     "scripts/package_release.py",
-    "tests/test_package_release.py"
+    "tests/test_package_release.py",
+    "Testar Destinia.bat",
+    "diagnostico/test_suite.ps1",
+    "diagnostico/COMO_TESTAR.md",
+    "tests/test_diagnostic.ps1"
   ]
 }

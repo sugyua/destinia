@@ -1,0 +1,255 @@
+# Diagnostico externo: nao altera fontes, biblioteca ARM ou saves originais.
+[CmdletBinding()]
+param(
+    [string]$Root = (Join-Path $PSScriptRoot '..'),
+    [ValidateSet('Guiado', 'Automatico')][string]$Mode = 'Guiado',
+    [ValidateSet('Ambos', 'host', 'host_zoom')][string]$Variant = 'Ambos',
+    [string]$RuntimeDir = 'C:\msys64\ucrt64\bin',
+    [string]$SaveSource = '',
+    [switch]$Fresh,
+    [ValidateRange(10, 1000)][int]$Frames = 60,
+    [ValidateRange(1, 600)][int]$TimeoutSeconds = 120,
+    [ValidateRange(30, 3600)][int]$InteractiveTimeoutSeconds = 900
+)
+
+function Get-SaveInventory([string]$Directory) {
+    if (-not $Directory -or -not (Test-Path -LiteralPath $Directory -PathType Container)) { return }
+    $base = [IO.Path]::GetFullPath($Directory).TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
+    foreach ($file in (Get-ChildItem -LiteralPath $base -Recurse -File -Force | Sort-Object FullName)) {
+        [pscustomobject]@{ File = $file.FullName.Substring($base.Length + 1); Hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash }
+    }
+}
+
+function Copy-IsolatedSave([string]$Source, [string]$Destination) {
+    if (Test-Path -LiteralPath $Destination) { throw 'A pasta de teste ja existe; nao sera sobrescrita.' }
+    if ($Source) {
+        if (-not (Test-Path -LiteralPath $Source -PathType Container)) { throw 'A pasta de save indicada nao existe.' }
+        $sourcePath = [IO.Path]::GetFullPath($Source).TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
+        $destinationPath = [IO.Path]::GetFullPath($Destination)
+        if ($destinationPath.Equals($sourcePath, [StringComparison]::OrdinalIgnoreCase) -or
+            $destinationPath.StartsWith($sourcePath + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+            throw 'A copia de teste nao pode ficar dentro do save original.'
+        }
+        $entries = @((Get-Item -LiteralPath $Source -Force)) + @(Get-ChildItem -LiteralPath $Source -Recurse -Force)
+        if (@($entries | Where-Object { $_.Attributes -band [IO.FileAttributes]::ReparsePoint }).Count) {
+            throw 'Save contem link/junction; copia recusada para preservar o isolamento.'
+        }
+    }
+    [void][IO.Directory]::CreateDirectory($Destination)
+    if ($Source) {
+        foreach ($item in (Get-ChildItem -LiteralPath $Source -Force)) {
+            Copy-Item -LiteralPath $item.FullName -Destination $Destination -Recurse -Force -ErrorAction Stop
+        }
+        $before = @(Get-SaveInventory $Source) | ConvertTo-Json -Compress
+        $copied = @(Get-SaveInventory $Destination) | ConvertTo-Json -Compress
+        if ($before -ne $copied) { throw 'A copia do save nao corresponde a origem; teste cancelado.' }
+    }
+}
+
+function ConvertTo-NativeArgument([string]$Value) {
+    if ($Value.Contains('"') -or $Value.Contains("`n") -or $Value.Contains("`r")) { throw 'Argumento contem caracteres nao permitidos.' }
+    return '"' + ($Value -replace '(\\+)$', '$1$1') + '"'
+}
+
+function Invoke-OwnedProcess([string]$Executable, [string[]]$Arguments, [string]$WorkingDirectory, [string]$LogPrefix, [int]$LimitSeconds) {
+    $outFile = $LogPrefix + '.stdout.log'; $errFile = $LogPrefix + '.stderr.log'
+    $start = New-Object Diagnostics.ProcessStartInfo
+    $start.FileName = $Executable
+    $start.Arguments = ($Arguments | ForEach-Object { ConvertTo-NativeArgument $_ }) -join ' '
+    $start.WorkingDirectory = $WorkingDirectory
+    $start.UseShellExecute = $false
+    $start.RedirectStandardOutput = $true; $start.RedirectStandardError = $true
+    $process = New-Object Diagnostics.Process
+    $process.StartInfo = $start
+    $started = $false; $timedOut = $false; $errorText = ''; $code = $null; $processId = $null
+    $stdout = ''; $stderr = ''
+    try {
+        if (-not $process.Start()) { throw 'Nao foi possivel iniciar o processo.' }
+        $started = $true; $processId = $process.Id
+        $outTask = $process.StandardOutput.ReadToEndAsync()
+        $errTask = $process.StandardError.ReadToEndAsync()
+        if (-not $process.WaitForExit($LimitSeconds * 1000)) {
+            $timedOut = $true
+            $process.Kill() # Somente o processo criado por esta chamada; nunca por nome.
+            if (-not $process.WaitForExit(5000)) { throw 'Processo nao encerrou apos o limite.' }
+        }
+        $code = $process.ExitCode
+        if (-not $outTask.Wait(5000) -or -not $errTask.Wait(5000)) { throw 'Captura de log nao terminou.' }
+        $stdout = $outTask.Result; $stderr = $errTask.Result
+    } catch {
+        $errorText = $_.Exception.Message
+    } finally {
+        if ($started -and -not $process.HasExited) { $process.Kill(); [void]$process.WaitForExit(5000) }
+        $process.Dispose()
+        [IO.File]::WriteAllText($outFile, $stdout)
+        [IO.File]::WriteAllText($errFile, $stderr)
+    }
+    [pscustomobject]@{ ExitCode = $code; TimedOut = $timedOut; Error = $errorText; Stdout = $outFile; Stderr = $errFile; ProcessId = $processId }
+}
+
+function Get-HeadlessVerdict($ProcessResult, [string]$Log, [string]$FrameDirectory, [int]$Width, [int]$Height, [int]$ExpectedFrames) {
+    $reason = ''
+    if ($ProcessResult.Error) { $reason = $ProcessResult.Error }
+    elseif ($ProcessResult.TimedOut) { $reason = 'Limite de tempo excedido.' }
+    elseif ($null -eq $ProcessResult.ExitCode -or $ProcessResult.ExitCode -ne 0) { $reason = 'Processo retornou erro: ' + $ProcessResult.ExitCode }
+    elseif ($Log -match '=== PROBLEMA:|JNI nao implementado|funcao nao implementada|heap esgotado|SDL_Init:|Nao consegui abrir|Falha ao mapear') { $reason = 'Log registra falha, mesmo que o codigo de saida seja zero.' }
+    elseif ($Log -notmatch 'initGame ok' -or $Log -notmatch ('(?m)\[host\] ' + $ExpectedFrames + ' quadros executados\.')) { $reason = 'Inicializacao ou total de quadros nao confirmado no log.' }
+    if (-not $reason) {
+        $expected = @(1) + @(10..$ExpectedFrames | Where-Object { $_ % 10 -eq 0 })
+        foreach ($frame in $expected) {
+            $path = Join-Path $FrameDirectory ('frame_{0:D5}.bmp' -f $frame)
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { $reason = 'Captura ausente: ' + [IO.Path]::GetFileName($path); break }
+            $bytes = [IO.File]::ReadAllBytes($path)
+            if ($bytes.Length -lt 54 -or $bytes[0] -ne 66 -or $bytes[1] -ne 77 -or
+                [BitConverter]::ToInt32($bytes, 18) -ne $Width -or [Math]::Abs([BitConverter]::ToInt32($bytes, 22)) -ne $Height) {
+                $reason = 'BMP invalido ou dimensoes incorretas: ' + [IO.Path]::GetFileName($path); break
+            }
+            $bits = [BitConverter]::ToUInt16($bytes, 28)
+            $offset = [BitConverter]::ToUInt32($bytes, 10)
+            $rowBytes = [Math]::Floor(($Width * [double]$bits + 31) / 32) * 4
+            if ($bits -notin @(24, 32) -or [BitConverter]::ToUInt16($bytes, 26) -ne 1 -or
+                [BitConverter]::ToUInt32($bytes, 30) -ne 0 -or $offset -lt 54 -or
+                [BitConverter]::ToUInt32($bytes, 2) -ne $bytes.Length -or $offset + $rowBytes * $Height -gt $bytes.Length) {
+                $reason = 'BMP incompleto ou formato inesperado: ' + [IO.Path]::GetFileName($path); break
+            }
+        }
+    }
+    $passed = -not [bool]$reason
+    if ($passed) { $reason = 'Inicializacao, contagem e cabecalhos BMP confirmados; conteudo visual nao avaliado.' }
+    [pscustomobject]@{ Passed = $passed; Detail = $reason }
+}
+
+function Add-TestResult([string]$Name, [string]$Status, [string]$Detail) {
+    $script:TestResults.Add([pscustomobject]@{ Teste = $Name; Estado = $Status; Detalhe = $Detail }) | Out-Null
+    Write-Host ('[{0}] {1}: {2}' -f $Status, $Name, $Detail)
+}
+
+function Read-ManualResult([string]$Name, [string]$Question) {
+    $answer = (Read-Host ($Question + ' [S=sim/N=falhou/P=nao testado]')).Trim().ToUpperInvariant()
+    $status = 'PENDENTE'
+    if ($answer -eq 'S') { $status = 'MANUAL_OK' }
+    elseif ($answer -eq 'N') { $status = 'MANUAL_FALHA' }
+    Add-TestResult $Name $status 'Resposta informada pelo usuario; nao e uma verificacao automatica.'
+}
+
+function Invoke-DestiniaSuite {
+    $ErrorActionPreference = 'Stop'
+    $rootPath = [IO.Path]::GetFullPath($Root)
+    $session = Join-Path $rootPath ('relatorios/testes_' + (Get-Date -Format 'yyyyMMdd_HHmmss') + '_' + [guid]::NewGuid().ToString('N').Substring(0, 8))
+    [void][IO.Directory]::CreateDirectory($session)
+    $script:TestResults = New-Object 'System.Collections.Generic.List[object]'
+    $oldPath = $env:PATH; $source = ''; $saveBefore = $null
+    $exitCode = 0
+    try {
+        Write-Host 'DESTINIA - TESTES AUTOMATICOS E ROTEIRO GUIADO'
+        Write-Host ('Resultados: ' + $session)
+        if ($env:OS -ne 'Windows_NT') { throw 'O executor completo requer Windows. Apenas as funcoes auxiliares sao testaveis em outros sistemas.' }
+        if (Get-Process -Name destinia_host -ErrorAction SilentlyContinue) { throw 'Feche as janelas do Destinia antes do teste. Nenhum processo existente sera encerrado.' }
+        if (-not (Test-Path -LiteralPath $RuntimeDir -PathType Container)) { throw 'Runtime UCRT64 nao encontrado. Informe -RuntimeDir ou consulte Dependencias no README.' }
+        $env:PATH = $RuntimeDir + [IO.Path]::PathSeparator + $oldPath
+        Add-TestResult 'Runtime' 'OK' ('Pasta adicionada somente ao PATH deste diagnostico: ' + $RuntimeDir + '. Dependencias transitivas serao exercitadas ao iniciar o host.')
+        $game = Join-Path $rootPath 'game'
+        $library = Join-Path $game 'lib/armeabi/libdestinia_jni.so'
+        if (-not (Test-Path -LiteralPath $library -PathType Leaf)) { throw 'Biblioteca ARM nao encontrada em game/lib/armeabi/libdestinia_jni.so.' }
+        $header = [IO.File]::ReadAllBytes($library)
+        if ($header.Length -lt 52 -or $header[0] -ne 127 -or $header[1] -ne 69 -or $header[2] -ne 76 -or $header[3] -ne 70 -or
+            $header[4] -ne 1 -or $header[5] -ne 1 -or [BitConverter]::ToUInt16($header, 18) -ne 40) { throw 'Biblioteca nao tem cabecalho ELF ARM 32 bits little-endian compativel.' }
+        if (-not (Test-Path -LiteralPath (Join-Path $game 'assets') -PathType Container) -or
+            -not @(Get-ChildItem -LiteralPath (Join-Path $game 'assets') -File).Count) { throw 'Pasta de assets ausente ou vazia.' }
+        Add-TestResult 'Dados originais' 'OK' ('ELF ARM e pasta de assets encontrados. SHA-256 da biblioteca: ' + (Get-FileHash -LiteralPath $library).Hash)
+        if (-not (Test-Path -LiteralPath (Join-Path $game 'res/raw') -PathType Container)) { Add-TestResult 'Audio' 'AVISO' 'Pasta res/raw ausente; audio precisa de teste manual.' }
+        if (-not $Fresh) {
+            if ($SaveSource) { $source = [IO.Path]::GetFullPath($SaveSource) }
+            elseif ($env:LOCALAPPDATA) { $source = Join-Path $env:LOCALAPPDATA 'Destinia/save' }
+            if ($source -and -not (Test-Path -LiteralPath $source -PathType Container)) {
+                if ($SaveSource) { throw 'A origem de save informada nao existe.' }
+                Add-TestResult 'Origem do save' 'AVISO' 'Save compartilhado nao encontrado; serao usadas pastas novas de teste.'
+                $source = ''
+            }
+        }
+        if ($source) { $saveBefore = ConvertTo-Json -InputObject @(Get-SaveInventory $source) -Compress }
+        $variants = @('host', 'host_zoom')
+        if ($Variant -ne 'Ambos') { $variants = @($Variant) }
+        foreach ($name in $variants) {
+            $hostDirectory = Join-Path $rootPath $name
+            $exe = Join-Path $hostDirectory 'build/destinia_host.exe'
+            if (-not (Test-Path -LiteralPath $exe -PathType Leaf)) {
+                Add-TestResult ($name + ' executavel') 'FALHA' ('Nao encontrado: ' + $exe + '. Compile antes de testar; o script nao instala nem compila automaticamente.')
+                continue
+            }
+            Add-TestResult ($name + ' executavel') 'OK' ('SHA-256: ' + (Get-FileHash -LiteralPath $exe).Hash)
+            $width = 400; $height = 240
+            if ($name -eq 'host_zoom') { $width = 800; $height = 480 }
+            $save = Join-Path $session ($name + '_save_automatico')
+            Copy-IsolatedSave $source $save
+            $frameDir = Join-Path $session ($name + '_frames')
+            $arguments = @('--game', $game, '--save', $save, '--headless', [string]$Frames, '--out', $frameDir)
+            if ($name -eq 'host_zoom') { $arguments += @('--lang', 'pt') }
+            $run = Invoke-OwnedProcess $exe $arguments $hostDirectory (Join-Path $session ($name + '_automatico')) $TimeoutSeconds
+            $log = [IO.File]::ReadAllText($run.Stdout) + "`n" + [IO.File]::ReadAllText($run.Stderr)
+            $verdict = Get-HeadlessVerdict $run $log $frameDir $width $height $Frames
+            $state = 'FALHA'; if ($verdict.Passed) { $state = 'OK' }
+            Add-TestResult ($name + ' inicializacao sem janela') $state $verdict.Detail
+            if ($Mode -eq 'Automatico') {
+                Add-TestResult ($name + ' gameplay, saves, camera e entradas') 'PENDENTE' 'Requer o modo Guiado e observacao humana.'
+                continue
+            }
+            Write-Host ''
+            Write-Host 'ROTEIRO: iniciar/carregar partida, mover, atacar, abrir inventario/equipar, trocar de mapa e salvar.'
+            Write-Host 'Teste mouse (DPI 100/150% e janela redimensionada), audio, controle/desconexao e Alt+Tab segurando direcao.'
+            if ($name -eq 'host_zoom') { Write-Host 'Teste PT. Na falha de mapa: F9 antes da transicao, F9 para parar; F9 outra vez captura o estado posterior.' }
+            Write-Host 'Compras/rede NAO sao acionadas por este roteiro. Use somente o save de teste. Feche a janela ao terminar.'
+            if ((Read-Host ('Abrir teste guiado de ' + $name + '? [S/N]')).Trim().ToUpperInvariant() -ne 'S') {
+                Add-TestResult ($name + ' teste guiado') 'PENDENTE' 'Usuario optou por nao abrir.'
+                continue
+            }
+            $guiSave = Join-Path $session ($name + '_save_guiado')
+            Copy-IsolatedSave $source $guiSave
+            $guiArgs = @('--game', $game, '--save', $guiSave, '--probe', '--profile')
+            if ($name -eq 'host_zoom') { $guiArgs += @('--lang', 'pt', '--trace-viewport', '--trace-frames', '1200', '--trace-out', (Join-Path $session 'trace_viewport')) }
+            $gui = Invoke-OwnedProcess $exe $guiArgs $hostDirectory (Join-Path $session ($name + '_guiado')) $InteractiveTimeoutSeconds
+            $guiLog = [IO.File]::ReadAllText($gui.Stdout) + [IO.File]::ReadAllText($gui.Stderr)
+            if ($gui.Error -or $gui.TimedOut -or $gui.ExitCode -ne 0 -or $guiLog -match '=== PROBLEMA:|JNI nao implementado|funcao nao implementada|heap esgotado|SDL_Init:') {
+                Add-TestResult ($name + ' processo guiado') 'FALHA' 'Erro, timeout ou falha no log. Verifique stdout/stderr; o roteiro nao confirma sucesso.'
+                continue
+            }
+            Read-ManualResult ($name + ' gameplay') 'Conseguiu iniciar/carregar, mover, atacar, abrir inventario e equipar?'
+            Read-ManualResult ($name + ' mapa/camera') 'A troca de mapa e a camera funcionaram sem duplicacao ou defeito?'
+            Read-ManualResult ($name + ' mouse/DPI') 'Mouse correto em janela redimensionada e DPI 100/150%?'
+            Read-ManualResult ($name + ' audio') 'Musica e efeitos funcionaram?'
+            Read-ManualResult ($name + ' controle e foco') 'Controle/desconexao e Alt+Tab funcionaram sem direcao presa?'
+            if ($name -eq 'host_zoom') { Read-ManualResult 'host_zoom PT e F9' 'Textos PT e captura/trace F9 funcionaram?' }
+            if ((Read-Host 'Salvou e quer reabrir a MESMA copia para conferir o progresso? [S/N]').Trim().ToUpperInvariant() -eq 'S') {
+                $reload = Invoke-OwnedProcess $exe $guiArgs $hostDirectory (Join-Path $session ($name + '_reabrir')) $InteractiveTimeoutSeconds
+                $reloadLog = [IO.File]::ReadAllText($reload.Stdout) + [IO.File]::ReadAllText($reload.Stderr)
+                if ($reload.Error -or $reload.TimedOut -or $reload.ExitCode -ne 0 -or $reloadLog -match '=== PROBLEMA:|JNI nao implementado|funcao nao implementada|heap esgotado|SDL_Init:') {
+                    Add-TestResult ($name + ' salvar/reabrir') 'FALHA' 'Falha ao executar a segunda abertura; confira logs.'
+                } else { Read-ManualResult ($name + ' salvar/reabrir') 'O progresso salvo permaneceu apos fechar e carregar novamente?' }
+            } else { Add-TestResult ($name + ' salvar/reabrir') 'PENDENTE' 'Segunda abertura nao executada.' }
+        }
+        Add-TestResult 'Compras e rede' 'NAO_TESTADO' 'Nao acionadas automaticamente. Podem travar ou alterar cash mesmo em copia de teste.'
+        Add-TestResult 'Casos internos de libc/ELF/SDL' 'NAO_TESTADO' 'fread/fwrite tamanho zero, entradas ELF corrompidas e falhas forjadas de SDL exigem testes de codigo; este BAT nao os valida.'
+    } catch {
+        Add-TestResult 'Execucao do diagnostico' 'FALHA' $_.Exception.Message
+    } finally {
+        $env:PATH = $oldPath
+        if ($null -ne $saveBefore) {
+            try {
+                $after = ConvertTo-Json -InputObject @(Get-SaveInventory $source) -Compress
+                if ($after -eq $saveBefore) { Add-TestResult 'Save de origem' 'OK' 'Hashes antes/depois iguais. Somente as copias foram usadas pelo roteiro.' }
+                else { Add-TestResult 'Save de origem' 'FALHA' 'Conteudo mudou durante o teste. Verifique se outro processo usou a origem; nao ha restauracao automatica.' }
+            } catch { Add-TestResult 'Save de origem' 'FALHA' ('Nao foi possivel conferir hashes: ' + $_.Exception.Message) }
+        }
+        if (@($script:TestResults | Where-Object { $_.Estado -in @('FALHA', 'MANUAL_FALHA') }).Count) { $exitCode = 1 }
+        $report = [pscustomobject]@{ Data = (Get-Date -Format 'o'); PowerShell = $PSVersionTable.PSVersion.ToString(); Modo = $Mode; Variante = $Variant; Codigo = $exitCode; Resultados = @($script:TestResults.ToArray()) }
+        $report | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $session 'resultados.json') -Encoding UTF8
+        $lines = @('DESTINIA - RELATORIO DE TESTES', ('Data: ' + $report.Data), ('Modo: ' + $Mode), '', 'OK automatico nao confirma gameplay. MANUAL_OK e relato do usuario. PENDENTE/NAO_TESTADO nao significam aprovado.', '')
+        $lines += @($script:TestResults | ForEach-Object { '[{0}] {1}: {2}' -f $_.Estado, $_.Teste, $_.Detalhe })
+        $lines += @('', 'Nao envie pastas de save. Revise relatorio/logs/capturas antes de compartilhar.', 'Nenhum arquivo e enviado a internet por este script.')
+        $lines | Set-Content -LiteralPath (Join-Path $session 'relatorio.txt') -Encoding UTF8
+        Write-Host ('Relatorio final: ' + (Join-Path $session 'relatorio.txt'))
+    }
+    return $exitCode
+}
+
+if ($MyInvocation.InvocationName -ne '.') { exit (Invoke-DestiniaSuite) }

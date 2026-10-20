@@ -15,3 +15,6 @@
 /host_zoom/camera.txt export-ignore
 /host_zoom/clear.txt export-ignore
 /host_zoom/fix.txt export-ignore
+
+# O novo launcher usa CRLF no Windows e LF normalizado no Git.
+"/Testar Destinia.bat" text eol=crlf

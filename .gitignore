@@ -27,3 +27,6 @@ Claude/exports/
 
 # Pacotes de distribuicao locais
 /dist/
+
+# Relatorios e copias de save do teste geral
+/relatorios/testes_*/

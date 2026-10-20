@@ -4,6 +4,16 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## Próxima atualização — diagnóstico, sem nova release
+
+- Adicionado `Testar Destinia.bat` com executor PowerShell para verificações automáticas e roteiro guiado dos dois hosts.
+- Saves de teste isolados por sessão e por host, comparação de hashes da origem e proteção contra sobrescrita de cópias anteriores.
+- Verificação dos dados ARM, executáveis, logs, contagem de quadros e BMPs; falhas no log não são ignoradas quando o host retorna zero.
+- Limite de tempo por processo, captura de stdout/stderr, relatório em texto e JSON e roteiro manual de gameplay, salvar/reabrir, câmera, PT/F9 e entradas.
+- Pacote de testes para extrair no projeto existente, sem executáveis ou dependências externas; pastas de relatório/save geradas pelo diagnóstico ignoradas no Git.
+- Documentadas as limitações: compras/rede e erros internos de libc/ELF/SDL não são testados automaticamente; sem validação real de Windows nesta etapa.
+- Nenhuma alteração nos fontes do jogo ou na release 0.2 Beta já publicada.
+
 ## 0.2 Beta — 20/10/2026
 
 ### Alterações em relação ao commit inicial
