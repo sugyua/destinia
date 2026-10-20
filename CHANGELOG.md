@@ -4,7 +4,16 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
-## Próxima atualização — diagnóstico, sem nova release
+## Próxima atualização — limpeza e diagnóstico, sem nova release
+
+### Limpeza do repositório
+
+- Removidos logs de testes, relatórios de uso de CPU, backups dos fontes, cópias antigas não usadas no build, configuração local do editor, arquivo vazio e material pessoal de continuidade/exportação de conversas.
+- Não foram encontrados arquivos de save rastreados na árvore atual. Reforçado o `.gitignore` para pastas de saves, `msave.dat`, formatos de save, relatórios locais, backups e credenciais.
+- Preservados os fontes ativos, CMakeLists, recursos do jogo, launchers, ferramentas de diagnóstico, testes e documentação técnica útil.
+- A limpeza afeta a branch principal atual; não reescreve commits antigos nem altera a release 0.2 Beta já publicada.
+
+### Ferramenta de diagnóstico
 
 - Adicionado `Testar Destinia.bat` com executor PowerShell para verificações automáticas e roteiro guiado dos dois hosts.
 - Saves de teste isolados por sessão e por host, comparação de hashes da origem e proteção contra sobrescrita de cópias anteriores.

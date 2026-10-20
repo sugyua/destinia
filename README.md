@@ -13,13 +13,13 @@ O host em C++17 executa a biblioteca ARM original do Destinia Android com Unicor
 | `host` | Host 400×240 |
 | `host_zoom` | Host experimental 800×480, tradução PT e trace de viewport |
 | `game` | APK original do Destinia Android extraído; recursos necessários em execução, não incluídos no ZIP curado de fontes |
-| `Claude` | Referência histórica, não é o host atual |
+| `Claude` | Especificação do host e ferramentas de análise para desenvolvimento |
 | `docs` | Decisões e histórico técnico; documentos antigos podem estar desatualizados |
 | `release` | Manifesto e notas da candidata |
 | `scripts` | Empacotamento dos fontes revisados |
 | `tests` | Testes do empacotamento |
 
-No repositório completo há backups e logs históricos; o pacote curado usa uma lista explícita de arquivos para não incluí-los.
+O repositório atual não inclui saves pessoais, logs de partidas, relatórios locais ou cópias antigas dos fontes. O `.gitignore` impede o envio acidental desses arquivos. A documentação técnica histórica pode citar arquivos removidos na limpeza; os fontes ativos estão em `host` e `host_zoom`.
 
 ## Recursos presentes no código
 

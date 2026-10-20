@@ -20,6 +20,12 @@ Claude/exports/
 # Saves locais
 **/save/
 **/save_*/
+**/[Ss]ave*/
+**/*_[Ss]ave_*/
+**/msave.dat
+*.sav
+*.save
+*.srm
 
 # Arquivos temporarios
 *.tmp
@@ -28,5 +34,28 @@ Claude/exports/
 # Pacotes de distribuicao locais
 /dist/
 
-# Relatorios e copias de save do teste geral
-/relatorios/testes_*/
+# Relatorios pessoais e resultados locais
+/relatorios/
+**/log.txt
+**/log_*.txt
+/host/sonda.txt
+/host_zoom/camera.txt
+/host_zoom/clear.txt
+/host_zoom/fix.txt
+
+# Backups, editor e exportacoes pessoais
+*.bak*
+*.orig
+*~
+.vscode/
+/Claude/manifest-*.json
+/host/main_original.cpp
+/host/main - Copia.cpp
+/Claude/main.cpp
+/CONTINUIDADE_INVESTIGACAO_MAPA_CHATGPT_CLAUDE.txt
+/docs/CONTEXTO_CLAUDE.md
+
+# Credenciais locais (exemplos documentados podem ser versionados)
+.env
+.env.*
+!.env.example
