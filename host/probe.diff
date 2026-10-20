@@ -1,0 +1,94 @@
+--- /mnt/user-data/uploads/main.cpp	2026-10-12 05:36:28.082671000 +0000
++++ main.cpp	2026-10-12 05:39:49.391465348 +0000
+@@ -95,6 +95,28 @@
+   return s;
+ }
+ 
++// ---------------------------------------------------------------- SONDA (diagnostico de toque)
++// So liga com --probe. Nao altera o comportamento do jogo: apenas LE memoria e imprime.
++// Os enderecos de MMain/Menu/Grp sao descobertos quando o proprio jogo zera essas estruturas
++// com memset (tamanhos 0x3928, 0x214 e 0x7c; cada um aparece em um unico lugar do codigo).
++static bool probe = false;
++static u32 gMMain = 0, gMenu = 0, gGrp = 0;
++static int autoFrame = -1, autoX = 0, autoY = 0;   // --autotap FRAME,X,Y (toque sintetico de teste)
++static u32 rd16(u32 a) { uint16_t v = 0; rd(a, &v, 2); return v; }
++static void probeState(const char* tag) {
++  if (!probe) return;
++  if (!gMMain || !gMenu) { fprintf(stderr, "[sonda] %s: enderecos ainda nao descobertos (MMain=%08x Menu=%08x Grp=%08x)\n", tag, gMMain, gMenu, gGrp); return; }
++  fprintf(stderr, "[sonda] %s: rede=%u (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=%u menu.anim=%u | lista: y0=%u altura=%u itens=%u | tecla_toque=%u | tela=%ux%u\n",
++          tag, rd16(gMMain + 14624), rd32(gMenu + 156), rd16(gMenu + 178), rd16(gMenu + 172), rd16(gMenu + 174), rd16(gMenu + 176),
++          rd32(gMMain + 14604), gGrp ? rd16(gGrp + 92) : 0, gGrp ? rd16(gGrp + 94) : 0);
++}
++static void probeTick(long frame) {   // chamada a cada quadro: imprime quando o estado muda (e a cada 100 quadros)
++  if (!probe || !gMMain || !gMenu) return;
++  static u32 last = 0xFFFFFFFF;
++  u32 sig = rd16(gMMain + 14624) | (rd32(gMenu + 156) << 8) | ((rd16(gMenu + 178) >= 16 ? 1u : 0u) << 24);
++  if (sig != last || frame % 100 == 0) { char t[48]; snprintf(t, sizeof t, "quadro %ld", frame); probeState(t); last = sig; }
++}
++
+ // ---------------------------------------------------------------- malloc simples
+ static u32 heapPtr = HEAP_BASE + 16;
+ static std::map<u32, u32> chunkSize;
+@@ -174,7 +196,12 @@
+   auto L = [&](const char* name, std::function<void()> f) { importId[name] = n; stubSet(n, name, std::move(f)); n++; };
+ 
+   L("memcpy", [] { u32 d = R(0), s = R(1), c = R(2); std::vector<uint8_t> b(c); rd(s, b.data(), c); wr(d, b.data(), c); W(0, d); });
+-  L("memset", [] { u32 d = R(0), c = R(2); std::vector<uint8_t> b(c, (uint8_t)R(1)); wr(d, b.data(), c); W(0, d); });
++  L("memset", [] {
++    u32 d = R(0), c = R(2); std::vector<uint8_t> b(c, (uint8_t)R(1)); wr(d, b.data(), c); W(0, d);
++    if (c == 0x3928 && !gMMain) { gMMain = d; if (probe) fprintf(stderr, "[sonda] MMain em %08x (lib+%x)\n", d, d - SO_BASE); }
++    else if (c == 0x214 && !gMenu) { gMenu = d; if (probe) fprintf(stderr, "[sonda] Menu em %08x (lib+%x)\n", d, d - SO_BASE); }
++    else if (c == 0x7c && gMMain && !gGrp) { gGrp = d; if (probe) fprintf(stderr, "[sonda] Grp em %08x (lib+%x)\n", d, d - SO_BASE); }
++  });
+   L("strlen", [] { W(0, (u32)cstr(R(0)).size()); });
+   L("strcpy", [] { std::string s = cstr(R(1)); wr(R(0), s.c_str(), s.size() + 1); });
+   L("strncmp", [] { std::string a = cstr(R(0)), b = cstr(R(1)); W(0, (u32)strncmp(a.c_str(), b.c_str(), R(2))); });
+@@ -437,7 +464,9 @@
+     if (a == "--game") gameDir = next(); else if (a == "--so") soPath = next(); else if (a == "--save") saveDir = next();
+     else if (a == "--scale") scale = atoi(next().c_str()); else if (a == "--headless") headlessFrames = atoi(next().c_str());
+     else if (a == "--out") outDir = next(); else if (a == "-v") verbose = true;
+-    else { printf("Uso: destinia_host [--game PASTA] [--so ARQUIVO] [--save PASTA] [--scale N] [--headless QUADROS --out PASTA] [-v]\n"); return 0; }
++    else if (a == "--probe") probe = true;
++    else if (a == "--autotap") { if (sscanf(next().c_str(), "%d,%d,%d", &autoFrame, &autoX, &autoY) != 3) { printf("--autotap precisa de QUADRO,X,Y\n"); return 0; } }
++    else { printf("Uso: destinia_host [--game PASTA] [--so ARQUIVO] [--save PASTA] [--scale N] [--headless QUADROS --out PASTA] [-v] [--probe] [--autotap QUADRO,X,Y]\n"); return 0; }
+   }
+   if (soPath.empty()) soPath = gameDir + "/lib/armeabi/libdestinia_jni.so";
+   assetsDir = gameDir + "/assets";
+@@ -491,7 +520,10 @@
+   fprintf(stderr, "[host] initGame ok. Rodando o jogo...\n");
+ 
+   // [OK] jniTouch(env,obj, x, y, tipo): tipo 0=toque 1=solta 2=move 3=tecla de menu (Thumb decodificado)
+-  auto touch = [&](int x, int y, int type) { callFn(fnTouch, {ENV_OBJ, 0x10, (u32)x, (u32)y, (u32)type}); };
++  auto touch = [&](int x, int y, int type) {
++    bool ok = callFn(fnTouch, {ENV_OBJ, 0x10, (u32)x, (u32)y, (u32)type});
++    if (probe && type != 2) { fprintf(stderr, "[sonda] jniTouch(x=%d, y=%d, tipo=%d) -> %s\n", x, y, type, ok ? "ok" : "FALHOU"); probeState(type == 0 ? "logo apos PRESSIONAR" : type == 1 ? "logo apos SOLTAR" : "logo apos tecla"); }
++  };
+ 
+   SDL_Window* win = nullptr; SDL_Renderer* ren = nullptr; SDL_Texture* tex = nullptr;
+   if (!headlessFrames) {
+@@ -514,16 +546,25 @@
+           int wx = ev.type == SDL_MOUSEMOTION ? ev.motion.x : ev.button.x, wy = ev.type == SDL_MOUSEMOTION ? ev.motion.y : ev.button.y;
+           float lx, ly; SDL_RenderWindowToLogical(ren, wx, wy, &lx, &ly);
+           int x = std::clamp((int)lx, 0, SCREEN_W - 1), y = std::clamp((int)ly, 0, SCREEN_H - 1);
++          if (probe && ev.type != SDL_MOUSEMOTION) {
++            int ww = 0, wh = 0, lw = 0, lh = 0; SDL_GetWindowSize(win, &ww, &wh); SDL_RenderGetLogicalSize(ren, &lw, &lh);
++            fprintf(stderr, "[sonda] SDL %s botao=%d janela_px=(%d,%d) tamanho_janela=%dx%d tamanho_logico=%dx%d -> jogo=(%d,%d)\n",
++                    ev.type == SDL_MOUSEBUTTONDOWN ? "BAIXO" : "CIMA", (int)ev.button.button, wx, wy, ww, wh, lw, lh, x, y);
++          }
+           if (ev.type == SDL_MOUSEBUTTONDOWN && ev.button.button == SDL_BUTTON_LEFT) { mouseDown = true; touch(x, y, 0); }
+           else if (ev.type == SDL_MOUSEBUTTONUP && ev.button.button == SDL_BUTTON_LEFT) { mouseDown = false; touch(x, y, 1); }
+           else if (ev.type == SDL_MOUSEMOTION && mouseDown) touch(x, y, 2);
+         } else if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_ESCAPE) touch(0, 0, 3);  // [?] ESC = tecla de menu do Android
+       }
+     }
++    // [SONDA] toque sintetico de teste (so com --autotap): pressiona no quadro N e solta 3 quadros depois
++    if (autoFrame >= 0 && frame == autoFrame) touch(autoX, autoY, 0);
++    if (autoFrame >= 0 && frame == autoFrame + 3) touch(autoX, autoY, 1);
+     // [OK] jniRun(env,obj, byte[] framebuffer, int contador) -> ms ate o proximo quadro (0 = sair)
+     u32 wait = 0;
+     if (!callFn(fnRun, {ENV_OBJ, 0x10, hScreen, (u32)frame}, &wait)) break;
+     frame++;
++    probeTick(frame);
+     if (wait == 0) { fprintf(stderr, "[host] o jogo pediu para encerrar.\n"); break; }
+ 
+     const uint8_t* fb = arrays[hScreen].data();

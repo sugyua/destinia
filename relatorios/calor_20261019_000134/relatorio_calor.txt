@@ -1,0 +1,35 @@
+﻿==========================================================
+  RELATORIO DE CALOR - DESTINIA PC PORT
+  Gerado: 2026-10-19 00:03:39
+==========================================================
+
+[AMBIENTE]
+  Nucleos/logicos: 12
+  Duracao medida:  119,9 s
+  Formato do profiler detectado: host (400x240)
+
+[EMULACAO POR QUADRO]  (quanto a CPU trabalha por quadro)
+  Media: 27,21 ms   Maximo: 525,35 ms
+
+[RITMO]  (o jogo roda a ~16 FPS = ~60 ms por quadro)
+  Quadro medio (wall): 62,49 ms
+  FPS efetivo medio:   16,0  (esperado ~16)
+  Quadros acima do orcamento: 0 %
+
+[USO DE CPU DO PROCESSO]  (1.0 = um nucleo 100%% ocupado)
+  Media: 0,88 nucleos (7 %% de todos os 12)
+  Pico:  1,38 nucleos (12 %% de todos)
+
+[DIAGNOSTICO]
+  - CPU ALTO: em media 0,88 nucleo(s) ocupado(s) o tempo todo. Isso e a causa direta do aquecimento.
+  - Nenhum quadro estourou o orÃ§amento: o ritmo esta respeitando os ~16 FPS do jogo e o host esta dormindo direito.
+  - PONTOS DE CONGELAMENTO: pico de emulacao de 525 ms em um quadro (provavel carga de arquivo). Isso e travada curta, nao calor constante.
+
+[RAW] Ultimas linhas do profiler:
+    [perfil] 120 quadros | emul=31.43ms (max 202.58ms) presente=0.75ms sleep=32.54ms wall=65.67ms | wait medio=107.0 | FPS efetivo=15.2 | 0% quadros emul acima do budget | wait=1000 em 5%
+    [perfil] 120 quadros | emul=31.19ms (max 273.89ms) presente=0.75ms sleep=31.55ms wall=64.79ms | wait medio=83.5 | FPS efetivo=15.4 | 0% quadros emul acima do budget | wait=1000 em 2%
+    [perfil] 120 quadros | emul=28.24ms (max 41.30ms) presente=0.81ms sleep=30.69ms wall=61.09ms | wait medio=60.0 | FPS efetivo=16.4 | 0% quadros emul acima do budget | wait=1000 em 0%
+    [perfil] 120 quadros | emul=27.92ms (max 34.85ms) presente=0.79ms sleep=30.81ms wall=61.14ms | wait medio=60.0 | FPS efetivo=16.4 | 0% quadros emul acima do budget | wait=1000 em 0%
+    [perfil] 120 quadros | emul=27.84ms (max 35.87ms) presente=0.80ms sleep=31.15ms wall=61.10ms | wait medio=60.0 | FPS efetivo=16.4 | 0% quadros emul acima do budget | wait=1000 em 0%
+    [perfil] 120 quadros | emul=28.79ms (max 37.60ms) presente=0.77ms sleep=30.18ms wall=61.01ms | wait medio=60.0 | FPS efetivo=16.4 | 0% quadros emul acima do budget | wait=1000 em 0%
+

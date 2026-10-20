@@ -1,0 +1,125 @@
+[host] .so carregada: 568 KB, 716 simbolos exportados
+[jogo:imp_log] c : Comm.deviceID = <DESTINIA-PC-0001>
+[host] FindClass game/destiniaeng/CommManager
+[host] FindClass game/destiniaeng/GameThread
+[sonda] MMain em 10073dc0 (lib+73dc0)
+[host] GetStaticMethodID getAssetResSize ([B)I
+[host] GetStaticMethodID getAssetRes ([B)[B
+[host] getAssetResSize gametxt_en.tdt -> 10474
+[sonda] Grp em 1004f790 (lib+4f790)
+[host] getAssetResSize dotum08.fnt -> 10341
+[sonda] Menu em 10083ac0 (lib+83ac0)
+[host] getAssetResSize mon_data_en.gdt -> 3840
+[host] fopen C:/destinia/host/save_t/msave.dat [rb] -> falhou
+[host] fopen C:/destinia/host/save_t/msave.dat [rb] -> falhou
+[host] GetStaticMethodID setSoundVolume (III)V
+[host] setSoundVolume 0,3,5
+[host] GetStaticMethodID setSoundVolume (III)V
+[host] setSoundVolume 1,3,5
+[host] getAssetResSize loading.wmb -> 83
+[host] getAssetResSize loading.agd -> 141
+[host] getAssetResSize tbutton.wmb -> 4743
+[host] getAssetResSize tbutton.agd -> 167
+[host] getAssetResSize touch_move.wpn -> 1222
+[host] getAssetResSize touch_clr.wpn -> 1174
+[host] getAssetResSize touch_bag.wpn -> 4904
+[host] getAssetResSize touch_ok.wpn -> 2068
+[host] getAssetResSize touch_skill.wpn -> 853
+[host] getAssetResSize touch_skill2.wpn -> 91
+[host] getAssetResSize touch_sort.wpn -> 6276
+[host] getAssetResSize touch_reset.wpn -> 6276
+[host] getAssetResSize touch_ad.wpn -> 23812
+[host] getAssetResSize touch_skip.wpn -> 6348
+[host] getAssetResSize touch_play_w.wpn -> 10004
+[host] getAssetResSize uipointer.wmb -> 137
+[host] getAssetResSize uibutton.wmb -> 124
+[host] initGame ok. Rodando o jogo...
+[host] GetStaticMethodID getAssetResSize ([B)I
+[host] GetStaticMethodID getAssetRes ([B)[B
+[host] getAssetResSize gv_ani.agd -> 167
+[host] getAssetResSize gv555.wmb -> 2969
+[host] getAssetResSize gv_lgt.wmb -> 266
+[host] getAssetResSize gvimg.wpn -> 64588
+[host] getAssetResSize game_grade.wmb -> 4422
+[host] GetStaticMethodID playSound (I)V
+[host] playSound 50 [audio ainda nao implementado]
+[sonda] quadro 1: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=0 menu.anim=0 | lista: y0=0 altura=0 itens=0 | tecla_toque=0 | tela=400x240
+[host] GetStaticMethodID getAssetResSize ([B)I
+[host] GetStaticMethodID getAssetRes ([B)[B
+[host] getAssetResSize effect_total.wmb -> 143729
+[host] getAssetResSize title.wmb -> 63042
+[host] getAssetResSize title_info.wpn -> 3850
+[host] getAssetResSize item_en.gdt -> 26228
+[host] getAssetResSize illu_hero.wmb -> 4692
+[host] getAssetResSize item_icon.wmb -> 7307
+[host] getAssetResSize skill0_icon.wmb -> 15944
+[host] getAssetResSize buf_icon.wmb -> 3124
+[host] getAssetResSize bagbox.wmb -> 144
+[host] getAssetResSize xsnum.wmb -> 121
+[host] getAssetResSize attrnum.wmb -> 93
+[host] getAssetResSize snum.wmb -> 206
+[host] getAssetResSize uinum.wmb -> 141
+[host] getAssetResSize bnum.wmb -> 1220
+[host] getAssetResSize gauge.wmb -> 165
+[host] getAssetResSize gauge_box.wmb -> 116
+[host] getAssetResSize ui_etc.wmb -> 4834
+[host] getAssetResSize uimenu.wmb -> 2539
+[host] getAssetResSize equip_name_en.tdt -> 3401
+[host] getAssetResSize equip_head_en.tdt -> 290
+[host] getAssetResSize qitem_name_en.tdt -> 251
+[host] getAssetResSize skill0_desc_en.tdt -> 1201
+[host] getAssetResSize attr0_desc_en.tdt -> 1478
+[host] getAssetResSize pet_skill_en.tdt -> 1426
+[host] getAssetResSize nick_en.tdt -> 960
+[host] getAssetResSize map_temp.wmb -> 103
+[host] GetStaticMethodID playSound (I)V
+[host] playSound 100 [audio ainda nao implementado]
+[sonda] quadro 100: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=0 menu.anim=0 | lista: y0=0 altura=0 itens=0 | tecla_toque=0 | tela=400x240
+[sonda] quadro 200: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=0 menu.anim=0 | lista: y0=0 altura=0 itens=0 | tecla_toque=0 | tela=400x240
+[sonda] quadro 300: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=0 menu.anim=0 | lista: y0=0 altura=0 itens=0 | tecla_toque=0 | tela=400x240
+[sonda] jniTouch(x=200, y=63, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=0 menu.anim=0 | lista: y0=0 altura=0 itens=0 | tecla_toque=26 | tela=400x240
+[host] GetStaticMethodID getAssetResSize ([B)I
+[host] GetStaticMethodID getAssetRes ([B)[B
+[host] getAssetResSize menubg.wmb -> 56891
+[host] getAssetResSize menu_en0_0.wpn -> 19204
+[host] getAssetResSize menu_en0_1.wpn -> 19204
+[host] getAssetResSize menu_en1_0.wpn -> 19204
+[host] getAssetResSize menu_en1_1.wpn -> 19204
+[host] getAssetResSize menu_en2_0.wpn -> 19204
+[host] getAssetResSize menu_en2_1.wpn -> 19204
+[host] getAssetResSize menu_en3_0.wpn -> 19204
+[host] getAssetResSize menu_en3_1.wpn -> 19204
+[host] getAssetResSize menu_en4_0.wpn -> 19204
+[host] getAssetResSize menu_en4_1.wpn -> 19204
+[host] getAssetResSize mapeff10.wmb -> 2402
+[host] getAssetResSize mapeff.agd -> 5844
+[host] getAssetResSize item_en.gdt -> 26228
+[host] getAssetResSize illu_hero.wmb -> 4692
+[host] getAssetResSize item_icon.wmb -> 7307
+[host] getAssetResSize skill0_icon.wmb -> 15944
+[host] getAssetResSize buf_icon.wmb -> 3124
+[host] getAssetResSize bagbox.wmb -> 144
+[host] getAssetResSize xsnum.wmb -> 121
+[host] getAssetResSize attrnum.wmb -> 93
+[host] getAssetResSize snum.wmb -> 206
+[host] getAssetResSize uinum.wmb -> 141
+[host] getAssetResSize bnum.wmb -> 1220
+[host] getAssetResSize gauge.wmb -> 165
+[host] getAssetResSize gauge_box.wmb -> 116
+[host] getAssetResSize ui_etc.wmb -> 4834
+[host] getAssetResSize uimenu.wmb -> 2539
+[host] getAssetResSize equip_name_en.tdt -> 3401
+[host] getAssetResSize equip_head_en.tdt -> 290
+[host] getAssetResSize qitem_name_en.tdt -> 251
+[host] getAssetResSize skill0_desc_en.tdt -> 1201
+[host] getAssetResSize attr0_desc_en.tdt -> 1478
+[host] getAssetResSize pet_skill_en.tdt -> 1426
+[host] getAssetResSize nick_en.tdt -> 960
+[host] getAssetResSize map_temp.wmb -> 103
+[sonda] jniTouch(x=200, y=63, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=0 menu.anim=0 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] quadro 367: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=1 menu.anim=2 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] quadro 374: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=1 menu.anim=16 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] quadro 400: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=1 menu.anim=68 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[host] 400 quadros executados. Imagens em frames_tap350

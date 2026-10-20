@@ -1,0 +1,145 @@
+[host] .so carregada: 568 KB, 716 simbolos exportados
+[host] textos PT aplicados em gametxt_en.tdt
+[host] textos PT aplicados em mon_data_en.gdt
+[host] initGame ok em 800x480. Rodando o jogo...
+[host] traducao PT ativa: itens, equipamentos, habilidades, menus, Fabricacao e Missoes.
+[host] Teclado: WASD/setas mover, Enter/Z confirmar, Esc/X voltar, I menu, F5 save. DualSense: analogico mover, X atacar, O voltar, triangulo menu, Share save, L1 acelerar.
+[camera] quadro 1 camX=0 camY=0 mapa=0x0 tiles (0x0 px) tela=800x480 divisao_prevista_x=800 
+[host] textos PT aplicados em item_en.gdt
+[host] textos PT aplicados em equip_name_en.tdt
+[host] textos PT aplicados em equip_head_en.tdt
+[host] textos PT aplicados em qitem_name_en.tdt
+[host] textos PT aplicados em skill0_desc_en.tdt
+[host] textos PT aplicados em attr0_desc_en.tdt
+[host] textos PT aplicados em pet_skill_en.tdt
+[camera] quadro 60 camX=0 camY=0 mapa=0x0 tiles (0x0 px) tela=800x480 divisao_prevista_x=800 
+[host] textos PT aplicados em item_en.gdt
+[host] textos PT aplicados em equip_name_en.tdt
+[host] textos PT aplicados em equip_head_en.tdt
+[host] textos PT aplicados em qitem_name_en.tdt
+[host] textos PT aplicados em skill0_desc_en.tdt
+[host] textos PT aplicados em attr0_desc_en.tdt
+[host] textos PT aplicados em pet_skill_en.tdt
+[host] textos PT aplicados em item_en.gdt
+[host] textos PT aplicados em equip_name_en.tdt
+[host] textos PT aplicados em equip_head_en.tdt
+[host] textos PT aplicados em qitem_name_en.tdt
+[host] textos PT aplicados em skill0_desc_en.tdt
+[host] textos PT aplicados em attr0_desc_en.tdt
+[host] textos PT aplicados em pet_skill_en.tdt
+[host] textos PT aplicados em quest_en.gdt
+[camera] quadro 110 camX=-800 camY=-480 mapa=0x0 tiles (0x0 px) tela=800x480 divisao_prevista_x=800 << CAMERA NEGATIVA
+[camera] quadro 120 camX=-800 camY=-480 mapa=0x0 tiles (0x0 px) tela=800x480 divisao_prevista_x=800 << CAMERA NEGATIVA
+[camera] quadro 167 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 180 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[host] textos PT aplicados em quest_en.gdt
+[camera] quadro 240 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 300 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 360 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 420 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 480 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 540 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 600 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 660 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 720 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 780 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 840 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 900 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 960 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 1020 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 1080 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 1140 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 1200 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 1260 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 1320 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 1380 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 1440 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 1500 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 1560 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 1620 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 1680 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 1740 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 1800 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 1860 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 1920 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 1980 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 2040 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 2100 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 2160 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 2220 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 2280 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 2340 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 2400 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 2460 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 2520 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 2580 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 2640 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 2700 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 2760 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 2820 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 2880 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 2940 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 3000 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 3060 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 3120 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 3180 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 3240 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 3300 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 3360 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 3420 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 3480 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 3540 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[host] textos PT aplicados em quest_en.gdt
+[camera] quadro 3600 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 3660 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 3720 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 3780 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 3840 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 3900 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 3960 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 4020 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 4080 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 4140 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 4200 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 4260 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 4320 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 4380 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 4440 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 4500 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 4560 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 4620 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 4680 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 4740 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 4800 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 4860 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 4920 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 4980 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 5040 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 5100 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 5160 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 5220 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 5280 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 5340 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 5400 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 5460 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 5520 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 5580 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 5640 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 5700 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 5760 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 5820 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 5880 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 5940 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 6000 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 6060 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 6120 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 6180 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 6240 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 6300 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 6360 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 6420 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 6480 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 6540 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 6600 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 6660 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA
+[camera] quadro 6720 camX=-320 camY=0 mapa=30x30 tiles (480x480 px) tela=800x480 divisao_prevista_x=320 << CAMERA NEGATIVA

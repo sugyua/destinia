@@ -1,0 +1,2655 @@
+Manifest-Version: 1.0
+Created-By: 1.0 (Android)
+
+Name: assets/npc7_head.wmb
+SHA1-Digest: m95omYPL4eWTUkZIZsfR8mcXO0E=
+
+Name: assets/m1_34.mpd
+SHA1-Digest: KSVWYzhbk0hPlbefaugwy8D+VGk=
+
+Name: assets/npc.gdt
+SHA1-Digest: jRr66qmpy7ReQ8WIzQ1JEWuWGto=
+
+Name: assets/m2_9.mpd
+SHA1-Digest: PYwUiHsHR9mFj/hSkGLcFJ8tTkk=
+
+Name: assets/m0_3.mpd
+SHA1-Digest: +sRm0GhLkqTCtitOib18OKtYqjk=
+
+Name: assets/uipointer.wmb
+SHA1-Digest: IUQA1JHix111i3s8GSQlszBDH5k=
+
+Name: assets/hero_bsword16.wmb
+SHA1-Digest: yTlmhaxTqYivOCwx/lJw9kntx+U=
+
+Name: res/raw/eff10.ogg
+SHA1-Digest: 2UKh4gFseBt7IXQXrIT3Q2RwSc4=
+
+Name: assets/mon6_2_head.wmb
+SHA1-Digest: QP+qtnjWHJCLRJs/avzTlwA976g=
+
+Name: assets/m0_obj.wmb
+SHA1-Digest: fwNgkEngfKBLgboQkhZ6eBDmL20=
+
+Name: assets/m1_36.mpd
+SHA1-Digest: NSc0Lwhn35Th8hruXWQxnNwoWqI=
+
+Name: assets/mapeff11.wmb
+SHA1-Digest: JR1OJM0YdPibZkkul/WRm5iFbvA=
+
+Name: assets/m0_18.mpd
+SHA1-Digest: 3QcdvcCZzqy/9iZBHBdIfJqIzO4=
+
+Name: assets/die_menu1_1.wpn
+SHA1-Digest: a8F2hDWh1z3YJaO+rs/NxACKi5E=
+
+Name: assets/egg.wmb
+SHA1-Digest: KbKDi6dWtGX05kVu09xmlu+bDxQ=
+
+Name: assets/m2_23.mpd
+SHA1-Digest: 5ejcctl09RpBXC4nefR0QRlcZI8=
+
+Name: res/drawable/bar.png
+SHA1-Digest: +YG/9y6bOWoA3hZdVyQH7bHPAwU=
+
+Name: res/raw/eff19.ogg
+SHA1-Digest: BdufsWmsTYU63gvsXZ/W0OwhONs=
+
+Name: assets/m0_14_d.wmb
+SHA1-Digest: pz2yvHhovZTVc2shMeejSeDTn68=
+
+Name: assets/pet6.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: assets/menu6_0.wpn
+SHA1-Digest: 4LLoIQ50J+PyITP4fKgoGGv1NKM=
+
+Name: assets/npc4.agd
+SHA1-Digest: 5Aw8AZEI3SgNFG/AJYe+U1TiJRw=
+
+Name: assets/m0_35.mpd
+SHA1-Digest: sTTsGR72bLdr/c7TiGe60sSyYlo=
+
+Name: assets/hero_body21.wmb
+SHA1-Digest: WXvEjLC5UZzdmu3uUYe0+gcXPts=
+
+Name: assets/pet5.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: assets/m0_55.mpd
+SHA1-Digest: aSIr+lC+INZhvN/Ya6/vpluHpBU=
+
+Name: assets/hero_bsword12.wmb
+SHA1-Digest: dVE3G9sbWv6152yMF7HyDd7Ejbc=
+
+Name: assets/chrstate.agd
+SHA1-Digest: sk/hnQuB10HA2YV3OcAoifIuaSM=
+
+Name: assets/m0_43.mpd
+SHA1-Digest: j4YcEBlvtkqjYC3buueTxbxEycg=
+
+Name: assets/hero_b0.agd
+SHA1-Digest: cODRysk0y91B89iG9K82RzXO0KE=
+
+Name: assets/mon18_1_head.wmb
+SHA1-Digest: /eapj8CvmbPXrhGM3auU3BY64AE=
+
+Name: assets/hero_gun2.wmb
+SHA1-Digest: kzF5wjL4DXpNpmlas6fekB230f0=
+
+Name: assets/npc44.agd
+SHA1-Digest: GhJfgMVZIGeCJUvJfTvmChiryDE=
+
+Name: assets/m2_42.mpd
+SHA1-Digest: /SWWdhPRb1msdgCD9eQqBuBJxMU=
+
+Name: assets/npc58.agd
+SHA1-Digest: oLggZSApAvVIWZqD8MyPlSx/ouo=
+
+Name: assets/charillu1.agd
+SHA1-Digest: 8w41b4oZ2B7WQD2YlbryHJdGQbY=
+
+Name: assets/menu_en2_1.wpn
+SHA1-Digest: 8REF3L8Qh/K5a+7kJXnOTnDkNr4=
+
+Name: assets/npc41_head.wmb
+SHA1-Digest: 51T5wLpJ7V0nxGHlk+3W56eNd7o=
+
+Name: assets/npc52_head.wmb
+SHA1-Digest: Q+VnBmWYOpVv594ZuTwl2NPD5i4=
+
+Name: assets/hero_ssword2.wmb
+SHA1-Digest: e01BCUwhMYzb4zk7Sm0aylZg750=
+
+Name: assets/mon16_2_head.wmb
+SHA1-Digest: NA4Uqrb+aGOQnDtZw1sIG+RtQww=
+
+Name: assets/hero_bsword20.wmb
+SHA1-Digest: NgwpUU04isBFR8JxgGwYn4DqRTY=
+
+Name: assets/m1_6.mpd
+SHA1-Digest: TxoRqPyN1tdaYHXUK424XN6ZQR0=
+
+Name: assets/charillu10.agd
+SHA1-Digest: +joJyoiprCgCkSxDfDv+lxyyYpY=
+
+Name: assets/m1_39.mpd
+SHA1-Digest: rqzI+bXXc9DceUvIpjK28mVvCPA=
+
+Name: assets/mon7.agd
+SHA1-Digest: GGq25ikWf3HLSZTTehCv9y/xE8o=
+
+Name: assets/mapeff1.wmb
+SHA1-Digest: BQderb0fiM0votmUc/zNFp4VBeY=
+
+Name: res/raw/bg107.mp3
+SHA1-Digest: 2jyRQUmNdN6t+lXOlMxEFJ/Nrps=
+
+Name: assets/pet17.wmb
+SHA1-Digest: SWttjpkQM4rUGUKIFbNt/+7LACY=
+
+Name: assets/m0_38.mpd
+SHA1-Digest: aaY+bJYyaMd39jQr/w1q3NHGSjM=
+
+Name: assets/hero_head1.wmb
+SHA1-Digest: y4CCqndUM7iykxbNWXR4l48kAyY=
+
+Name: assets/hero_bsword7.wmb
+SHA1-Digest: dODyDRKit6q9PP2DdWJlp6lye8g=
+
+Name: assets/pet_skill.tdt
+SHA1-Digest: J7oJe7vu67aU8Anb5yRkBUysVz0=
+
+Name: assets/hero_ssword18.wmb
+SHA1-Digest: Usvx+THoEa5eACQdE4QHXAWISpg=
+
+Name: assets/menu3_1.wpn
+SHA1-Digest: 3K7rruhDDzq6uPki0eP32Vri9tc=
+
+Name: res/raw/eff01.ogg
+SHA1-Digest: /4L+drjcorM1AkF1wdvmjRGuul4=
+
+Name: assets/bnum.wmb
+SHA1-Digest: h3Ucd9/TEfepRfblsymN8pwfov0=
+
+Name: assets/m0_62.mpd
+SHA1-Digest: Nb6HeXPUIkNEimI/UMuXPeuiSBA=
+
+Name: assets/npc56_head.wmb
+SHA1-Digest: Xv8/EiSqHqLE+17SWHyINvxTvmQ=
+
+Name: assets/m1_11.mpd
+SHA1-Digest: V7bBvJXIqAAOyYYo6WCgt3yvpxg=
+
+Name: assets/charillu2.agd
+SHA1-Digest: 0lSQEVnXpyZ/sk5xWyO1+mUpJdI=
+
+Name: lib/armeabi/libdestinia_jni.so
+SHA1-Digest: Ajl6cMlSGxOxXWOyI3puJ/wFtCU=
+
+Name: assets/m0_7.mpd
+SHA1-Digest: JEqdtI9EvsBGDwetOOcbg2Ai2nE=
+
+Name: assets/m0_59.mpd
+SHA1-Digest: laWSB7doswxspD0OjHwiVDjC+fU=
+
+Name: assets/charillu2.wmb
+SHA1-Digest: Wcb7DZtPq6GTF8OBJgWNrVf0Zoc=
+
+Name: assets/hero_bsword3.wmb
+SHA1-Digest: lhgugR7714jMr9zxDdzE53WiWsk=
+
+Name: assets/menu1_1_t.wpn
+SHA1-Digest: GMptUmzxpiX/YA3nsePe1mGnpx0=
+
+Name: assets/hero_bsword5.wmb
+SHA1-Digest: eKEvyjWASP17tLWt0Y9TWPYIv2o=
+
+Name: assets/npc55.agd
+SHA1-Digest: Lk8PfjZSthYRHBRy2bYxSQ1HJvM=
+
+Name: assets/m0_9_d.wmb
+SHA1-Digest: 2wsxuXeEYO6spL18AvcYNXJff5s=
+
+Name: assets/m1_32.mpd
+SHA1-Digest: O2YWSaRiP341PPYRREeXUvlB6UA=
+
+Name: res/raw/bg100.mp3
+SHA1-Digest: kjAvIoJsAZwMnz/3OKoYPMzJyeg=
+
+Name: assets/char_name.tdt
+SHA1-Digest: 1F4MYr+LI23IDl8slMeyzcWOYnY=
+
+Name: assets/hero_gun24.wmb
+SHA1-Digest: 99hS/aSVj+3k1DhEzQuuvxdb480=
+
+Name: assets/m0_33.mpd
+SHA1-Digest: fYqi1CfAp0IuFHkEKS7KzOxL2i8=
+
+Name: assets/npc23_head.wmb
+SHA1-Digest: 8IoJAAeR6d8QXpFlb5oZZ023yQQ=
+
+Name: assets/mon6.agd
+SHA1-Digest: 8A3o/nykisB8CE3qaVuqqA506yo=
+
+Name: assets/npc57.agd
+SHA1-Digest: RvAGeZ9Dk0bKo97WqM1ykrZZNqA=
+
+Name: assets/hero_head30.wmb
+SHA1-Digest: 9I20BTCISyoHhDgKnN4bQV9bOHk=
+
+Name: assets/equip_head_en.tdt
+SHA1-Digest: EgowVJ0l2ppFxYSczwTMaN6Clcw=
+
+Name: assets/hero_body1.wmb
+SHA1-Digest: 0vqW/bItk1DUF6WKtPFSGmzD/ns=
+
+Name: assets/m0_15_d.wmb
+SHA1-Digest: JTJyIVxAzBVgDEmff6fVDk33epU=
+
+Name: assets/hero_head13.wmb
+SHA1-Digest: v6rYKg5Oc3609rwHRoTDT5iQvuQ=
+
+Name: assets/hero_gun29.wmb
+SHA1-Digest: 2Bjn6KK0p5eGvljWSCz88evwrIo=
+
+Name: assets/m0_17.mpd
+SHA1-Digest: +4fnlLCqfpN2czAbi44LXlnYnBU=
+
+Name: assets/nick_en.tdt
+SHA1-Digest: mhoX8adeih/NDEe2KyHVy4c1/A8=
+
+Name: assets/mon17_0_head.wmb
+SHA1-Digest: NDHkxinbRSR71Aicc1+OJvloyII=
+
+Name: assets/mapeff6.wmb
+SHA1-Digest: Oo3dGWcemLodT+VX2kJMeZiGyAM=
+
+Name: assets/menu6_1.wpn
+SHA1-Digest: 1FL2d5wlv4pR4iFmaU4Jkl9YSGo=
+
+Name: res/raw/eff11.ogg
+SHA1-Digest: ivirJnw5TGrLvnNdk3FOdmfMdhE=
+
+Name: assets/pet2.wmb
+SHA1-Digest: M/0JwL5yLR/y0hWoKGYev46q0Dg=
+
+Name: assets/m0_16_d.wmb
+SHA1-Digest: REiBOXqqvgCnHnR+Sjppjz4QfmM=
+
+Name: assets/hero_ssword16.wmb
+SHA1-Digest: /YF/MSehwPAHm2Csp/EyJP5zRbU=
+
+Name: assets/pet12.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: assets/mapeff4.wmb
+SHA1-Digest: b3viG5oP9wFIoY5MDhsI4ttsOeE=
+
+Name: assets/effect_ssword.wmb
+SHA1-Digest: pNSaoV+DNL388w7Fs3G6ly/5DT8=
+
+Name: assets/boss5.agd
+SHA1-Digest: WKJrcfblRWhfvaNne4QG3wynO7M=
+
+Name: assets/m0_0_t.wmb
+SHA1-Digest: pezIuSkIVmVwUQ+ZDACC/i5+4R4=
+
+Name: res/drawable/back_b.png
+SHA1-Digest: 5F48q8p8s2ASjvnYtLx/fDKtv8E=
+
+Name: assets/npc62.agd
+SHA1-Digest: whqr1qpTeWxj0+J7ipVK1t3Eoe8=
+
+Name: assets/hero_head18.wmb
+SHA1-Digest: VY4X0uZ/VWEoRw92UGtTpMtbuGE=
+
+Name: assets/equip_name.tdt
+SHA1-Digest: 2VNMNaHYKOjiMCGXXUGJxsr0Qm4=
+
+Name: assets/m0_20.mpd
+SHA1-Digest: OM3d8GQ3+UzVuRgqbWrVl4braEU=
+
+Name: assets/hero_head17.wmb
+SHA1-Digest: +8Zu4PNv6GnrKgYRsWUxkJckmZc=
+
+Name: assets/touch_sort.wpn
+SHA1-Digest: rhRBvUV9L753w5sVqYZGtxMRnAg=
+
+Name: assets/m1_1.mpd
+SHA1-Digest: x92jfIs4jKIZlPeMJ/mLgttTvJ4=
+
+Name: assets/mon14.agd
+SHA1-Digest: Q4fRvjsXrLI4Ydm3SPDtc6hcMQs=
+
+Name: assets/pet9.agd
+SHA1-Digest: O/BeIjJjI685f4J69rkoOrhslqw=
+
+Name: assets/pet13.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: res/raw/eff03.ogg
+SHA1-Digest: jK4Vt8GRbb0vZiRnucs/gLCdGJY=
+
+Name: assets/npc7.agd
+SHA1-Digest: 47J/nAL9VqXDoB7jUqzK7LgbpuI=
+
+Name: assets/m0_0.mpd
+SHA1-Digest: TfUGPu8Zncza0k+KVTITW5tcq20=
+
+Name: assets/m2_11.mpd
+SHA1-Digest: yZh5GZprvhkGqU7ghzkko8vFLKw=
+
+Name: assets/m0_11.mpd
+SHA1-Digest: zea7UyEja5OoHBccZzvVnpbJpTM=
+
+Name: assets/npc22_head.wmb
+SHA1-Digest: FEgZsdg19ckh+Ckg634K0ta3Yr4=
+
+Name: assets/touch_play.wpn
+SHA1-Digest: Cce0e0Lpz7AdSDUvIV70ctHUdGw=
+
+Name: assets/pet_skill_en.tdt
+SHA1-Digest: VcFRHeRaDm3egMtcM0EbD5W3vXQ=
+
+Name: assets/m1_5.mpd
+SHA1-Digest: iIicB3n+4qJWjCi86nIGHw4doMU=
+
+Name: assets/charillu7.agd
+SHA1-Digest: ccwgN6XEf9xpmTwLDuwV2KKmfvI=
+
+Name: assets/hero_b1.agd
+SHA1-Digest: 3ZKSv9oQnc7eqlvheIuxza9zTvw=
+
+Name: res/raw/eff23.ogg
+SHA1-Digest: k7X8oIKfQJAYtTr1cziVjfb8r9A=
+
+Name: assets/npc47.agd
+SHA1-Digest: yv1YnQbxCZEE9thMccL/91fX+qs=
+
+Name: assets/effect_total.wmb
+SHA1-Digest: 6LpvWjOGudDe3FGX5cV4TSrPpko=
+
+Name: assets/hero_gun22.wmb
+SHA1-Digest: QgEdyPG0R5A0EhnOrSFFBU/q604=
+
+Name: res/raw/eff06.ogg
+SHA1-Digest: VbTRpcoXHXVZtzPA8fSEITeA2u4=
+
+Name: assets/hero_body3.wmb
+SHA1-Digest: qmDb/TbNsjb3Xfoig8mdOji8lHY=
+
+Name: assets/skill2_desc_en.tdt
+SHA1-Digest: zsGMMiX6Ap6DRSCT37IgiowFv9U=
+
+Name: assets/bagbox.wmb
+SHA1-Digest: zc0Ri8l8hD74BF2/7AI29gdYRf8=
+
+Name: assets/menu_en2_0.wpn
+SHA1-Digest: IZBERHYDvLWV7SHm3vEW/YqoGCY=
+
+Name: assets/mapeff8.wmb
+SHA1-Digest: dwARwsW0v4ey/Loloul4RmErG4k=
+
+Name: assets/npc30.agd
+SHA1-Digest: kTUjScCVuN9pM59rJ7FhLeSrZsQ=
+
+Name: assets/hero_ssword24.wmb
+SHA1-Digest: NXwMTnCP0z/r2+yDwBO0mSmrv98=
+
+Name: res/raw/bg103.mp3
+SHA1-Digest: XjZLZLgOrkgYoZNj0vSUq2bMj1s=
+
+Name: assets/m2_16.mpd
+SHA1-Digest: 80mfIzIrfAsAV0q5G8zhSNpezjA=
+
+Name: assets/gametxt_en.tdt
+SHA1-Digest: qMiqwOpZ7FpDRMhpQjd+tBrgLjA=
+
+Name: assets/mon11.agd
+SHA1-Digest: t8Vn9oYurqcRbNG/Xa/00gD/l2I=
+
+Name: assets/pet10.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: assets/m0_46.mpd
+SHA1-Digest: nFge1hjpjFK03UohbQhW1F+ong8=
+
+Name: assets/menu1_1.wpn
+SHA1-Digest: a1rz1IPfo9EFh4h1Z9LiZfXOQSI=
+
+Name: assets/hero_ssword6.wmb
+SHA1-Digest: FeRcvdcKjS3uD9W0/SEcAblQKDQ=
+
+Name: assets/menu_en0_0.wpn
+SHA1-Digest: 546G09dXjJC/qm9BSd+eIz8xZdk=
+
+Name: assets/m1_46.mpd
+SHA1-Digest: KQEYntfbGV/X6U9/GJpQCBsHCUk=
+
+Name: assets/m0_39.mpd
+SHA1-Digest: ScYe4BNm1vJy7cGv3mMMgCKyt9I=
+
+Name: assets/hero_ssword14.wmb
+SHA1-Digest: as/rULPfRelyRMuH8vckT6Qd5CY=
+
+Name: assets/hero1.agd
+SHA1-Digest: lAZrX87WTXXJTKJCIzQYW2O8kV4=
+
+Name: assets/mon17_1_head.wmb
+SHA1-Digest: G0iAC0c27h1wxjuNLYiDZ/a9fQo=
+
+Name: assets/mon2_0_head.wmb
+SHA1-Digest: 1PCFW8mAEk2UXzQNu0n21t1vb5I=
+
+Name: assets/m1_12.mpd
+SHA1-Digest: W2KqqqVA8g3U93En5b7dga/mBVc=
+
+Name: assets/hero_head31.wmb
+SHA1-Digest: Y9avuJXsdTZbSfHThHaMWZD35Cg=
+
+Name: assets/hero_ssword8.wmb
+SHA1-Digest: F/P3OMWfl5AiXHlHT8fiqe3FwCk=
+
+Name: assets/mon9_1_head.wmb
+SHA1-Digest: W7cEfGdClKKXPVfzGX3Js3f8T80=
+
+Name: res/anim/slide_down.xml
+SHA1-Digest: 1JdZLu2TTeHihpcgde6SzfcvX1Q=
+
+Name: assets/hero_gun3.wmb
+SHA1-Digest: 9fOaR64Q5w48nG4t+pO19aA5coI=
+
+Name: assets/m0_21.mpd
+SHA1-Digest: oaPupe8IVBcsgTz4OHWFU1G1cXc=
+
+Name: assets/m0_41.mpd
+SHA1-Digest: u5z0OCJLu+jo06cQRgT7tV7kJak=
+
+Name: assets/npc27_head.wmb
+SHA1-Digest: giZq2vPUz59EUI7kBEdl3GvUaLc=
+
+Name: assets/boss2.agd
+SHA1-Digest: v2/YwLfjYZL+8uQlOasJVAGDuEY=
+
+Name: res/raw/eff17.ogg
+SHA1-Digest: 7NwhTM4IDdtzg9UakBpXOhja7tk=
+
+Name: assets/m2_18.mpd
+SHA1-Digest: rvT6Rc/IMqBIxDuZYiRw9L0VjRw=
+
+Name: assets/m0_22.mpd
+SHA1-Digest: ITXLbes9si6lg1pRTBBa5RAT1zE=
+
+Name: assets/attr0_desc.tdt
+SHA1-Digest: 9mSpnNqSLKdq0bH4IXyFBO3qUqg=
+
+Name: assets/hero_bsword14.wmb
+SHA1-Digest: CEycQ4iwuh0tkr0vu6NjRm/S7Pw=
+
+Name: assets/boss2_head.wmb
+SHA1-Digest: qhHUmCcMAsby53JmLLnZ4JVVXnE=
+
+Name: assets/m2_12.mpd
+SHA1-Digest: mphE9lHA+oS4Ph3Lh13kaJhacoc=
+
+Name: assets/hero_gun19.wmb
+SHA1-Digest: b8kJ/66TYUbBS0S/TQxxxE8EgsI=
+
+Name: assets/mon2_2_head.wmb
+SHA1-Digest: p5DoMS8I+iY9kdYWWwGVTLjIWkI=
+
+Name: assets/hero_body22.wmb
+SHA1-Digest: pM17yTzJJdUQ3Ou2pdRj6W0NgJE=
+
+Name: assets/loading.wmb
+SHA1-Digest: N1MiKbS/MU8TZxFg7tIqB3/jcPM=
+
+Name: res/drawable-ldpi/icon.png
+SHA1-Digest: iEn44nkE1ZgXq/p6KRQNgzX8HCQ=
+
+Name: assets/hero_body12.wmb
+SHA1-Digest: Ak4KxkHF1uicvHaN0NeGjWI3k/M=
+
+Name: assets/m2_19.mpd
+SHA1-Digest: dZrVP3ouzInGHzrvzQp+oAX+3u0=
+
+Name: res/anim/alpha.xml
+SHA1-Digest: ai1l5SLqxrc34hNPbmAhubCfskk=
+
+Name: assets/m0_2.mpd
+SHA1-Digest: vSEUbKEwkzmJpINUOOvdKohYZ84=
+
+Name: assets/mon12_2_head.wmb
+SHA1-Digest: GNvwUmR5aqnqbb4oF6rHhGiIM/k=
+
+Name: assets/mon9_0_head.wmb
+SHA1-Digest: 8RFix/LhdF46Kw6A9hGNNuUEyTc=
+
+Name: assets/m2_53.mpd
+SHA1-Digest: 412xbUgabfwlJjgO4fjDMj0BS/A=
+
+Name: assets/pet1.wmb
+SHA1-Digest: Vbl3HWvU/1yr+VkqQzRfX3MOsoU=
+
+Name: assets/hero_ssword15.wmb
+SHA1-Digest: 4H7Z4Spzsz3Ra6QP2GazvoAivq8=
+
+Name: assets/npc50_head.wmb
+SHA1-Digest: fjVpAaS1gBzNKNrTi2FhRYXkeSE=
+
+Name: assets/hero_body26.wmb
+SHA1-Digest: Yrj/kmy9goDfxMzPgM425MA0czg=
+
+Name: assets/hero_body20.wmb
+SHA1-Digest: 3OBy90uSwaIWmT2YkD8amxMIilM=
+
+Name: assets/mon17.agd
+SHA1-Digest: e91gSwwd1MrTLzLCsLOyKQBUp84=
+
+Name: assets/mon19.agd
+SHA1-Digest: L2hkx2rBmVrucFNdXZGnUM9Irdg=
+
+Name: assets/npc38.agd
+SHA1-Digest: C6tRHTaDwOe764HaaDlyezZtZcI=
+
+Name: assets/hero_ssword10.wmb
+SHA1-Digest: Cy2Bmg1vhOSqvoXQDdpNvm+ZdoI=
+
+Name: res/raw/eff05.ogg
+SHA1-Digest: 2j2Eol6DtpjGZRejSVbOaSSIcOM=
+
+Name: assets/hero_ssword29.wmb
+SHA1-Digest: 4vpsk5Lvzdzl2Ai/2LaQmHZbpiw=
+
+Name: assets/m1_3.mpd
+SHA1-Digest: PUgq+UhTVoJXrM8bIFAvQ3SeRWo=
+
+Name: assets/m2_0_d.wmb
+SHA1-Digest: EO9tqTAcm5nNR+PJlVm8Kcl6Z8k=
+
+Name: assets/giftbox.agd
+SHA1-Digest: 1lxKHXu+ZGZsRrPD3v96adx323U=
+
+Name: assets/mon21_2_head.wmb
+SHA1-Digest: 1NPrVM6+UQz2/KvxNsyJMQVXKic=
+
+Name: assets/npc37.agd
+SHA1-Digest: Hh06SKqiX2+MI84W5aqynH5/kxA=
+
+Name: assets/hero_head14.wmb
+SHA1-Digest: 5PvyLMgxDE9X0wsj9Co3Hg4qk9Q=
+
+Name: assets/hero_gun28.wmb
+SHA1-Digest: ZJf2ydJLfu4KNRiXtyQ8mXzJEMg=
+
+Name: res/drawable-hdpi/grade_en.png
+SHA1-Digest: FqYwMCOpr7KTrya3h1DAh0YkDzw=
+
+Name: res/raw/bg105.mp3
+SHA1-Digest: EI4YsUgyuKE2RHDEdmfzkCmMEbE=
+
+Name: assets/hero_head23.wmb
+SHA1-Digest: YqIPqt9HrXUAEqq3olghPOw+HMM=
+
+Name: assets/boss8.agd
+SHA1-Digest: ZVccsxjGq43ZPRqsVcudje1C//8=
+
+Name: assets/mon4_2_head.wmb
+SHA1-Digest: OpoSWlI4uhdt+NGGdzrvuLwniXc=
+
+Name: assets/m2_22.mpd
+SHA1-Digest: c/MVdIzabgIVPCvLmYtR87tmGzo=
+
+Name: assets/quest.gdt
+SHA1-Digest: zgiFLrce0RbVa0YYSmaKUKerCso=
+
+Name: assets/npc11.agd
+SHA1-Digest: p4qAsIFaFYJZb/nUpn1s0kSK8Ag=
+
+Name: assets/npc43_head.wmb
+SHA1-Digest: 7w8BfBXPLh9LX+MZKjbp3BfLxEw=
+
+Name: assets/hero_body14.wmb
+SHA1-Digest: 93vH13JuiZAJzTVVJGXtaGl5mpQ=
+
+Name: assets/skill0_desc.tdt
+SHA1-Digest: F4gwGgGqlBXpsFdT8fwnX9m4xf4=
+
+Name: res/raw/eff08.ogg
+SHA1-Digest: Ejz/Wos8A1VX/Pzr6VHVWuNhhLs=
+
+Name: assets/gv_ani.agd
+SHA1-Digest: UutXifIreHot5//Nb6/EgNmIzTA=
+
+Name: assets/hero_bsword22.wmb
+SHA1-Digest: xZiBUfd6lEbyB9WXZiGGPSJT5Ls=
+
+Name: assets/m1_44.mpd
+SHA1-Digest: GToN7q1VYcjM0desDKgFs+DnBZ4=
+
+Name: assets/m2_4_d.wmb
+SHA1-Digest: KYSKbWr+lwdB67o9uxU7H/TUs1A=
+
+Name: assets/hero_bsword19.wmb
+SHA1-Digest: BHBX9Uj0DUUPxXrVSebS/NsytW0=
+
+Name: assets/npc34_head.wmb
+SHA1-Digest: pYMDVAVPScr9kffWBYmv2T/tVxc=
+
+Name: assets/hero_head27.wmb
+SHA1-Digest: 6GndrxrBk3iWTjlDrKXMz1vgDYI=
+
+Name: assets/dlgillu1.wmb
+SHA1-Digest: oVCMde6VwRQUBkmNRk72x/pg38U=
+
+Name: assets/1.ddt
+SHA1-Digest: h+SDKlydfjByXZtyt/Nm2O0r/dw=
+
+Name: assets/m2_43.mpd
+SHA1-Digest: dKOjkk/D49HDQV21IGHY7DZj6qE=
+
+Name: assets/m2_3.mpd
+SHA1-Digest: R+r/ZN2FRlhDE8SABW/2/WfzMPg=
+
+Name: assets/m1_0.mpd
+SHA1-Digest: zNteNH2lNVl65XJeu/cu+0Ntre4=
+
+Name: assets/m0_27.mpd
+SHA1-Digest: PGBm/loEQ78TKnwniJFfBb5DCi4=
+
+Name: assets/pet14.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: assets/m1_48.mpd
+SHA1-Digest: 9GktXseHfRttc5CuTbccslq4pxQ=
+
+Name: assets/m2_52.mpd
+SHA1-Digest: s7muSu3UYFu1hJt5KNVjOQVLIvo=
+
+Name: assets/pet18.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: assets/m0_13_d.wmb
+SHA1-Digest: i00K8MLGuOynXp3mLA+ypUa+0r8=
+
+Name: assets/boss6_head.wmb
+SHA1-Digest: Dz2GoeJcT2a9d5ofzZbPnhOTehE=
+
+Name: assets/npc57_head.wmb
+SHA1-Digest: whMTn1EYCFao78reZxIEujet9D0=
+
+Name: assets/boss5_head.wmb
+SHA1-Digest: s1ZrXxNLDIUT1pYOEiPZ4vKUWPI=
+
+Name: assets/touch_ad.wpn
+SHA1-Digest: gA2VYhU/SMltplKM8Z9nPT5ufWA=
+
+Name: assets/snum.wmb
+SHA1-Digest: GYmEg0YNDAKOLWfJFgXVSF3zqrY=
+
+Name: assets/m2_48.mpd
+SHA1-Digest: IEuBjUAxn7LFtydHV9o8wkZMZhU=
+
+Name: assets/mon1_0_head.wmb
+SHA1-Digest: jrQsTM2y7//sunbJ2jC/u2gTG7E=
+
+Name: assets/m1_9.mpd
+SHA1-Digest: 1zZlUrT3rkpFBSk4m2xi3bYLLok=
+
+Name: assets/m1_10.mpd
+SHA1-Digest: kXRhz25D8GmyQZ3hQfcq8Wxju9s=
+
+Name: assets/m1_38.mpd
+SHA1-Digest: wvjt8/u84UHsfV9fRcE2lLkAhcM=
+
+Name: assets/attr2_desc.tdt
+SHA1-Digest: /dF4U4HxpGHk6wxPMoUX0EUrmuQ=
+
+Name: assets/m1_29.mpd
+SHA1-Digest: 6DukqBkRo+Aq1axSpkj6QC1R7oo=
+
+Name: assets/npc32.agd
+SHA1-Digest: aC60hfn3l/GBGL6dBolYE1xhNQU=
+
+Name: assets/m2_33.mpd
+SHA1-Digest: 7UrV7qcosVX0Cg83ZpulLegjVWQ=
+
+Name: res/drawable/news.png
+SHA1-Digest: pVrKFrVik1TfVa9m7Na5/AxeL/g=
+
+Name: assets/npc60.agd
+SHA1-Digest: Pb7BD8aH9pHRPd7gvOCFM57xDjU=
+
+Name: assets/0_en.ddt
+SHA1-Digest: P0Khm69CL9lCtf4PkHetsldRCcQ=
+
+Name: assets/m2_40.mpd
+SHA1-Digest: WbRl5fnQfRu47cRtR8UxOA9O8/4=
+
+Name: assets/hero_ssword28.wmb
+SHA1-Digest: mMb7Xzz/mBHXFk46SscpcKpL1qk=
+
+Name: assets/npc52.agd
+SHA1-Digest: DDUFGQ4Ougo6K6fbpuTK9Z7i054=
+
+Name: assets/mon19_2_head.wmb
+SHA1-Digest: HeddtJFyCh9QX4WsxqzaIT4+jQw=
+
+Name: assets/npc36.agd
+SHA1-Digest: FC++1bki4Rt1zw5pYmFuVaveeYE=
+
+Name: assets/m0_5_t.wmb
+SHA1-Digest: LoX8yeGLHPk/c6SpJ/0IWr4Sa6Q=
+
+Name: assets/mon11_1_head.wmb
+SHA1-Digest: MPJFNEHLNqXFzXcW7ilm0W31OLk=
+
+Name: assets/npc24.agd
+SHA1-Digest: n+BcMZNdTuYRDcu2ZQzXul9nBv8=
+
+Name: assets/m1_42.mpd
+SHA1-Digest: p/YFcrPIhQUc7DoRMa5/9VsaPpI=
+
+Name: assets/menu_pet.agd
+SHA1-Digest: Pz5T9Q7Rh1TX5749WM8dk94EvDM=
+
+Name: assets/hero_make.wmb
+SHA1-Digest: XMpuApJWFsyZmygQI9B50Py6CVU=
+
+Name: assets/npc0_head.wmb
+SHA1-Digest: IkaC6JkWxnGaB9M9Lr5cF3oN8cA=
+
+Name: assets/mon13_2_head.wmb
+SHA1-Digest: 6FqkGBmvMPqCHgV9TJmzgJIdeyo=
+
+Name: assets/m1_25.mpd
+SHA1-Digest: uhVbKtNhDIBSMc0DIJ4VSQF3uxc=
+
+Name: assets/m0_26.mpd
+SHA1-Digest: IACu74HSA5f2lYF8XIMSyglZWUs=
+
+Name: assets/gvimg.wmb
+SHA1-Digest: TCAEoc0djH4Ruot8h945KmOmgxA=
+
+Name: res/raw/eff09.ogg
+SHA1-Digest: CIdbvgwqlKxmwcPbgeKTiWGfWw0=
+
+Name: assets/item_en.gdt
+SHA1-Digest: JMIqNhJ+TRs6mq3M8aNUAgEeeLU=
+
+Name: assets/npc42_head.wmb
+SHA1-Digest: qiPJ3/okOJq1CFJXArwsJzVC1KY=
+
+Name: res/raw/eff25.ogg
+SHA1-Digest: jXOvaImxcoJORFQ7KtYC+j5UD6o=
+
+Name: assets/m1_2.mpd
+SHA1-Digest: oadYv+lYcOif92YAZYGOKpX9hE4=
+
+Name: assets/mapeff13.wmb
+SHA1-Digest: oSPWWLI2KDRsJEHzNidodA9D18A=
+
+Name: assets/m1_0_t.wmb
+SHA1-Digest: qgjedcVc6lHfFyd918I/znGYvdM=
+
+Name: assets/menu_en1_0.wpn
+SHA1-Digest: 4TN2DMwrYf40gm7+/oaZBtnq7Dc=
+
+Name: assets/npc41.agd
+SHA1-Digest: tbclnzO3SbInf4DQSScrdonE5ZY=
+
+Name: assets/m0_42.mpd
+SHA1-Digest: aacwQPpYjzkMm5uNFH8KkkrbOkM=
+
+Name: assets/mon3_0_head.wmb
+SHA1-Digest: vkQO+1orHzSY7skkO8BprpU5HAs=
+
+Name: assets/charillu4.wmb
+SHA1-Digest: 6PYNCT8bokN3rc6tuQNv2fyYQqo=
+
+Name: assets/npc10.agd
+SHA1-Digest: 4wY75fN+HoQmTmc/56FybHG6hHQ=
+
+Name: assets/m1_1_t.wmb
+SHA1-Digest: wzfktcUkyOnPVS7gdpWZUHYfiBA=
+
+Name: assets/m1_3_d.wmb
+SHA1-Digest: lcHqV3bdO40kRpBWor3S401pyoM=
+
+Name: assets/npc54_head.wmb
+SHA1-Digest: 5NpyR9GqKnRw64TH0uZVqjBvpaQ=
+
+Name: assets/hero_body28.wmb
+SHA1-Digest: WxIEZ4SbY3ea39yZUlHpcGuzHyk=
+
+Name: assets/mapeff.agd
+SHA1-Digest: xJxyqnk+88MDGuiecHqp8M13vTo=
+
+Name: assets/hero_gun1.wmb
+SHA1-Digest: 3OOHy6Pmn+0Txo+BUm4OxybSF9Y=
+
+Name: assets/m2_5.mpd
+SHA1-Digest: WB0IggHZXzkrNqen8RhbN4enW+I=
+
+Name: assets/hero_bsword23.wmb
+SHA1-Digest: UCITWoPMVs601kMpmm/MDKpMzVw=
+
+Name: assets/hero_body5.wmb
+SHA1-Digest: 8uWFttF/8ed/o1enaHLA/xdcClI=
+
+Name: assets/hero_gun27.wmb
+SHA1-Digest: TkY8QuHJaCHDDelNzma30FLgYIY=
+
+Name: assets/hero_head8.wmb
+SHA1-Digest: cRhav0XFiaqID/ljhRwXHn5Ml+w=
+
+Name: assets/pet16.wmb
+SHA1-Digest: v6NaAQL6wR7a5VmtMHJCox4dgxo=
+
+Name: assets/hero_body13.wmb
+SHA1-Digest: bhTuXNibByABeY73Ts7BCiDeMaI=
+
+Name: assets/m0_10_t.wmb
+SHA1-Digest: XnRUOO+B1vRHbaVrUZT1f8foOq8=
+
+Name: assets/m0_2_t.wmb
+SHA1-Digest: qvDYspkBS6b5kKgX23m76sF/rNY=
+
+Name: assets/pet7.wmb
+SHA1-Digest: BFuqfdYdhVQ/a3jSRNtG+TD5e7o=
+
+Name: assets/dlgillu0.wmb
+SHA1-Digest: KuCdQq4nEFnlpWD6UVh7TfXa6u4=
+
+Name: assets/mon2_1_head.wmb
+SHA1-Digest: DwOZq+oa3KnHI38r1bYF+EgNKAM=
+
+Name: assets/m2_49.mpd
+SHA1-Digest: v1nDF1ZG5PWO5miHdPVe81qZbkA=
+
+Name: assets/m2_3_t.wmb
+SHA1-Digest: pymAyjSj4mrXPIHesHeVm+vzJHU=
+
+Name: assets/hero_bsword24.wmb
+SHA1-Digest: b15aA92QlG7OdgvLTqbE894/2bY=
+
+Name: assets/npc21_head.wmb
+SHA1-Digest: sqCQSWh8GDH2cYgP2tlNu5cWLho=
+
+Name: assets/npc32_head.wmb
+SHA1-Digest: Txjhi66jtfEG24TBgADaN7htnEU=
+
+Name: assets/help_touch_en.tdt
+SHA1-Digest: +pTq5ggtyTSRgBVN8qpg540byNo=
+
+Name: assets/npc39_head.wmb
+SHA1-Digest: LaR92vlH81LZAAPww5sZfLW9/us=
+
+Name: assets/npc5_head.wmb
+SHA1-Digest: A7kgAcEbZ6EMZaXSU2y3sTnLDu8=
+
+Name: assets/m2_50.mpd
+SHA1-Digest: 5HI4TfaNDB6R/sp7yNRw1dY+MMQ=
+
+Name: assets/mapname0.tdt
+SHA1-Digest: d6hCdZ1+c5vIgVbI9iqwNfFAUlI=
+
+Name: assets/m0_19.mpd
+SHA1-Digest: wiUVK7oMonpuWSxKpKlZXf7HhBo=
+
+Name: assets/gvimg.wpn
+SHA1-Digest: gVKYxaK3NR9ar9c6GaqkOKlZQGU=
+
+Name: assets/m2_20.mpd
+SHA1-Digest: 61UB3rmjtifBzIi9aY2kmKJx0Uo=
+
+Name: assets/mon3_1_head.wmb
+SHA1-Digest: efQWoqqHbJeh9YQTcE+ecq5DGFs=
+
+Name: assets/effect_bsword.wmb
+SHA1-Digest: jxPHF72YpXt9WDvDP7gVZ8HQbAg=
+
+Name: assets/hero_bsword4.wmb
+SHA1-Digest: yegYKmpUXuozsagEbeOn9T/Ucss=
+
+Name: assets/pet18.wmb
+SHA1-Digest: zxy8uMnZGyVPWICuVxUHGXfoc9M=
+
+Name: assets/m0_51.mpd
+SHA1-Digest: jLWGnod0Q5ir2K7sP2MZsLjX71M=
+
+Name: assets/hero_ssword20.wmb
+SHA1-Digest: uimMchnn97ldXS2T8t4WN23IzUI=
+
+Name: assets/hero_body18.wmb
+SHA1-Digest: e5QZwAc/m0xOyAi04M2qicBqSK8=
+
+Name: assets/hero_gun13.wmb
+SHA1-Digest: 6VrXtKAt0ZS4dYJoaXL8XP5vYto=
+
+Name: assets/hero_ssword23.wmb
+SHA1-Digest: Pl67EiMakW3nrYKpPHeR3jJPV/I=
+
+Name: assets/hero_gun26.wmb
+SHA1-Digest: UXJpHgrqeJ/yvYZp7mqnGrfnyo4=
+
+Name: assets/m0_61.mpd
+SHA1-Digest: Y4xaIlOyhDQY2khAZqK9+JBjotE=
+
+Name: assets/mon13_1_head.wmb
+SHA1-Digest: RwtztMCb6xCmU0m+Ksr9EkfCe38=
+
+Name: assets/hero_gun10.wmb
+SHA1-Digest: Q9CQT5vBPBVL9ht70522phWFJsc=
+
+Name: assets/hero_ssword12.wmb
+SHA1-Digest: Cg3ZgMRKfZQebwAAJcAG6gKujBY=
+
+Name: assets/npc9_head.wmb
+SHA1-Digest: 4NU1fUsfOyMj+aUGdv5o5aBaEto=
+
+Name: assets/npc11_head.wmb
+SHA1-Digest: 6MrleVWzGg9TPvdIvEoNaoWqWek=
+
+Name: assets/m1_49.mpd
+SHA1-Digest: kSPNeptp57bk8uRArxfkfNzcR7M=
+
+Name: assets/npc3_head.wmb
+SHA1-Digest: yEv4nKv2rbAUd/ZnnRCMTa1pInc=
+
+Name: assets/hero_body10.wmb
+SHA1-Digest: 6NTWC/AfTpemXvYnrom9OwQaWl4=
+
+Name: assets/hero_body9.wmb
+SHA1-Digest: TbGNZPKp5xraHLguFPDDcQPMLj0=
+
+Name: assets/help_touch.tdt
+SHA1-Digest: xAkCG1+DFA+ivYY16aLP3Ic5PT0=
+
+Name: assets/die_menu0_0.wpn
+SHA1-Digest: KFUltc/i1Sj+rmwvU9nsJUBt29w=
+
+Name: assets/hero_bsword8.wmb
+SHA1-Digest: nWk1Dk/cTrXzR9xYqZIABO2lqjY=
+
+Name: assets/charillu10.wmb
+SHA1-Digest: m/QUWCGhX9ZyOpjpfqINRQIRwxs=
+
+Name: assets/item.gdt
+SHA1-Digest: w3HgPn4ajlwkCLBy+tfb6stgFGE=
+
+Name: res/raw/eff04.ogg
+SHA1-Digest: I5H7vSxGTm3smMchtajWmKyFR/4=
+
+Name: assets/mapname0_en.tdt
+SHA1-Digest: cV+lMsLPITBkIJTCmBKqeamMb/Y=
+
+Name: assets/m1_4_t.wmb
+SHA1-Digest: mvsYckYuN1XTP9cJNTeBCNFCSdQ=
+
+Name: assets/mon7_1_head.wmb
+SHA1-Digest: B0JoSHyq59ZrqZRoH0bDMB0I/DQ=
+
+Name: assets/hero_bsword27.wmb
+SHA1-Digest: 0YcMupj33mvrdxZQijwNzkW+7ag=
+
+Name: assets/npc21.agd
+SHA1-Digest: GGLiTeTFfBd3tF1wY5Q28k7QMkY=
+
+Name: assets/mon19_1_head.wmb
+SHA1-Digest: rvdXnv60xTfTFVKR4rk1YJZF8RI=
+
+Name: assets/script_en.sdt
+SHA1-Digest: EPuLTUE2EgxEjT4657XohDWKHnE=
+
+Name: res/drawable/back_clicked.png
+SHA1-Digest: lVkYfq7f8mFCtIepY/J3fYgEsJQ=
+
+Name: assets/pet5.wmb
+SHA1-Digest: Ebl5+pslYsLydkyXik1flkoIFkI=
+
+Name: assets/npc9.agd
+SHA1-Digest: krYKAksYgp7veHqhqS7dqiMWxoM=
+
+Name: assets/mon1_1_head.wmb
+SHA1-Digest: rwdFuJC70Y9fQ9HWjB/n9ZAuTak=
+
+Name: assets/pet15.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: assets/m2_27.mpd
+SHA1-Digest: kOBlkDQKOCtcb2q3NAxpLjaq1vM=
+
+Name: assets/pet10.wmb
+SHA1-Digest: 037e+bs49se0xmqmIZ80a4O217w=
+
+Name: assets/m0_1_t.wmb
+SHA1-Digest: Ag9BJFTjSvAgP0B4h3NxXmstVj0=
+
+Name: assets/boss7_head.wmb
+SHA1-Digest: t7XXNgKIZWjdq/IZHrmv1o5DFJQ=
+
+Name: assets/mon20_2_head.wmb
+SHA1-Digest: a1mkTJPkkpnwX1eR1V2V6aBZvnM=
+
+Name: assets/pet22.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: assets/hero_bsword11.wmb
+SHA1-Digest: 4b4XtMnNkz4blugyZ5ZqcSfgpJ0=
+
+Name: assets/m0_7_t.wmb
+SHA1-Digest: PIWEtslyK4f6v5+BuSbyEE+4f6o=
+
+Name: assets/uinum.wmb
+SHA1-Digest: u6LdFRmEDklj+QilzeKz5fyfUyk=
+
+Name: assets/npc59_head.wmb
+SHA1-Digest: CL2gWaGHIGdgjG4WQ+jcxfmkpfI=
+
+Name: assets/gametxt_f_en.tdt
+SHA1-Digest: ZwAunr87rMeNpsIib9jsXmNtRdA=
+
+Name: assets/npc33.agd
+SHA1-Digest: hTyrIQKGJMrRcRB++uzPQCvZ8LY=
+
+Name: assets/hero_ssword22.wmb
+SHA1-Digest: g/qRd3U5jOIdleFsDcjaGM7fYTI=
+
+Name: assets/hero_bsword13.wmb
+SHA1-Digest: 3alI9ElDBMgQpPEiUBm0ewf9ZeY=
+
+Name: assets/m0_36.mpd
+SHA1-Digest: /ITft+PFozMUpsNoJyu13dAezd8=
+
+Name: assets/hero_gun31.wmb
+SHA1-Digest: ZJwl/s/ybQh2jOlZxiKwwvgiBqM=
+
+Name: assets/touch_move.wpn
+SHA1-Digest: qQ9Ouw44qNOsdAeBnXS1LI0cgjE=
+
+Name: assets/m1_18.mpd
+SHA1-Digest: HPmqATmfDvfBBA7oKI4AOin7mSE=
+
+Name: assets/attr2_desc_en.tdt
+SHA1-Digest: /2Wahr/TPHeVCAteYZd7e3jlHT0=
+
+Name: res/raw/eff21.ogg
+SHA1-Digest: 82B9zIFATXpZ6nLmTu6mkUiL+04=
+
+Name: assets/m1_31.mpd
+SHA1-Digest: mnbdbeI8YWnfUcJd76+3BuLY2IA=
+
+Name: assets/m1_22.mpd
+SHA1-Digest: PEsnqKRWQqMKNZny84ABP22fHUQ=
+
+Name: assets/attrnum.wmb
+SHA1-Digest: rc1GLy/tBXvmWLop9IH23aau23g=
+
+Name: assets/m2_46.mpd
+SHA1-Digest: x1gAlXh3neaGndUn5IgzGZvTWx8=
+
+Name: assets/m2_4_t.wmb
+SHA1-Digest: hZBh367KyqlrJ7TvuxoKQF4w1js=
+
+Name: assets/menu4_0.wpn
+SHA1-Digest: xLMWMo71pjKJ4WDWtTnKH3O6Kic=
+
+Name: assets/pet7.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: assets/charillu4.agd
+SHA1-Digest: rBerkVklctVfW9yp/NbJlo+AWWA=
+
+Name: assets/hero_bsword1.wmb
+SHA1-Digest: xKk4uFg16B9D79bA4SIfZbVUgRs=
+
+Name: assets/mon12.agd
+SHA1-Digest: MMOAzdIw4vlB3sypX2x2ekaNBR4=
+
+Name: assets/hero_body24.wmb
+SHA1-Digest: /0R0YXlDcHbNsagh+fxHPolf3M0=
+
+Name: res/raw/eff13.ogg
+SHA1-Digest: 1LaPhzk35kY6HFBCB7fy0BxkntI=
+
+Name: assets/m2_30.mpd
+SHA1-Digest: qG6bs5BBmra9C/MZiLlhyCX2TaY=
+
+Name: assets/m2_44.mpd
+SHA1-Digest: JhFehtDvI8oDIxMTMXy3bkOqg1c=
+
+Name: assets/hero_gun12.wmb
+SHA1-Digest: Ao8M9dIyoIRWOmcFb0iTh2wjX/Q=
+
+Name: assets/m0_29.mpd
+SHA1-Digest: 6jar+Yh9aVf7bCYEC3oEQOG4l9w=
+
+Name: assets/die_title.wpn
+SHA1-Digest: Iid0eoQAB+IUVIvDTSxwOYm5kac=
+
+Name: assets/hero_body16.wmb
+SHA1-Digest: yxCxAc4RPiyw7YznGOSiAuCTP4A=
+
+Name: assets/mapeff2.wmb
+SHA1-Digest: LRYxEQO5M8qSwJLepi3udP1MR/A=
+
+Name: assets/m2_38.mpd
+SHA1-Digest: Kqz1NRIG1vMYLC/T/P0kewz9RyM=
+
+Name: assets/mapname2_en.tdt
+SHA1-Digest: eHcGq8p2CpAXRO0cv5b6OhFUDCA=
+
+Name: assets/ui_etc.wmb
+SHA1-Digest: xz0AGDi9tKWjnhpldBNFD77i9qg=
+
+Name: assets/touch_play_w.wpn
+SHA1-Digest: Tim282pyf7kw6oWZsqdTrL+RtKQ=
+
+Name: assets/hero_head6.wmb
+SHA1-Digest: gaHioOAjmO5WXEvST3O79aSoBro=
+
+Name: assets/mon_data_en.gdt
+SHA1-Digest: gAvmOd6XTWqM1n0wFzX0oIzGzpo=
+
+Name: assets/npc1.agd
+SHA1-Digest: FHm6rX7/zpF8vYsreUfUMoTDaCk=
+
+Name: assets/m1_15.mpd
+SHA1-Digest: bKmPjfPU1Y3BXhW2vjJ1V0j4VkM=
+
+Name: res/raw/eff50.ogg
+SHA1-Digest: vaydmChmArO2nLfL7katy4yMonA=
+
+Name: assets/hero_ssword9.wmb
+SHA1-Digest: HMnE+mPrD1jZsYYCtpqLezf67Gw=
+
+Name: assets/hero_head21.wmb
+SHA1-Digest: LXURYMLAVfZ51oKnGC6DtjnpDtM=
+
+Name: assets/mon12_0_head.wmb
+SHA1-Digest: nxC+Aj56lVD4+P0Zv5ViJW16hh0=
+
+Name: assets/gametxt_f.tdt
+SHA1-Digest: v3JBt6qgKyzXpoUhV2iuKaomWzQ=
+
+Name: assets/mon9.agd
+SHA1-Digest: hP13OAKWSVAidhN5wOHbukcfoqA=
+
+Name: assets/shadow.wmb
+SHA1-Digest: t2KVs0Ee8p8NMfRUsfKolUINp7g=
+
+Name: assets/m0_8.mpd
+SHA1-Digest: 05kY2G8bhHGkJ02TOcPIEac1irs=
+
+Name: assets/menu5_0.wpn
+SHA1-Digest: U6PH3WrY/NBmDY1Ne9hAVdJZf14=
+
+Name: assets/npc62_head.wmb
+SHA1-Digest: 7Ds9XICIypTa9aGeiPtJ/d5Stl0=
+
+Name: assets/pet13.wmb
+SHA1-Digest: e+7qijz827+aZjKVJZyZ5n9MeUo=
+
+Name: assets/hero_head16.wmb
+SHA1-Digest: K0K09YmmkWsytLBSyQ/ut3Y72WU=
+
+Name: assets/hero_ssword4.wmb
+SHA1-Digest: ZGq580aY7xo99Ld+gQH7qBlTmVM=
+
+Name: assets/m2_41.mpd
+SHA1-Digest: kyG73/InDbXh+G8f3QSYxvxOAjg=
+
+Name: assets/npc55_head.wmb
+SHA1-Digest: nlq4FkggOR9y4o8vklrRGoR9hto=
+
+Name: assets/nitem_main.tdt
+SHA1-Digest: lBDFZ9TxPtm2imxvfXqpia9hXhg=
+
+Name: assets/menu_en3_0.wpn
+SHA1-Digest: GOXfCn33xb8OHtEupgaMezb7Iq0=
+
+Name: assets/pet21.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: assets/m2_4.mpd
+SHA1-Digest: 57sJ2yPz4jtJIDEjnbdDbubQmb4=
+
+Name: assets/m2_37.mpd
+SHA1-Digest: 6s2DSI0oEqd+qzfpzEHjnfMaQX0=
+
+Name: assets/hero_ssword31.wmb
+SHA1-Digest: KFmGk/CGjBMUrx7qknTd9OFLP9s=
+
+Name: assets/mon8_2_head.wmb
+SHA1-Digest: Y76l7NsOuvs38rgUgQ5EIqok4EA=
+
+Name: assets/m1_24.mpd
+SHA1-Digest: qToaVIf6d/7iJMWogQd1oSbIouk=
+
+Name: res/drawable-hdpi/grade.png
+SHA1-Digest: 1kPk2YAUy010GtgC+QmMi+VCZgg=
+
+Name: assets/m0_47.mpd
+SHA1-Digest: 6raF2+acGZG5qULOvZF6Qyx3PNA=
+
+Name: assets/m0_4.mpd
+SHA1-Digest: +go1zh4MuoNxenkuUyZMBoRqF08=
+
+Name: assets/hero_gun21.wmb
+SHA1-Digest: vNKtSrbCS7NeYmvZ0UkWZH//bPc=
+
+Name: assets/m0_57.mpd
+SHA1-Digest: ajdWPQfTGvr+AhtuNwXW9qhUMjw=
+
+Name: assets/charillu6.agd
+SHA1-Digest: 146LSeCDq4mipjqpHW42FoOw9Ps=
+
+Name: res/drawable/back_button.xml
+SHA1-Digest: cFXmXrgCD9IRfHlMK4E1g2TZceA=
+
+Name: assets/mon2.agd
+SHA1-Digest: QvoXrB9pIWDkoGIygnof6uE9j9Y=
+
+Name: assets/npc49.agd
+SHA1-Digest: 5WoZTd27WAURc/EejM5VsSlpTXk=
+
+Name: assets/m1_45.mpd
+SHA1-Digest: t+0CytPHoETFv+a9HUYQDnL03SI=
+
+Name: assets/mon12_1_head.wmb
+SHA1-Digest: s8UZ6vrp+E2LQqxcu2mPNa1NABQ=
+
+Name: assets/mon17_2_head.wmb
+SHA1-Digest: infkLymG/3QUFzKdmzbmgv6ArFo=
+
+Name: assets/mon5_2_head.wmb
+SHA1-Digest: NnovjsJwm1xHCVfxNFwLQZO6Hfw=
+
+Name: res/layout/main.xml
+SHA1-Digest: WnDTObpeNS2ZJTERw8UqEuKrYbE=
+
+Name: assets/boss1.agd
+SHA1-Digest: F4yeK3PYFmZG6cbpCxM3hDEHlPs=
+
+Name: assets/m1_20.mpd
+SHA1-Digest: W7LFq4h+WF/xfsEShOStPQ579+Q=
+
+Name: assets/npc58_head.wmb
+SHA1-Digest: y+a4y/VZ0PKKzHBvbJkJbYSwXNc=
+
+Name: assets/charillu9.agd
+SHA1-Digest: J7dboLX5gwe9dRMVIMdIfX7s1QU=
+
+Name: assets/die_menu1_0.wpn
+SHA1-Digest: whoiOr4+/5p8zqNaTLkO/kYfcrc=
+
+Name: assets/m2_6.mpd
+SHA1-Digest: PLrjEs314FuRa0ic8qTMKKoVnNo=
+
+Name: assets/menu3_0.wpn
+SHA1-Digest: K63X/Y7BMWnSlgAAfgSdzrB2bLU=
+
+Name: assets/npc40.agd
+SHA1-Digest: 1Tutd4YlPDHFha+wObYwPQ5SENc=
+
+Name: assets/m0_58.mpd
+SHA1-Digest: 7pSB0MtG9t1ysBRjYtcw9HjV+GY=
+
+Name: assets/die_menu_en1_0.wpn
+SHA1-Digest: TEZeMBHCXuUrgd4l+L3Aifkz+Is=
+
+Name: assets/m0_49.mpd
+SHA1-Digest: SnVDwyJgC/bsqy6LhXEyBRbyjqo=
+
+Name: assets/m0_3_t.wmb
+SHA1-Digest: jjnXw0GxF1l9Xa7pja2U0mf92Ek=
+
+Name: assets/m2_1_t.wmb
+SHA1-Digest: P0isXYjPtWkVLXltNBghkYsPUOs=
+
+Name: assets/npc29.agd
+SHA1-Digest: MowPX2HnDz/9s74AM+YxpG0g900=
+
+Name: assets/hero_gun8.wmb
+SHA1-Digest: cv3aYRAW9v7OT1PlEHbEltqfB6A=
+
+Name: assets/pet3.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: assets/m0_8_d.wmb
+SHA1-Digest: dStaBh1GvW4ZsrmY3W/zFfMz/pg=
+
+Name: assets/m1_37.mpd
+SHA1-Digest: NqLXyWx6h2CVrZqEO8HAkCwnGcs=
+
+Name: assets/hero_head10.wmb
+SHA1-Digest: HjNlO7Ss4WdU8oU3xcoWjfNq4gY=
+
+Name: assets/m2_2.mpd
+SHA1-Digest: hvFVk6e3otuLTky/80LTHCEwuFs=
+
+Name: assets/mon8.agd
+SHA1-Digest: tHoHC0nxHbIhbLrgp7FhA5tEujE=
+
+Name: assets/mon11_0_head.wmb
+SHA1-Digest: gHr54MnZCZbxBTXLy5Sse7NkR/k=
+
+Name: assets/m1_8.mpd
+SHA1-Digest: OUeqHE8je+MpxTGv22057eu0yUM=
+
+Name: assets/hero_gun4.wmb
+SHA1-Digest: P0GkTxPm05KeSlD0edP+Y0yzKKo=
+
+Name: assets/m0_64.mpd
+SHA1-Digest: FA4yC4JQ3nVA3Q4oqLrAjBmSS5A=
+
+Name: assets/hero_head29.wmb
+SHA1-Digest: RWFNKw+gQj2YvIZBa/ZF84vjyhg=
+
+Name: assets/hero_gun14.wmb
+SHA1-Digest: KGVJuxzazzL+HANIb1NrQv4q7OU=
+
+Name: assets/m2_3_d.wmb
+SHA1-Digest: XuOuUQbyopPnnPjvp3FWy33jBmo=
+
+Name: assets/mon15.agd
+SHA1-Digest: T2wWAP2kIhlLoWPDW8wOjQR7uEs=
+
+Name: assets/skill2_icon.wmb
+SHA1-Digest: /OOeEV72HMjRF3JO2OgpZMziW2w=
+
+Name: assets/m0_63.mpd
+SHA1-Digest: fZYPAGnKU2nCRQ81TdklWkV46lQ=
+
+Name: assets/giftbox.wmb
+SHA1-Digest: ypvbMnkjC1Q/u1Uf7bb0zLaajRU=
+
+Name: assets/effect_gun.wmb
+SHA1-Digest: +RAJSe11qJHByPAauk0j85okPMY=
+
+Name: assets/gv555.wmb
+SHA1-Digest: BIGRIaetrYXyQAeqhQ605skRlVg=
+
+Name: assets/hero_body4.wmb
+SHA1-Digest: V44Iyhx/In0rR5djKbZH8K5ejJQ=
+
+Name: assets/m1_35.mpd
+SHA1-Digest: wuJDHxKkWSqd5lwpwiLrwZNHzy0=
+
+Name: assets/mon13_0_head.wmb
+SHA1-Digest: 5CceYDrGrOX8g4HG3nzZLhvjFnc=
+
+Name: assets/pet3.wmb
+SHA1-Digest: DIF8Kjh9O02UhrbEi3ubjy+MMTQ=
+
+Name: assets/m1_51.mpd
+SHA1-Digest: odWgPk2FRKkshrWe/9hAEb6BGxE=
+
+Name: assets/npc4_head.wmb
+SHA1-Digest: TnQbR288KmVIVJXeicfcuZ8nVlY=
+
+Name: assets/m2_10.mpd
+SHA1-Digest: JYVIb4anrI/Tv1nsGBG6Q4Ze1uk=
+
+Name: assets/char_name_en.tdt
+SHA1-Digest: 73L/ei6R63B7Q6hUzB1PHN95j14=
+
+Name: assets/m0_13.mpd
+SHA1-Digest: c8LRusjdFJsmD6tyS2uUSAkA00U=
+
+Name: assets/npc46.agd
+SHA1-Digest: +cPj4YI1mSVnebU0wRljH8ASz0s=
+
+Name: assets/m0_44.mpd
+SHA1-Digest: KOq6SMMNQ+cG+aP5INHMjAv+5S8=
+
+Name: assets/pet12.wmb
+SHA1-Digest: pd20O4/4hqiCd+579nRNrpooHQo=
+
+Name: assets/skill0_desc_en.tdt
+SHA1-Digest: mJrT4xlpNtyyE0egg6gBPSMyOMU=
+
+Name: assets/mapeff3.wmb
+SHA1-Digest: FoBieDuQsWxjnuuNJk08siQdsX4=
+
+Name: assets/hero_ssword27.wmb
+SHA1-Digest: UsELD3DtvtDb1DooegqXFjqIa+E=
+
+Name: assets/m2_obj.wmb
+SHA1-Digest: pXbD12E+TjGml/A4w11Be0b0xfQ=
+
+Name: assets/hero_bsword10.wmb
+SHA1-Digest: 90td0w93De6q0XnLriTByuxsv90=
+
+Name: assets/die_menu_en0_0.wpn
+SHA1-Digest: VZxvXCiNM/rIZELmPxsAVPrikcU=
+
+Name: assets/mon20_0_head.wmb
+SHA1-Digest: hgy77PvwPVFWSHP/0No8/9QGKMc=
+
+Name: assets/mmap_etc.wmb
+SHA1-Digest: q6bpk1gp2vKxGsodXA9qfVg3gF0=
+
+Name: assets/hero_head7.wmb
+SHA1-Digest: 9YU+EMdOAyK1SlsTkFo65VR/H+c=
+
+Name: assets/menu_en4_1.wpn
+SHA1-Digest: iaYmz2d7/4t5LmYDaD3D774tDNk=
+
+Name: assets/npc53.agd
+SHA1-Digest: 7OghNBCuNsOZyOEMcmwIEDzlT6s=
+
+Name: assets/m0_30.mpd
+SHA1-Digest: mfRVm8a+OcJba38DXgT3sj4452s=
+
+Name: assets/hero_ssword21.wmb
+SHA1-Digest: /eQqCmeJhi1AYkD2b1rAk09dwKw=
+
+Name: assets/npc8_head.wmb
+SHA1-Digest: Cwz6+IqhR/41aWf5ImfUw/tABWI=
+
+Name: assets/pet9.wmb
+SHA1-Digest: No3HfaLV21eMUAvWq6+5lLpEqqA=
+
+Name: assets/xsnum.wmb
+SHA1-Digest: EavR3sRhPMNV/1Swmbob9/+Okpw=
+
+Name: assets/m2_24.mpd
+SHA1-Digest: 5HLcwLVYGmP5CzOdg9fqR0nF7qE=
+
+Name: assets/touch_skip.wpn
+SHA1-Digest: zp6dVm44foopl6OBKtFJLxzXK1Y=
+
+Name: assets/mon16_1_head.wmb
+SHA1-Digest: OSY99RfnVaz9230EY/So478JqCU=
+
+Name: assets/mon10_2_head.wmb
+SHA1-Digest: nUgt5okalkgpgoJcL3GzWXyUTnc=
+
+Name: assets/m2_47.mpd
+SHA1-Digest: 9+3Z9f5ldAYE1Mij85nuWuHfE4A=
+
+Name: assets/m0_32.mpd
+SHA1-Digest: ct4HHcODl4cMPiT4CtAlbp5jo88=
+
+Name: assets/m0_16.mpd
+SHA1-Digest: fzIqU9m4NMKzGYfdiCMcCYtZw4Y=
+
+Name: assets/m1_28.mpd
+SHA1-Digest: 0iLArTh5e2XryqSAStm7pGJwHa4=
+
+Name: assets/hero_bsword29.wmb
+SHA1-Digest: U6ULXKzSb8IsEwOoZH+rYYGMmN0=
+
+Name: assets/m0_54.mpd
+SHA1-Digest: 2I4cc78NDh4LDFCM27tYaG51rmI=
+
+Name: assets/hero_ssword25.wmb
+SHA1-Digest: EO7YS6JY+diaZxPT/Nbl3J6oAzM=
+
+Name: assets/mon14_0_head.wmb
+SHA1-Digest: FXUqLYsJzXqTrej649HLrUJYrCo=
+
+Name: assets/mon16.agd
+SHA1-Digest: Cq+/tuN3zEl15hR/2Kw1cH0+6rc=
+
+Name: res/raw/eff00.ogg
+SHA1-Digest: VpXwp0cVM0YCb7RH+cgj1JQar3o=
+
+Name: assets/skill2_desc.tdt
+SHA1-Digest: Q1VbzWZBh0ofyygtbZ0erOwIHRA=
+
+Name: res/raw/bg102.mp3
+SHA1-Digest: b3hrLowdaGYpjlooPszO0joNh8c=
+
+Name: assets/hero_ssword1.wmb
+SHA1-Digest: EjLTMI+q0AE+Msck7aqbXiPC6ZY=
+
+Name: assets/npc25_head.wmb
+SHA1-Digest: Pewms9SaCemRUa1v7+y5VifNBwA=
+
+Name: assets/number.wmb
+SHA1-Digest: HCdSEbui9OFUL6ApWKw+YuhWoko=
+
+Name: assets/pet4.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: assets/pet19.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: assets/m2_51.mpd
+SHA1-Digest: kG2K66QG6TX8da6zpkNWfsM4fYY=
+
+Name: assets/m2_2_d.wmb
+SHA1-Digest: qRmOrZjA98FKXNT9132GFeiIeJs=
+
+Name: assets/npc22.agd
+SHA1-Digest: EReX9NewfnX1knuhfjGU+tlNzTQ=
+
+Name: assets/hero2.agd
+SHA1-Digest: 8bUJR6xxIWBTUGlPeQIdYBI0Kio=
+
+Name: assets/boss7.agd
+SHA1-Digest: x5k35BcBJ6KJo/DMXWAO7Kli9wk=
+
+Name: assets/hero_gun18.wmb
+SHA1-Digest: qmAEe9w0RgUS9EJ09NP2ibDMIT0=
+
+Name: assets/hero_body6.wmb
+SHA1-Digest: cYYtnH7k7E9+IIO/sGYzN4NsEmI=
+
+Name: assets/die_menu_en0_1.wpn
+SHA1-Digest: IyIS7zLbDQNGStuze4/hl2b+8DY=
+
+Name: assets/hero_bsword31.wmb
+SHA1-Digest: RBlXk8EtBdaQArZ1+mEKz0MVOhc=
+
+Name: assets/mon20_1_head.wmb
+SHA1-Digest: +s1EfmoWDQnnaWkdm+QQZDUHrO4=
+
+Name: assets/touch_skill.wpn
+SHA1-Digest: tae1pCMJyQYxiXlU5CJR9bKC4Qc=
+
+Name: assets/attr0_desc_en.tdt
+SHA1-Digest: 34wgx37Q4UYspM25BNvB3kHtaLY=
+
+Name: assets/charillu9.wmb
+SHA1-Digest: c/bjAtgFMja/55lCQ1QL3zBEsfE=
+
+Name: assets/hero_bsword21.wmb
+SHA1-Digest: AYFhj2+o1JvvQVYN+P+pDdftA5Q=
+
+Name: assets/mapeff16.wmb
+SHA1-Digest: pAPsojWmNrNcikHeZVHJGwl3iH0=
+
+Name: assets/m2_31.mpd
+SHA1-Digest: 8frBkJjmq5q0q+SetRJs7zfNNVA=
+
+Name: assets/mon18_2_head.wmb
+SHA1-Digest: ZvqF9+JBeiuW4/ECIeGQx//7rn4=
+
+Name: assets/attr1_desc_en.tdt
+SHA1-Digest: nkVa318rL+QYI8a1XwpKVEL3APU=
+
+Name: assets/m0_17_d.wmb
+SHA1-Digest: TPX48HUrYFWhqVBBCPrSnILZ0+c=
+
+Name: assets/m0_11_d.wmb
+SHA1-Digest: EihdXYIBrugL9PpoNxropIsV7UE=
+
+Name: assets/mon14_1_head.wmb
+SHA1-Digest: PaYKUCH9aFuIQzeP8QOuGBJBXsw=
+
+Name: assets/m1_13.mpd
+SHA1-Digest: VkyLPp/Lui/RMeKdOxsXH+IQ/jI=
+
+Name: assets/m0_6.mpd
+SHA1-Digest: Q7ul41fWaRdatFnTcWdLePkNVmo=
+
+Name: assets/m0_23.mpd
+SHA1-Digest: PDc9JFNxYUHOPoo2iFbXmgK2G8k=
+
+Name: assets/npc6_head.wmb
+SHA1-Digest: eOXekEsIgye2tMVnKBdWphwPolU=
+
+Name: res/raw/eff12.ogg
+SHA1-Digest: apP42aA9mqrRJCDccWwFBbYodjw=
+
+Name: assets/mon3.agd
+SHA1-Digest: MvqLZaI5D1DwRBHaKolHp+YNrMU=
+
+Name: assets/hero_bsword6.wmb
+SHA1-Digest: ppRNjoh/0smfL3lzZwiMe4p8beU=
+
+Name: assets/charillu0.wmb
+SHA1-Digest: 0LmyP3vOdAiApQCYbr9+JgpcTPQ=
+
+Name: assets/touch_reset.wpn
+SHA1-Digest: 95UislbbGfEfyxa0hmxjwxQDXT4=
+
+Name: assets/touch_clr.wpn
+SHA1-Digest: V76WaE+GIveH/URqhkmJtTkzi28=
+
+Name: assets/pet4.wmb
+SHA1-Digest: SzRfPb3K/q5lqzXWkQGSOlJJd7I=
+
+Name: res/raw/bg104.mp3
+SHA1-Digest: HSO1T6Zn4m7kT1DOR9YmKnjj+OA=
+
+Name: assets/hero_bsword2.wmb
+SHA1-Digest: Bu0RAUGKuTPnrCG1ETehgR8HHaI=
+
+Name: assets/nick.tdt
+SHA1-Digest: 42F6I7AIRVqCmekOPDeDAeqhYbE=
+
+Name: assets/npc25.agd
+SHA1-Digest: H3icLckA8U5VBnFdVpoiDxhmtl0=
+
+Name: assets/npc49_head.wmb
+SHA1-Digest: y3Ie48NIxUEWwHMUC1Er/Nd4UiE=
+
+Name: assets/npc35_head.wmb
+SHA1-Digest: 3y1bDm28UDKE4gUmjF6CJjozPaQ=
+
+Name: assets/mon21_0_head.wmb
+SHA1-Digest: XV4rPLw6b7htV1tpUsWNZL5s9nk=
+
+Name: assets/m2_39.mpd
+SHA1-Digest: NceIAPJe0GlgvHwEOVGADDmZf/g=
+
+Name: assets/mapeff14.wmb
+SHA1-Digest: IuSfwV/Yk0GjuIdBN3WPcDVtZvM=
+
+Name: assets/tbutton.agd
+SHA1-Digest: z4l3oQlq+wn/TwyjbZnL8jy6ABI=
+
+Name: assets/touch_bag.wpn
+SHA1-Digest: c/BeTaYuB4rNqDE/ie47IwbbvDg=
+
+Name: assets/menu2_1.wpn
+SHA1-Digest: NkqqzsNZ1xXdNewUHmA6o+Ab4TY=
+
+Name: assets/npc61.agd
+SHA1-Digest: nHxvHnQuDzAXD8IwStbMK6OksqU=
+
+Name: assets/mon15_2_head.wmb
+SHA1-Digest: oB27AdDgdA57SHGBnt65sNVhevw=
+
+Name: assets/m2_13.mpd
+SHA1-Digest: vgaFYCTfxFC70UiK1qZBwmKmvag=
+
+Name: assets/hero_gun20.wmb
+SHA1-Digest: E+GMnOtLJvlDYQITm8NIZ7Lmoaw=
+
+Name: assets/m1_19.mpd
+SHA1-Digest: ZD2hzN80bYt8LRE/xxcILIPyVU8=
+
+Name: assets/pet8.wmb
+SHA1-Digest: dc5OabS9YqTBfm9nqj11sylLPH8=
+
+Name: assets/illu_hero.wmb
+SHA1-Digest: xKKdexcCV446J0vPE7GAMj5iLhc=
+
+Name: res/drawable-hdpi/icon.png
+SHA1-Digest: eqyy/qCE4Jdg0JJw7FaXwhyi4DQ=
+
+Name: assets/mon11_2_head.wmb
+SHA1-Digest: SygixEBY1o4T6fhby07kJ7R2xpI=
+
+Name: res/raw/bg106.mp3
+SHA1-Digest: d449ar1rwpirccrswvZ+StJ7VBg=
+
+Name: assets/pet11.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: assets/hero_head15.wmb
+SHA1-Digest: BeKGOI3u1zRc98idG0VnAySV6Q0=
+
+Name: assets/npc2_head.wmb
+SHA1-Digest: csRVTH/cHVHbmAZmAk6SdADLBqE=
+
+Name: assets/charillu8.agd
+SHA1-Digest: qwiNzyMhspKZkekIIcyP6+ua2oY=
+
+Name: assets/m0_50.mpd
+SHA1-Digest: jG/xiIwb9kMmRhi3NmbENPsyvN4=
+
+Name: assets/hero_head9.wmb
+SHA1-Digest: FwEAZaxJiIFSWKNB5Lmb9lO0wEQ=
+
+Name: assets/menu4_1.wpn
+SHA1-Digest: L7/rBqeGOcwF0/a7Uy3W6IX0N7Q=
+
+Name: assets/dropitem.agd
+SHA1-Digest: TUz9e/EPTPPETrxvVtcSODCgJW4=
+
+Name: assets/hero_body2.wmb
+SHA1-Digest: OI5Bgud7UPr3BTPEENHEOEWI2i8=
+
+Name: assets/menu2_0.wpn
+SHA1-Digest: UQXiewyQJ7+Rdu3IArYm0zreClM=
+
+Name: assets/npc38_head.wmb
+SHA1-Digest: wrRMt6/wUzGd8BfbhYzK/T9FAao=
+
+Name: assets/npc43.agd
+SHA1-Digest: h6BEVEmC66bEBuCbJfZVNcBL40I=
+
+Name: assets/attr1_desc.tdt
+SHA1-Digest: EItHB32aMCSNh+fOVuZFsBmmkB4=
+
+Name: assets/buf_icon.wmb
+SHA1-Digest: v8rIO48ffsjz5vnok2fT9R/CDwA=
+
+Name: assets/menu1_0.wpn
+SHA1-Digest: KX3YShyEvgzsCT5ubv8HwOK9buE=
+
+Name: assets/hero_bsword17.wmb
+SHA1-Digest: gsuHGJVYve/EzTUHJjGL4xgPHAA=
+
+Name: assets/hero_body29.wmb
+SHA1-Digest: r+t9dqro2QYJmDzW5DUoMvC2M88=
+
+Name: assets/hero_ssword30.wmb
+SHA1-Digest: s5uM74yw2xEyuWg6k4T+EwufF0Y=
+
+Name: assets/mon9_2_head.wmb
+SHA1-Digest: 2VHt757FwfxIVJHzzbzhmUAPj08=
+
+Name: assets/hero_bsword25.wmb
+SHA1-Digest: /GMmaCFu8RS2UQVgcz7PKTZzrbA=
+
+Name: assets/menu_en1_1.wpn
+SHA1-Digest: JUe9PmWZHLTme29z7HcdZnKQEUU=
+
+Name: assets/mon18_0_head.wmb
+SHA1-Digest: AntgdlmYna7yVQ7P1uWG8gOaWlM=
+
+Name: assets/charillu6.wmb
+SHA1-Digest: lpcoJnHfsqZFK0WDW8c9xyXxHYA=
+
+Name: assets/gv_kt.wmb
+SHA1-Digest: Xafwml9zcvJN1hbckCnI3h1DRaM=
+
+Name: assets/pet14.wmb
+SHA1-Digest: MCL7llNCiulOyCn2QfSza8t7Qcc=
+
+Name: assets/hero_head19.wmb
+SHA1-Digest: dbRv0C3Kan4ntX/9iaPCooXf+ec=
+
+Name: assets/npc35.agd
+SHA1-Digest: DY/6lvfbX4u/MLQC/FYvkA02hPw=
+
+Name: assets/hero_b2.agd
+SHA1-Digest: 5Z21o/nbNe4j59L9WFudWJI5wGo=
+
+Name: assets/map_temp.wmb
+SHA1-Digest: BcIfXfab2wDpxTKd6d56pNScP6I=
+
+Name: assets/mon10_1_head.wmb
+SHA1-Digest: DKe7o+VEyYRvnJUGFYP3+3G0p4c=
+
+Name: assets/npc61_head.wmb
+SHA1-Digest: 6qy40x4TkQK7VORkaVX6zC7UINM=
+
+Name: assets/tbutton.wmb
+SHA1-Digest: mEPLO05ul99GSHt8B0kwMQKyoeU=
+
+Name: assets/die_menu_en1_1.wpn
+SHA1-Digest: 3BDxovWF4umGyH0sTt9zhWWeV74=
+
+Name: assets/m2_17.mpd
+SHA1-Digest: 20Wv+nm2p2dwjhrvth2YMbeX3ZA=
+
+Name: assets/hero_bsword9.wmb
+SHA1-Digest: pxPyBAt5KR0+SWxdrXyCiXyoGe8=
+
+Name: assets/m1_17.mpd
+SHA1-Digest: G3yrHtbqkrL4SXWpkkLSjiQRXYQ=
+
+Name: assets/hero_ssword17.wmb
+SHA1-Digest: UlAYEs6kA+iHDNBu59lcA8L/tZU=
+
+Name: AndroidManifest.xml
+SHA1-Digest: FIkeD76FXP2u5qBvFEeO57sqiiI=
+
+Name: assets/pet21.wmb
+SHA1-Digest: wPMxe18Ga7e0ptwn1RG4tFVIq7s=
+
+Name: assets/pet2.agd
+SHA1-Digest: O/BeIjJjI685f4J69rkoOrhslqw=
+
+Name: assets/m0_10_d.wmb
+SHA1-Digest: f8y/uFuHU4e8zKJIRysvHQY30eI=
+
+Name: assets/npc36_head.wmb
+SHA1-Digest: kjrxdY2ai7sqCoqNMFKJ6wr/7hU=
+
+Name: assets/m2_28.mpd
+SHA1-Digest: kfv2av204BHdKR5N53SiAuy17+E=
+
+Name: assets/hero_body17.wmb
+SHA1-Digest: 6LasbR31EEGdegyEEm+SBFHKtnU=
+
+Name: assets/mon6_0_head.wmb
+SHA1-Digest: AplXvJj1fYDkSQGratberCl/+5M=
+
+Name: assets/m0_25.mpd
+SHA1-Digest: hwGkM9i+kCRYf+jHLZmqWrhcbbM=
+
+Name: classes.dex
+SHA1-Digest: xncPKwWiOMKnQykOx1STOokQgLY=
+
+Name: assets/uibutton.wmb
+SHA1-Digest: e5J1fIrFpHa+8q+v0HPSY4lFd7g=
+
+Name: assets/mon1.agd
+SHA1-Digest: mWUd/l5nOoTtsrPsxfQDS57YYnI=
+
+Name: assets/mon4_1_head.wmb
+SHA1-Digest: 7ujbOadoLtrHIb7g/hBYLrd5ckk=
+
+Name: assets/skill1_desc.tdt
+SHA1-Digest: Q1ycSO3AKv5Nra92rCWOdxNDpxk=
+
+Name: assets/m2_26.mpd
+SHA1-Digest: lyyIiTPiPlvvCVXru4z68kEIC68=
+
+Name: res/raw/eff14.ogg
+SHA1-Digest: RhQS893PDlhMUWmHRiYPfUI7Xm0=
+
+Name: assets/m2_35.mpd
+SHA1-Digest: de9BJh9KmLExpNt1Frc4rq384uE=
+
+Name: assets/menu_en4_0.wpn
+SHA1-Digest: z71anKhgbXnU2yt5GX/nmOWPWUs=
+
+Name: assets/mon7_0_head.wmb
+SHA1-Digest: I1QL6v9mR1VCHAruKbrGi0A7/+w=
+
+Name: assets/script.sdt
+SHA1-Digest: 7oS2zRUKNFSaMTlBTHox5VUx//Q=
+
+Name: assets/npc26_head.wmb
+SHA1-Digest: AA5xY2jMpWYca5tHu42GcrDhLzI=
+
+Name: assets/m1_0_d.wmb
+SHA1-Digest: B1qwhJRiJdzB7UZcXChhnKVqGSw=
+
+Name: assets/mon_data.gdt
+SHA1-Digest: ABfXOcS6I6Wezuxlvcew9OJsFs4=
+
+Name: assets/npc24_head.wmb
+SHA1-Digest: lOCTb8XxcQl+xsWB8sr4DGZt/Aw=
+
+Name: assets/touch_pound.wpn
+SHA1-Digest: U0xaGLqASJGKkZZOk/ZjM2xD2Ts=
+
+Name: assets/hero_head25.wmb
+SHA1-Digest: 5IMdIX9rKDyk6V9qR+oFPf7q5O0=
+
+Name: assets/mon15_1_head.wmb
+SHA1-Digest: Y25zfi1AWD962CVbBUSU4XPThM4=
+
+Name: assets/charillu0.agd
+SHA1-Digest: csLWj0KzFE0pAMkff+mdukWdKrE=
+
+Name: res/raw/eff16.ogg
+SHA1-Digest: xqAyw+afxzIMu/Ls7Hh/f6Cj9ws=
+
+Name: assets/m2_1.mpd
+SHA1-Digest: N/9sJVzmNbsOrvd8qSC4M4WqgfM=
+
+Name: assets/hero_head2.wmb
+SHA1-Digest: Z+JxPmvrsLMfw1sQEDgGf1n04oU=
+
+Name: assets/m1_41.mpd
+SHA1-Digest: +8Lg0KsyNxe4qHwuVgRTYvTZe+s=
+
+Name: assets/m1_23.mpd
+SHA1-Digest: mI7aqVns3u7l2INqJVP8+jNB77c=
+
+Name: assets/npc3.agd
+SHA1-Digest: eTIVfmZOKXPTYsw9RL46/sCyALI=
+
+Name: assets/hero_ssword13.wmb
+SHA1-Digest: 21QXikJqDbAgE3w2n6O+HCdgkqc=
+
+Name: assets/mon18.agd
+SHA1-Digest: ziGOSkbn3vfssczfYaFXhk24XMs=
+
+Name: assets/npc60_head.wmb
+SHA1-Digest: OZxQj+/cG28E66EkKDXx4KMUf+k=
+
+Name: assets/hero_gun25.wmb
+SHA1-Digest: nGTTDH2bpsxx1sWj5jv6JhSjxmU=
+
+Name: assets/npc10_head.wmb
+SHA1-Digest: Xv49QLnfvi/CsKOOUy7QXwW/mww=
+
+Name: res/xml/update_state.xml
+SHA1-Digest: 0jYUag1vXkdqiDCldYMBuCUZ0m4=
+
+Name: assets/npc56.agd
+SHA1-Digest: vgjFxOeRruoo5yySVEYR9Xchh+w=
+
+Name: assets/crieff.wmb
+SHA1-Digest: 1VjayxdT4JrumMnqFlfmVFATInM=
+
+Name: assets/mon4_0_head.wmb
+SHA1-Digest: 0rxkcpsUY3drlY51ijhK7EN/b8g=
+
+Name: assets/npc37_head.wmb
+SHA1-Digest: FVCGWlA4Rv9+vT8asjfdV8QQkIs=
+
+Name: assets/m0_14.mpd
+SHA1-Digest: u95AiOmoEeFEpk9csjw9ReM4i0A=
+
+Name: assets/img.png
+SHA1-Digest: lD2b1mhAruZTZNx40BPAaaZAItU=
+
+Name: assets/mon5_0_head.wmb
+SHA1-Digest: lNEmMFX7r71TA3nVyEbcPt8nFWY=
+
+Name: assets/m2_0_t.wmb
+SHA1-Digest: lltjVayhuD8YY4em4U15sBe/aqc=
+
+Name: assets/hero_head24.wmb
+SHA1-Digest: IGI/0N3AULIgGs1NDiqJJqNm7gg=
+
+Name: assets/mapeff7.wmb
+SHA1-Digest: hLdqLfsHBHs1rlzg1zp+ek4TT4Y=
+
+Name: assets/menu0_0.wpn
+SHA1-Digest: 0N+XMylRfcQyScOKjX9w4UrmtxU=
+
+Name: res/raw/eff02.ogg
+SHA1-Digest: PlZNk8eX1U3h6MVs9q/AU8UCSvs=
+
+Name: assets/hero_ssword19.wmb
+SHA1-Digest: pCqcUOLpyZiXQPeDSABtkcACFqE=
+
+Name: assets/m0_1.mpd
+SHA1-Digest: K4UXHEefJDTo6mFlRUg4f0+rJrU=
+
+Name: assets/mon3_2_head.wmb
+SHA1-Digest: CFT7YQFDJe2zPLQzSm3H2zH7ENA=
+
+Name: assets/mon4.agd
+SHA1-Digest: IsROUH6f1Fm8M1PfR+EwEXV7/J4=
+
+Name: assets/game_grade.wmb
+SHA1-Digest: WetrqCBh1MHHnMCoG8J1KnUC2lQ=
+
+Name: assets/mon20.agd
+SHA1-Digest: QYKyZ27XRCnuBXX38JH2fweygOs=
+
+Name: assets/charillu1.wmb
+SHA1-Digest: JiPBBGnx3KveFo5ItfNnKIs3smY=
+
+Name: assets/m1_43.mpd
+SHA1-Digest: PrtLwxbdKPF8ZqnuNlqc7bJS2lk=
+
+Name: assets/m1_50.mpd
+SHA1-Digest: iLpBxHEARFdN2MsNwM3GmlzSkhU=
+
+Name: assets/hero_bsword26.wmb
+SHA1-Digest: Kmh/Jp5jLGYozUJke+ZGDA92ifg=
+
+Name: assets/touch_ok.wpn
+SHA1-Digest: tLzQZDZTB7yVU/8EPfUQdY31r8A=
+
+Name: assets/quest_hard_en.gdt
+SHA1-Digest: U/AlzTnSKgXDHLDn4vgb83p2R/w=
+
+Name: assets/hero_head28.wmb
+SHA1-Digest: agYWOHZEvLkIoziCTXzJeAuGvww=
+
+Name: assets/npc54.agd
+SHA1-Digest: 91uaABup7UufqLteQFCKZLy1pZM=
+
+Name: assets/mon16_0_head.wmb
+SHA1-Digest: OCT5FjkytKf9r5/bUFpLn8DvMek=
+
+Name: assets/npc28.agd
+SHA1-Digest: vGxXVsfvpHHUZRqLbP5E2i6pDJo=
+
+Name: assets/pet16.agd
+SHA1-Digest: O/BeIjJjI685f4J69rkoOrhslqw=
+
+Name: assets/hero_ssword5.wmb
+SHA1-Digest: wetQV/iC9QX2n8LdUmNAFNDR664=
+
+Name: assets/charillu5.wmb
+SHA1-Digest: BjyTVi6DJZDpkGkTnWYhuHEEKNM=
+
+Name: assets/m1_47.mpd
+SHA1-Digest: +Ran4wHxI0ZkkfWzTYbx+Us6MO0=
+
+Name: assets/hero_gun11.wmb
+SHA1-Digest: lBYWYOyefgIn8NcT+/4+3E6ewbQ=
+
+Name: assets/hero_bsword30.wmb
+SHA1-Digest: U8Kqj+BLHWXQT/L0bpS+cQOmbLI=
+
+Name: assets/mon7_2_head.wmb
+SHA1-Digest: kXNmnGTKW2gZuj8y35EyTAXKFmA=
+
+Name: assets/dlghead.wmb
+SHA1-Digest: fCD9jtasaLdeh5Ls2LhqnA/ULAk=
+
+Name: assets/quick_pound.wpn
+SHA1-Digest: y+Iwo+U1bYwNz5ofyWf9GgOt97Y=
+
+Name: assets/hero_body30.wmb
+SHA1-Digest: An7dNuhi7HRlS5eXehkfXtb8gAo=
+
+Name: assets/skill0_icon.wmb
+SHA1-Digest: 5yb09mBFJBzKTiNtSIQzBiG/Uuc=
+
+Name: assets/pet17.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: assets/mapname1_en.tdt
+SHA1-Digest: NX85tbU1KTccOxSmaStj4pxSwas=
+
+Name: assets/charillu7.wmb
+SHA1-Digest: 16qBGw9K+8Nya6dTP/DnggFLk80=
+
+Name: assets/hero_body11.wmb
+SHA1-Digest: hHL6T53mVR/W1aNS01FJJ8LaL/U=
+
+Name: assets/m0_12_d.wmb
+SHA1-Digest: roped3+a5RdgSNoYSlIuX7LYdIM=
+
+Name: assets/pet11.wmb
+SHA1-Digest: Oj99ubZ120KT5AYaZlyJLxF68OA=
+
+Name: assets/npc45_head.wmb
+SHA1-Digest: n2/slYicKCvtKSoZYfw2B7vqykQ=
+
+Name: assets/npc48.agd
+SHA1-Digest: +X5d8FS0+YDGqrWe2Nmfu+bF2T0=
+
+Name: assets/npc2.agd
+SHA1-Digest: sSLI5w1hqQL+yXv6soozJhxRWHs=
+
+Name: assets/menu0_1.wpn
+SHA1-Digest: /iIxZsykN5VZ3HCibk4snyAbGz8=
+
+Name: assets/hero_head22.wmb
+SHA1-Digest: eC3XKS4XollH7M5FnaEMkeMrtjQ=
+
+Name: assets/npc26.agd
+SHA1-Digest: wjbR0Wqti1EX5O/E6h91G/G46go=
+
+Name: assets/mon21_1_head.wmb
+SHA1-Digest: 2XsRdAs9psyyKyDZSuER9f1VFXM=
+
+Name: assets/boss0_head.wmb
+SHA1-Digest: qww/fXmf3nJbB/INyGIf+aI3j5o=
+
+Name: assets/m0_12.mpd
+SHA1-Digest: 1eFoIrPu6sc+wI8CtJBSsmbHDlg=
+
+Name: assets/hero_head20.wmb
+SHA1-Digest: Q0vX6PXLKcfBRu3OFWyNW3fg4jw=
+
+Name: assets/gauge.wmb
+SHA1-Digest: dkwsrqQHAfZ37pb0KkvbGjROvX4=
+
+Name: assets/dlgchar.wmb
+SHA1-Digest: bA6v3PLhI3eeWCCSl1jplZOznvI=
+
+Name: assets/menu5_1.wpn
+SHA1-Digest: lBK2CAF9lQDJDpeWKrbVz1Um1LM=
+
+Name: assets/m0_10.mpd
+SHA1-Digest: R2PXXgyxrr6p4MDJyuz53OZWgFk=
+
+Name: assets/mon5.agd
+SHA1-Digest: SQyphPCzjuqCLrJNQ8DY0rkw7EA=
+
+Name: assets/npc30_head.wmb
+SHA1-Digest: WSA6D6qDd05b4BY1GgIqH9C9F8Q=
+
+Name: assets/m0_6_t.wmb
+SHA1-Digest: 3okpW0kA2k6x2h7yL1WpLV4ERmQ=
+
+Name: assets/hero_ssword3.wmb
+SHA1-Digest: fWP1KoVSTErw9k+gILxzJ294i14=
+
+Name: assets/m0_5.mpd
+SHA1-Digest: mor/Yk5jueLjPQn/q1QPC3I9e8o=
+
+Name: assets/m1_4.mpd
+SHA1-Digest: 22b73ropCYRb3Z+4K/X8+VYVIdc=
+
+Name: assets/npc27.agd
+SHA1-Digest: XOHt83H2IovoZ/CKv+zZzOO0NQo=
+
+Name: res/raw/eff24.ogg
+SHA1-Digest: 2G+6kBV34JqIZrXGhTvFLo3Ipoc=
+
+Name: res/layout/drmview.xml
+SHA1-Digest: T2BX3U3dzeH3yD33g0d6SHIFTSI=
+
+Name: res/raw/eff15.ogg
+SHA1-Digest: v5ZkNKNRrpuDedf9znaz0gtAQjY=
+
+Name: assets/gv_lgt.wmb
+SHA1-Digest: 8bXAS9n+cHHN8bunUxkmePyFMpk=
+
+Name: res/raw/eff18.ogg
+SHA1-Digest: 5TCY9AE6WNY4ytczaK95FU/DBgE=
+
+Name: assets/hero_gun23.wmb
+SHA1-Digest: WeHrotDTHE3p6MkpVLUR1XvMSBE=
+
+Name: assets/m0_56.mpd
+SHA1-Digest: Dszx5guC/dP3d7sJrhWiNJ05GGA=
+
+Name: assets/hero_head4.wmb
+SHA1-Digest: WZaLoeGVPMkOWIOrps0Rr4gR0lk=
+
+Name: assets/gametxt.tdt
+SHA1-Digest: MyM38cnFmO4Gb5WJ1aoMFdkXU6E=
+
+Name: assets/m2_25.mpd
+SHA1-Digest: LQ9RunZEGFOytNpFryV8qVhfIJM=
+
+Name: assets/npc50.agd
+SHA1-Digest: w7x69zo3Cf0zQYiBkxxEiMJBcI0=
+
+Name: assets/npc23.agd
+SHA1-Digest: o+wedSEEsynHiKOVFvBKNrYEoCk=
+
+Name: assets/m2_7.mpd
+SHA1-Digest: LpbEzNOr/ZoYFEDVsJ4CpF7Lstc=
+
+Name: assets/npc8.agd
+SHA1-Digest: oOnLMakevCr8pcP2zzfruzTdY9U=
+
+Name: assets/skill1_icon.wmb
+SHA1-Digest: Ezv+/7X5FxngpQkQUojhskCgBDA=
+
+Name: assets/m2_32.mpd
+SHA1-Digest: iMlps10/jBsykEsYg5PRN7Nczj0=
+
+Name: assets/mapeff10.wmb
+SHA1-Digest: Lg3Ut1rzJIHNVHqFElzek6DdMxc=
+
+Name: assets/gvimg_ad.wpn
+SHA1-Digest: l/P6Z94lyngbCYSvBsdr3wk/z7o=
+
+Name: assets/m1_40.mpd
+SHA1-Digest: 3+x9khUKm3qcqG19Ir5iaEAFtyg=
+
+Name: assets/m2_15.mpd
+SHA1-Digest: iz2c50vysfAEFOctDBT9HL3IG5w=
+
+Name: assets/mapeff12.wmb
+SHA1-Digest: D/qYt8h8wN1Oy/8Ex/RR5wyZL14=
+
+Name: assets/npc53_head.wmb
+SHA1-Digest: jCeR3LkCAjhfJ30qHzAOivxeRro=
+
+Name: assets/m2_34.mpd
+SHA1-Digest: x5mCSwT1Pyx9CswMiyQKMKq94yk=
+
+Name: assets/mon19_0_head.wmb
+SHA1-Digest: zP7aDhMYIr87YIwUJBxeEhsRrXw=
+
+Name: assets/title_info.wpn
+SHA1-Digest: 1q0XBYOGVHIznDwWMk03oa9OmDE=
+
+Name: assets/equip_name_en.tdt
+SHA1-Digest: /+qxaDrgs+f/uEFbU2fYrBW6OP0=
+
+Name: assets/npc1_head.wmb
+SHA1-Digest: IkaC6JkWxnGaB9M9Lr5cF3oN8cA=
+
+Name: assets/qitem_name_en.tdt
+SHA1-Digest: mLbgWNCqzwmJYr9xql52kdQnb58=
+
+Name: assets/hero_body7.wmb
+SHA1-Digest: GM5d4MF0PIMOnRi6NwNWYtR89mI=
+
+Name: assets/boss9.agd
+SHA1-Digest: v3AZixadEV2Z+r5/RDP5A5/cJYc=
+
+Name: assets/hero_ssword26.wmb
+SHA1-Digest: XIhiMeD9Q43XayPT4qAC58AmpBM=
+
+Name: assets/touch_skill2.wpn
+SHA1-Digest: gHNTg5dq7rgqq0uF5KXPdDSgNlE=
+
+Name: res/drawable-mdpi/icon.png
+SHA1-Digest: wqxCHtiM1EYE8yWm/B6UeX5CeCE=
+
+Name: assets/charillu3.agd
+SHA1-Digest: cJhDKuYeBwY5XJynz4tOedCtsB4=
+
+Name: assets/npc47_head.wmb
+SHA1-Digest: daVlhkgmqjp65wzxOn4fj1HVI8w=
+
+Name: assets/npc31_head.wmb
+SHA1-Digest: px/fik+DJA39WZYwzESxlKNkB1c=
+
+Name: assets/charillu8.wmb
+SHA1-Digest: nOcMP/4rCY8i7xIOoqZk8C2UD9E=
+
+Name: assets/boss1_head.wmb
+SHA1-Digest: pf0vvIKi4ZIcyN1VKXi+fQOsffY=
+
+Name: assets/mon5_1_head.wmb
+SHA1-Digest: 9413TLjHYjJB+b4ZYXh1P7OB8LI=
+
+Name: assets/m1_4_d.wmb
+SHA1-Digest: WLI4qlw63fzRhw15oyT6mxQqh1Y=
+
+Name: assets/m2_1_d.wmb
+SHA1-Digest: MOSwNtiE9XIGxKp+LF6i6AVjCmw=
+
+Name: assets/mapname2.tdt
+SHA1-Digest: p+jeUV2wh6+25Y0+dkfVsET/L3A=
+
+Name: assets/eff.agd
+SHA1-Digest: g+ySN86sIj35jMfng0Ul/8a7xEs=
+
+Name: assets/hero_bsword15.wmb
+SHA1-Digest: 6UpHhnRkfiMOnIsdZ/80asInirs=
+
+Name: res/raw/eff07.ogg
+SHA1-Digest: Ma78NCA2o85iTT4KrNQ34w5NivE=
+
+Name: assets/hero_body15.wmb
+SHA1-Digest: BfXCF9xT7044bpxL+9AOX8aYWmk=
+
+Name: assets/m0_52.mpd
+SHA1-Digest: mHIB7k4cy6Gw+5UA75FFPlbrHEw=
+
+Name: assets/m2_14.mpd
+SHA1-Digest: FZtjqU7SVvFlsZpOph0X8+b1ck0=
+
+Name: assets/m2_8.mpd
+SHA1-Digest: W0Rtkqdmp7NbBzJMJwUSOBGBpN4=
+
+Name: assets/mon14_2_head.wmb
+SHA1-Digest: Uyz+2S+3T4SW2oRvG73jTkrWr2c=
+
+Name: assets/menu_en0_1.wpn
+SHA1-Digest: ngFMuCXpIBGFSIfACvAoVq+djtw=
+
+Name: assets/hero_gun9.wmb
+SHA1-Digest: KWmIWX7EAcwKNBCe9fpjX8/eBz4=
+
+Name: assets/mon21.agd
+SHA1-Digest: sJ5SqQK6IQQOOUW9Dwwl/IRHLRA=
+
+Name: assets/npc51_head.wmb
+SHA1-Digest: HbQ+hh4dckyAgcjj0CFZ2NrfuZY=
+
+Name: res/raw/bg101.mp3
+SHA1-Digest: KHns4gakFotdb+KtE9hP730X2ms=
+
+Name: assets/hero_gun7.wmb
+SHA1-Digest: mojuINDeuWPoByP7YuI0TMbWIn0=
+
+Name: assets/hero_head12.wmb
+SHA1-Digest: k6AbHaJuXRYlZJ6/TTGnln227AU=
+
+Name: assets/npc44_head.wmb
+SHA1-Digest: fjVEtTnTRMnXWms3UFniyQcjlf0=
+
+Name: assets/hero_ssword11.wmb
+SHA1-Digest: i6Fe0SRuQRD8PYwUjizOHox7wQw=
+
+Name: assets/dropitem.wmb
+SHA1-Digest: WOWC1hQ+L0K1TuYgoqQcrr5JoWY=
+
+Name: assets/m0_9_t.wmb
+SHA1-Digest: YoBZ1StIlwm9SBIVdfwXjY45/oI=
+
+Name: assets/m1_obj.wmb
+SHA1-Digest: 7CdF0AskbbMltyLH7/cctgVruxI=
+
+Name: assets/pet15.wmb
+SHA1-Digest: p7tHAuyDYho0BKBLxOKjFZHBR0o=
+
+Name: assets/boss9_head.wmb
+SHA1-Digest: LSNbEMywziI/J5MY8tfRfYy7kdQ=
+
+Name: assets/0.ddt
+SHA1-Digest: ZIW4p4NpsRk3i1zB6ZVuvlQWoso=
+
+Name: assets/npc39.agd
+SHA1-Digest: H0SFG4ZxSHEB4XpwWieUE6GT87c=
+
+Name: assets/uimenu.wmb
+SHA1-Digest: 75gC7l3dRHjdnMkF0Fkxt4sHf1c=
+
+Name: assets/hero_gun16.wmb
+SHA1-Digest: 7nkiA8Hdk/tWc0Yk+LN/RgZrSRk=
+
+Name: assets/m1_33.mpd
+SHA1-Digest: 8WDGgqGwz8qaPFEp9Nv4Nskro+A=
+
+Name: assets/hero_gun15.wmb
+SHA1-Digest: wMoaNVMZUXS7Fe/KtbTCKkhTFcQ=
+
+Name: assets/npc28_head.wmb
+SHA1-Digest: yNtO6+efDoOSvlVE8ktX+XjuPoM=
+
+Name: assets/skill1_desc_en.tdt
+SHA1-Digest: ekv/A359BJ0NWqasRqJxwVL0FlU=
+
+Name: assets/npc59.agd
+SHA1-Digest: mFT8Jz/K/Z6mRpcHHZeBH1GoRS4=
+
+Name: assets/pet19.wmb
+SHA1-Digest: RD6/JP+G6c6DqXqHdBU/ZlLrhsA=
+
+Name: assets/m0_60.mpd
+SHA1-Digest: Jph+JANPiUB8cLR4EELFxLLdJS4=
+
+Name: assets/mapeff5.wmb
+SHA1-Digest: fhgGlugI65P5Gw77FXnDYud9TfM=
+
+Name: assets/npc46_head.wmb
+SHA1-Digest: OlbIOEtkG+ukc+qa/aQy4sT97Xs=
+
+Name: assets/npc42.agd
+SHA1-Digest: uHkYNGGQxmAP5T4Qaq8cSRo5IRs=
+
+Name: assets/hero_gun5.wmb
+SHA1-Digest: /tmLoJFWIdVoC1Nf6DwDhspd5Ow=
+
+Name: assets/m0_48.mpd
+SHA1-Digest: /KhvxLzDg3ldBkOW3AtSQrrxgKY=
+
+Name: assets/hero_head11.wmb
+SHA1-Digest: gXUaULHNT3FLIRZw1IT6fxE4XDo=
+
+Name: assets/boss4.agd
+SHA1-Digest: CqUGyTiPSl05WKP4Q0SOZcCwqI8=
+
+Name: assets/hero_body31.wmb
+SHA1-Digest: R8bvxc3DAxn/QO9ClfGQaq/1bHM=
+
+Name: assets/quest_hard.gdt
+SHA1-Digest: +axaFf3mTzH31PJ3fySV/PV7TKw=
+
+Name: assets/hero_gun30.wmb
+SHA1-Digest: PqF+coxVPmtGgZAODPtMiGE+VhM=
+
+Name: assets/hero_ssword7.wmb
+SHA1-Digest: dihbHEEHtLaDY2T6ztH2pwovcMU=
+
+Name: assets/npc33_head.wmb
+SHA1-Digest: U7eoykN4RshPp1et+FwlvTZoxb8=
+
+Name: assets/mapeff15.wmb
+SHA1-Digest: ExXMKQsf3j0zYtd/D2hpg7bLPLI=
+
+Name: assets/hero_body19.wmb
+SHA1-Digest: GGpFM8+3TGCaTB342j6RuzUnnzo=
+
+Name: assets/gauge_box.wmb
+SHA1-Digest: 0CGeYj0AxHjeTk1sNq0FaKSFggQ=
+
+Name: assets/npc45.agd
+SHA1-Digest: vJ3h/xXEzxxNhXKwmSgOusfIMjY=
+
+Name: assets/menu_en3_1.wpn
+SHA1-Digest: U4jFSuNyTgk5Z3u8eiLErD2M1S4=
+
+Name: assets/m1_7.mpd
+SHA1-Digest: +DboVR0EcjQ1pHOUOZz3dDPclmI=
+
+Name: res/raw/eff20.ogg
+SHA1-Digest: olRLjGxxTIwjYuReeRmgDbd5gwo=
+
+Name: assets/npc5.agd
+SHA1-Digest: gbjLrYEIOHTHzgpJJYXuhF+bgq4=
+
+Name: assets/m2_0.mpd
+SHA1-Digest: +bkOVvcpo5PO7j0fW/J766nPlWw=
+
+Name: assets/m2_45.mpd
+SHA1-Digest: YxdrdW9XX6ccxPhwdlyNJVRbgZ0=
+
+Name: assets/mon8_1_head.wmb
+SHA1-Digest: MO52BHAidecn/l3p5D8Am0qXnpc=
+
+Name: assets/hero_head3.wmb
+SHA1-Digest: WVPEXIJs5ammA3w2oYQYXiCzUyg=
+
+Name: assets/boss0.agd
+SHA1-Digest: 2MYtUUeDUsUHYeeJaqTIwu1Xbro=
+
+Name: assets/hero0.agd
+SHA1-Digest: DGQLNz5WXIa9hZ5prXHhIW+tYPM=
+
+Name: assets/npc48_head.wmb
+SHA1-Digest: J8natAxN6moWdC7aHNuLJVazobM=
+
+Name: assets/m0_37.mpd
+SHA1-Digest: W2Wh+sssc4F/Fh9WAjRHzZwShaU=
+
+Name: assets/mon1_2_head.wmb
+SHA1-Digest: Z5/4z0X/xRRcgMbKwzNhrYTRArw=
+
+Name: assets/hero_gun6.wmb
+SHA1-Digest: KoH6AaJYycr7zqBgJEpu7cIWUCM=
+
+Name: assets/m0_9.mpd
+SHA1-Digest: abRXTji+hARvq2/9xHO+VJNSOjc=
+
+Name: assets/mon10.agd
+SHA1-Digest: 2ccp4rEWswNsNGwgtmStvys5664=
+
+Name: assets/m0_34.mpd
+SHA1-Digest: I7Li9NHZtQ1LKNGb2/6/DXOn7AA=
+
+Name: assets/dotum08.fnt
+SHA1-Digest: j3pP5gKWam5N5NUTSMdjGmevYYk=
+
+Name: assets/chrstate.wmb
+SHA1-Digest: +jqtK9wA31+Z1e2V6px2EYnRb+E=
+
+Name: assets/m0_4_t.wmb
+SHA1-Digest: SsTD+s5c8HWipjehlKAtXS8Wr8M=
+
+Name: assets/m2_21.mpd
+SHA1-Digest: 9QOnDasJ3Ox7+YHFKBFCGAL0AtE=
+
+Name: resources.arsc
+SHA1-Digest: jJrF9hhPA4dzg2hZVf81ZAxoDAM=
+
+Name: assets/m1_14.mpd
+SHA1-Digest: 3mes6iGBIcmWaB5zBL6b/j2lM9o=
+
+Name: assets/pet1.agd
+SHA1-Digest: ZOPGJFDWBDcu8n3NAMbHVw0kp38=
+
+Name: assets/mapname1.tdt
+SHA1-Digest: +5QtYiqM/9A8+V11Qb+LZgbzKoQ=
+
+Name: assets/m0_24.mpd
+SHA1-Digest: OHpz8hwgqbTXfvqK6NMd4ik5s+o=
+
+Name: assets/pet6.wmb
+SHA1-Digest: TzS1MyVPp47Uvp8o08czZF/zsZY=
+
+Name: assets/m1_2_t.wmb
+SHA1-Digest: O+s6++rMWHIKstxumkN4ptggyb4=
+
+Name: assets/m1_30.mpd
+SHA1-Digest: a49VaGIH/F2yyLNScswn0D3crjc=
+
+Name: assets/hero_head26.wmb
+SHA1-Digest: 9kUKM2qWCjcuXiGD0RXlLHbiM8g=
+
+Name: res/drawable/banner.png
+SHA1-Digest: N562H9r0ffJ43HE8rgt+Mr04nMQ=
+
+Name: assets/mon13.agd
+SHA1-Digest: wkOdAB9NRCGLfL6QYy3TmwqFRr4=
+
+Name: assets/mon8_0_head.wmb
+SHA1-Digest: imjKXnN+Jm0nkSKF5VPMs93t4q0=
+
+Name: assets/pet8.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: assets/mmap_tile.wmb
+SHA1-Digest: qlbWeVvHvWG8XrxDiDaKG35NBRs=
+
+Name: assets/boss6.agd
+SHA1-Digest: p5u3uL1axCGJSgDFmeLHjjPF9is=
+
+Name: assets/hero_bsword28.wmb
+SHA1-Digest: 3dWxJK+/IMPPeNc4ZdhPgOGyVnM=
+
+Name: assets/m2_29.mpd
+SHA1-Digest: kilMY0dSXITcuJP90otpzlDXdAM=
+
+Name: assets/attr_icon.wmb
+SHA1-Digest: 4ajQugKx1xMwDXV0LLMY5fkrfAA=
+
+Name: assets/m0_53.mpd
+SHA1-Digest: z6nfYMAFErN6seHObYWJNIVyMEQ=
+
+Name: res/anim/slide_up.xml
+SHA1-Digest: 4XabOci5eoIVtSa+LxpTh1nswyQ=
+
+Name: res/raw/eff22.ogg
+SHA1-Digest: XCjx2HrdmfDl+dgAaCxMpcRBI2o=
+
+Name: assets/npc31.agd
+SHA1-Digest: HVhCkNjDR7GC6Vhw7XgAkJHt1nM=
+
+Name: assets/mapeff9.wmb
+SHA1-Digest: YYAZY4m6OOfif15wIGitxdBNYWY=
+
+Name: assets/menu1_0_t.wpn
+SHA1-Digest: vI8MFIimD3/eKNtBLvM//lUgs1g=
+
+Name: assets/pet20.agd
+SHA1-Digest: aNUBwK5hJ6xcMFeWU7L/u8vOCgo=
+
+Name: assets/qitem_name.tdt
+SHA1-Digest: +AcNsI5vG/7rl2DMJ8F0SoY0K8s=
+
+Name: assets/hero_body27.wmb
+SHA1-Digest: gpTd2+1AVpErGdRVSJ7kbl4xCUs=
+
+Name: assets/loading.agd
+SHA1-Digest: MnT8eaHmZCMmhLL0N0mYtj7GVp8=
+
+Name: assets/m1_27.mpd
+SHA1-Digest: OmG5m2In3Shl40SYzGwfPAMDe7c=
+
+Name: assets/1_en.ddt
+SHA1-Digest: /gZ0aE9FH4ybWex9F56FS+mDqDE=
+
+Name: assets/quest_en.gdt
+SHA1-Digest: 4l8G4fd+NMW1I1P0c6wSkhLszc4=
+
+Name: assets/mon15_0_head.wmb
+SHA1-Digest: +V/V2/FCNH8EM05GK82lBTndwtc=
+
+Name: assets/hero_body8.wmb
+SHA1-Digest: HNXWylU/tYZHFTomkg1x6TkyTX8=
+
+Name: assets/m1_26.mpd
+SHA1-Digest: CJCWNstEqV2KsdeocClG5bN1eOw=
+
+Name: assets/hero_body25.wmb
+SHA1-Digest: nrbNLmjaDS4dcducGc8VgOAro48=
+
+Name: assets/hero_head5.wmb
+SHA1-Digest: YaL4IeEdBp1wfTocb6ztdXiLlfc=
+
+Name: assets/hero_bsword18.wmb
+SHA1-Digest: StC3J5NOCmgivFi3Nmx8yLhfd2k=
+
+Name: assets/m0_8_t.wmb
+SHA1-Digest: PA8E9OiqFT4y5m9hNTqFFJnl2fc=
+
+Name: assets/m0_15.mpd
+SHA1-Digest: od2Kkhsrj5VEX56E1AFzHCptIjE=
+
+Name: assets/item_icon.wmb
+SHA1-Digest: 9t1mW/hFV05V9ArorrQ2EWzyyCU=
+
+Name: assets/m0_65.mpd
+SHA1-Digest: Ke9Ew/ugs6WBpnYJs36nBpb3TAs=
+
+Name: assets/pet20.wmb
+SHA1-Digest: v/R1N21s9Z3wKUH6n0xWxJtxQLQ=
+
+Name: assets/hero_body23.wmb
+SHA1-Digest: f+C9oZJwQcpbfuizrmvuXjU2iDU=
+
+Name: assets/menubg.wmb
+SHA1-Digest: jOPGNjSfcKePwEJxjCSJEYjIxwI=
+
+Name: assets/npc0.agd
+SHA1-Digest: FHm6rX7/zpF8vYsreUfUMoTDaCk=
+
+Name: assets/mon10_0_head.wmb
+SHA1-Digest: DG9HEAotVyx5XYOFcPw87V4H3Tw=
+
+Name: assets/m0_40.mpd
+SHA1-Digest: rvI2X+FfQMdODHzEInVuZlP2TqA=
+
+Name: assets/npc40_head.wmb
+SHA1-Digest: nxCaUC7Mz92SFc4bqf462PMdObg=
+
+Name: assets/hero_gun17.wmb
+SHA1-Digest: CysmQMz5XVEaqvT5tRYBk2Zs9es=
+
+Name: assets/m0_28.mpd
+SHA1-Digest: O+SXCPcs2HqYdB5wyYB4CmtCITU=
+
+Name: assets/m0_45.mpd
+SHA1-Digest: JkWQloBgsLJGbU9cr0dDg7I/Ouo=
+
+Name: assets/boss8_head.wmb
+SHA1-Digest: vno1c3XOEY2/3LOkGphdWmkzb1E=
+
+Name: assets/title.wmb
+SHA1-Digest: 1D/qUwF+MjMjKF8LDFkRX4IyxVY=
+
+Name: assets/equip_head.tdt
+SHA1-Digest: FKhGRNfmreomWowlvV8WUgvSDbk=
+
+Name: assets/npc34.agd
+SHA1-Digest: +cPj4YI1mSVnebU0wRljH8ASz0s=
+
+Name: assets/die_menu0_1.wpn
+SHA1-Digest: +Pu+F1pqV3TOp3jg9EA3WzYmDsg=
+
+Name: assets/m2_36.mpd
+SHA1-Digest: SMY8taAEKooc6MU6ub9SZhRSHBs=
+
+Name: assets/gv_skt.wmb
+SHA1-Digest: 1d7QBqKoV35Grmqwcp37tKjkpdk=
+
+Name: assets/charillu3.wmb
+SHA1-Digest: bXwa5zt7pWYVrY/68rsWF+gxRSU=
+
+Name: assets/npc6.agd
+SHA1-Digest: aPnmIrEra1vYD80EPWPId4UpUo8=
+
+Name: assets/m0_0_d.wmb
+SHA1-Digest: B1qwhJRiJdzB7UZcXChhnKVqGSw=
+
+Name: assets/npc29_head.wmb
+SHA1-Digest: EEd+7TMb5Yy23fGErj0Qmt0NuwM=
+
+Name: assets/m1_21.mpd
+SHA1-Digest: WphH6vKfP5nTsI8GjtgSizroL9w=
+
+Name: assets/m0_31.mpd
+SHA1-Digest: YDw18USan6DbZ75uYinXSdTKTE8=
+
+Name: assets/mon6_1_head.wmb
+SHA1-Digest: D6GUhnHjPqH9eVcltiseg3nUYhE=
+
+Name: assets/npc51.agd
+SHA1-Digest: DDUFGQ4Ougo6K6fbpuTK9Z7i054=
+
+Name: assets/m1_16.mpd
+SHA1-Digest: aQbHjnFd3OlwCaXolWNZU02dB38=
+
+Name: assets/charillu5.agd
+SHA1-Digest: SWJDjt5cWtD4iV40wa7D/RoowJc=
+
+Name: assets/boss4_head.wmb
+SHA1-Digest: 1kf4UeUdEuGA52Ttl/ZzuOlbCOQ=
+

@@ -1,0 +1,26 @@
+﻿# Dados pessoais e exportacoes
+Claude/exports/
+.freebuff/
+
+# Compilacoes
+**/build/
+**/build_*/
+**/CMakeFiles/
+**/__pycache__/
+*.pyc
+*.obj
+*.exe
+
+# Capturas e diagnosticos gerados
+**/frames/
+**/frames_*/
+**/trace_viewport/
+*.log
+
+# Saves locais
+**/save/
+**/save_*/
+
+# Arquivos temporarios
+*.tmp
+*.temp

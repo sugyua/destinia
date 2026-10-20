@@ -1,0 +1,476 @@
+[host] .so carregada: 568 KB, 716 simbolos exportados
+[jogo:imp_log] c : Comm.deviceID = <DESTINIA-PC-0001>
+[host] FindClass game/destiniaeng/CommManager
+[host] FindClass game/destiniaeng/GameThread
+[sonda] MMain em 10073dc0 (lib+73dc0)
+[host] GetStaticMethodID getAssetResSize ([B)I
+[host] GetStaticMethodID getAssetRes ([B)[B
+[host] getAssetResSize gametxt_en.tdt -> 10474
+[sonda] Grp em 1004f790 (lib+4f790)
+[host] getAssetResSize dotum08.fnt -> 10341
+[sonda] Menu em 10083ac0 (lib+83ac0)
+[host] getAssetResSize mon_data_en.gdt -> 3840
+[host] fopen C:/destinia/host/save_probe/msave.dat [rb] -> falhou
+[host] fopen C:/destinia/host/save_probe/msave.dat [rb] -> falhou
+[host] GetStaticMethodID setSoundVolume (III)V
+[host] setSoundVolume 0,3,5
+[host] GetStaticMethodID setSoundVolume (III)V
+[host] setSoundVolume 1,3,5
+[host] getAssetResSize loading.wmb -> 83
+[host] getAssetResSize loading.agd -> 141
+[host] getAssetResSize tbutton.wmb -> 4743
+[host] getAssetResSize tbutton.agd -> 167
+[host] getAssetResSize touch_move.wpn -> 1222
+[host] getAssetResSize touch_clr.wpn -> 1174
+[host] getAssetResSize touch_bag.wpn -> 4904
+[host] getAssetResSize touch_ok.wpn -> 2068
+[host] getAssetResSize touch_skill.wpn -> 853
+[host] getAssetResSize touch_skill2.wpn -> 91
+[host] getAssetResSize touch_sort.wpn -> 6276
+[host] getAssetResSize touch_reset.wpn -> 6276
+[host] getAssetResSize touch_ad.wpn -> 23812
+[host] getAssetResSize touch_skip.wpn -> 6348
+[host] getAssetResSize touch_play_w.wpn -> 10004
+[host] getAssetResSize uipointer.wmb -> 137
+[host] getAssetResSize uibutton.wmb -> 124
+[host] initGame ok. Rodando o jogo...
+[host] GetStaticMethodID getAssetResSize ([B)I
+[host] GetStaticMethodID getAssetRes ([B)[B
+[host] getAssetResSize gv_ani.agd -> 167
+[host] getAssetResSize gv555.wmb -> 2969
+[host] getAssetResSize gv_lgt.wmb -> 266
+[host] getAssetResSize gvimg.wpn -> 64588
+[host] getAssetResSize game_grade.wmb -> 4422
+[host] GetStaticMethodID playSound (I)V
+[host] playSound 50 [audio ainda nao implementado]
+[sonda] quadro 1: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=0 menu.anim=0 | lista: y0=0 altura=0 itens=0 | tecla_toque=0 | tela=400x240
+[host] GetStaticMethodID getAssetResSize ([B)I
+[host] GetStaticMethodID getAssetRes ([B)[B
+[host] getAssetResSize effect_total.wmb -> 143729
+[host] getAssetResSize title.wmb -> 63042
+[host] getAssetResSize title_info.wpn -> 3850
+[host] getAssetResSize item_en.gdt -> 26228
+[host] getAssetResSize illu_hero.wmb -> 4692
+[host] getAssetResSize item_icon.wmb -> 7307
+[host] getAssetResSize skill0_icon.wmb -> 15944
+[host] getAssetResSize buf_icon.wmb -> 3124
+[host] getAssetResSize bagbox.wmb -> 144
+[host] getAssetResSize xsnum.wmb -> 121
+[host] getAssetResSize attrnum.wmb -> 93
+[host] getAssetResSize snum.wmb -> 206
+[host] getAssetResSize uinum.wmb -> 141
+[host] getAssetResSize bnum.wmb -> 1220
+[host] getAssetResSize gauge.wmb -> 165
+[host] getAssetResSize gauge_box.wmb -> 116
+[host] getAssetResSize ui_etc.wmb -> 4834
+[host] getAssetResSize uimenu.wmb -> 2539
+[host] getAssetResSize equip_name_en.tdt -> 3401
+[host] getAssetResSize equip_head_en.tdt -> 290
+[host] getAssetResSize qitem_name_en.tdt -> 251
+[host] getAssetResSize skill0_desc_en.tdt -> 1201
+[host] getAssetResSize attr0_desc_en.tdt -> 1478
+[host] getAssetResSize pet_skill_en.tdt -> 1426
+[host] getAssetResSize nick_en.tdt -> 960
+[host] getAssetResSize map_temp.wmb -> 103
+[host] GetStaticMethodID playSound (I)V
+[host] playSound 100 [audio ainda nao implementado]
+[sonda] SDL BAIXO botao=1 janela_px=(224,171) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(74,57)
+[sonda] jniTouch(x=74, y=57, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=0 menu.anim=0 | lista: y0=0 altura=0 itens=0 | tecla_toque=26 | tela=400x240
+[host] GetStaticMethodID getAssetResSize ([B)I
+[host] GetStaticMethodID getAssetRes ([B)[B
+[host] getAssetResSize menubg.wmb -> 56891
+[host] getAssetResSize menu_en0_0.wpn -> 19204
+[host] getAssetResSize menu_en0_1.wpn -> 19204
+[host] getAssetResSize menu_en1_0.wpn -> 19204
+[host] getAssetResSize menu_en1_1.wpn -> 19204
+[host] getAssetResSize menu_en2_0.wpn -> 19204
+[host] getAssetResSize menu_en2_1.wpn -> 19204
+[host] getAssetResSize menu_en3_0.wpn -> 19204
+[host] getAssetResSize menu_en3_1.wpn -> 19204
+[host] getAssetResSize menu_en4_0.wpn -> 19204
+[host] getAssetResSize menu_en4_1.wpn -> 19204
+[host] getAssetResSize mapeff10.wmb -> 2402
+[host] getAssetResSize mapeff.agd -> 5844
+[host] getAssetResSize item_en.gdt -> 26228
+[host] getAssetResSize illu_hero.wmb -> 4692
+[host] getAssetResSize item_icon.wmb -> 7307
+[host] getAssetResSize skill0_icon.wmb -> 15944
+[host] getAssetResSize buf_icon.wmb -> 3124
+[host] getAssetResSize bagbox.wmb -> 144
+[host] getAssetResSize xsnum.wmb -> 121
+[host] getAssetResSize attrnum.wmb -> 93
+[host] getAssetResSize snum.wmb -> 206
+[host] getAssetResSize uinum.wmb -> 141
+[host] getAssetResSize bnum.wmb -> 1220
+[host] getAssetResSize gauge.wmb -> 165
+[host] getAssetResSize gauge_box.wmb -> 116
+[host] getAssetResSize ui_etc.wmb -> 4834
+[host] getAssetResSize uimenu.wmb -> 2539
+[host] getAssetResSize equip_name_en.tdt -> 3401
+[host] getAssetResSize equip_head_en.tdt -> 290
+[host] getAssetResSize qitem_name_en.tdt -> 251
+[host] getAssetResSize skill0_desc_en.tdt -> 1201
+[host] getAssetResSize attr0_desc_en.tdt -> 1478
+[host] getAssetResSize pet_skill_en.tdt -> 1426
+[host] getAssetResSize nick_en.tdt -> 960
+[host] getAssetResSize map_temp.wmb -> 103
+[sonda] SDL CIMA botao=1 janela_px=(224,171) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(74,57)
+[sonda] jniTouch(x=74, y=57, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=0 menu.anim=0 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] quadro 95: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=1 menu.anim=2 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] quadro 100: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=1 menu.anim=12 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] quadro 102: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=1 menu.anim=16 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(191,64) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(63,21)
+[sonda] jniTouch(x=63, y=21, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=1 menu.anim=18 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(191,64) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(63,21)
+[sonda] jniTouch(x=63, y=21, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=1 menu.anim=20 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(357,65) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(119,21)
+[sonda] jniTouch(x=119, y=21, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=1 menu.anim=52 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(357,65) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(119,21)
+[sonda] jniTouch(x=119, y=21, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=1 menu.anim=56 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(379,126) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(126,42)
+[sonda] jniTouch(x=126, y=42, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=1 menu.anim=80 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(379,126) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(126,42)
+[sonda] jniTouch(x=126, y=42, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=1 menu.anim=80 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(379,126) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(126,42)
+[sonda] jniTouch(x=126, y=42, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=1 menu.anim=80 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(379,126) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(126,42)
+[sonda] jniTouch(x=126, y=42, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=1 menu.anim=82 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(366,184) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(122,61)
+[host] fopen C:/destinia/host/save_probe/save0.dat [rb] -> falhou
+[host] GetStaticMethodID getAssetResSize ([B)I
+[host] GetStaticMethodID getAssetRes ([B)[B
+[host] getAssetResSize hero_head1.wmb -> 1729
+[host] getAssetResSize hero_body1.wmb -> 3629
+[host] getAssetResSize shadow.wmb -> 1080
+[host] getAssetResSize hero_bsword1.wmb -> 488
+[host] getAssetResSize effect_bsword.wmb -> 12401
+[host] getAssetResSize hero_b0.agd -> 97
+[host] fopen C:/destinia/host/save_probe/save1.dat [rb] -> falhou
+[host] getAssetResSize hero_head1.wmb -> 1729
+[host] getAssetResSize hero_body1.wmb -> 3629
+[host] getAssetResSize shadow.wmb -> 1080
+[host] getAssetResSize hero_gun1.wmb -> 182
+[host] getAssetResSize effect_gun.wmb -> 1244
+[host] getAssetResSize hero_b1.agd -> 124
+[host] fopen C:/destinia/host/save_probe/save2.dat [rb] -> falhou
+[host] getAssetResSize hero_head1.wmb -> 1729
+[host] getAssetResSize hero_body1.wmb -> 3629
+[host] getAssetResSize shadow.wmb -> 1080
+[host] getAssetResSize hero_ssword1.wmb -> 567
+[host] getAssetResSize effect_ssword.wmb -> 7785
+[host] getAssetResSize hero_b2.agd -> 148
+[host] GetStaticMethodID playSound (I)V
+[host] playSound 24 [audio ainda nao implementado]
+[sonda] jniTouch(x=122, y=61, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=28 | tela=400x240
+[sonda] quadro 144: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(366,184) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(122,61)
+[sonda] jniTouch(x=122, y=61, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(366,184) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(122,61)
+[sonda] jniTouch(x=122, y=61, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(366,184) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(122,61)
+[sonda] jniTouch(x=122, y=61, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(389,133) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(129,44)
+[sonda] jniTouch(x=129, y=44, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(389,133) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(129,44)
+[sonda] jniTouch(x=129, y=44, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(390,146) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(130,48)
+[sonda] jniTouch(x=130, y=48, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(390,146) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(130,48)
+[sonda] jniTouch(x=130, y=48, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(393,159) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(131,53)
+[sonda] jniTouch(x=131, y=53, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(393,159) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(131,53)
+[sonda] jniTouch(x=131, y=53, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] quadro 200: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(396,176) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(132,58)
+[sonda] jniTouch(x=132, y=58, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(396,176) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(132,58)
+[sonda] jniTouch(x=132, y=58, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(397,188) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(132,62)
+[sonda] jniTouch(x=132, y=62, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(397,188) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(132,62)
+[sonda] jniTouch(x=132, y=62, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(397,188) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(132,62)
+[sonda] jniTouch(x=132, y=62, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(397,188) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(132,62)
+[sonda] jniTouch(x=132, y=62, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(397,206) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(132,68)
+[sonda] jniTouch(x=132, y=68, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(397,207) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(132,69)
+[sonda] jniTouch(x=132, y=69, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(398,222) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(132,74)
+[sonda] jniTouch(x=132, y=74, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(398,222) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(132,74)
+[sonda] jniTouch(x=132, y=74, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(398,222) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(132,74)
+[sonda] jniTouch(x=132, y=74, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(398,222) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(132,74)
+[sonda] jniTouch(x=132, y=74, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(396,229) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(132,76)
+[sonda] jniTouch(x=132, y=76, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(396,230) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(132,76)
+[sonda] jniTouch(x=132, y=76, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(396,230) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(132,76)
+[sonda] jniTouch(x=132, y=76, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(395,230) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(131,76)
+[sonda] jniTouch(x=131, y=76, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(336,222) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(112,74)
+[sonda] jniTouch(x=112, y=74, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(336,222) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(112,74)
+[sonda] jniTouch(x=112, y=74, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(310,222) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(103,74)
+[sonda] jniTouch(x=103, y=74, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(310,222) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(103,74)
+[sonda] jniTouch(x=103, y=74, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(259,216) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(86,72)
+[sonda] jniTouch(x=86, y=72, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(259,216) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(86,72)
+[sonda] jniTouch(x=86, y=72, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(199,213) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(66,71)
+[sonda] jniTouch(x=66, y=71, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(198,213) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(66,71)
+[sonda] jniTouch(x=66, y=71, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(198,213) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(66,71)
+[sonda] jniTouch(x=66, y=71, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(198,213) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(66,71)
+[sonda] jniTouch(x=66, y=71, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(140,200) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(46,66)
+[sonda] jniTouch(x=46, y=66, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(140,200) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(46,66)
+[sonda] jniTouch(x=46, y=66, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(168,213) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(56,71)
+[sonda] jniTouch(x=56, y=71, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(168,214) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(56,71)
+[sonda] jniTouch(x=56, y=71, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(168,214) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(56,71)
+[sonda] jniTouch(x=56, y=71, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(168,214) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(56,71)
+[sonda] jniTouch(x=56, y=71, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(175,215) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(58,71)
+[sonda] jniTouch(x=58, y=71, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(175,215) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(58,71)
+[sonda] jniTouch(x=58, y=71, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(187,218) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(62,72)
+[sonda] jniTouch(x=62, y=72, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(187,218) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(62,72)
+[sonda] jniTouch(x=62, y=72, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(205,221) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(68,73)
+[sonda] jniTouch(x=68, y=73, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(205,222) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(68,74)
+[sonda] jniTouch(x=68, y=74, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] quadro 300: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(209,222) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(69,74)
+[sonda] jniTouch(x=69, y=74, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(209,222) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(69,74)
+[sonda] jniTouch(x=69, y=74, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(209,222) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(69,74)
+[sonda] jniTouch(x=69, y=74, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(210,223) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(70,74)
+[sonda] jniTouch(x=70, y=74, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(237,225) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(79,75)
+[sonda] jniTouch(x=79, y=75, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(237,225) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(79,75)
+[sonda] jniTouch(x=79, y=75, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(237,225) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(79,75)
+[sonda] jniTouch(x=79, y=75, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(237,225) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(79,75)
+[sonda] jniTouch(x=79, y=75, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(244,224) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(81,74)
+[sonda] jniTouch(x=81, y=74, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(246,224) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(82,74)
+[sonda] jniTouch(x=82, y=74, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(274,225) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(91,75)
+[sonda] jniTouch(x=91, y=75, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(274,225) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(91,75)
+[sonda] jniTouch(x=91, y=75, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(274,225) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(91,75)
+[sonda] jniTouch(x=91, y=75, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(274,225) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(91,75)
+[sonda] jniTouch(x=91, y=75, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(291,225) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(97,75)
+[sonda] jniTouch(x=97, y=75, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(291,225) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(97,75)
+[sonda] jniTouch(x=97, y=75, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(301,222) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(100,74)
+[sonda] jniTouch(x=100, y=74, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(301,222) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(100,74)
+[sonda] jniTouch(x=100, y=74, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(301,222) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(100,74)
+[sonda] jniTouch(x=100, y=74, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(301,222) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(100,74)
+[sonda] jniTouch(x=100, y=74, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(303,188) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(101,62)
+[sonda] jniTouch(x=101, y=62, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(303,188) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(101,62)
+[sonda] jniTouch(x=101, y=62, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(303,188) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(101,62)
+[sonda] jniTouch(x=101, y=62, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(303,187) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(101,62)
+[sonda] jniTouch(x=101, y=62, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(295,160) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(98,53)
+[sonda] jniTouch(x=98, y=53, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(294,157) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(98,52)
+[sonda] jniTouch(x=98, y=52, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(292,145) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(97,48)
+[sonda] jniTouch(x=97, y=48, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(290,142) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(96,47)
+[sonda] jniTouch(x=96, y=47, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(289,122) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(96,40)
+[sonda] jniTouch(x=96, y=40, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(289,110) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(96,36)
+[sonda] jniTouch(x=96, y=36, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(290,97) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(96,32)
+[sonda] jniTouch(x=96, y=32, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(291,93) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(97,31)
+[sonda] jniTouch(x=97, y=31, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(295,84) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(98,28)
+[sonda] jniTouch(x=98, y=28, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(298,80) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(99,26)
+[sonda] jniTouch(x=99, y=26, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(312,74) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(104,24)
+[sonda] jniTouch(x=104, y=24, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(323,71) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(107,23)
+[sonda] jniTouch(x=107, y=23, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(362,68) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(120,22)
+[sonda] jniTouch(x=120, y=22, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(362,68) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(120,22)
+[sonda] jniTouch(x=120, y=22, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(362,68) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(120,22)
+[sonda] jniTouch(x=120, y=22, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(365,68) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(121,22)
+[sonda] jniTouch(x=121, y=22, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(373,70) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(124,23)
+[sonda] jniTouch(x=124, y=23, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(379,79) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(126,26)
+[sonda] jniTouch(x=126, y=26, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(382,88) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(127,29)
+[sonda] jniTouch(x=127, y=29, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(383,90) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(127,30)
+[sonda] jniTouch(x=127, y=30, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(383,90) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(127,30)
+[sonda] jniTouch(x=127, y=30, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(384,94) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(128,31)
+[sonda] jniTouch(x=128, y=31, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(385,106) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(128,35)
+[sonda] jniTouch(x=128, y=35, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(385,109) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(128,36)
+[sonda] jniTouch(x=128, y=36, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] SDL BAIXO botao=1 janela_px=(385,112) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(128,37)
+[sonda] jniTouch(x=128, y=37, tipo=0) -> ok
+[sonda] logo apos PRESSIONAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=2 | tela=400x240
+[sonda] SDL CIMA botao=1 janela_px=(385,112) tamanho_janela=1200x720 tamanho_logico=400x240 -> jogo=(128,37)
+[sonda] jniTouch(x=128, y=37, tipo=1) -> ok
+[sonda] logo apos SOLTAR: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] quadro 400: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] quadro 500: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] quadro 600: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] quadro 700: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] quadro 800: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] quadro 900: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
+[sonda] quadro 1000: rede=0 (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=2 menu.anim=98 | lista: y0=50 altura=36 itens=5 | tecla_toque=0 | tela=400x240
