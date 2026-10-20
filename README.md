@@ -11,7 +11,7 @@ O host em C++17 executa a biblioteca ARM original do Destinia Android com Unicor
 | Diretório | Finalidade |
 | --- | --- |
 | `host` | Host 400×240 |
-| `host_zoom` | Host experimental 800×480, tradução PT e trace de viewport |
+| `host_zoom` | Resolução original 400×240 ampliada para janela 800×480, tradução PT e trace de viewport |
 | `game` | APK original do Destinia Android extraído; recursos necessários em execução, não incluídos no ZIP curado de fontes |
 | `Claude` | Especificação do host e ferramentas de análise para desenvolvimento |
 | `docs` | Decisões e histórico técnico; documentos antigos podem estar desatualizados |
@@ -29,7 +29,7 @@ O repositório atual não inclui saves pessoais, logs de partidas, relatórios l
 - HUD de experiência, modo sem janela e capturas BMP.
 - Tradução opcional `--lang pt` e trace F9 com `--trace-viewport`, apenas em `host_zoom`.
 
-A presença no código não equivale a validação completa de gameplay. Câmera/transição em 800×480, compras e rede continuam com limitações documentadas.
+A presença no código não equivale a validação completa de gameplay. O host_zoom agora amplia a imagem original, em vez de aumentar a área renderizada. A correção ainda precisa de confirmação visual nas passagens do Windows; compras e rede continuam com limitações documentadas.
 
 ## Dependências
 

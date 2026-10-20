@@ -43,7 +43,9 @@ static std::string defaultSaveDir() {
 // ---------------------------------------------------------------- constantes
 // [OK] resolucao e formato: GameThread passa 400x240 e um buffer de 192000
 // bytes (400*240*2 = RGB565 little-endian) para initGame/jniRun.
-static const int SCREEN_W = 800, SCREEN_H = 480;
+// O jogo e as coordenadas de toque ficam na resolucao original. Apenas a janela e ampliada.
+static const int SCREEN_W = 400, SCREEN_H = 240;
+static const int WINDOW_W = 800, WINDOW_H = 480;
 static const u32 FB_BYTES = SCREEN_W * SCREEN_H * 2;
 
 // mapa de memoria do "celular" emulado
@@ -246,7 +248,7 @@ static void cameraTick(long frame) {
           neg ? "<< CAMERA NEGATIVA" : "");
 }
 // Correcao automatica da faixa duplicada em mapas menores que a tela (ex.: 30x30 tiles = 480 px em 800x480).
-// A camera fica negativa (isso centraliza o mapa e esta CORRETO), mas Map_drawBuff le tiles sem checar limites
+// No antigo framebuffer 800x480, a camera negativa alinhava o mapa a direita. Map_drawBuff le tiles sem checar limites
 // e repete o cenario fora do mapa. Aqui, quando Map_drawBuff chama uma das duas rotinas que desenham UM tile
 // fora do mapa, o x e jogado para fora da tela e o proprio clipping do jogo descarta o desenho.
 // Nao escreve na memoria do jogo, nao mexe na camera e nao afeta heroi/monstros/HUD (nao passam por aqui).
@@ -2092,7 +2094,7 @@ int main(int argc, char** argv) {
 #endif
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  // pixels nitidos
-    win = SDL_CreateWindow("Destinia 0.2 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 720, SDL_WINDOW_RESIZABLE);
+    win = SDL_CreateWindow("Destinia 0.2 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_W, WINDOW_H, SDL_WINDOW_RESIZABLE);
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_PRESENTVSYNC);
     tex = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGB565, SDL_TEXTUREACCESS_STREAMING, SCREEN_W, SCREEN_H);
     for (int i = 0; i < SDL_NumJoysticks(); i++) { if (SDL_IsGameController(i)) { controller = SDL_GameControllerOpen(i); if (controller) { fprintf(stderr, "[host] Controle conectado: %s\n", SDL_GameControllerName(controller)); break; } } }

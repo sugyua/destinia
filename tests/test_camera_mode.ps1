@@ -16,7 +16,7 @@ try {
     $elf[0]=127; $elf[1]=69; $elf[2]=76; $elf[3]=70; $elf[4]=1; $elf[5]=1; $elf[18]=40
     [IO.File]::WriteAllBytes((Join-Path $fixture 'game/lib/armeabi/libdestinia_jni.so'), $elf)
     $env:OS = 'Windows_NT'
-    $script:launches = 0; $script:answers = 0
+    $script:launches = 0; $script:answers = 0; $script:oldBinary = $false
     function Get-Process { return }
     function Read-Host($Prompt) {
         $script:answers++
@@ -37,7 +37,9 @@ try {
             # Sem F9: o relatorio deve manter a evidencia visual pendente.
         }
         [IO.File]::WriteAllText(($Prefix + '.stdout.log'), '')
-        [IO.File]::WriteAllText(($Prefix + '.stderr.log'), '[camera] quadro 60 camX=-160 camY=0 mapa=30x30')
+        $processLog = '[host] initGame ok em 400x240. [camera] quadro 60 camX=0 camY=0 mapa=30x30'
+        if ($script:oldBinary) { $processLog = '[host] initGame ok em 800x480.' }
+        [IO.File]::WriteAllText(($Prefix + '.stderr.log'), $processLog)
         return [pscustomobject]@{Stdout=($Prefix+'.stdout.log'); Stderr=($Prefix+'.stderr.log'); Error=$null; TimedOut=$false; ExitCode=0}
     }
     $code = Invoke-DestiniaSuite
@@ -47,6 +49,12 @@ try {
     if ($script:launches -ne 2 -or $script:answers -ne 3) { throw 'Teste repetiu janelas ou perguntas gerais' }
     if (@($result.Resultados | Where-Object { $_.Teste -eq 'Capturas F9' -and $_.Estado -eq 'PENDENTE' }).Count -ne 1) { throw 'Ausencia de capturas nao foi destacada' }
     if ((Get-Content -LiteralPath (Join-Path $SaveSource 'msave.dat') -Raw) -ne 'original intacto') { throw 'Save original alterado' }
+    $script:oldBinary = $true; $script:launches = 0; $script:answers = 0
+    $oldCode = Invoke-DestiniaSuite
+    $oldResult = Get-Content -LiteralPath (Join-Path $script:ReportState.Directory 'resultados.json') -Raw | ConvertFrom-Json
+    if ($oldCode -ne 1 -or $script:launches -ne 1 -or $script:answers -ne 0) { throw 'EXE antigo nao bloqueou a janela guiada' }
+    if (@($oldResult.Resultados | Where-Object { $_.Teste -eq 'host_zoom versao antiga' -and $_.Estado -eq 'FALHA' }).Count -ne 1) { throw 'Instrucao de recompilacao ausente para EXE antigo' }
+    Write-Host 'OK: EXE antigo identificado sem abrir janela nem perguntar sobre gameplay.'
     Write-Host 'OK: fluxo Camera, falha manual, capturas pendentes, apenas zoom, sem reabertura e save preservado.'
 } finally {
     $env:OS = $oldOS

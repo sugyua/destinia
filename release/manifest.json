@@ -23,6 +23,10 @@
     "Testar Destinia.bat",
     "diagnostico/test_suite.ps1",
     "diagnostico/COMO_TESTAR.md",
-    "tests/test_diagnostic.ps1"
+    "tests/test_diagnostic.ps1",
+    "tests/test_camera_mode.ps1",
+    "tests/test_zoom_render.py",
+    "tests/zoom_native_smoke.cpp",
+    "docs/VERIFICACAO_ZOOM_ORIGINAL.md"
   ]
 }

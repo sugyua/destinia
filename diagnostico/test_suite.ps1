@@ -255,7 +255,7 @@ function Invoke-DestiniaSuite {
             }
             Add-TestResult ($name + ' executavel') 'OK' ('SHA-256: ' + (Get-FileHash -LiteralPath $exe).Hash)
             $width = 400; $height = 240
-            if ($name -eq 'host_zoom') { $width = 800; $height = 480 }
+            # Ambos renderizam em 400x240; o zoom amplia somente a apresentacao SDL.
             $save = Join-Path $session ($name + '_save_automatico')
             Copy-IsolatedSave $source $save
             $frameDir = Join-Path $session ($name + '_frames')
@@ -267,6 +267,10 @@ function Invoke-DestiniaSuite {
             $verdict = Get-HeadlessVerdict $run $log $frameDir $width $height $Frames
             $state = 'FALHA'; if ($verdict.Passed) { $state = 'OK' }
             Add-TestResult ($name + ' inicializacao sem janela') $state $verdict.Detail
+            if ($name -eq 'host_zoom' -and $log -match 'initGame ok em 800x480') {
+                Add-TestResult 'host_zoom versao antiga' 'FALHA' 'Executavel ainda usa framebuffer 800x480. Recompile host_zoom com os fontes atuais antes de testar a correcao.'
+                continue
+            }
             Add-LogObservations ($name + ' automatico') $log
             if ($Mode -eq 'Automatico') {
                 Add-TestResult ($name + ' gameplay, saves, camera e entradas') 'PENDENTE' 'Requer o modo Guiado e observacao humana.'

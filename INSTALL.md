@@ -99,3 +99,17 @@ Em `host_zoom`, F9 inicia/para a gravação quando iniciado com `--trace-viewpor
 - O código de saída atual pode ser zero mesmo após uma falha emulada; confira também o log.
 
 Não inclua saves pessoais em um relatório público sem revisá-los.
+
+## Atualização do zoom: enquadramento original
+
+O host_zoom agora renderiza o jogo em **400×240** e amplia a imagem para uma janela inicial de **800×480**, com pixels nítidos e proporção preservada. A imagem mostra o enquadramento original; deixa de mostrar uma área maior do mapa. Janelas com outra proporção ainda podem ter barras externas para preservar a imagem. PT, F9 e os comandos existentes continuam disponíveis.
+
+**É necessário recompilar o host_zoom**, mesmo que já exista um EXE na pasta. Substituir somente o BAT não atualiza o jogo. Depois de extrair os fontes atuais sobre a pasta do projeto, execute no terminal MSYS2 UCRT64:
+
+```sh
+cd /c/destinia-main
+cmake -S host_zoom -B host_zoom/build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build host_zoom/build
+```
+
+Feche o jogo antes de compilar. Depois abra `Testar Destinia.bat`, escolha **1** e repita apenas a passagem que apresentou a faixa preta. Os BMPs e as coordenadas F9 agora são de 400×240; a ampliação ocorre somente na apresentação. O diagnóstico recusa o EXE antigo de 800×480 e pede recompilação. O host normal não foi alterado.

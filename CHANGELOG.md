@@ -4,7 +4,14 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
-## Próxima atualização — limpeza e diagnóstico, sem nova release
+## Próxima atualização — zoom, limpeza e diagnóstico, sem nova release
+
+### Zoom com enquadramento original
+
+- host_zoom passa a renderizar em 400×240 e ampliar a apresentação para uma janela inicial de 800×480, com pixels nítidos. Antes, renderizava uma área de 800×480: mapas de 480 pixels ficavam alinhados à direita pela câmera original, deixando 320 pixels vazios à esquerda.
+- Preservados o mapeamento proporcional do mouse, PT, HUD e F9; as capturas passam a registrar o framebuffer original de 400×240. O zoom deixa de mostrar uma área maior do cenário.
+- Diagnóstico e launcher ajustados ao novo enquadramento. EXE antigo de 800×480 é identificado e exige recompilação, evitando testar a correção com um binário desatualizado.
+- Compilação e inicialização verificadas em Linux, além de teste da câmera ARM para mapa de 30×30 tiles. A confirmação visual da passagem no Windows continua pendente; nenhuma correção da loja foi feita.
 
 ### Teste focado de câmera
 

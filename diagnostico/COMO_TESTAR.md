@@ -6,11 +6,13 @@ Sao necessarios os executaveis compilados em `host/build/destinia_host.exe` e `h
 
 Ao baixar o pacote de testes, extraia todos os arquivos **na raiz do projeto existente**, mantendo a subpasta diagnostico. O pacote nao inclui o jogo, executaveis nem dependencias externas.
 
-## Novo teste: camera do host_zoom
+## Teste da correcao de camera do host_zoom
 
 No duplo clique, escolha **1 — Camera host_zoom**. A opcao 2 conserva o roteiro geral. Argumentos pelo Prompt continuam funcionando sem menu.
 
-Este modo verifica a inicializacao apenas do host_zoom, abre uma copia isolada do save e ativa `--trace-camera` junto com o trace de viewport. Nao exige recompilar os executaveis atuais. Nao solicita os testes gerais nem reabertura do save.
+Os BMPs agora sao 400x240, a resolucao original; a janela amplia a apresentacao para 800x480.
+
+Este modo verifica a inicializacao apenas do host_zoom, abre uma copia isolada do save e ativa `--trace-camera` junto com o trace de viewport. A correcao de enquadramento exige recompilar host_zoom com os fontes atuais; consulte INSTALL.md. Um EXE antigo com framebuffer 800x480 e recusado. Nao solicita os testes gerais nem reabertura do save.
 
 1. Clique em TAP TO START e carregue a partida. Va ate a passagem com defeito.
 2. Pressione **F9 antes da transicao**: captura a tela e inicia a gravacao.
