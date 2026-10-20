@@ -67,3 +67,5 @@ O [manifesto](release/manifest.json) identifica o commit base anterior à 0.2. O
 Versão **v0.2-beta**, primeira release do port, marcada como **pré-lançamento** no GitHub e aprovada pelo usuário após revisão das verificações e limitações.
 
 O ZIP curado não inclui biblioteca original, APK, DEX, assets, áudio, saves ou DLLs de terceiros. Consulte [THIRD_PARTY.md](THIRD_PARTY.md). Não foi definida uma licença para o código do host nesta etapa.
+
+Se quiser ajudar no projeto, entre em contato comigo pelo WhatsApp: [+55 21 97468-6880](https://wa.me/5521974686880).
