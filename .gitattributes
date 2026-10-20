@@ -1,0 +1,17 @@
+# Dados originais permanecem no repositorio, mas nao nos arquivos da tag.
+/game export-ignore
+/Claude export-ignore
+/relatorios export-ignore
+/.vscode export-ignore
+/Untitled-1.txt export-ignore
+/host/log*.txt export-ignore
+/host/sonda.txt export-ignore
+/host/probe.diff export-ignore
+/host/patch_autotap2.py export-ignore
+/host/main_original.cpp export-ignore
+"/host/main - Copia.cpp" export-ignore
+/host/*.bak* export-ignore
+/host_zoom/*.bak* export-ignore
+/host_zoom/camera.txt export-ignore
+/host_zoom/clear.txt export-ignore
+/host_zoom/fix.txt export-ignore

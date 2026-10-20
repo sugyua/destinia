@@ -38,7 +38,7 @@ GitHub
 
 Repositório Windows:
 
-https://github.com/sugyua/Destinia_PCport
+https://github.com/sugyua/destinia
 
 Somente o projeto Windows deverá ser enviado ao repositório existente.
 
@@ -63,3 +63,15 @@ Identifique linguagem, engine, organização do código, funcionalidades impleme
 Não modifique nenhum arquivo nesta primeira etapa.
 
 Apresente um relatório e aguarde instruções para continuar.
+
+Preparacao de release — orientacao atual do usuario (20/10/2026)
+
+* A etapa inicial de diagnostico foi concluida. O usuario solicitou preparar a primeira release do port existente, preservando funcionalidades.
+* Versao proposta: 0.2 Beta, com numero em VERSION e identificacao coerente nas janelas de host e host_zoom.
+* Manter CHANGELOG.md em portugues, com aviso de Beta e possiveis bugs no inicio, a cada atualizacao relevante.
+* Registrar apenas mudancas efetivas; distinguir testes do empacotador de compilacao e testes reais do jogo.
+* Antes de publicar tag/release, apresentar plano, verificacoes e limitacoes e obter aprovacao do usuario.
+* Revisar dados originais, licencas e arquivos automaticos da tag antes da publicacao. Nao enviar saves, chaves ou credenciais.
+* Nao configurar atualizacoes periodicas sem uma tarefa explicitamente definida.
+* A pasta game e o APK original do Destinia Android extraido, conforme esclarecido pelo usuario.
+* Nao incluir no arquivo da release programas, instaladores, ferramentas ou bibliotecas externos que o usuario precise instalar no PC. Documentar esses requisitos na secao Dependencias do README do GitHub.

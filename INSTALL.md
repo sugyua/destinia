@@ -1,0 +1,101 @@
+# Instalação e compilação — Destinia 0.2 Beta
+
+> **Versão Beta: pode conter diversos bugs. Faça backup dos saves.**
+
+## O que está disponível nesta release de fontes
+
+`destinia-0.2-beta-source.zip` contém os fontes dos dois hosts, seus CMakeLists, launchers normais de desenvolvimento e documentação. **Não contém executável Windows nem os dados originais do jogo.** Extrair o ZIP não instala um jogo pronto para jogar.
+
+Não há um instalador, assinatura digital ou pacote de DLLs validado nesta entrega. Um ZIP Windows executável só deve ser publicado depois das verificações em máquina limpa descritas em `docs/RELEASE_0.2.md`.
+
+## Requisitos para compilar no Windows
+
+Os programas e bibliotecas externos são instalados separadamente, conforme a seção [Dependências do README](README.md#dependências). Seus instaladores, runtimes e ferramentas não serão anexados ao arquivo da release.
+
+- Windows 64 bits com MSYS2, usando o terminal **UCRT64**.
+- Compilador C++17, CMake 3.16 ou superior, Ninja e pkg-config/pkgconf.
+- SDL2 e Unicorn para o mesmo ambiente UCRT64.
+- SDL2_mixer com suporte a OGG/MP3, se desejar áudio.
+- Arquivos compatíveis do Destinia Android obtidos pelo usuário.
+
+Não misture DLLs e bibliotecas de MSYS, MINGW64 e UCRT64. O ambiente histórico do projeto registrou SDL2 2.32.10 e Unicorn 2.1.4; isso não é uma nova certificação dessas versões.
+
+Instale as ferramentas pelo gerenciador `pacman` do MSYS2. Verifique os nomes disponíveis dos pacotes com `pacman -Ss SDL2`, `pacman -Ss unicorn` e `pacman -Ss SDL2_mixer`. Antes de configurar, confirme:
+
+```sh
+cmake --version
+g++ --version
+pkg-config --modversion sdl2 unicorn
+pkg-config --modversion SDL2_mixer
+```
+
+A ausência do mixer permite compilar sem áudio. A ausência de SDL2 ou Unicorn impede a configuração.
+
+## Compilar os dois hosts
+
+No terminal UCRT64, entre na pasta extraída, por exemplo `/c/destinia`:
+
+```sh
+cmake -S host -B host/build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build host/build
+cmake -S host_zoom -B host_zoom/build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build host_zoom/build
+```
+
+Saídas esperadas após compilação bem-sucedida:
+- `host/build/destinia_host.exe`
+- `host_zoom/build/destinia_host.exe`
+
+Essas compilações ainda precisam ser executadas no Windows para validar esta candidata.
+
+## Dados necessários em execução
+
+A pasta `game` corresponde ao APK original do Destinia Android extraído. Disponha esses dados compatíveis ao lado de `host` e `host_zoom`:
+
+```text
+destinia/
+  host/build/destinia_host.exe
+  host_zoom/build/destinia_host.exe
+  game/
+    lib/armeabi/libdestinia_jni.so
+    assets/...
+    res/raw/...
+```
+
+A biblioteca ARM e os assets são necessários para iniciar. `res/raw` fornece música e efeitos. O host não executa `classes.dex`, o manifesto Android nem os certificados do APK. Não baixe DLLs avulsas de sites desconhecidos: use a mesma instalação UCRT64 da compilação.
+
+## Primeiro teste com save separado
+
+A partir da raiz, no terminal UCRT64:
+
+```sh
+./host/build/destinia_host.exe --game ./game --save ./save_release_02_host
+./host_zoom/build/destinia_host.exe --game ./game --save ./save_release_02_zoom --lang pt
+```
+
+Essas pastas são criadas pelo host. Para testar progresso existente, copie primeiro o save completo para uma nova pasta e aponte `--save` para essa cópia. Não teste a candidata sobre o único save de uma partida.
+
+Os launchers normais `Abrir Destinia.bat` e `Abrir Destinia Zoom 800x480.bat`:
+- procuram o binário em `host/build` ou `host_zoom/build`;
+- exigem `C:\msys64\ucrt64\bin\SDL2.dll` e acrescentam essa pasta ao PATH;
+- usam o save compartilhado `%LOCALAPPDATA%\Destinia\save`;
+- não compilam automaticamente e não ativam tradução PT no launcher de zoom.
+
+Os scripts antigos de teste de tradução/compra do repositório completo ainda procuram `host_zoom/save_zoom800`. Essa origem pode não refletir a partida atual. Eles não estão no ZIP curado; não migre nem sobrescreva saves para satisfazer esses scripts.
+
+## Controles
+
+WASD/setas: movimento; Enter/Z/espaço: confirmar/ação; Esc/X: voltar; I/C: menu; F5: comando de save; Shift: aceleração manual. Gamepad também é suportado. O mapeamento e o funcionamento precisam ser confirmados durante a validação interativa.
+
+Em `host_zoom`, F9 inicia/para a gravação quando iniciado com `--trace-viewport`. Preserve os BMPs e logs ao relatar o defeito visual de troca de mapa.
+
+## Diagnóstico
+
+- DLL ausente: confira o ambiente UCRT64 e suas dependências transitivas.
+- Biblioteca ARM não encontrada: confira `--game` e a árvore `lib/armeabi`.
+- Sem áudio: verifique SDL2_mixer, codecs, `res/raw` e a ausência de `--mute`.
+- Tela ou clique incorreto: informe host, resolução da janela, escala DPI do Windows e passos de reprodução.
+- Compra aguardando indefinidamente ou mapa duplicado: são problemas conhecidos; não são anunciados como corrigidos.
+- O código de saída atual pode ser zero mesmo após uma falha emulada; confira também o log.
+
+Não inclua saves pessoais em um relatório público sem revisá-los.

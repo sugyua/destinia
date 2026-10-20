@@ -1,0 +1,24 @@
+{
+  "version": "0.2",
+  "base_commit": "d9a9352bbbe9902b7b9bc3ef0dac2353b3f26611",
+  "files": [
+    ".gitignore",
+    "AGENTS.md",
+    "README.md",
+    "INSTALL.md",
+    "CHANGELOG.md",
+    "THIRD_PARTY.md",
+    "VERSION",
+    "host/main.cpp",
+    "host/CMakeLists.txt",
+    "host_zoom/main.cpp",
+    "host_zoom/CMakeLists.txt",
+    "Abrir Destinia.bat",
+    "Abrir Destinia Zoom 800x480.bat",
+    "release/manifest.json",
+    "release/NOTAS_0.2.md",
+    "docs/RELEASE_0.2.md",
+    "scripts/package_release.py",
+    "tests/test_package_release.py"
+  ]
+}

@@ -24,3 +24,6 @@ Claude/exports/
 # Arquivos temporarios
 *.tmp
 *.temp
+
+# Pacotes de distribuicao locais
+/dist/
