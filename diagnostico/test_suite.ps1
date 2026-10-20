@@ -2,7 +2,7 @@
 [CmdletBinding()]
 param(
     [string]$Root = (Join-Path $PSScriptRoot '..'),
-    [ValidateSet('Guiado', 'Automatico')][string]$Mode = 'Guiado',
+    [ValidateSet('Guiado', 'Automatico', 'Camera')][string]$Mode = 'Guiado',
     [ValidateSet('Ambos', 'host', 'host_zoom')][string]$Variant = 'Ambos',
     [string]$RuntimeDir = 'C:\msys64\ucrt64\bin',
     [string]$SaveSource = '',
@@ -198,11 +198,21 @@ function Read-ManualResult([string]$Name, [string]$Question) {
     Add-TestResult $Name $status 'Resposta informada pelo usuario; nao e uma verificacao automatica.'
 }
 
+function Get-GuidedArguments([string]$Name, [string]$TestMode, [string]$GamePath, [string]$SavePath, [string]$TracePath) {
+    $arguments = @('--game', $GamePath, '--save', $SavePath, '--probe', '--profile')
+    if ($Name -eq 'host_zoom') {
+        $arguments += @('--lang', 'pt', '--trace-viewport', '--trace-frames', '1200', '--trace-out', $TracePath)
+        if ($TestMode -eq 'Camera') { $arguments += '--trace-camera' }
+    }
+    return $arguments
+}
+
 function Invoke-DestiniaSuite {
     $ErrorActionPreference = 'Stop'
     $rootPath = [IO.Path]::GetFullPath($Root)
     $session = Join-Path $rootPath ('relatorios/testes_' + (Get-Date -Format 'yyyyMMdd_HHmmss') + '_' + [guid]::NewGuid().ToString('N').Substring(0, 8))
     [void][IO.Directory]::CreateDirectory($session)
+    if ($Mode -eq 'Camera') { $Variant = 'host_zoom' }
     Initialize-TestReport $session $Mode $Variant
     $oldPath = $env:PATH; $source = ''; $saveBefore = $null
     $exitCode = 0; $reachedEnd = $false; $caughtFailure = $false
@@ -263,9 +273,18 @@ function Invoke-DestiniaSuite {
                 continue
             }
             Write-Host ''
-            Write-Host 'ROTEIRO: iniciar/carregar partida, mover, atacar, abrir inventario/equipar, trocar de mapa e salvar.'
+            if ($Mode -eq 'Camera') {
+                Write-Host 'TESTE FOCADO: carregar a partida e repetir somente a passagem com defeito no mapa/camera.'
+                Write-Host '1. F9 ANTES de atravessar: inicia gravacao e captura a tela anterior.'
+                Write-Host '2. Atravesse, espere o defeito aparecer e aperte F9 para parar.'
+                Write-Host '3. F9 NOVAMENTE, ainda com o defeito visivel: captura a tela posterior e inicia outro trecho.'
+                Write-Host '4. Espere alguns segundos, aperte F9 para parar e feche o jogo normalmente.'
+                Write-Host 'Nao e necessario testar audio, controles, salvar/reabrir ou acessar a loja.'
+            } else {
+                Write-Host 'ROTEIRO: iniciar/carregar partida, mover, atacar, abrir inventario/equipar, trocar de mapa e salvar.'
+            }
             Write-Host 'Na janela do jogo, clique em TAP TO START e jogue manualmente. O roteiro nao faz os cliques por voce.'
-            Write-Host 'Teste mouse (DPI 100/150% e janela redimensionada), audio, controle/desconexao e Alt+Tab segurando direcao.'
+            if ($Mode -ne 'Camera') { Write-Host 'Teste mouse (DPI 100/150% e janela redimensionada), audio, controle/desconexao e Alt+Tab segurando direcao.' }
             if ($name -eq 'host_zoom') { Write-Host 'Teste PT. Na falha de mapa: F9 antes da transicao, F9 para parar; F9 outra vez captura o estado posterior.' }
             Write-Host 'Compras/rede NAO sao acionadas por este roteiro. Use somente o save de teste. Feche a janela ao terminar.'
             Set-TestStage ($name + ': aguardando permissao para abrir janela guiada')
@@ -275,14 +294,28 @@ function Invoke-DestiniaSuite {
             }
             $guiSave = Join-Path $session ($name + '_save_guiado')
             Copy-IsolatedSave $source $guiSave
-            $guiArgs = @('--game', $game, '--save', $guiSave, '--probe', '--profile')
-            if ($name -eq 'host_zoom') { $guiArgs += @('--lang', 'pt', '--trace-viewport', '--trace-frames', '1200', '--trace-out', (Join-Path $session 'trace_viewport')) }
+            $guiArgs = @(Get-GuidedArguments $name $Mode $game $guiSave (Join-Path $session 'trace_viewport'))
             Set-TestStage ($name + ': janela guiada em execucao; feche o jogo ao concluir o roteiro')
             $gui = Invoke-OwnedProcess $exe $guiArgs $hostDirectory (Join-Path $session ($name + '_guiado')) $InteractiveTimeoutSeconds
             $guiLog = [IO.File]::ReadAllText($gui.Stdout) + [IO.File]::ReadAllText($gui.Stderr)
             Add-LogObservations ($name + ' guiado') $guiLog
             if ($gui.Error -or $gui.TimedOut -or $gui.ExitCode -ne 0 -or $guiLog -match '=== PROBLEMA:|JNI nao implementado|funcao nao implementada|heap esgotado|SDL_Init:') {
                 Add-TestResult ($name + ' processo guiado') 'FALHA' 'Erro, timeout ou falha no log. Verifique stdout/stderr; o roteiro nao confirma sucesso.'
+                continue
+            }
+            if ($Mode -eq 'Camera') {
+                Read-ManualResult ($name + ' mapa/camera') 'A troca de mapa e a camera funcionaram sem duplicacao ou defeito?'
+                Set-TestStage 'Descricao do defeito de camera'
+                $description = Read-Host 'Descreva o defeito e a passagem/mapa (ou informe que nao ocorreu)'
+                Add-TestResult 'Descricao da camera' 'INFO' $description
+                $captures = @(Get-ChildItem -LiteralPath (Join-Path $session 'trace_viewport') -Filter 'viewport_frame_*.bmp' -File -ErrorAction SilentlyContinue)
+                $captureState = 'PENDENTE'
+                if ($captures.Count -ge 2) { $captureState = 'INFO' }
+                Add-TestResult 'Capturas F9' $captureState ('BMPs encontrados: ' + $captures.Count + '. Sao necessarias imagens antes e depois; a contagem nao confirma a ordem ou o conteudo visual.')
+                if ($guiLog -notmatch '\[camera\]') {
+                    Add-TestResult 'Log de camera' 'AVISO' 'Nenhuma linha [camera] encontrada; confira se o executavel suporta --trace-camera.'
+                } else { Add-TestResult 'Log de camera' 'INFO' 'Coordenadas e dimensoes registradas no stderr do teste guiado; nao validam a correcao visual.' }
+                Add-TestResult 'Demais testes de gameplay' 'NAO_TESTADO' 'Modo focado em camera; audio, entradas e salvar/reabrir nao foram solicitados.'
                 continue
             }
             Read-ManualResult ($name + ' gameplay') 'Conseguiu iniciar/carregar, mover, atacar, abrir inventario e equipar?'

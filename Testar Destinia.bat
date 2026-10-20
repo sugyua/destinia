@@ -12,7 +12,24 @@ if not exist "%ROOT%diagnostico\test_suite.ps1" (
   pause
   exit /b 1
 )
+if not "%~1"=="" goto argumentos
+echo DESTINIA - ESCOLHA O TESTE
+echo [1] Camera host_zoom - novo teste focado
+echo [2] Roteiro geral dos dois hosts
+choice /c 12 /n /m "Escolha 1 ou 2: "
+if errorlevel 3 exit /b 2
+if errorlevel 2 goto geral
+if errorlevel 1 goto camera
+exit /b 2
+:camera
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%ROOT%diagnostico\test_suite.ps1" -Root "%ROOT%." -Mode Camera
+goto resultado
+:geral
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%ROOT%diagnostico\test_suite.ps1" -Root "%ROOT%."
+goto resultado
+:argumentos
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%ROOT%diagnostico\test_suite.ps1" -Root "%ROOT%." %*
+:resultado
 set "RESULT=%ERRORLEVEL%"
 echo.
 echo Codigo do diagnostico: %RESULT%

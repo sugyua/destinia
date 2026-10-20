@@ -28,6 +28,13 @@ function Write-TestBmp($Path, $Width, $Height) {
     [IO.File]::WriteAllBytes($Path, $bytes)
 }
 try {
+    $cameraArgs = @(Get-GuidedArguments 'host_zoom' 'Camera' 'game path' 'save path' 'trace path')
+    Assert-True ($cameraArgs -contains '--trace-camera' -and $cameraArgs -contains '--trace-viewport') 'Modo Camera precisa registrar camera e viewport'
+    Assert-True ($cameraArgs -contains 'save path' -and $cameraArgs -notcontains '--headless') 'Camera precisa usar save isolado e janela interativa'
+    $normalArgs = @(Get-GuidedArguments 'host' 'Guiado' 'game path' 'save path' 'trace path')
+    Assert-True ($normalArgs -notcontains '--trace-camera' -and $normalArgs -notcontains '--trace-viewport') 'Host normal recebeu flags exclusivas do zoom'
+    $passed++; Write-Host 'OK: argumentos da janela de camera e preservacao do host normal'
+
     $shopLog = "[host] cash local 0 -> 170000; resposta da loja nao simulada (spinner pode permanecer).`n[sonda] quadro 100: rede=1 menu.estado=2"
     $observations = @(Get-SessionObservations $shopLog)
     Assert-True (@($observations | Where-Object { $_.Teste -eq 'Compra observada' -and $_.Estado -eq 'AVISO' }).Count -eq 1) 'Compra com cash alterado nao foi destacada'

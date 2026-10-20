@@ -6,7 +6,23 @@ Sao necessarios os executaveis compilados em `host/build/destinia_host.exe` e `h
 
 Ao baixar o pacote de testes, extraia todos os arquivos **na raiz do projeto existente**, mantendo a subpasta diagnostico. O pacote nao inclui o jogo, executaveis nem dependencias externas.
 
-## Duplo clique: modo guiado
+## Novo teste: camera do host_zoom
+
+No duplo clique, escolha **1 — Camera host_zoom**. A opcao 2 conserva o roteiro geral. Argumentos pelo Prompt continuam funcionando sem menu.
+
+Este modo verifica a inicializacao apenas do host_zoom, abre uma copia isolada do save e ativa `--trace-camera` junto com o trace de viewport. Nao exige recompilar os executaveis atuais. Nao solicita os testes gerais nem reabertura do save.
+
+1. Clique em TAP TO START e carregue a partida. Va ate a passagem com defeito.
+2. Pressione **F9 antes da transicao**: captura a tela e inicia a gravacao.
+3. Atravesse e, com o defeito visivel, pressione **F9 para parar**.
+4. Pressione **F9 novamente, ainda na tela com defeito**, para capturar o estado posterior. Aguarde alguns segundos e pressione F9 para encerrar.
+5. Feche o jogo normalmente. Responda se a camera funcionou (N se houve defeito) e descreva a passagem e o problema.
+
+O relatorio informa quantos BMPs foram encontrados e se existem linhas de camera no log. A contagem nao prova que as imagens correspondem a antes/depois; essa comparacao continua manual. Menos de duas imagens fica PENDENTE. Nao abra a loja neste teste.
+
+Envie `relatorio.txt`, `resultados.json`, os logs e `trace_viewport` da nova sessao. **Exclua as pastas com save** antes de compactar; nao precisa enviar sessoes antigas. A pasta exata aparece no inicio e no final do BAT.
+
+## Roteiro geral (opcao 2)
 
 1. Feche todas as janelas do Destinia e abra o BAT.
 2. Aguarde as verificacoes automaticas, com 60 quadros sem janela e capturas BMP por host.
@@ -27,6 +43,7 @@ Esses menus ainda podem travar ou alterar cash local; exigem teste separado e vo
 Na pasta do projeto:
 
 ```bat
+"Testar Destinia.bat" -Mode Camera
 "Testar Destinia.bat" -Mode Automatico
 "Testar Destinia.bat" -Variant host_zoom
 "Testar Destinia.bat" -RuntimeDir "D:\msys64\ucrt64\bin"
@@ -34,6 +51,7 @@ Na pasta do projeto:
 "Testar Destinia.bat" -Fresh
 ```
 
+- `-Mode Camera`: teste guiado focado, seleciona somente host_zoom e registra camera/viewport.
 - `-Mode Automatico`: sem janelas de gameplay ou perguntas. O BAT ainda pausa no final para leitura.
 - `-Variant host`, `host_zoom` ou `Ambos`: seleciona os executaveis.
 - `-SaveSource`: origem para copiar. Por padrao, procura `%LOCALAPPDATA%\Destinia\save`. Se a origem padrao nao existir, usa saves vazios e informa o aviso. Origem explicita inexistente e erro.
@@ -75,4 +93,4 @@ Codigo final 1 indica falha automatica ou manual. Codigo 0 significa que nenhuma
 
 ## Verificacao desta ferramenta
 
-Funcoes testadas com PowerShell 7 em Linux: isolamento e copia de saves, deteccao de erro com exit zero, BMP ausente/incorreto/truncado, captura real de stdout/stderr e timeout do proprio processo. Tambem foram testados os avisos de compra/rede, a atualizacao do relatorio e sua preservacao apos encerrar um processo de teste. O roteiro anterior ja foi exercitado pelo usuario no Windows; os ajustes de relatorio desta atualizacao ainda precisam de confirmacao no Windows PowerShell 5.1. Nenhuma correcao do host e anunciada por esses testes.
+Funcoes testadas com PowerShell 7 em Linux: isolamento e copia de saves, deteccao de erro com exit zero, BMP ausente/incorreto/truncado, captura real de stdout/stderr e timeout do proprio processo. Tambem foram testados os avisos de compra/rede, a atualizacao do relatorio e sua preservacao apos encerrar um processo de teste. O roteiro geral ja foi exercitado pelo usuario no Windows. O novo menu BAT e o modo focado em camera ainda precisam de confirmacao no Windows PowerShell 5.1. O fluxo Camera tambem foi exercitado com processo/janela e respostas simulados: somente zoom, falha manual, ausencia de capturas, sem reabertura e com save original preservado. Nenhum jogo foi executado nesses testes. Nenhuma correcao do host e anunciada por esses testes.

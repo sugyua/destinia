@@ -6,6 +6,13 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 
 ## Próxima atualização — limpeza e diagnóstico, sem nova release
 
+### Teste focado de câmera
+
+- BAT com menu para escolher entre câmera do host_zoom e roteiro geral; opções por linha de comando preservadas.
+- Novo `-Mode Camera`: seleciona somente host_zoom, ativa o registro passivo de câmera e viewport e orienta capturas F9 antes/depois da troca de mapa.
+- Perguntas limitadas à falha visual e sua descrição, sem repetir áudio, controles e salvar/reabrir. Relatório informa quantidade de capturas e ausência do log de câmera.
+- Saves continuam isolados. Nenhuma correção de câmera ou loja é anunciada; não é necessário recompilar o jogo.
+
 ### Ajustes após os testes de gameplay
 
 - O diagnóstico agora destaca compras observadas nos logs, alterações de cash e rede ainda aguardando resposta na última sonda. Uma espera já encerrada não é marcada como pendente.
