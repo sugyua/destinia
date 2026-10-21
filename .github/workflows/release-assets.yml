@@ -3,7 +3,7 @@ name: Anexar ZIPs das releases
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, release/v0.4-beta]
     paths: [.github/workflows/release-assets.yml]
 
 permissions:
@@ -28,10 +28,7 @@ jobs:
           import zipfile
 
           repository = os.environ['GITHUB_REPOSITORY']
-          approved = [
-              ('0.2', '8e70b4438e599e6357b5b4bf0a822305ea34f276'),
-              ('0.3', 'fb57ae2d9019813e9175dd6069ab473b5e9b8df7'),
-          ]
+          approved = [('0.4', '098f61fa7095004a37ae54e9b0b084b0fc26ce28')]
           with tempfile.TemporaryDirectory() as directory:
               for version, commit in approved:
                   tag = 'v' + version + '-beta'
