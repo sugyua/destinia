@@ -874,6 +874,7 @@ static int runHost(int argc, char** argv) {
   auto setFullscreen = [&](bool enabled) {
     if(enabled && !(SDL_GetWindowFlags(win)&SDL_WINDOW_FULLSCREEN)) SDL_GetWindowSize(win,&windowWidth,&windowHeight);
     if(SDL_SetWindowFullscreen(win,enabled?SDL_WINDOW_FULLSCREEN_DESKTOP:0)!=0) {
+      fullscreen=(SDL_GetWindowFlags(win)&SDL_WINDOW_FULLSCREEN)!=0;
       hostReport("[host] Nao foi possivel alternar tela cheia: %s\n",SDL_GetError()); return false;
     }
     fullscreen=enabled;
@@ -957,10 +958,17 @@ static int runHost(int argc, char** argv) {
           int wx=ev.type==SDL_MOUSEMOTION?ev.motion.x:ev.button.x,wy=ev.type==SDL_MOUSEMOTION?ev.motion.y:ev.button.y;
           int x=0,y=0;
           bool inside=mapMouseToGame(wx,wy,x,y,mouseDown && ev.type!=SDL_MOUSEBUTTONDOWN);
+          if(probe && ev.type!=SDL_MOUSEMOTION) {
+            int ww=0,wh=0,ow=0,oh=0; SDL_GetWindowSize(win,&ww,&wh); SDL_GetRendererOutputSize(ren,&ow,&oh);
+            hostReport("[sonda] SDL %s botao=%d janela_px=(%d,%d) tamanho_janela=%dx%d saida_render=%dx%d -> jogo=(%d,%d) dentro=%d\n",
+                       ev.type==SDL_MOUSEBUTTONDOWN?"BAIXO":"CIMA",(int)ev.button.button,wx,wy,ww,wh,ow,oh,x,y,(int)inside);
+          }
           if(ev.type==SDL_MOUSEBUTTONDOWN && ev.button.button==SDL_BUTTON_LEFT && inside) { mouseDown=true; touch(x,y,0); }
           else if(ev.type==SDL_MOUSEBUTTONUP && ev.button.button==SDL_BUTTON_LEFT && mouseDown) { mouseDown=false; touch(x,y,1); }
           else if(ev.type==SDL_MOUSEMOTION && mouseDown) touch(x,y,2);
         } else {
+          if(probe && ev.type==SDL_CONTROLLERBUTTONDOWN && ev.cbutton.which==controls.controllerId())
+            hostReport("[sonda] Controle BOTAO: %d\n",(int)ev.cbutton.button);
           controls.event(ev);
           if(ev.type==SDL_WINDOWEVENT && ev.window.event==SDL_WINDOWEVENT_SIZE_CHANGED && !fullscreen)
             SDL_GetWindowSize(win,&windowWidth,&windowHeight);
