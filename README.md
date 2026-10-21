@@ -136,13 +136,13 @@ Testes automatizados cobrem registro, morte única, reaparecimento, slots, persi
 
 ## Atualizações futuras
 
-Das **43 melhorias aprovadas**, **8 foram concluídas** nas versões 0.5 e 0.6; **35 ainda não estão concluídas**, incluindo o Códex entregue parcialmente, somente da **0.8 em diante**. As versões abaixo são metas provisórias, sem datas garantidas, e dependem de investigação e testes.
+Das **44 melhorias aprovadas**, **8 foram concluídas** nas versões 0.5 e 0.6; **36 ainda não estão concluídas**, incluindo o Códex entregue parcialmente, somente da **0.8 em diante**. As versões abaixo são metas provisórias, sem datas garantidas, e dependem de investigação e testes.
 
 **A expansão continua incluindo aumento do nível máximo, novos ranks de armas, armaduras e acessórios, itens únicos, conjuntos com bônus, novos títulos, novos pets, drops exclusivos por monstro e um Códex de equipamentos e monstros.** Limites, nomes e valores serão definidos após verificar dados originais e balanceamento.
 
 Consulte o [roadmap detalhado](docs/ROADMAP.md) para dependências, critérios de verificação e referências. A [investigação inicial de pets e títulos](docs/INVESTIGACAO_PETS_TITULOS.md) registra a base original encontrada e as condições para as metas 0.10 (títulos) e 0.11 (pets); nenhum desses conteúdos novos está implementado. A aprovação do planejamento não comprova a viabilidade de todos os itens nem autoriza automaticamente novas releases.
 
-**Novas classes em planejamento:** Mago e Berserker (item 44), com versão de entrega e terceira classe ainda a definir.
+**Novas classes em planejamento:** Mago, Berserker, Paladino, Monge, Necromante, Druida, Engenheiro e Granadeiro (item 44). Com as três atuais, a meta passa a ser **pelo menos 11 classes**. Armas exclusivas por classe (item 45): **foice para Necromante** e **granadas para Granadeiro**; demais equipamentos e versão de entrega a definir.
 
 **Novo objetivo para a 1.0:** cooperativo pela internet e LAN, registrado como item 43 e ainda não implementado.
 
@@ -219,11 +219,25 @@ O planejamento da **0.8 até a 0.12 permanece preservado**. A preparação para 
 
 O autor definiu as duas modalidades: **internet e rede local (LAN)**. Limite de jogadores, criação/entrada em salas, conteúdo compartilhado e regras de XP, drops e missões serão definidos na etapa de projeto. O escopo inicial é o port Windows; suporte a navegador, iOS ou partidas entre plataformas exige avaliação própria. A versão 1.0 só poderá ser considerada entregue com uma sessão cooperativa real validada, sem comprometer o modo solo nem os saves.
 
-### Novas classes — versão a definir
+### Novas classes e armas exclusivas — versão a definir
 
-- [ ] **44. Novas classes: Mago e Berserker:** Classes adicionais em planejamento, solicitadas pelo autor. Mago e Berserker são os dois nomes definidos até agora; a terceira classe mencionada continua a definir. Nenhuma dessas novas classes foi implementada.
+- [ ] **44. Oito novas classes, totalizando pelo menos 11:** Preservar as três classes atuais e acrescentar **Mago, Berserker, Paladino, Monge, Necromante, Druida, Engenheiro e Granadeiro**. As cinco propostas de Paladino a Engenheiro foram aprovadas pelo autor, que também acrescentou Granadeiro. São classes futuras, ainda não implementadas; a versão de entrega será escolhida após a investigação técnica.
+- [ ] **45. Armas exclusivas por classe:** Planejar famílias de armas e regras de equipamento próprias para algumas classes. Associações definidas pelo autor: **Necromante → foice** e **Granadeiro → granadas**. As demais armas, exclusividades e ferramentas adicionais do Granadeiro serão definidas na etapa de projeto, junto das restrições de uso e do balanceamento.
 
-Habilidades, armas/armaduras permitidas, atributos, animações e progressão serão definidos na etapa de projeto. Antes de escolher a versão de entrega, investigar os IDs e limites nativos de classes, a seleção/criação de personagens, os equipamentos e os campos dos saves; validar criação, combate, evolução e salvar/reabrir com os novos personagens. Preservar as classes e os saves existentes e avaliar a compatibilidade com o cooperativo planejado para a 1.0. O pedido registra o objetivo; ainda não confirma que a biblioteca ARM permite acrescentar novas classes sem outras alterações.
+| Nova classe | Direção de design aprovada | Arma definida pelo autor |
+| --- | --- | --- |
+| Mago | Identidade e habilidades a detalhar | A definir |
+| Berserker | Identidade e habilidades a detalhar | A definir |
+| Paladino | Resistência, proteção, cura moderada e auras para coop | A definir |
+| Monge | Combos, esquivas, contra-ataques e mobilidade | A definir |
+| Necromante | Lacaios, maldições, drenagem de vida e enfraquecimento | Foice |
+| Druida | Natureza, veneno, raízes, regeneração e interação com animais; transformações como possibilidade posterior | A definir |
+| Engenheiro | Bombas, armadilhas e torres, com preparação e posicionamento | A definir |
+| Granadeiro | Combate com granadas; habilidades e recursos adicionais a detalhar | Granadas |
+
+Cada classe deve funcionar no modo solo e oferecer sinergias no cooperativo. Diferenciar os dispositivos do Engenheiro das armas e habilidades do Granadeiro faz parte do projeto das classes; ainda não foram definidos tipos de granada, valores de dano ou habilidades específicas.
+
+**Dependências antes de escolher a versão:** investigar IDs e limites nativos de classes e armas, seleção/criação de personagens, requisitos de equipamento, animações, habilidades e campos dos saves. Definir progressão, atributos, obtenção, fabricação, drops e apresentação das novas armas no inventário e no Códex. Validar criação, equipar/recusar armas conforme a classe, combate, evolução e salvar/reabrir, preservando classes e saves existentes. Avaliar também a compatibilidade com o cooperativo planejado para a 1.0. O planejamento ainda não comprova a viabilidade de ampliar esses sistemas na biblioteca ARM original.
 
 Os recursos opcionais terão configurações próprias. Mudanças permanentes de progressão/conteúdo dependem de perfis e saves identificados para os modos clássico e expandido, sem conversão silenciosa. Antes de ampliar o jogo, será verificado o que já existe para melhorar os sistemas atuais. A publicação de cada nova release continuará dependendo da revisão das verificações e da aprovação do autor.
 

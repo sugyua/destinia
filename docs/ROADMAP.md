@@ -2,7 +2,7 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs. Faça backup dos saves antes de atualizar.**
 
-Planejamento autorizado pelo autor em **21/10/2026**: **43 melhorias aprovadas**, das quais **8 concluídas** na 0.5/0.6 e **35 ainda não concluídas**, incluindo o Códex entregue parcialmente, da 0.8 em diante. A publicação da **0.6 Beta** foi aprovada pelo autor. Testes automáticos passaram; campanha e inspeção manual no Windows continuam pendentes.
+Planejamento autorizado pelo autor em **21/10/2026**: **44 melhorias aprovadas**, das quais **8 concluídas** na 0.5/0.6 e **36 ainda não concluídas**, incluindo o Códex entregue parcialmente, da 0.8 em diante. A publicação da **0.6 Beta** foi aprovada pelo autor. Testes automáticos passaram; campanha e inspeção manual no Windows continuam pendentes.
 
 ## Melhorias concluídas com sucesso
 
@@ -43,7 +43,7 @@ As versões abaixo são **metas provisórias**, sem calendário garantido. Uma e
 | 0.11 | Missões, armazenamento, desafios, pets e Códex | Muito alta; depende de dados, animações/comportamento, eventos de descoberta e saves |
 | 0.12 | Pós-jogo e masmorras | Muito alta; etapa exploratória |
 | 1.0 | Cooperativo pela internet e LAN; preparação em etapas após a 0.12 | Muito alta; depende de investigação de rede, sincronização e saves |
-| A definir | Novas classes: Mago e Berserker; terceira classe ainda a definir | Muito alta; depende de IDs/limites de classes, habilidades, gráficos e saves |
+| A definir | Oito novas classes (11 no total) e armas exclusivas; Necromante com foice, Granadeiro com granadas | Muito alta; depende de IDs/limites de classes e armas, habilidades, gráficos e saves |
 
 ## Regras de implementação
 
@@ -153,11 +153,25 @@ O planejamento da **0.8 até a 0.12 permanece preservado**. A preparação para 
 
 O autor definiu as duas modalidades: **internet e rede local (LAN)**. Limite de jogadores, criação/entrada em salas, conteúdo compartilhado e regras de XP, drops e missões serão definidos na etapa de projeto. O escopo inicial é o port Windows; suporte a navegador, iOS ou partidas entre plataformas exige avaliação própria. A versão 1.0 só poderá ser considerada entregue com uma sessão cooperativa real validada, sem comprometer o modo solo nem os saves.
 
-### Novas classes — versão a definir
+### Novas classes e armas exclusivas — versão a definir
 
-- [ ] **44. Novas classes: Mago e Berserker:** Classes adicionais em planejamento, solicitadas pelo autor. Mago e Berserker são os dois nomes definidos até agora; a terceira classe mencionada continua a definir. Nenhuma dessas novas classes foi implementada.
+- [ ] **44. Oito novas classes, totalizando pelo menos 11:** Preservar as três classes atuais e acrescentar **Mago, Berserker, Paladino, Monge, Necromante, Druida, Engenheiro e Granadeiro**. As cinco propostas de Paladino a Engenheiro foram aprovadas pelo autor, que também acrescentou Granadeiro. São classes futuras, ainda não implementadas; a versão de entrega será escolhida após a investigação técnica.
+- [ ] **45. Armas exclusivas por classe:** Planejar famílias de armas e regras de equipamento próprias para algumas classes. Associações definidas pelo autor: **Necromante → foice** e **Granadeiro → granadas**. As demais armas, exclusividades e ferramentas adicionais do Granadeiro serão definidas na etapa de projeto, junto das restrições de uso e do balanceamento.
 
-Habilidades, armas/armaduras permitidas, atributos, animações e progressão serão definidos na etapa de projeto. Antes de escolher a versão de entrega, investigar os IDs e limites nativos de classes, a seleção/criação de personagens, os equipamentos e os campos dos saves; validar criação, combate, evolução e salvar/reabrir com os novos personagens. Preservar as classes e os saves existentes e avaliar a compatibilidade com o cooperativo planejado para a 1.0. O pedido registra o objetivo; ainda não confirma que a biblioteca ARM permite acrescentar novas classes sem outras alterações.
+| Nova classe | Direção de design aprovada | Arma definida pelo autor |
+| --- | --- | --- |
+| Mago | Identidade e habilidades a detalhar | A definir |
+| Berserker | Identidade e habilidades a detalhar | A definir |
+| Paladino | Resistência, proteção, cura moderada e auras para coop | A definir |
+| Monge | Combos, esquivas, contra-ataques e mobilidade | A definir |
+| Necromante | Lacaios, maldições, drenagem de vida e enfraquecimento | Foice |
+| Druida | Natureza, veneno, raízes, regeneração e interação com animais; transformações como possibilidade posterior | A definir |
+| Engenheiro | Bombas, armadilhas e torres, com preparação e posicionamento | A definir |
+| Granadeiro | Combate com granadas; habilidades e recursos adicionais a detalhar | Granadas |
+
+Cada classe deve funcionar no modo solo e oferecer sinergias no cooperativo. Diferenciar os dispositivos do Engenheiro das armas e habilidades do Granadeiro faz parte do projeto das classes; ainda não foram definidos tipos de granada, valores de dano ou habilidades específicas.
+
+**Dependências antes de escolher a versão:** investigar IDs e limites nativos de classes e armas, seleção/criação de personagens, requisitos de equipamento, animações, habilidades e campos dos saves. Definir progressão, atributos, obtenção, fabricação, drops e apresentação das novas armas no inventário e no Códex. Validar criação, equipar/recusar armas conforme a classe, combate, evolução e salvar/reabrir, preservando classes e saves existentes. Avaliar também a compatibilidade com o cooperativo planejado para a 1.0. O planejamento ainda não comprova a viabilidade de ampliar esses sistemas na biblioteca ARM original.
 
 ## Planejamento — drops exclusivos e Códex
 
