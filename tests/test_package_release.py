@@ -19,7 +19,8 @@ class PackageTests(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name) / "source"
         self.root.mkdir()
-        (self.root / "VERSION").write_text("0.2\n", encoding="utf-8")
+        # Fixture binaria: manter bytes LF identicos tambem no Windows.
+        (self.root / "VERSION").write_bytes(b"0.2\n")
         (self.root / "README.md").write_text("Beta\n", encoding="utf-8")
         self.out = Path(self.tmp.name) / "output"
 

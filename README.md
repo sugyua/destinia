@@ -87,7 +87,7 @@ Para testar uma instalação existente, execute **[Testar Destinia.bat](Testar%2
 
 O relatório é salvo ao longo da sessão e informa quando está parcial. Após cada execução, o diagnóstico também destaca compras observadas, alterações de cash e a rede aguardando resposta; esses avisos não significam que o problema da loja foi corrigido.
 
-Para esta versão, use o diagnóstico incluído no pacote completo de fontes 0.6, com EXEs da mesma versão. Não sobreponha os auxiliares antigos da main: eles podem não incluir as proteções de preferências da 0.6.
+Para esta versão, use o diagnóstico incluído no pacote completo de fontes 0.7, com EXEs da mesma versão. Não sobreponha os auxiliares antigos da main: eles podem não incluir as proteções de preferências da 0.6.
 
 Consulte [INSTALL.md](INSTALL.md) para compilar e executar com dados próprios compatíveis. Os launchers existentes continuam voltados ao ambiente de desenvolvimento MSYS2 em `C:\msys64\ucrt64\bin`; não são launchers portáteis.
 
@@ -100,7 +100,7 @@ python scripts/package_release.py --out dist/release-0.7
 
 No Linux, o comando pode ser `python3`. O empacotador cria ZIP e SHA-256, não compila executáveis. Não sobrescreve artefatos existentes. A reprodução byte a byte foi verificada com a mesma versão de Python/zlib; outras versões podem mudar a compressão.
 
-O [manifesto](release/manifest.json) usa a 0.5 como base. O workflow Windows compila/testa os EXEs e gera um pacote separado; o empacotador de fontes não compila executáveis. Consulte o [roadmap](docs/ROADMAP.md) para as etapas seguintes.
+O [manifesto](release/manifest.json) usa a 0.6 e seu planejamento como base da 0.7. O workflow Windows compila/testa os EXEs e gera um pacote separado; o empacotador de fontes não compila executáveis. Consulte o [roadmap](docs/ROADMAP.md) para as etapas seguintes.
 
 ## Melhorias concluídas com sucesso
 

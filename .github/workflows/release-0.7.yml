@@ -41,7 +41,7 @@ jobs:
             "$target/build/destinia_host.exe" --version
             grep -q 'SDL2_MIXER_FOUND:INTERNAL=1' "$target/build/CMakeCache.txt"
           done
-      - name: Testar ARM original estabilidade preferencias e Codex
+      - name: Testar ARM estabilidade preferencias Codex e empacotamento
         shell: msys2 {0}
         env:
           DESTINIA_NATIVE_TESTS: '1'

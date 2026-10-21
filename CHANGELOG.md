@@ -6,6 +6,8 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 
 ## 0.7 Beta — 21/10/2026
 
+- Teste de empacotamento com fixture binária de finais de linha idênticos no Windows e Linux; o pacote continua preservando os bytes dos arquivos originais.
+
 - Códex inicial de monstros nos dois hosts, com estados visto/derrotado e contador de mortes por espécie.
 - Botão CODEX F8, atalho F8 quando não remapeado, paginação e pausa da partida durante a consulta.
 - Registro auxiliar por slot em codex-v1.txt na pasta global de saves, compartilhado entre instalações e hosts; não muda o formato do save ARM nem importa mortes antigas.
