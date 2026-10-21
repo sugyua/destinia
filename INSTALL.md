@@ -1,12 +1,12 @@
-# Instalação e compilação — Destinia 0.2 Beta
+# Instalação e compilação — Destinia 0.3 Beta
 
 > **Versão Beta: pode conter diversos bugs. Faça backup dos saves.**
 
 ## O que está disponível nesta release de fontes
 
-`destinia-0.2-beta-source.zip` contém os fontes dos dois hosts, seus CMakeLists, launchers normais de desenvolvimento e documentação. **Não contém executável Windows nem os dados originais do jogo.** Extrair o ZIP não instala um jogo pronto para jogar.
+`destinia-0.3-beta-source.zip` contém os fontes dos dois hosts, seus CMakeLists, launchers normais de desenvolvimento e documentação. **Não contém executável Windows nem os dados originais do jogo.** Extrair o ZIP não instala um jogo pronto para jogar.
 
-Não há um instalador, assinatura digital ou pacote de DLLs validado nesta entrega. Um ZIP Windows executável só deve ser publicado depois das verificações em máquina limpa descritas em `docs/RELEASE_0.2.md`.
+Não há um instalador, assinatura digital ou pacote de DLLs validado nesta entrega. Um ZIP Windows executável só deve ser publicado depois das verificações em máquina limpa descritas em `docs/RELEASE_0.3.md`.
 
 ## Requisitos para compilar no Windows
 

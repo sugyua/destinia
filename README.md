@@ -1,8 +1,8 @@
-# Destinia para Windows — 0.2 Beta
+# Destinia para Windows — 0.3 Beta (candidata)
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**Primeira release: 0.2 Beta, distribuída em código-fonte.** O pacote contém os fontes, não um jogo pronto para executar. Veja [instalação](INSTALL.md), [changelog](CHANGELOG.md) e [plano e verificações da release](docs/RELEASE_0.2.md).
+**0.3 Beta preparada para revisão; a release publicada anterior é a 0.2 Beta.** O pacote contém os fontes, não um jogo pronto para executar. Veja [instalação](INSTALL.md), [changelog](CHANGELOG.md) e [plano e verificações da release](docs/RELEASE_0.3.md).
 
 ## Arquitetura
 
@@ -62,12 +62,12 @@ Para verificar o empacotador, com Python 3.9 ou superior:
 
 ```sh
 python -m unittest discover -s tests -v
-python scripts/package_release.py --out dist/candidata-0.2
+python scripts/package_release.py --out dist/candidata-0.3
 ```
 
 No Linux, o comando pode ser `python3`. O empacotador cria ZIP e SHA-256, não compila executáveis. Não sobrescreve artefatos existentes. A reprodução byte a byte foi verificada com a mesma versão de Python/zlib; outras versões podem mudar a compressão.
 
-O [manifesto](release/manifest.json) identifica o commit base anterior à 0.2. O pacote inclui as alterações desta versão, registradas na tag `v0.2-beta`.
+O [manifesto](release/manifest.json) usa a 0.2 Beta como base de comparação. As mudanças da candidata 0.3 estão no changelog; zoom out, fundo cinza e UI menor ficam para depois.
 
 ## Publicação
 

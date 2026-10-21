@@ -4,53 +4,48 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
-## Próxima atualização — zoom, limpeza e diagnóstico, sem nova release
+## 0.3 Beta — candidata preparada em 21/10/2026
 
-### Tela cheia proporcional no zoom
+Esta versão registra o estado atual com enquadramento original ampliado. A restauração do zoom out, o fundo cinza, a centralização dos mapas pequenos e o ajuste da UI ficam para a próxima atualização.
 
-- Opção `--fullscreen` abre o host_zoom em tela cheia sem bordas, na resolução atual do monitor; F11 alterna entre janela e tela cheia.
-- Launcher do zoom e teste focado de câmera passam a iniciar em tela cheia. O nome antigo do launcher é preservado para manter atalhos existentes.
-- Proporção original preservada: no monitor 3440×1440, imagem 2400×1440 centralizada, com barras laterais de 520 pixels; sem esticar ou cortar a imagem.
-- Framebuffer e capturas permanecem em 400×240. A apresentação ampliada continua usando o mapeamento proporcional do mouse.
+### Tela cheia e enquadramento
 
-### Zoom com enquadramento original
+- `host_zoom` renderiza em 400×240 e amplia a apresentação, com pixels nítidos e proporção preservada; a janela inicial é 800×480.
+- Opção `--fullscreen` para tela cheia sem bordas na resolução atual do monitor. F11 alterna entre tela cheia e janela. Launcher do zoom e teste focado iniciam em tela cheia.
+- No monitor 3440×1440, a imagem ocupa 2400×1440, centralizada, com barras externas de 520 pixels por lado. Não é renderização nativa ultrawide.
+- Mapeamento do mouse acompanha a área central e o redimensionamento; cliques nas barras externas não acionam o jogo.
+- PT, HUD, comandos e F9 preservados. As capturas do zoom passam a ter 400×240.
+- O zoom out anterior de 800×480 foi retirado nesta versão. A ausência da faixa preta/duplicação no enquadramento original não significa correção da câmera em visão ampliada.
 
-- host_zoom passa a renderizar em 400×240 e ampliar a apresentação para uma janela inicial de 800×480, com pixels nítidos. Antes, renderizava uma área de 800×480: mapas de 480 pixels ficavam alinhados à direita pela câmera original, deixando 320 pixels vazios à esquerda.
-- Preservados o mapeamento proporcional do mouse, PT, HUD e F9; as capturas passam a registrar o framebuffer original de 400×240. O zoom deixa de mostrar uma área maior do cenário.
-- Diagnóstico e launcher ajustados ao novo enquadramento. EXE antigo de 800×480 é identificado e exige recompilação, evitando testar a correção com um binário desatualizado.
-- Compilação e inicialização verificadas em Linux, além de teste da câmera ARM para mapa de 30×30 tiles. A confirmação visual da passagem no Windows continua pendente; nenhuma correção da loja foi feita.
+### Diagnóstico e proteção de saves
 
-### Teste focado de câmera
+- Adicionados `Testar Destinia.bat`, executor Windows PowerShell 5.1 e roteiro em português; nenhuma instalação, download ou compilação automática.
+- Menu com teste focado de câmera do host_zoom e roteiro geral dos dois hosts; opções por linha de comando preservadas.
+- Saves copiados para pastas isoladas por sessão/host, recusa de sobrescrita/links e comparação de hashes da origem antes/depois.
+- Verificação de ELF ARM, assets, executáveis, logs, contagem de quadros e integridade básica dos BMPs. Erros conhecidos no log não são ignorados quando o processo retorna zero.
+- Captura de stdout/stderr e timeout somente dos processos iniciados pelo diagnóstico.
+- Relatórios TXT/JSON desde o início, atualizados durante o roteiro, com etapa, indicação de sessão parcial, falhas, avisos e pendências.
+- Roteiro manual de gameplay, salvar/reabrir, câmera, entradas, áudio, PT/F9; modo focado evita repetir os demais itens e registra a descrição da falha.
+- Registro passivo de câmera, orientação de capturas F9 antes/depois e contagem de imagens. EXE antigo de 800×480 é identificado e exige recompilação.
+- Avisos de alterações locais de cash e rede aguardando na última sonda; recuperação posterior da rede evita aviso de espera ainda pendente. Compras não são validadas automaticamente.
+- Pacote separado do diagnóstico, com BAT, executor e instruções, sem dados originais, saves, executáveis ou dependências.
 
-- BAT com menu para escolher entre câmera do host_zoom e roteiro geral; opções por linha de comando preservadas.
-- Novo `-Mode Camera`: seleciona somente host_zoom, ativa o registro passivo de câmera e viewport e orienta capturas F9 antes/depois da troca de mapa.
-- Perguntas limitadas à falha visual e sua descrição, sem repetir áudio, controles e salvar/reabrir. Relatório informa quantidade de capturas e ausência do log de câmera.
-- Saves continuam isolados. Nenhuma correção de câmera ou loja é anunciada; não é necessário recompilar o jogo.
+### Organização, documentação e distribuição
 
-### Ajustes após os testes de gameplay
+- Removidos logs locais, backups, cópias antigas de fontes, configuração do editor, arquivos vazios e material pessoal de continuidade/exportação de conversas.
+- Reforçado o ignore para saves, relatórios, backups e credenciais. Nenhum save pessoal estava rastreado na árvore limpa; commits antigos não foram reescritos.
+- Mantidos fontes ativos, recursos originais no repositório e dados necessários à compilação; arquivos de distribuição continuam excluindo o APK extraído e saves.
+- BAT de diagnóstico normalizado para CRLF no Windows; launcher do zoom e instruções atualizados.
+- Adicionado contato para colaboradores no README, mantendo a seção Dependências e instalação separada de ferramentas/bibliotecas.
+- Versão 0.3 Beta no VERSION, manifesto e títulos dos dois hosts; notas, verificações, ZIP curado de fontes e SHA-256 preparados para revisão.
 
-- O diagnóstico agora destaca compras observadas nos logs, alterações de cash e rede ainda aguardando resposta na última sonda. Uma espera já encerrada não é marcada como pendente.
-- Relatórios gravados desde o início e atualizados a cada resultado, antes das perguntas e das janelas de teste, com indicação explícita de sessão parcial e etapa atual.
-- Resumo com contagem de falhas, avisos e pendências; código zero não é apresentado como aprovação de todos os recursos.
-- Preservação de resultados parciais testada com encerramento real de um processo auxiliar, além dos testes de detecção de compra/rede.
-- Pacote de testes atualizado, sem exigir recompilação dos hosts. Nenhuma alteração no gameplay, na loja ou nos saves originais.
+### Verificações e limites
 
-### Limpeza do repositório
-
-- Removidos logs de testes, relatórios de uso de CPU, backups dos fontes, cópias antigas não usadas no build, configuração local do editor, arquivo vazio e material pessoal de continuidade/exportação de conversas.
-- Não foram encontrados arquivos de save rastreados na árvore atual. Reforçado o `.gitignore` para pastas de saves, `msave.dat`, formatos de save, relatórios locais, backups e credenciais.
-- Preservados os fontes ativos, CMakeLists, recursos do jogo, launchers, ferramentas de diagnóstico, testes e documentação técnica útil.
-- A limpeza afeta a branch principal atual; não reescreve commits antigos nem altera a release 0.2 Beta já publicada.
-
-### Ferramenta de diagnóstico
-
-- Adicionado `Testar Destinia.bat` com executor PowerShell para verificações automáticas e roteiro guiado dos dois hosts.
-- Saves de teste isolados por sessão e por host, comparação de hashes da origem e proteção contra sobrescrita de cópias anteriores.
-- Verificação dos dados ARM, executáveis, logs, contagem de quadros e BMPs; falhas no log não são ignoradas quando o host retorna zero.
-- Limite de tempo por processo, captura de stdout/stderr, relatório em texto e JSON e roteiro manual de gameplay, salvar/reabrir, câmera, PT/F9 e entradas.
-- Pacote de testes para extrair no projeto existente, sem executáveis ou dependências externas; pastas de relatório/save geradas pelo diagnóstico ignoradas no Git.
-- Documentadas as limitações: compras/rede e erros internos de libc/ELF/SDL não são testados automaticamente; sem validação real de Windows nesta etapa.
-- Nenhuma alteração nos fontes do jogo ou na release 0.2 Beta já publicada.
+- Compilação, inicialização ARM, capturas e testes do empacotador/diagnóstico verificados em Linux. Teste da rotina ARM da câmera com mapa de 30×30 tiles; janela/textura, F11 e geometria ultrawide simulada também exercitados.
+- No Windows, o usuário informou troca de mapa sem defeito na sessão de 20/10 às 20:58, com inicialização 400×240, código zero e hashes da origem inalterados. Não houve captura F9 nessa sessão; o resultado manual não aprova todos os recursos.
+- A UI original foi ampliada junto com o cenário e continua grande; o usuário considera o contador de XP a referência desejada para o ajuste futuro. O contador já existia antes da 0.3.
+- Compras/rede continuam pendentes: alteração local de cash e rede aguardando foram observadas. Não foi confirmada compra online nem persistência do saldo.
+- Permanecem limitações de libc/ELF/SDL já documentadas na 0.2. Sem novo EXE Windows distribuível, instalador ou validação em máquina limpa; áudio não foi retestado em Linux nesta preparação.
 
 ## 0.2 Beta — 20/10/2026
 

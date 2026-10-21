@@ -1,6 +1,6 @@
 {
-  "version": "0.2",
-  "base_commit": "d9a9352bbbe9902b7b9bc3ef0dac2353b3f26611",
+  "version": "0.3",
+  "base_commit": "fa92ed696470ac68f2ad8274d9d2f9259f97f3ce",
   "files": [
     ".gitignore",
     "AGENTS.md",
@@ -27,6 +27,8 @@
     "tests/test_camera_mode.ps1",
     "tests/test_zoom_render.py",
     "tests/zoom_native_smoke.cpp",
-    "docs/VERIFICACAO_ZOOM_ORIGINAL.md"
+    "docs/VERIFICACAO_ZOOM_ORIGINAL.md",
+    "release/NOTAS_0.3.md",
+    "docs/RELEASE_0.3.md"
   ]
 }
