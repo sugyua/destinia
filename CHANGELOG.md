@@ -4,7 +4,9 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
-## Correções após a 0.7 — branch main, sem nova release
+## Atualização da 0.7 — Códex com imagens
+
+- Pacotes Windows x64 e fontes da compilação verificada `ba18cede` disponibilizados na pré-release `v0.7-codex-imagens`, com dois EXEs e checksums SHA-256. Versão interna continua 0.7 Beta; release original preservada.
 
 - Miniatura original de cada monstro ao lado do nome no Códex, nos dois hosts e no protótipo web. Montagem da primeira pose a partir dos sprites WBI/AGD do APK, preservando cores, transparência, variantes e o compartilhamento original de arte entre os chefes 101/103; sem sombras e efeitos externos.
 - Quatro monstros por página para manter as figuras legíveis. Nome, estado e contador de mortes continuam disponíveis; formato dos saves e registros anteriores preservados.
