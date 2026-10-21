@@ -131,9 +131,11 @@ Separar o tamanho da UI do zoom, melhorar a apresentação para teclado, control
 - [ ] **19. Atalhos visíveis nas habilidades:** Mostrar a tecla ou botão configurado junto às habilidades e adaptar os símbolos ao controle usado.
 - [ ] **24. Português mais completo e legível:** Completar diálogos e descrições ainda em inglês e investigar suporte a acentos/fontes, preservando espaço e quebras de linha.
 
-**Antecipação do item 42 — Códex inicial de monstros (bestiário):** Meta da **0.7**, limitada a uma lista consultável das espécies encontradas pelo personagem, com os estados **visto** e **derrotado** separados. Monstros ainda não descobertos permanecem ocultos. Preservar o registro entre sessões sem mudar a lógica de combate nem reescrever o formato do save original. Armas, armaduras e integração com drops exclusivos continuam para a **0.11**. Esta é uma entrega parcial planejada; o item 42 completo permanece pendente.
+**Antecipação do item 42 — Códex inicial de monstros (bestiário):** Meta da **0.7**, limitada a uma lista consultável das espécies encontradas pelo personagem, com os estados **visto** e **derrotado** separados e um **contador de derrotas por espécie**. Monstros ainda não descobertos permanecem ocultos. Preservar o registro entre sessões sem mudar a lógica de combate nem reescrever o formato do save original. Armas, armaduras e integração com drops exclusivos continuam para a **0.11**. Esta é uma entrega parcial planejada; o item 42 completo permanece pendente.
 
 **Condição para antecipar:** investigar um arquivo auxiliar associado de forma estável ao personagem, junto à pasta compartilhada de saves, sem depender de editar o save ARM. Validar salvar/reabrir, isolamento entre personagens e atualizações; a viabilidade dessa associação ainda precisa ser comprovada. Não haverá promessa de recuperar encontros ou derrotas antigos que o jogo não tenha guardado.
+
+**Contador por espécie — fase inicial da 0.7:** mostrar no Códex quantos monstros de cada espécie o personagem derrotou. Um monstro apenas visto permanece com zero derrotas registradas; cada nova derrota confirmada soma uma unidade, contando cada morte uma única vez. Preservar os totais por personagem entre sessões, hosts e atualizações que usam a mesma pasta de saves. Em saves antigos, importar apenas contagens comprováveis; na ausência de histórico, identificar a contagem como registrada desde a implementação, sem apresentar zero como prova de que o personagem nunca matou aquela espécie.
 
 ### Meta 0.8 — Saves, compatibilidade e loja offline
 
@@ -179,7 +181,7 @@ Adicionar baú compartilhado, informação de missões, dificuldades opcionais, 
 - [ ] **32. Dificuldades opcionais:** Perfis de dificuldade com ajustes de inimigos e recompensas; preservar uma experiência equivalente à original.
 - [ ] **35. Contratos repetíveis offline:** Objetivos opcionais de caça/coleta para dar propósito ao pós-jogo, com recompensas e repetição controladas.
 - [ ] **39. Novos pets:** Acrescentar mascotes ao sistema original, com aparência, animações, atributos, habilidades, evolução e obtenção offline a definir; validar IDs, comportamento e salvamento no modo expandido, preservando os pets existentes.
-- [ ] **42. Códex de equipamentos e monstros:** Entrega em fases: bestiário com monstros vistos/derrotados antecipado como meta da 0.7; armas e armaduras encontradas/obtidas e integração com drops exclusivos ficam na 0.11. Preservar descobertas por personagem entre sessões e ocultar conteúdos ainda não descobertos; marcar o item completo somente após entregar as duas fases.
+- [ ] **42. Códex de equipamentos e monstros:** Entrega em fases: bestiário com monstros vistos/derrotados e contador de derrotas por espécie antecipado como meta da 0.7; armas e armaduras encontradas/obtidas e integração com drops exclusivos ficam na 0.11. Preservar descobertas por personagem entre sessões e ocultar conteúdos ainda não descobertos; marcar o item completo somente após entregar as duas fases.
 
 ### Meta 0.12 — Pós-jogo e masmorras
 
