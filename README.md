@@ -1,8 +1,10 @@
-# Destinia para Windows — 0.3 Beta (candidata)
+# Destinia para Windows — 0.3 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**0.3 Beta preparada para revisão; a release publicada anterior é a 0.2 Beta.** O pacote contém os fontes, não um jogo pronto para executar. Veja [instalação](INSTALL.md), [changelog](CHANGELOG.md) e [plano e verificações da release](docs/RELEASE_0.3.md).
+**Versão atual: 0.3 Beta, distribuída em código-fonte.**
+
+**[Baixar a versão 0.3](https://github.com/sugyua/destinia/releases/tag/v0.3-beta)** · [Versão 0.2](https://github.com/sugyua/destinia/releases/tag/v0.2-beta) · [Todas as releases](https://github.com/sugyua/destinia/releases) O pacote contém os fontes, não um jogo pronto para executar. Veja [instalação](INSTALL.md), [changelog](CHANGELOG.md) e [plano e verificações da release](docs/RELEASE_0.3.md).
 
 ## Arquitetura
 
@@ -67,11 +69,11 @@ python scripts/package_release.py --out dist/candidata-0.3
 
 No Linux, o comando pode ser `python3`. O empacotador cria ZIP e SHA-256, não compila executáveis. Não sobrescreve artefatos existentes. A reprodução byte a byte foi verificada com a mesma versão de Python/zlib; outras versões podem mudar a compressão.
 
-O [manifesto](release/manifest.json) usa a 0.2 Beta como base de comparação. As mudanças da candidata 0.3 estão no changelog; zoom out, fundo cinza e UI menor ficam para depois.
+O [manifesto](release/manifest.json) usa a 0.2 Beta como base de comparação. As mudanças da 0.3 estão no changelog; zoom out, fundo cinza e UI menor ficam para depois.
 
 ## Publicação
 
-Versão **v0.2-beta**, primeira release do port, marcada como **pré-lançamento** no GitHub e aprovada pelo usuário após revisão das verificações e limitações.
+Versão **v0.3-beta**, aprovada pelo usuário após revisão das verificações e limitações. A 0.3 é a release principal no GitHub, mas continua **Beta**, com possíveis bugs e recursos incompletos. A primeira release **v0.2-beta** permanece disponível em Releases.
 
 O ZIP curado não inclui biblioteca original, APK, DEX, assets, áudio, saves ou DLLs de terceiros. Consulte [THIRD_PARTY.md](THIRD_PARTY.md). Não foi definida uma licença para o código do host nesta etapa.
 

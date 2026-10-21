@@ -1,4 +1,4 @@
-# Preparação da release 0.3 Beta
+# Verificações da release 0.3 Beta
 
 ## Escopo aprovado
 
@@ -8,12 +8,12 @@ Esta candidata altera somente identificação de versão, documentação, notas 
 
 ## Distribuição
 
-- Tag proposta: v0.3-beta; pré-lançamento.
+- Tag: v0.3-beta; jogo em versão Beta.
 - ZIP curado: destinia-0.3-beta-source.zip, com SHA-256.
 - Base de comparação: fa92ed696470ac68f2ad8274d9d2f9259f97f3ce (0.2 Beta).
 - Arquivos incluídos definidos em release/manifest.json. APK extraído, saves, logs e dependências excluídos.
 - Revisar também a exportação automática da tag, que tem regras próprias em .gitattributes.
-- Publicação de tag/release depende da aprovação final do usuário após revisão das verificações.
+- Publicação de tag/release aprovada pelo usuário em 21/10/2026 após revisão. A release é destacada como principal no GitHub para aparecer no painel Releases; título e aviso mantêm a classificação Beta.
 
 ## Validação do usuário
 

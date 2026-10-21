@@ -27,6 +27,6 @@ Compilação e inicialização verificadas em Linux; testes do empacotador e dia
 
 A UI original continua grande após ampliação. A câmera com zoom out ainda não está corrigida; o enquadramento original evita o caso que produzia a faixa lateral. Compras podem alterar cash local e ficar aguardando rede. Não foram validados compra online, persistência desse saldo, todos os casos internos de emulação, áudio nesta preparação ou instalação Windows em máquina limpa.
 
-ZIP curado e SHA-256 serão disponibilizados com a publicação aprovada; a candidata está em revisão. Nenhum instalador ou dependência externa será incluído.
+O ZIP curado e o SHA-256 estão na página da release no GitHub. Nenhum instalador ou dependência externa está incluído. A publicação foi aprovada pelo usuário; o jogo permanece Beta.
 
 Se quiser ajudar no projeto, entre em contato comigo pelo WhatsApp: [+55 21 97468-6880](https://wa.me/5521974686880).
