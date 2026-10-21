@@ -1,8 +1,8 @@
-# Destinia 0.6 Beta — candidata para aprovação
+# Destinia 0.6 Beta — configurações e distribuição Windows
 
 > **AVISO: o jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves.**
 
-A 0.6 prepara configurações persistentes e executáveis Windows dos dois hosts. A release pública atual continua sendo a 0.5; esta candidata aguarda aprovação para publicação.
+A 0.6 entrega configurações persistentes e executáveis Windows dos dois hosts. Publicação aprovada pelo autor após os testes automatizados; a validação manual da campanha no Windows permanece pendente.
 
 ## O que mudou desde a 0.5
 
@@ -16,6 +16,13 @@ A 0.6 prepara configurações persistentes e executáveis Windows dos dois hosts
 
 Não foram alterados nível máximo, itens, regras da campanha, ritmo ARM ou escala nativa da UI; essas melhorias continuam no roadmap.
 
+## Downloads
+
+- [Windows x64 — dois EXEs prontos](https://github.com/sugyua/destinia/releases/download/v0.6-beta/destinia-0.6-beta-windows-x64.zip) · [SHA-256](https://github.com/sugyua/destinia/releases/download/v0.6-beta/destinia-0.6-beta-windows-x64.zip.sha256)
+- [Código-fonte](https://github.com/sugyua/destinia/releases/download/v0.6-beta/destinia-0.6-beta-source.zip) · [SHA-256](https://github.com/sugyua/destinia/releases/download/v0.6-beta/destinia-0.6-beta-source.zip.sha256)
+
+O README e o roadmap marcam os oito itens concluídos com sucesso na 0.5/0.6. As atualizações futuras agora contêm somente os 29 itens planejados da 0.7 em diante.
+
 ## Instalação e dependências
 
 Extraia em pasta nova, instale separadamente as dependências de [README.md](../README.md#dependências) e disponha seus dados originais em `game`. O pacote Windows não precisa de compilação; abra um dos inicializadores BAT. Consulte [INSTALL.md](../INSTALL.md) e [PREFERENCIAS.md](../docs/PREFERENCIAS.md).
@@ -24,6 +31,6 @@ Os ZIPs não incluem DLLs, instaladores, ferramentas externas, APK/áudio/assets
 
 ## Verificações e limites
 
-Compilações e testes automatizados em Linux e Windows, com biblioteca ARM original, mixer real e saves descartáveis. Resultados e identificação dos artefatos em [RELEASE_0.6.md](../docs/RELEASE_0.6.md). Testes automáticos não substituem campanha manual, controle físico, audição ou inspeção visual no PC do autor.
+**31 testes Python no Linux, 19 no Windows e cinco scripts PowerShell 5.1 aprovados**, com biblioteca ARM original, mixer real e saves descartáveis. Resultados e identificação dos artefatos em [RELEASE_0.6.md](../docs/RELEASE_0.6.md). Testes automáticos não substituem campanha manual, controle físico, audição ou inspeção visual no PC do autor.
 
 Se quiser ajudar no projeto, entre em contato comigo pelo WhatsApp: [+55 21 97468-6880](https://wa.me/5521974686880).

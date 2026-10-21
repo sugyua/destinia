@@ -1,6 +1,6 @@
-# Verificações da candidata 0.6 Beta
+# Verificações da release 0.6 Beta
 
-> **Beta: pode apresentar diversos bugs. Faça backup dos saves. A publicação da 0.6 aguarda aprovação do autor.**
+> **Beta: pode apresentar diversos bugs. Faça backup dos saves. Publicação aprovada pelo autor em 21/10/2026; campanha manual no Windows continua pendente.**
 
 ## Escopo
 
@@ -30,4 +30,6 @@ Workflow `.github/workflows/windows-candidate.yml`, runner Windows Server 2022 c
 
 Pacotes separados de fontes e Windows x64, cada um com SHA-256. Dados `game`, saves, logs, backups, DLLs, instaladores e ferramentas externas excluídos. Dependências em README/INSTALL; dados compatíveis fornecidos pelo usuário.
 
-A candidata fica na [PR #2](https://github.com/sugyua/destinia/pull/2), em branch separada, para revisão e teste. Os EXEs vêm do run Windows identificado acima; a documentação final pode ter commits posteriores, sem alteração do código compilado. O pacote final é remontado com esses EXEs e a documentação revisada, mantendo a identidade de compilação em BUILD_INFO.txt. Não criar tag ou release 0.6 sem aprovação separada. A release pública atual é a 0.5 Beta.
+Publicação aprovada pelo autor após apresentação dos resultados e limitações. A [PR #2](https://github.com/sugyua/destinia/pull/2) integra a versão na main, com tag `v0.6-beta` e pacotes na [release 0.6](https://github.com/sugyua/destinia/releases/tag/v0.6-beta). Os EXEs vêm do run Windows identificado acima; o [run 39593539235](https://github.com/sugyua/destinia/actions/runs/39593539235) também aprovou a revisão final de preparação. Os commits de publicação posteriores alteram documentação, sem mudar o código C++ verificado. O pacote Windows é remontado com os mesmos EXEs e a documentação da publicação; BUILD_INFO.txt mantém a identidade de compilação.
+
+README e roadmap registram os oito itens implementados com sucesso na 0.5/0.6. A seção Atualizações futuras contém somente os 29 itens da 0.7 em diante; não há promessa de viabilidade ou data para as alterações ARM de conteúdo.

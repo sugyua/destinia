@@ -1,12 +1,12 @@
-# Instalação e compilação — Destinia 0.6 Beta (candidata)
+# Instalação e compilação — Destinia 0.6 Beta
 
-> **Versão Beta: pode conter diversos bugs. Faça backup dos saves. A release 0.6 ainda aguarda aprovação.**
+> **Versão Beta: pode conter diversos bugs. Faça backup dos saves. Publicação aprovada pelo autor; campanha manual no Windows ainda pendente.**
 
 ## Pacotes
 
 - `destinia-0.6-beta-windows-x64.zip`: dois EXEs do port, inicializadores BAT, configuradores e documentação. **Não precisa compilar.**
 - `destinia-0.6-beta-source.zip`: fontes, testes, compilador BAT e documentação para desenvolvimento.
-- Cada pacote acompanha `.sha256`. Não inclui dados do APK, saves pessoais, DLLs, instaladores ou ferramentas externas. A candidata Windows é produzida pelo workflow `Compilar e testar candidata Windows`; os resultados estão em [RELEASE_0.6.md](docs/RELEASE_0.6.md).
+- Cada pacote acompanha `.sha256`. Não inclui dados do APK, saves pessoais, DLLs, instaladores ou ferramentas externas. A compilação Windows foi produzida pelo workflow `Compilar e testar candidata Windows`; os resultados estão em [RELEASE_0.6.md](docs/RELEASE_0.6.md).
 
 ## Dependências de execução
 
@@ -16,7 +16,7 @@ Instale separadamente o [MSYS2](https://www.msys2.org/), usando o ambiente **UCR
 pacman -S --needed mingw-w64-ucrt-x86_64-SDL2 mingw-w64-ucrt-x86_64-SDL2_mixer mingw-w64-ucrt-x86_64-unicorn
 ```
 
-O gerenciador instala também as dependências transitivas. Não misture DLLs de MSYS, MINGW64 e UCRT64. SDL2/Unicorn e suas bibliotecas de execução são obrigatórios; os EXEs da candidata são compilados com SDL2_mixer e também precisam de suas DLLs. Não baixe DLLs avulsas: use os pacotes do mesmo ambiente. Os inicializadores acrescentam `C:\msys64\ucrt64\bin` ao PATH apenas naquele processo.
+O gerenciador instala também as dependências transitivas. Não misture DLLs de MSYS, MINGW64 e UCRT64. SDL2/Unicorn e suas bibliotecas de execução são obrigatórios; os EXEs da 0.6 são compilados com SDL2_mixer e também precisam de suas DLLs. Não baixe DLLs avulsas: use os pacotes do mesmo ambiente. Os inicializadores acrescentam `C:\msys64\ucrt64\bin` ao PATH apenas naquele processo.
 
 Se o MSYS2 estiver em outro local, defina `DESTINIA_MSYS2_ROOT`, por exemplo no Prompt:
 

@@ -95,3 +95,9 @@ Orientacao atual — publicacao 0.5 e candidata 0.6 (21/10/2026)
 * Autor aprovou publicar a 0.5 com validacao manual no Windows pendente, apos conhecer resultados locais; nao solicitar essa aprovacao novamente.
 * Preparar e testar a 0.6 conforme roadmap: preferencias persistentes, remapeamento de comandos, volumes separados, pausa opcional e distribuicao de EXEs Windows. Nao publicar a release 0.6 antes da aprovacao correspondente.
 * Dependencias externas permanecem fora dos pacotes; documentar requisitos e distinguir verificacao automatizada de gameplay manual.
+
+Orientacao atual — publicacao 0.6 (21/10/2026)
+
+* Autor autorizou publicar a 0.6 apos apresentacao dos testes e limitacoes; nao solicitar a mesma aprovacao novamente.
+* Registrar todas as mudancas desde a 0.5 em portugues, marcar os oito itens entregues e deixar nas atualizacoes futuras somente a 0.7 em diante.
+* Manter pendencias manuais explicitas; sucesso de implementacao/testes automatizados nao comprova toda a campanha no Windows.
