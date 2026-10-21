@@ -28,7 +28,7 @@ jobs:
           import zipfile
 
           repository = os.environ['GITHUB_REPOSITORY']
-          approved = [('0.4', '09be5c429e9dff2ceb502cc69f9f8374693ccd3b')]
+          approved = [('0.5', '29c442ebbb6c40ca75c7da9c4aaf68b7f8d984ff')]
           with tempfile.TemporaryDirectory() as directory:
               for version, commit in approved:
                   tag = 'v' + version + '-beta'
@@ -49,8 +49,8 @@ jobs:
                       for name in zipped.namelist():
                           path = pathlib.PurePosixPath(name)
                           if ('game' in path.parts or 'relatorios' in path.parts
-                                  or any(part.lower().startswith('save') for part in path.parts)
-                                  or path.suffix.lower() in {'.exe', '.dll', '.so', '.dex', '.dat'}):
+                                  or any(part.lower().startswith('save') or part.lower().endswith('_backups') for part in path.parts[:-1])
+                                  or path.suffix.lower() in {'.exe', '.dll', '.so', '.dex', '.dat', '.sav', '.save', '.srm', '.log'}):
                               raise RuntimeError('Arquivo indevido no pacote: ' + name)
                   subprocess.run(['gh', 'release', 'upload', tag, str(archive), str(checksum),
                                   '--repo', repository, '--clobber'], check=True)
