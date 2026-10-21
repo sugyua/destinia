@@ -120,16 +120,20 @@ Das **41 melhorias aprovadas**, **8 foram concluídas** nas versões 0.5 e 0.6; 
 
 Consulte o [roadmap detalhado](docs/ROADMAP.md) para dependências, critérios de verificação e referências. A [investigação inicial de pets e títulos](docs/INVESTIGACAO_PETS_TITULOS.md) registra a base original encontrada e as condições para as metas 0.10 (títulos) e 0.11 (pets); nenhum desses conteúdos novos está implementado. A aprovação do planejamento não comprova a viabilidade de todos os itens nem autoriza automaticamente novas releases.
 
-**Metas dos novos pedidos:** drops exclusivos por monstro na **0.10** e Códex na **0.11**, após mapear IDs, eventos de descoberta/obtenção/derrota e persistência por personagem. No save antigo, registrar apenas o que puder ser comprovado; não inventar o histórico de monstros derrotados ou itens já vendidos. Ainda são recursos planejados, sujeitos à investigação.
+**Metas dos novos pedidos:** Códex inicial somente de monstros na **0.7**, drops exclusivos por monstro na **0.10** e ampliação do Códex com armas e armaduras na **0.11**. A antecipação depende de validar IDs, eventos reais de encontro/derrota e persistência por personagem. No save antigo, registrar apenas o que puder ser comprovado; não inventar o histórico de monstros derrotados ou itens já vendidos. Ainda são recursos planejados, sujeitos à investigação.
 
-### Meta 0.7 — Interface e acessibilidade
+### Meta 0.7 — Interface, acessibilidade e Códex inicial de monstros
 
-Separar o tamanho da UI do zoom e melhorar a apresentação para teclado, controle e português.
+Separar o tamanho da UI do zoom, melhorar a apresentação para teclado, controle e português e antecipar a fase de monstros do Códex.
 
 - [ ] **08. Escala de UI independente do zoom:** Escolher tamanho da interface e do texto sem mudar a quantidade de cenário visível; alinhar as regiões clicáveis.
 - [ ] **09. Ocultar botões virtuais:** Opção de esconder direcional e botões de toque ao jogar por teclado/controle, mantendo os comandos físicos.
 - [ ] **19. Atalhos visíveis nas habilidades:** Mostrar a tecla ou botão configurado junto às habilidades e adaptar os símbolos ao controle usado.
 - [ ] **24. Português mais completo e legível:** Completar diálogos e descrições ainda em inglês e investigar suporte a acentos/fontes, preservando espaço e quebras de linha.
+
+**Antecipação do item 42 — Códex inicial de monstros (bestiário):** Meta da **0.7**, limitada a uma lista consultável das espécies encontradas pelo personagem, com os estados **visto** e **derrotado** separados. Monstros ainda não descobertos permanecem ocultos. Preservar o registro entre sessões sem mudar a lógica de combate nem reescrever o formato do save original. Armas, armaduras e integração com drops exclusivos continuam para a **0.11**. Esta é uma entrega parcial planejada; o item 42 completo permanece pendente.
+
+**Condição para antecipar:** investigar um arquivo auxiliar associado de forma estável ao personagem, junto à pasta compartilhada de saves, sem depender de editar o save ARM. Validar salvar/reabrir, isolamento entre personagens e atualizações; a viabilidade dessa associação ainda precisa ser comprovada. Não haverá promessa de recuperar encontros ou derrotas antigos que o jogo não tenha guardado.
 
 ### Meta 0.8 — Saves, compatibilidade e loja offline
 
@@ -168,14 +172,14 @@ Aumentar o nível máximo e acrescentar ranks, itens inéditos, conjuntos, recei
 
 ### Meta 0.11 — Missões, armazenamento, desafios, pets e Códex
 
-Adicionar baú compartilhado, informação de missões, dificuldades opcionais, contratos offline, novos pets e um Códex de descobertas.
+Adicionar baú compartilhado, informação de missões, dificuldades opcionais, contratos offline, novos pets e ampliar o Códex com equipamentos.
 
 - [ ] **18. Baú compartilhado entre personagens:** Transferir itens entre personagens pelo armazenamento local, com proteção contra perda/duplicação.
 - [ ] **23. Rastreador de missão:** Mostrar objetivo ativo e, quando houver coordenadas conhecidas, marcador de destino; verificar os recursos originais existentes.
 - [ ] **32. Dificuldades opcionais:** Perfis de dificuldade com ajustes de inimigos e recompensas; preservar uma experiência equivalente à original.
 - [ ] **35. Contratos repetíveis offline:** Objetivos opcionais de caça/coleta para dar propósito ao pós-jogo, com recompensas e repetição controladas.
 - [ ] **39. Novos pets:** Acrescentar mascotes ao sistema original, com aparência, animações, atributos, habilidades, evolução e obtenção offline a definir; validar IDs, comportamento e salvamento no modo expandido, preservando os pets existentes.
-- [ ] **42. Códex de equipamentos e monstros:** Consultar todas as armas, armaduras e espécies de monstros já registradas pelo personagem, distinguindo equipamento encontrado de obtido e monstro encontrado de derrotado; salvar as descobertas entre sessões e manter o conteúdo ainda não descoberto oculto.
+- [ ] **42. Códex de equipamentos e monstros:** Entrega em fases: bestiário com monstros vistos/derrotados antecipado como meta da 0.7; armas e armaduras encontradas/obtidas e integração com drops exclusivos ficam na 0.11. Preservar descobertas por personagem entre sessões e ocultar conteúdos ainda não descobertos; marcar o item completo somente após entregar as duas fases.
 
 ### Meta 0.12 — Pós-jogo e masmorras
 

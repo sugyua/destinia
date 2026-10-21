@@ -27,7 +27,7 @@ As versões abaixo são **metas provisórias**, sem calendário garantido. Uma e
 
 | Meta | Foco | Dificuldade preliminar |
 | --- | --- | --- |
-| 0.7 | Interface e acessibilidade | Alta; depende de investigação ARM/renderização |
+| 0.7 | Interface, acessibilidade e Códex inicial de monstros | Alta; depende de renderização, IDs/eventos de encontro e derrota e registro auxiliar por personagem |
 | 0.8 | Saves, compatibilidade e loja offline | Alta; depende de investigação de saves e callbacks ARM |
 | 0.9 | Inventário, coleta e assistência opcional | Alta; depende de dados, UI e persistência nativos |
 | 0.10 | Progressão expandida, equipamentos, títulos e drops exclusivos | Muito alta; exige mapear progressão, IDs/condições, tabelas de drops e balanceamento |
@@ -47,9 +47,9 @@ As versões abaixo são **metas provisórias**, sem calendário garantido. Uma e
 
 ## Etapas futuras aprovadas
 
-### Meta 0.7 — Interface e acessibilidade
+### Meta 0.7 — Interface, acessibilidade e Códex inicial de monstros
 
-Separar o tamanho da UI do zoom e melhorar a apresentação para teclado, controle e português.
+Separar o tamanho da UI do zoom, melhorar a apresentação para teclado, controle e português e antecipar a fase de monstros do Códex.
 
 **Dependências:** Depende das configurações da 0.6 e da identificação de como a UI nativa é desenhada e recebe cliques.
 
@@ -59,6 +59,14 @@ Separar o tamanho da UI do zoom e melhorar a apresentação para teclado, contro
 - [ ] **24. Português mais completo e legível:** Completar diálogos e descrições ainda em inglês e investigar suporte a acentos/fontes, preservando espaço e quebras de linha.
 
 **Verificação necessária antes da entrega:** Conferir texto, acentos, símbolos dos comandos e regiões clicáveis; testar janela, DPI e tela cheia 3440×1440 com imagem proporcional 2400×1440.
+
+**Antecipação do item 42 — Códex inicial de monstros (bestiário):** Meta da **0.7**, limitada a uma lista consultável das espécies encontradas pelo personagem, com os estados **visto** e **derrotado** separados. Monstros ainda não descobertos permanecem ocultos. Preservar o registro entre sessões sem mudar a lógica de combate nem reescrever o formato do save original. Armas, armaduras e integração com drops exclusivos continuam para a **0.11**. Esta é uma entrega parcial planejada; o item 42 completo permanece pendente.
+
+**Investigação e condições da antecipação:** a biblioteca original exporta `Mon_createMonster`, `procMonster` e `checkMonsterBeaten`; o host já dispõe de observação por hooks Unicorn e leitura de memória emulada. São candidatos de investigação, não eventos de descoberta/derrota já validados: criar ou carregar um monstro não prova que apareceu na tela, e o nome de uma rotina não comprova morte. Mapear IDs de espécie, visibilidade e confirmação de derrota antes de registrar os estados.
+
+Investigar persistência em arquivo auxiliar associado de forma estável ao personagem, junto à pasta global de saves compartilhada pelos hosts Windows, para não depender da alteração do formato ARM nem de concluir toda a meta 0.8. A identificação do personagem, o formato auxiliar e a integração ainda não foram comprovados. Preservar o save original; se a associação ou os eventos não forem seguros, reavaliar a meta e registrar a limitação.
+
+**Verificação do bestiário antes da entrega:** observar um monstro visível sem derrotá-lo; derrotá-lo e conferir a mudança de estado; repetir sem duplicar a espécie; trocar de mapa sem registrar mortes falsas; conferir inimigos carregados fora da tela, chefes e IDs inválidos; salvar/reabrir, alternar hosts/instalações na mesma pasta compartilhada e manter personagens separados. Em save antigo, importar somente histórico comprovável; começar a registrar os demais encontros a partir da implementação. Não marcar este planejamento como recurso concluído.
 
 ### Meta 0.8 — Saves, compatibilidade e loja offline
 
@@ -109,16 +117,16 @@ Aumentar o nível máximo e acrescentar ranks, itens inéditos, conjuntos, recei
 
 ### Meta 0.11 — Missões, armazenamento, desafios, pets e Códex
 
-Adicionar baú compartilhado, informação de missões, dificuldades opcionais, contratos offline, novos pets e um Códex de descobertas.
+Adicionar baú compartilhado, informação de missões, dificuldades opcionais, contratos offline, novos pets e ampliar o Códex com equipamentos.
 
-**Dependências:** Baú depende da gravação segura da 0.8; missões e recompensas exigem mapear objetivos e validar a economia expandida. Novos pets também exigem mapear IDs, tabelas de habilidades/evolução, animações, comportamento e campos do save. A meta 0.10 fornece a base de expansão e balanceamento. O Códex exige identificar os equipamentos e monstros por IDs estáveis e observar eventos reais de encontro, obtenção e derrota, com persistência por personagem.
+**Dependências:** Baú depende da gravação segura da 0.8; missões e recompensas exigem mapear objetivos e validar a economia expandida. Novos pets também exigem mapear IDs, tabelas de habilidades/evolução, animações, comportamento e campos do save. A meta 0.10 fornece a base de expansão e balanceamento. A fase de equipamentos do Códex exige identificar armas/armaduras por IDs estáveis e observar encontro e obtenção, preservando os registros do bestiário cuja fase inicial foi antecipada para a 0.7. A ampliação continua dependendo de inventário e persistência compatíveis.
 
 - [ ] **18. Baú compartilhado entre personagens:** Transferir itens entre personagens pelo armazenamento local, com proteção contra perda/duplicação.
 - [ ] **23. Rastreador de missão:** Mostrar objetivo ativo e, quando houver coordenadas conhecidas, marcador de destino; verificar os recursos originais existentes.
 - [ ] **32. Dificuldades opcionais:** Perfis de dificuldade com ajustes de inimigos e recompensas; preservar uma experiência equivalente à original.
 - [ ] **35. Contratos repetíveis offline:** Objetivos opcionais de caça/coleta para dar propósito ao pós-jogo, com recompensas e repetição controladas.
 - [ ] **39. Novos pets:** Acrescentar mascotes ao sistema original, com aparência, animações, atributos, habilidades, evolução e obtenção offline a definir; validar IDs, comportamento e salvamento no modo expandido, preservando os pets existentes.
-- [ ] **42. Códex de equipamentos e monstros:** Consultar todas as armas, armaduras e espécies de monstros já registradas pelo personagem, distinguindo equipamento encontrado de obtido e monstro encontrado de derrotado; salvar as descobertas entre sessões e manter o conteúdo ainda não descoberto oculto.
+- [ ] **42. Códex de equipamentos e monstros:** Entrega em fases: bestiário com monstros vistos/derrotados antecipado como meta da 0.7; armas e armaduras encontradas/obtidas e integração com drops exclusivos ficam na 0.11. Preservar descobertas por personagem entre sessões e ocultar conteúdos ainda não descobertos; marcar o item completo somente após entregar as duas fases.
 
 **Verificação necessária antes da entrega:** Transferir itens entre personagens e reabrir sem perdas/duplicações; validar objetivos, marcadores, recompensas e regras de dificuldade, mantendo o perfil original. Para pets, obter um mascote realmente novo e validar movimento, animação, habilidades, evolução quando aplicável, troca/descarte e salvar/reabrir sem alterar os mascotes existentes. Para o Códex, conferir separadamente encontro/obtenção de equipamento e encontro/derrota de monstro, salvar/reabrir, manter personagens separados e não atribuir descobertas não observadas.
 
@@ -139,9 +147,9 @@ Ampliar a duração do jogo com Novo Jogo+, desafio de chefes e masmorras variá
 Adicionados a pedido do autor em **21/10/2026**, ainda sem implementação:
 
 - **41. Drops exclusivos — meta 0.10:** armas e armaduras que caiam apenas de monstros ou chefes específicos. Definir associações, chances e requisitos depois de mapear o sistema de drops original e os IDs dos equipamentos. Pertence ao modo expandido; preservar o modo clássico e não confundir equipamento novo com apenas alterar a aparência de um existente.
-- **42. Códex — meta 0.11:** catálogo consultável das armas, armaduras e espécies de monstros descobertas pelo personagem. Diferenciar equipamento visto/encontrado de realmente obtido, e monstro encontrado de derrotado. Manter descobertas após salvar e reabrir; conteúdos ainda não descobertos permanecem ocultos. A integração com os drops exclusivos depende de validar as associações da 0.10.
+- **42. Códex — fase 1 antecipada para a 0.7; fase 2 na 0.11:** primeiro entregar somente o bestiário de monstros vistos/derrotados; depois ampliar com armas e armaduras encontradas/obtidas. Manter descobertas por personagem após salvar e reabrir e ocultar conteúdos ainda não descobertos. A integração com os drops exclusivos depende de validar as associações da 0.10. As duas fases são metas, ainda não implementadas.
 
-**Dependências e critérios:** a base de saves/perfis da 0.8, o mapeamento de inventário da 0.9 e a identificação dos eventos e IDs nativos. Para drops, provar a exclusividade em monstros permitidos e não permitidos e revisar outras fontes de obtenção. Para o Códex, definir em qual evento um equipamento ou monstro passa a contar como encontrado, observar esse evento e testar a gravação separada dos estados de descoberta, obtenção e derrota. Em saves antigos, aproveitar somente informações comprováveis e começar a observar o restante; não reconstruir como fato um histórico de monstros derrotados ou equipamentos vendidos que não esteja disponível. Não substituir, zerar ou converter silenciosamente o save original.
+**Dependências e critérios da expansão completa:** a base de saves/perfis da 0.8, o mapeamento de inventário da 0.9 e a identificação dos eventos e IDs nativos. O bestiário inicial da 0.7 investiga registro auxiliar por personagem para não depender de alterar o save nativo; essa alternativa ainda exige prova de associação e persistência seguras. Para drops, provar a exclusividade em monstros permitidos e não permitidos e revisar outras fontes de obtenção. Para o Códex, definir em qual evento um equipamento ou monstro passa a contar como encontrado, observar esse evento e testar a gravação separada dos estados de descoberta, obtenção e derrota. Em saves antigos, aproveitar somente informações comprováveis e começar a observar o restante; não reconstruir como fato um histórico de monstros derrotados ou equipamentos vendidos que não esteja disponível. Não substituir, zerar ou converter silenciosamente o save original.
 
 Estas metas são estimativas de planejamento, sem data garantida. Não foi comprovado nesta atualização de documentação que os formatos e rotinas nativos permitem os dois recursos; a investigação e os protótipos descartáveis devem anteceder qualquer entrega.
 
@@ -155,7 +163,7 @@ A inspeção somente de leitura confirmou sistemas originais de títulos e pets 
 
 ## Investigação da expansão de conteúdo
 
-O aumento do nível máximo (25), os novos ranks (26/27), receitas (28), recompensas de cash jogando (30), itens inéditos (37), conjuntos (38), novos títulos (40) e drops exclusivos por monstro (41) fazem parte da meta **0.10**. Novos pets (39) e Códex (42) ficam inicialmente na meta **0.11**. Novo Jogo+, desafios e masmorras seguem nas etapas de pós-jogo. Os números são uma organização inicial; provas de viabilidade podem ser antecipadas enquanto se concluem melhorias independentes do host.
+O aumento do nível máximo (25), os novos ranks (26/27), receitas (28), recompensas de cash jogando (30), itens inéditos (37), conjuntos (38), novos títulos (40) e drops exclusivos por monstro (41) fazem parte da meta **0.10**. Novos pets (39) e a fase de equipamentos do Códex (42) ficam na meta **0.11**; o bestiário inicial do item 42 foi antecipado como meta da **0.7**. Novo Jogo+, desafios e masmorras seguem nas etapas de pós-jogo. Os números são uma organização inicial; provas de viabilidade podem ser antecipadas enquanto se concluem melhorias independentes do host.
 
 Antes de alterar esses sistemas, é necessário:
 
