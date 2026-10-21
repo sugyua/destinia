@@ -4,7 +4,7 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
-## 0.4 Beta — candidata preparada em 21/10/2026
+## 0.4 Beta — 21/10/2026
 
 ### Compilação e inicializadores
 
@@ -28,7 +28,7 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 - Verificação de janela/textura, alternância F11, geometria ultrawide simulada e altura do texto XP. A confirmação visual em gameplay no Windows, incluindo cliques na UI, PT e F9, permanece pendente.
 - Sem alteração de compras/rede e sem reteste de áudio nesta preparação. Sem EXE Windows pronto ou dependências no pacote de fontes.
 - Log TXT detalhado dos eventos do jogo reservado para a **0.5**; não implementado na 0.4. Os relatórios de diagnóstico já existentes permanecem disponíveis.
-- Releases 0.2 e 0.3 preservadas. Novas notas, manifesto e instruções da candidata 0.4 para revisão antes da publicação.
+- Releases 0.2 e 0.3 preservadas. Notas, manifesto e instruções da 0.4 revisados; publicação aprovada pelo usuário.
 
 ## 0.3 Beta — 21/10/2026
 

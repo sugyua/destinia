@@ -1,10 +1,10 @@
-# Destinia para Windows — 0.4 Beta (candidata)
+# Destinia para Windows — 0.4 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**Candidata 0.4 Beta em revisão; release publicada atual: 0.3 Beta.**
+**Versão atual: 0.4 Beta, distribuída em código-fonte.**
 
-**[Baixar a versão 0.3](https://github.com/sugyua/destinia/releases/tag/v0.3-beta)** · [Versão 0.2](https://github.com/sugyua/destinia/releases/tag/v0.2-beta) · [Todas as releases](https://github.com/sugyua/destinia/releases) O pacote contém os fontes, não um jogo pronto para executar. Veja [instalação](INSTALL.md), [changelog](CHANGELOG.md) e [plano e verificações da release](docs/RELEASE_0.4.md).
+**[Baixar a versão 0.4](https://github.com/sugyua/destinia/releases/tag/v0.4-beta)** · [Versão 0.3](https://github.com/sugyua/destinia/releases/tag/v0.3-beta) · [Versão 0.2](https://github.com/sugyua/destinia/releases/tag/v0.2-beta) · [Todas as releases](https://github.com/sugyua/destinia/releases) O pacote contém os fontes, não um jogo pronto para executar. Veja [instalação](INSTALL.md), [changelog](CHANGELOG.md) e [plano e verificações da release](docs/RELEASE_0.4.md).
 
 ## Arquitetura
 
@@ -79,7 +79,7 @@ O [manifesto](release/manifest.json) usa a 0.3 como base de comparação. A 0.4 
 
 ## Publicação
 
-Versão **v0.3-beta**, aprovada pelo usuário após revisão das verificações e limitações. A 0.3 é a release principal no GitHub, mas continua **Beta**, com possíveis bugs e recursos incompletos. A primeira release **v0.2-beta** permanece disponível em Releases.
+Versão **v0.4-beta**, aprovada pelo usuário após revisão das verificações e limitações. A 0.4 é a release principal no GitHub, mas continua **Beta**, com possíveis bugs e recursos incompletos. As versões **v0.2-beta** e **v0.3-beta** permanecem disponíveis em Releases. O ajuste visual da UI e os cliques ainda precisam de confirmação no Windows.
 
 O ZIP curado não inclui biblioteca original, APK, DEX, assets, áudio, saves ou DLLs de terceiros. Consulte [THIRD_PARTY.md](THIRD_PARTY.md). Não foi definida uma licença para o código do host nesta etapa.
 

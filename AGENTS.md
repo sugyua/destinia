@@ -81,4 +81,4 @@ Orientacao atual — candidata 0.4 (21/10/2026)
 * Preparar compilador BAT dos dois hosts e inicializadores separados; incluir zoom out, fundo cinza, centralizacao de mapas pequenos e UI proporcionalmente menor.
 * Manter contador XP aproximadamente no tamanho visual da 0.3, preservando tela cheia proporcional e F11.
 * Log TXT detalhado de eventos reservado para a 0.5; nao implementar na 0.4.
-* Nao confundir testes ARM com mapas sinteticos e testes locais com validacao de gameplay/UI no Windows. Solicitar aprovacao antes da publicacao da release 0.4.
+* Nao confundir testes ARM com mapas sinteticos e testes locais com validacao de gameplay/UI no Windows. Publicacao da release 0.4 aprovada em 21/10/2026; manter solicitacao de aprovacao para novas releases.

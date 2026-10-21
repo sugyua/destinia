@@ -1,4 +1,4 @@
-# Candidata 0.4 Beta — plano e verificações
+# Release 0.4 Beta — plano e verificações
 
 Escopo solicitado: compilação dos dois hosts por BAT e um launcher para cada host; após complemento do usuário, incluir zoom out, centralização com fundo cinza e UI menor. O log TXT detalhado fica para a 0.5.
 
@@ -21,4 +21,4 @@ Resultado final: ambos os hosts compilados; 12 testes Python aprovados, sete gru
 
 ## Distribuição e aprovação
 
-ZIP curado de fontes e SHA-256, sem APK extraído, saves, logs pessoais, EXE, DLLs ou instaladores/dependências. Recompilação necessária. A release 0.3 permanece disponível. Criar rascunho para revisão e obter aprovação antes de publicar tag/release 0.4.
+ZIP curado de fontes e SHA-256, sem APK extraído, saves, logs pessoais, EXE, DLLs ou instaladores/dependências. Recompilação necessária. A release 0.3 permanece disponível. Rascunho e pacote revisados; publicação da tag/release 0.4 aprovada pelo usuário em 21/10/2026. O jogo permanece Beta, com confirmação visual no Windows pendente.
