@@ -1,0 +1,60 @@
+name: Anexar ZIPs das releases
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [.github/workflows/release-assets.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  upload:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Conferir e anexar os pacotes aprovados
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: python
+        run: |
+          import base64
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import subprocess
+          import tempfile
+          import zipfile
+
+          repository = os.environ['GITHUB_REPOSITORY']
+          approved = [
+              ('0.2', '8e70b4438e599e6357b5b4bf0a822305ea34f276'),
+              ('0.3', 'fb57ae2d9019813e9175dd6069ab473b5e9b8df7'),
+          ]
+          with tempfile.TemporaryDirectory() as directory:
+              for version, commit in approved:
+                  tag = 'v' + version + '-beta'
+                  filename = 'destinia-' + version + '-beta-source.zip'
+                  archive = pathlib.Path(directory, filename)
+                  checksum = pathlib.Path(directory, filename + '.sha256')
+                  for destination in (archive, checksum):
+                      path = 'release/artifacts/' + tag + '/' + destination.name
+                      endpoint = 'repos/' + repository + '/contents/' + path + '?ref=' + commit
+                      response = subprocess.check_output(['gh', 'api', endpoint], text=True)
+                      destination.write_bytes(base64.b64decode(json.loads(response)['content']))
+                  expected = checksum.read_text().split()[0]
+                  if hashlib.sha256(archive.read_bytes()).hexdigest() != expected:
+                      raise RuntimeError('Checksum invalido: ' + filename)
+                  with zipfile.ZipFile(archive) as zipped:
+                      if zipped.testzip() is not None:
+                          raise RuntimeError('ZIP corrompido: ' + filename)
+                      for name in zipped.namelist():
+                          path = pathlib.PurePosixPath(name)
+                          if ('game' in path.parts or 'relatorios' in path.parts
+                                  or any(part.lower().startswith('save') for part in path.parts)
+                                  or path.suffix.lower() in {'.exe', '.dll', '.so', '.dex', '.dat'}):
+                              raise RuntimeError('Arquivo indevido no pacote: ' + name)
+                  subprocess.run(['gh', 'release', 'upload', tag, str(archive), str(checksum),
+                                  '--repo', repository, '--clobber'], check=True)
+                  print('ZIP e checksum anexados: ' + tag)
