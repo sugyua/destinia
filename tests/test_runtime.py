@@ -132,13 +132,13 @@ class RuntimeHostTests(unittest.TestCase):
                 result=self.run_host(variant,use_save=False)
                 self.assertEqual(result.returncode,0,result.stderr)
                 self.assertTrue(configured.is_dir(),'Configuracao global ignorada')
-                self.assertIn(str(configured),result.stderr)
+                self.assertIn(str(configured).replace('\\','/'),result.stderr.replace('\\','/'))
         override=self.base/'pasta por ambiente'
         result=self.run_host('host',use_save=False,env={'DESTINIA_SAVE_DIR':str(override)})
         self.assertEqual(result.returncode,0,result.stderr)
         self.assertTrue(override.is_dir())
         result=self.run_host('host',env={'DESTINIA_SAVE_DIR':str(override)})
-        self.assertIn(str(self.base/'save'),result.stderr)
+        self.assertIn(str(self.base/'save').replace('\\','/'),result.stderr.replace('\\','/'))
 
     def test_invalid_configuration_does_not_start_with_a_new_save(self):
         local=self.base/'local app data'/'Destinia'; local.mkdir(parents=True)

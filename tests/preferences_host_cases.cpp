@@ -19,6 +19,7 @@ static int fixtureInit(Uint32 flags) {
 }
 static int fixturePoll(SDL_Event* e) {
   SDL_zero(*e);
+  if(scenario=="persist" && tick==1) {e->type=SDL_QUIT;++tick;return 1;}
   auto key=[&](SDL_Keycode code,bool down){e->type=down?SDL_KEYDOWN:SDL_KEYUP;e->key.keysym.sym=code;return 1;};
   if(scenario=="focus") {
     if(tick==0 && stage<3) { int step=stage++; return key(step==1?SDLK_UP:SDLK_w,step!=2); }

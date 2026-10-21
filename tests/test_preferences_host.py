@@ -51,6 +51,30 @@ class PreferencesHostTests(unittest.TestCase):
                 self.assertEqual(logs.count('ENTRADA tecla=7 pressionada'),1)
                 self.assertEqual(logs.count('ENTRADA tecla=7 solta'),1)
 
+    def test_window_preferences_survive_reopen_and_validation_rejects_bad_values(self):
+        with tempfile.TemporaryDirectory(prefix='destinia window preferences ') as directory:
+            base=Path(directory)
+            config=base/'config.ini'
+            config.write_text('audio.musica=35\nchave_futura=preservar\n')
+            env=dict(os.environ,SDL_VIDEODRIVER='dummy',SDL_AUDIODRIVER='dummy',LOCALAPPDATA=str(base/'local'))
+            for variant,exe in self.binaries.items():
+                for extra in (['--windowed','--scale','2'],[]):
+                    command=[str(exe),'persist','--game',str(ROOT/'game'),'--settings',str(config),'--save',str(base/variant/'save'),'--reports',str(base/'reports')]+extra
+                    run=subprocess.run(command,cwd=base,env=env,capture_output=True,text=True,timeout=60)
+                    self.assertEqual(run.returncode,0,run.stderr)
+                    text=config.read_text()
+                    self.assertIn('video.'+variant+'.largura=800',text)
+                    self.assertIn('video.'+variant+'.altura=480',text)
+                    self.assertIn('video.'+variant+'.tela_cheia=0',text)
+                    self.assertIn('audio.musica=35',text)
+                    self.assertIn('chave_futura=preservar',text)
+                invalid=base/'invalid.ini';invalid.write_text('audio.musica=999\n')
+                rejected=subprocess.run([str(exe),'persist','--settings',str(invalid),'--save',str(base/'must-not-exist')],cwd=base,env=env,capture_output=True,text=True,timeout=10)
+                self.assertNotEqual(rejected.returncode,0)
+                self.assertFalse((base/'must-not-exist').exists())
+                checked=subprocess.run([str(exe),'persist','--check-settings',str(invalid)],cwd=base,env=env,capture_output=True,text=True,timeout=10)
+                self.assertNotEqual(checked.returncode,0)
+
     def test_real_mixer_honors_user_and_native_volumes_and_decodes_game_audio(self):
         for variant in self.binaries:
             with self.subTest(variant=variant):

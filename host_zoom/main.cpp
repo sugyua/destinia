@@ -2080,7 +2080,7 @@ static int runHost(int argc, char** argv) {
     else if (a == "--trace-out") traceViewportOutDir = next();
     else if (a == "--autotap") { if (sscanf(next().c_str(), "%d,%d,%d", &autoFrame, &autoX, &autoY) != 3) { printf("--autotap precisa de QUADRO,X,Y\n"); return 0; } }
     else if (a == "--autotap2") { if (sscanf(next().c_str(), "%d,%d,%d", &autoFrame2, &autoX2, &autoY2) != 3) { printf("--autotap2 precisa de QUADRO,X,Y\n"); return 0; } }
-    else { printf("Uso: destinia_host [--game PASTA] [--so ARQUIVO] [--save PASTA] [--reports PASTA] [--scale N] [--fullscreen] [--lang pt] [--headless QUADROS --out PASTA] [--trace-viewport --trace-frames N --trace-out PASTA] [-v] [--probe] [--profile] [--mute] [--autotap QUADRO,X,Y] [--autotap2 QUADRO,X,Y]\n"); return 0; }
+    else { printf("Uso: destinia_host [--game PASTA] [--so ARQUIVO] [--save PASTA] [--reports PASTA] [--settings ARQUIVO] [--no-save-preferences] [--windowed|--fullscreen] [--scale N] [--fullscreen] [--lang pt] [--headless QUADROS --out PASTA] [--trace-viewport --trace-frames N --trace-out PASTA] [-v] [--probe] [--profile] [--mute] [--autotap QUADRO,X,Y] [--autotap2 QUADRO,X,Y]\n"); return 0; }
   }
   preferences=destinia::Preferences::load(settingsPath,"host_zoom");
   bool fullscreen=fullscreenOverride<0?preferences.fullscreen:fullscreenOverride!=0;
@@ -2307,7 +2307,7 @@ static int runHost(int argc, char** argv) {
       const bool paused=controls.paused();
       if(paused!=wasPaused) {
         controls.release();
-        SDL_SetWindowTitle(win,paused?"Destinia 0.6 Beta - PAUSADO (F10 para retomar)":"Destinia 0.6 Beta");
+        SDL_SetWindowTitle(win,paused?"Destinia 0.6 Beta - PAUSADO":"Destinia 0.6 Beta");
         hostReport("[host] %s.\n",paused?"Pausado":"Retomado"); wasPaused=paused;
       }
       updateAudioState(controls.focused,paused);
@@ -2442,7 +2442,7 @@ int main(int argc,char** argv) {
   if(argc==2 && std::strcmp(argv[1],"--version")==0) { std::puts("Destinia 0.6 Beta"); return 0; }
   int result=1;
   if(argc==3 && std::string(argv[1])=="--check-settings") {
-    try { destinia::Preferences::load(argv[2],"host_zoom"); printf("Preferencias validas.\n"); return 0; }
+    try { if(!fs::is_regular_file(argv[2])) throw std::runtime_error("Arquivo de preferencias nao encontrado."); destinia::Preferences::load(argv[2],"host_zoom"); printf("Preferencias validas.\n"); return 0; }
     catch(const std::exception& e) { fprintf(stderr,"%s\n",e.what()); return 1; }
   }
   try { result=runHost(argc,argv); }
