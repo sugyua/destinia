@@ -1,10 +1,10 @@
-# Destinia para Windows — 0.3 Beta
+# Destinia para Windows — 0.4 Beta (candidata)
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**Versão atual: 0.3 Beta, distribuída em código-fonte.**
+**Candidata 0.4 Beta em revisão; release publicada atual: 0.3 Beta.**
 
-**[Baixar a versão 0.3](https://github.com/sugyua/destinia/releases/tag/v0.3-beta)** · [Versão 0.2](https://github.com/sugyua/destinia/releases/tag/v0.2-beta) · [Todas as releases](https://github.com/sugyua/destinia/releases) O pacote contém os fontes, não um jogo pronto para executar. Veja [instalação](INSTALL.md), [changelog](CHANGELOG.md) e [plano e verificações da release](docs/RELEASE_0.3.md).
+**[Baixar a versão 0.3](https://github.com/sugyua/destinia/releases/tag/v0.3-beta)** · [Versão 0.2](https://github.com/sugyua/destinia/releases/tag/v0.2-beta) · [Todas as releases](https://github.com/sugyua/destinia/releases) O pacote contém os fontes, não um jogo pronto para executar. Veja [instalação](INSTALL.md), [changelog](CHANGELOG.md) e [plano e verificações da release](docs/RELEASE_0.4.md).
 
 ## Arquitetura
 
@@ -31,7 +31,7 @@ O repositório atual não inclui saves pessoais, logs de partidas, relatórios l
 - HUD de experiência, modo sem janela e capturas BMP.
 - Tradução opcional `--lang pt` e trace F9 com `--trace-viewport`, apenas em `host_zoom`.
 
-A presença no código não equivale a validação completa de gameplay. O host_zoom amplia a imagem original e oferece tela cheia com `--fullscreen` e alternância por F11. Em 3440×1440, o jogo ocupa 2400×1440 com barras laterais de 520 pixels. A correção ainda precisa de confirmação visual nas passagens do Windows; compras e rede continuam com limitações documentadas.
+A presença no código não equivale a validação completa de gameplay. O host_zoom usa framebuffer 800×480 para zoom out, mapas pequenos centralizados, fundo cinza fora dos limites do mapa e UI nativa proporcionalmente menor. Oferece tela cheia com `--fullscreen` e alternância por F11. Em 3440×1440, o jogo ocupa 2400×1440 com barras laterais de 520 pixels. A correção ainda precisa de confirmação visual nas passagens do Windows; compras e rede continuam com limitações documentadas.
 
 ## Dependências
 
@@ -52,7 +52,7 @@ A pasta `game` é o APK Android extraído, conforme informado pelo autor. Não �
 
 ## Compilar com duplo clique
 
-Abra **Compilar Destinia.bat** e escolha **1 — Zoom**, **2 — Host normal** ou **3 — Ambos**. Mantenha o BAT e `scripts/compile_windows.sh` na pasta do projeto. O compilador usa o MSYS2 UCRT64 já instalado em `C:\msys64`; não instala nem baixa dependências. Feche o jogo antes de compilar. As ferramentas necessárias estão na seção Dependências e em INSTALL.md.
+Abra **Compilar Destinia.bat** para compilar os dois hosts. Depois use **Abrir Destinia.bat** para o normal ou **Abrir Destinia Zoom 800x480.bat** para o zoom. Mantenha o BAT e `scripts/compile_windows.sh` na pasta do projeto. O compilador usa o MSYS2 UCRT64 já instalado em `C:\msys64`; não instala nem baixa dependências. Feche o jogo antes de compilar. As ferramentas necessárias estão na seção Dependências e em INSTALL.md.
 
 [Baixar somente os arquivos do compilador](https://raw.githubusercontent.com/sugyua/destinia/main/diagnostico/pacotes/compilar-destinia.zip) para extrair na raiz do projeto existente. Esse auxiliar foi adicionado após a publicação da 0.3; os ZIPs já publicados da 0.2 e 0.3 permanecem inalterados.
 
@@ -70,12 +70,12 @@ Para verificar o empacotador, com Python 3.9 ou superior:
 
 ```sh
 python -m unittest discover -s tests -v
-python scripts/package_release.py --out dist/candidata-0.3
+python scripts/package_release.py --out dist/candidata-0.4
 ```
 
 No Linux, o comando pode ser `python3`. O empacotador cria ZIP e SHA-256, não compila executáveis. Não sobrescreve artefatos existentes. A reprodução byte a byte foi verificada com a mesma versão de Python/zlib; outras versões podem mudar a compressão.
 
-O [manifesto](release/manifest.json) usa a 0.2 Beta como base de comparação. As mudanças da 0.3 estão no changelog; zoom out, fundo cinza e UI menor ficam para depois.
+O [manifesto](release/manifest.json) usa a 0.3 como base de comparação. A 0.4 restaura o zoom out, centraliza mapas pequenos e reduz proporcionalmente a UI. O log TXT detalhado do jogo fica reservado para a 0.5 em docs/ROADMAP.md.
 
 ## Publicação
 

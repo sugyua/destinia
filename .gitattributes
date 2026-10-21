@@ -21,3 +21,6 @@
 
 "/Compilar Destinia.bat" text eol=crlf
 /scripts/compile_windows.sh text eol=lf
+
+"/Abrir Destinia.bat" text eol=crlf
+"/Abrir Destinia Zoom 800x480.bat" text eol=crlf

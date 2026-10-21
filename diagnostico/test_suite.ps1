@@ -255,7 +255,7 @@ function Invoke-DestiniaSuite {
             }
             Add-TestResult ($name + ' executavel') 'OK' ('SHA-256: ' + (Get-FileHash -LiteralPath $exe).Hash)
             $width = 400; $height = 240
-            # Ambos renderizam em 400x240; o zoom amplia somente a apresentacao SDL.
+            if ($name -eq 'host_zoom') { $width = 800; $height = 480 }
             $save = Join-Path $session ($name + '_save_automatico')
             Copy-IsolatedSave $source $save
             $frameDir = Join-Path $session ($name + '_frames')
@@ -267,8 +267,8 @@ function Invoke-DestiniaSuite {
             $verdict = Get-HeadlessVerdict $run $log $frameDir $width $height $Frames
             $state = 'FALHA'; if ($verdict.Passed) { $state = 'OK' }
             Add-TestResult ($name + ' inicializacao sem janela') $state $verdict.Detail
-            if ($name -eq 'host_zoom' -and $log -match 'initGame ok em 800x480') {
-                Add-TestResult 'host_zoom versao antiga' 'FALHA' 'Executavel ainda usa framebuffer 800x480. Recompile host_zoom com os fontes atuais antes de testar a correcao.'
+            if ($name -eq 'host_zoom' -and $log -notmatch 'mapas pequenos centralizados') {
+                Add-TestResult 'host_zoom versao antiga' 'FALHA' 'Executavel sem identificacao do zoom out centralizado da 0.4. Recompile host_zoom com os fontes atuais.'
                 continue
             }
             Add-LogObservations ($name + ' automatico') $log
@@ -284,6 +284,7 @@ function Invoke-DestiniaSuite {
                 Write-Host '3. F9 NOVAMENTE, ainda com o defeito visivel: captura a tela posterior e inicia outro trecho.'
                 Write-Host '4. Espere alguns segundos, aperte F9 para parar e feche o jogo normalmente.'
                 Write-Host 'F11 alterna tela cheia/janela. Confira o mouse na imagem central e Alt+Tab.'
+                Write-Host '0.4: mapas pequenos devem ter margens cinzas simetricas. Confira a UI menor e o contador de XP.'
                 Write-Host 'Nao e necessario testar audio, controles, salvar/reabrir ou acessar a loja.'
             } else {
                 Write-Host 'ROTEIRO: iniciar/carregar partida, mover, atacar, abrir inventario/equipar, trocar de mapa e salvar.'
@@ -308,12 +309,13 @@ function Invoke-DestiniaSuite {
                 Add-TestResult ($name + ' processo guiado') 'FALHA' 'Erro, timeout ou falha no log. Verifique stdout/stderr; o roteiro nao confirma sucesso.'
                 continue
             }
-            if ($name -eq 'host_zoom' -and $Mode -eq 'Camera' -and $guiLog -notmatch 'initGame ok em 400x240') {
-                Add-TestResult 'host_zoom janela guiada' 'FALHA' 'Inicializacao 400x240 nao confirmada. Confira logs e recompile o host_zoom atual com suporte a --fullscreen.'
+            if ($name -eq 'host_zoom' -and $Mode -eq 'Camera' -and $guiLog -notmatch 'initGame ok em 800x480') {
+                Add-TestResult 'host_zoom janela guiada' 'FALHA' 'Inicializacao 800x480 nao confirmada. Confira logs e recompile o host_zoom atual com suporte a --fullscreen.'
                 continue
             }
             if ($Mode -eq 'Camera') {
                 Read-ManualResult ($name + ' mapa/camera') 'A troca de mapa e a camera funcionaram sem duplicacao ou defeito?'
+                Read-ManualResult ($name + ' UI e XP') 'UI menor legivel, botoes clicaveis e tamanho do contador de XP adequados?'
                 Set-TestStage 'Descricao do defeito de camera'
                 $description = Read-Host 'Descreva o defeito e a passagem/mapa (ou informe que nao ocorreu)'
                 Add-TestResult 'Descricao da camera' 'INFO' $description

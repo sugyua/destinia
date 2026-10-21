@@ -43,8 +43,8 @@ static std::string defaultSaveDir() {
 // ---------------------------------------------------------------- constantes
 // [OK] resolucao e formato: GameThread passa 400x240 e um buffer de 192000
 // bytes (400*240*2 = RGB565 little-endian) para initGame/jniRun.
-// O jogo e as coordenadas de toque ficam na resolucao original. Apenas a janela e ampliada.
-static const int SCREEN_W = 400, SCREEN_H = 240;
+// Zoom out: mais area do mapa e UI original proporcionalmente menor.
+static const int SCREEN_W = 800, SCREEN_H = 480;
 static const int WINDOW_W = 800, WINDOW_H = 480;
 static const u32 FB_BYTES = SCREEN_W * SCREEN_H * 2;
 
@@ -247,28 +247,48 @@ static void cameraTick(long frame) {
           frame, camX, camY, mw, mh, mw * 16, mh * 16, SCREEN_W, SCREEN_H, SCREEN_W - mw * 16,
           neg ? "<< CAMERA NEGATIVA" : "");
 }
+// Centraliza apenas eixos menores que o viewport. Nao muda arquivos ou posicoes do mundo.
+static constexpr uint16_t MAP_BACKGROUND = 0x8410; // cinza medio em RGB565
+static void centerSmallMapCamera() {
+  const int mw = (int16_t)rd16(SO_BASE + 0x80B18), mh = (int16_t)rd16(SO_BASE + 0x80B18 + 2);
+  if (mw <= 0 || mh <= 0) return;
+  const int dimensions[] = {mw * 16, mh * 16};
+  const int screen[] = {SCREEN_W, SCREEN_H};
+  for (int axis = 0; axis < 2; ++axis) {
+    if (dimensions[axis] >= screen[axis]) continue;
+    const u32 address = SO_BASE + 0x77EE0 + 18552 + 2 * axis;
+    const int16_t centered = (int16_t)((dimensions[axis] - screen[axis]) / 2);
+    if ((int16_t)rd16(address) != centered) wr(address, &centered, sizeof centered);
+  }
+}
+// Antes da leitura ARM: cobre tambem calculos de camera inline, sem depender de Map_setMapView.
+static void cameraReadHook(uc_engine*, uc_mem_type, uint64_t, int, int64_t, void*) {
+  centerSmallMapCamera();
+}
 // Correcao automatica da faixa duplicada em mapas menores que a tela (ex.: 30x30 tiles = 480 px em 800x480).
 // No antigo framebuffer 800x480, a camera negativa alinhava o mapa a direita. Map_drawBuff le tiles sem checar limites
 // e repete o cenario fora do mapa. Aqui, quando Map_drawBuff chama uma das duas rotinas que desenham UM tile
 // fora do mapa, o x e jogado para fora da tela e o proprio clipping do jogo descarta o desenho.
-// Nao escreve na memoria do jogo, nao mexe na camera e nao afeta heroi/monstros/HUD (nao passam por aqui).
+// O filtro afeta somente tiles; a centralizacao compartilhada ajusta a camera em memoria.
 // Desligar com --no-fix-map-edge (para comparar). Enderecos da .so: Map_drawBuff 0x19308 (660 bytes),
 // Grp_drawClipWImageP 0xBB90, Grp_drawSimpleClipWImageP 0xB4BC; Game 0x77EE0; curMapData 0x80B18.
 static bool fixMapEdge = true;
 static void mapEdgeHook(uc_engine*, uint64_t, uint32_t, void*) {
   u32 lr = regLR() & ~1u;
   if (lr < SO_BASE + 0x19308 || lr >= SO_BASE + 0x19308 + 660) return;
+  centerSmallMapCamera();
   int camX = (int16_t)rd16(SO_BASE + 0x77EE0 + 18552), camY = (int16_t)rd16(SO_BASE + 0x77EE0 + 18554);
   int mw = (int16_t)rd16(SO_BASE + 0x80B18), mh = (int16_t)rd16(SO_BASE + 0x80B18 + 2);
   int wx = (int)R(1) + camX, wy = (int)R(2) + camY;
   if (wx < 0 || wx >= mw * 16 || wy < 0 || wy >= mh * 16) W(1, 0x4000);  // fora da tela: o clipping descarta
 }
-// Complemento da correcao acima: ANTES de Map_drawBuff desenhar os tiles, pinta de preto tudo que fica FORA do mapa.
+// Complemento da correcao acima: ANTES de Map_drawBuff desenhar os tiles, pinta de cinza tudo que fica FORA do mapa.
 // Motivo (evidencia dos prints): chuva e outros efeitos sao desenhados antes dos tiles; no 400x240 original o mapa
 // os cobria por completo, mas num mapa menor que a tela eles ficam visiveis na faixa fora do mapa.
 // HUD, heroi, monstros e efeitos desenhados DEPOIS de Map_drawBuff nao sao afetados.
 // frameBuffer[idx] -> {largura, altura, ponteiro dos pixels RGB565}; vetor em 0x4EF5C; Map_drawBuff em 0x19308.
 static void mapEdgeClearHook(uc_engine*, uint64_t, uint32_t, void*) {
+  centerSmallMapCamera();
   u32 idx = R(0);
   if (idx >= 5) return;
   u32 fbs = rd32(SO_BASE + 0x4EF5C + 4 * idx);
@@ -281,12 +301,12 @@ static void mapEdgeClearHook(uc_engine*, uint64_t, uint32_t, void*) {
   int x0 = std::clamp(-camX, 0, w), x1 = std::clamp(-camX + mw * 16, 0, w);
   int y0 = std::clamp(-camY, 0, h), y1 = std::clamp(-camY + mh * 16, 0, h);
   if (x0 == 0 && x1 == w && y0 == 0 && y1 == h) return;  // o mapa cobre a tela inteira
-  std::vector<uint8_t> zero((size_t)w * 2, 0);
+  std::vector<uint16_t> background((size_t)w, MAP_BACKGROUND);
   for (int y = 0; y < h; y++) {
     u32 row = px + (u32)y * (u32)w * 2;
-    if (y < y0 || y >= y1) { wr(row, zero.data(), (size_t)w * 2); continue; }
-    if (x0 > 0) wr(row, zero.data(), (size_t)x0 * 2);
-    if (x1 < w) wr(row + (u32)x1 * 2, zero.data(), (size_t)(w - x1) * 2);
+    if (y < y0 || y >= y1) { wr(row, background.data(), (size_t)w * 2); continue; }
+    if (x0 > 0) wr(row, background.data(), (size_t)x0 * 2);
+    if (x1 < w) wr(row + (u32)x1 * 2, background.data(), (size_t)(w - x1) * 2);
   }
 }
 static void probeTick(long frame) {   // chamada a cada quadro: imprime quando o estado muda (e a cada 100 quadros)
@@ -1930,7 +1950,7 @@ static void drawHudExperienceText(uint8_t* pixels, uint32_t current, uint32_t re
   };
 
   const int targetScale = std::max(2, SCREEN_W / 200);
-  const int scale = std::max(1, std::min(targetScale - 1, (SCREEN_W - 8) / ((int)strlen(text) * 6)));
+  const int scale = std::max(1, std::min(targetScale / 2, (SCREEN_W - 8) / ((int)strlen(text) * 6)));
   const int textWidth = (int)strlen(text) * 6 * scale - scale;
   const int textHeight = 7 * scale;
   const int left = (SCREEN_W - textWidth) / 2;
@@ -2044,6 +2064,14 @@ int main(int argc, char** argv) {
   if (!loadSo(soPath)) return 1;
   uc_hook hk; uc_hook_add(uc, &hk, UC_HOOK_CODE, (void*)stubHook, nullptr, STUB_BASE, STUB_BASE + STUB_COUNT * 4 - 1);
   uc_hook hk2; uc_hook_add(uc, &hk2, UC_HOOK_CODE, (void*)stubHook, nullptr, MAGIC_RET, MAGIC_RET + 3);
+  if (exportsMap["Game"] != SO_BASE + 0x77EE0 || exportsMap["curMapData"] != SO_BASE + 0x80B18) {
+    fprintf(stderr, "[host] Layout ARM incompativel com a camera do zoom.\n"); return 1;
+  }
+  uc_hook cameraHook;
+  if (uc_hook_add(uc, &cameraHook, UC_HOOK_MEM_READ, (void*)cameraReadHook, nullptr,
+                  SO_BASE + 0x77EE0 + 18552, SO_BASE + 0x77EE0 + 18555) != UC_ERR_OK) {
+    fprintf(stderr, "[host] Falha ao registrar centralizacao da camera.\n"); return 1;
+  }
   if (fixMapEdge) {
     uc_hook hk3, hk4;
     uc_hook_add(uc, &hk3, UC_HOOK_CODE, (void*)mapEdgeHook, nullptr, SO_BASE + 0xBB90, SO_BASE + 0xBB90);
@@ -2075,6 +2103,7 @@ int main(int argc, char** argv) {
   if (!callFn(fnInit, {ENV_OBJ, 0x10, hId, (u32)devId.size(), hModel, (u32)model.size(), SCREEN_W, SCREEN_H, 0})) return 2;
   if (traceViewport) traceViewportDimensions("after-init");
   fprintf(stderr, "[host] initGame ok em %dx%d. Rodando o jogo...\n", SCREEN_W, SCREEN_H);
+  fprintf(stderr, "[host] zoom out: mapas pequenos centralizados; fundo cinza; UI nativa.\n");
   if (portugueseTextTest) fprintf(stderr, "[host] traducao PT ativa: itens, equipamentos, habilidades, menus, Fabricacao e Missoes.\n");
 
   // [OK] jniTouch(env,obj, x, y, tipo): tipo 0=toque 1=solta 2=move 3=tecla de menu (Thumb decodificado)
@@ -2104,7 +2133,7 @@ int main(int argc, char** argv) {
 #endif
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  // pixels nitidos
-    win = SDL_CreateWindow("Destinia 0.3 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_W, WINDOW_H, SDL_WINDOW_RESIZABLE);
+    win = SDL_CreateWindow("Destinia 0.4 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_W, WINDOW_H, SDL_WINDOW_RESIZABLE);
     if (fullscreen) setFullscreen(true);
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_PRESENTVSYNC);
     tex = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGB565, SDL_TEXTUREACCESS_STREAMING, SCREEN_W, SCREEN_H);
@@ -2255,6 +2284,7 @@ int main(int argc, char** argv) {
     traceViewportFrame = frame;
     const bool runSucceeded = callFn(fnRun, {ENV_OBJ, 0x10, hScreen, (u32)frame}, &wait);
     runMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - runStart).count();
+    centerSmallMapCamera();
     traceViewportWriteFrameSummary(frame);
     if (!runSucceeded) {
       if (traceViewportRecording) stopTraceViewportRecording("run-error");
@@ -2314,7 +2344,7 @@ int main(int argc, char** argv) {
       int ow = 0, oh = 0;
       SDL_GetRendererOutputSize(ren, &ow, &oh);
       SDL_Rect dst = gameViewport();
-      SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
+      SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);
       SDL_RenderClear(ren);
       SDL_RenderCopy(ren, tex, nullptr, &dst);
       SDL_RenderPresent(ren);

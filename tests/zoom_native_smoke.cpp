@@ -75,7 +75,7 @@ static int controlledEvent(SDL_Event* event) {
 int main(int argc, char** argv) {
   int result = destiniaMainForTest(argc, argv);
   if (result) return result;
-  if (testWindowWidth != 800 || testWindowHeight != 480 || testTextureWidth != 400 || testTextureHeight != 240) {
+  if (testWindowWidth != 800 || testWindowHeight != 480 || testTextureWidth != 800 || testTextureHeight != 480) {
     fprintf(stderr, "FALHA: janela=%dx%d textura=%dx%d\n", testWindowWidth, testWindowHeight, testTextureWidth, testTextureHeight);
     return 1;
   }
@@ -83,21 +83,48 @@ int main(int argc, char** argv) {
     fprintf(stderr, "FALHA: tela cheia, alternancia F11 ou viewport ultrawide incorretos. Chamadas=%d\n", fullscreenCalls);
     return 1;
   }
-  // Testa a rotina original com o tamanho de mapa observado no relatorio.
-  const uint16_t dims[] = {30, 30};
-  wr(exportsMap.at("curMapData"), dims, sizeof dims);
-  for (u32 position : {0u, 240u, 480u}) {
-    if (!callFn(exportsMap.at("Map_setMapView"), {position, position})) return 1;
-    int x = (int16_t)rd16(exportsMap.at("Game") + 18552);
-    int y = (int16_t)rd16(exportsMap.at("Game") + 18554);
-    int expectedX = std::clamp((int)position - 200, 0, 80);
-    int expectedY = std::clamp((int)position - 120, 0, 240);
-    if (x != expectedX || y != expectedY) {
-      fprintf(stderr, "FALHA: camera=(%d,%d), esperado=(%d,%d)\n", x, y, expectedX, expectedY);
-      return 1;
+  // Leitura ARM real aciona o hook mesmo apos uma escrita de camera inline.
+  u32 reader = hmalloc(4);
+  const uint8_t code[] = {0x00, 0x88, 0x70, 0x47}; // ldrh r0,[r0]; bx lr
+  wr(reader, code, sizeof code);
+  const u32 camera = exportsMap.at("Game") + 18552;
+  for (const auto dims : {std::pair<uint16_t,uint16_t>{30,30}, {60,60}, {20,10}}) {
+    const uint16_t map[] = {dims.first, dims.second};
+    wr(exportsMap.at("curMapData"), map, sizeof map);
+    for (u32 position : {0u, 240u, 480u}) {
+      if (!callFn(exportsMap.at("Map_setMapView"), {position, position})) return 1;
+      // Simula tambem um escritor inline que nao chama Map_setMapView.
+      if (dims.first == 30) { int16_t old = -320; wr(camera, &old, 2); }
+      u32 value = 0;
+      if (!callFn(reader | 1u, {camera}, &value)) return 1;
+      int x = (int16_t)value, y = (int16_t)rd16(camera + 2);
+      int width = dims.first * 16, height = dims.second * 16;
+      int expectedX = width < 800 ? (width - 800)/2 : std::clamp((int)position - 400, 0, width - 800);
+      int expectedY = height < 480 ? (height - 480)/2 : std::clamp((int)position - 240, 0, height - 480);
+      if (x != expectedX || y != expectedY) {
+        fprintf(stderr, "FALHA: camera=(%d,%d), esperado=(%d,%d)\n", x,y,expectedX,expectedY); return 1;
+      }
     }
   }
+  const uint16_t map[] = {30,30}; wr(exportsMap.at("curMapData"), map, sizeof map);
+  if (!callFn(exportsMap.at("Map_setMapView"), {240,240})) return 1;
+  centerSmallMapCamera();
+  u32 pixels = hmalloc(800*480*2), buffer = hmalloc(12);
+  std::vector<uint16_t> scene(800*480, 0xF81F); wr(pixels,scene.data(),scene.size()*2);
+  wr32(buffer,800); wr32(buffer+4,480); wr32(buffer+8,pixels); wr32(SO_BASE+0x4EF5C,buffer);
+  W(0,0); mapEdgeClearHook(uc,0,0,nullptr);
+  if (rd16(pixels) != MAP_BACKGROUND || rd16(pixels+159*2) != MAP_BACKGROUND ||
+      rd16(pixels+160*2) != 0xF81F || rd16(pixels+639*2) != 0xF81F || rd16(pixels+640*2) != MAP_BACKGROUND) {
+    fprintf(stderr,"FALHA: fundo cinza ou preservacao da area do mapa.\n"); return 1;
+  }
+  std::vector<uint8_t> hud(800*480*2,0);
+  drawHudExperienceText(hud.data(),100,200);
+  int first = 480, last = -1;
+  for (int y=0;y<480;++y) for(int x=0;x<800;++x) if(read565(hud.data(),x,y)==0xFFBC) {
+    first=std::min(first,y);last=std::max(last,y);
+  }
+  if(last-first+1 != 14) { fprintf(stderr,"FALHA: tamanho do texto XP alterado.\n"); return 1; }
   uc_close(uc);
-  fprintf(stderr, "OK: janela 800x480, textura 400x240 e camera ARM no mapa 480x480.\n");
+  fprintf(stderr, "OK: janela 800x480, textura 800x480, camera ARM centralizada e fundo cinza; mapa preservado.\n");
   return 0;
 }

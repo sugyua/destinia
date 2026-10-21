@@ -15,16 +15,8 @@ if not exist "%ROOT%scripts\compile_windows.sh" (
   exit /b 1
 )
 if not "%~1"=="" goto argumento
-echo DESTINIA - COMPILAR
-echo [1] Zoom host_zoom
-echo [2] Host normal
-echo [3] Ambos
-choice /c 123 /n /m "Escolha 1, 2 ou 3: "
-if errorlevel 4 exit /b 2
-if errorlevel 3 goto ambos
-if errorlevel 2 goto host
-if errorlevel 1 goto zoom
-exit /b 2
+echo DESTINIA - COMPILAR OS DOIS HOSTS
+goto ambos
 :zoom
 set "TARGET=host_zoom"
 goto compilar

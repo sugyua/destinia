@@ -4,15 +4,33 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
-## Próxima atualização — após a 0.3, sem nova release
+## 0.4 Beta — candidata preparada em 21/10/2026
 
-- Adicionado `Compilar Destinia.bat`, com menu para host_zoom, host normal ou ambos, usando MSYS2 UCRT64 e dependências já instaladas.
-- Executor `scripts/compile_windows.sh` configura e compila com CMake/Ninja, usa a pasta do projeto independentemente de onde o BAT foi aberto e interrompe na primeira falha, preservando o código de erro.
-- Caminho padrão do MSYS2 `C:\msys64`, configurável por `DESTINIA_MSYS2_ROOT`; resultados e erros ficam visíveis até fechar a janela.
-- Pacote pequeno com os dois arquivos do compilador e SHA-256, sem executáveis, instaladores ou dependências. Documentação e manifesto atualizados.
-- Fluxo do executor testado em Linux com ferramentas simuladas, incluindo caminhos com espaços e falhas; confirmação do BAT no Windows pendente. Fontes do jogo, saves e releases 0.2/0.3 publicados não foram alterados por este auxiliar.
+### Compilação e inicializadores
 
-## 0.3 Beta — candidata preparada em 21/10/2026
+- Adicionado `Compilar Destinia.bat` e executor Bash para MSYS2 UCRT64: o duplo clique configura e compila os dois hosts com CMake/Ninja. Os argumentos host_zoom, host e ambos continuam disponíveis.
+- Falhas de configuração/compilação interrompem o processo com o código de erro preservado. Caminhos com espaços suportados; sem instalação automática de ferramentas ou dependências e sem limpeza automática do build.
+- Inicializadores separados `Abrir Destinia.bat` e `Abrir Destinia Zoom 800x480.bat` incluídos no pacote; usam a mesma raiz MSYS2 configurável por DESTINIA_MSYS2_ROOT e orientam executar o compilador quando falta EXE.
+- Arquivos BAT normalizados para CRLF e script Bash para LF. Saves existentes não são migrados ou apagados.
+
+### Zoom out, fundo e UI
+
+- Restaurado o framebuffer 800×480 no host_zoom, mostrando área maior do mapa e UI nativa proporcionalmente menor. O host normal permanece em 400×240.
+- Mapas menores que a área visível centralizados por eixo. A centralização atua antes da leitura da câmera pelo ARM, incluindo caminhos com cálculo inline, e preserva a câmera nativa em mapas maiores.
+- Área fora do mapa preenchida em cinza médio, com filtro dos tiles externos mantido. O cenário deixa de ser alinhado somente à direita; mapa de 480×480 tem margens de 160 pixels por lado no framebuffer 800×480.
+- Margens externas da apresentação SDL também cinzas. Tela cheia proporcional e F11 preservados: área de imagem 2400×1440 centralizada no monitor 3440×1440.
+- Fonte do contador de XP ajustada para manter aproximadamente o tamanho visual da 0.3 na mesma resolução de monitor, enquanto a UI original fica proporcionalmente menor. Não há controle configurável de escala da UI nesta versão.
+- Diagnóstico atualizado para BMPs 800×480, identificação do novo zoom e pergunta manual sobre UI/XP. EXE desatualizado é recusado com instrução de recompilação.
+
+### Verificações e limites
+
+- Compilação em Linux e testes automatizados de inicialização, BMPs, empacotamento, compilador e diagnóstico; fixture ARM com mapas pequenos/grandes, escrita inline simulada, preenchimento cinza e preservação de pixels internos.
+- Verificação de janela/textura, alternância F11, geometria ultrawide simulada e altura do texto XP. A confirmação visual em gameplay no Windows, incluindo cliques na UI, PT e F9, permanece pendente.
+- Sem alteração de compras/rede e sem reteste de áudio nesta preparação. Sem EXE Windows pronto ou dependências no pacote de fontes.
+- Log TXT detalhado dos eventos do jogo reservado para a **0.5**; não implementado na 0.4. Os relatórios de diagnóstico já existentes permanecem disponíveis.
+- Releases 0.2 e 0.3 preservadas. Novas notas, manifesto e instruções da candidata 0.4 para revisão antes da publicação.
+
+## 0.3 Beta — 21/10/2026
 
 Esta versão registra o estado atual com enquadramento original ampliado. A restauração do zoom out, o fundo cinza, a centralização dos mapas pequenos e o ajuste da UI ficam para a próxima atualização.
 

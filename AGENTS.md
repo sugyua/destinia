@@ -75,3 +75,10 @@ Preparacao de release — orientacao atual do usuario (20/10/2026)
 * Nao configurar atualizacoes periodicas sem uma tarefa explicitamente definida.
 * A pasta game e o APK original do Destinia Android extraido, conforme esclarecido pelo usuario.
 * Nao incluir no arquivo da release programas, instaladores, ferramentas ou bibliotecas externos que o usuario precise instalar no PC. Documentar esses requisitos na secao Dependencias do README do GitHub.
+
+Orientacao atual — candidata 0.4 (21/10/2026)
+
+* Preparar compilador BAT dos dois hosts e inicializadores separados; incluir zoom out, fundo cinza, centralizacao de mapas pequenos e UI proporcionalmente menor.
+* Manter contador XP aproximadamente no tamanho visual da 0.3, preservando tela cheia proporcional e F11.
+* Log TXT detalhado de eventos reservado para a 0.5; nao implementar na 0.4.
+* Nao confundir testes ARM com mapas sinteticos e testes locais com validacao de gameplay/UI no Windows. Solicitar aprovacao antes da publicacao da release 0.4.

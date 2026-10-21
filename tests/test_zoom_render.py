@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 @unittest.skipUnless(os.environ.get('DESTINIA_ZOOM_EXE'), 'Requer host_zoom compilado e game original')
 class ZoomRenderTests(unittest.TestCase):
-    def test_native_framebuffer_and_capture_preserve_original_resolution(self):
+    def test_zoom_out_framebuffer_and_captures_use_800x480(self):
         exe = Path(os.environ['DESTINIA_ZOOM_EXE']).resolve()
         with tempfile.TemporaryDirectory(prefix='destinia-render-') as directory:
             output = Path(directory) / 'frames'
@@ -19,11 +19,11 @@ class ZoomRenderTests(unittest.TestCase):
                                   '--headless', '10', '--out', str(output), '--mute', '--lang', 'pt',
                                   '--trace-camera'], capture_output=True, text=True, timeout=120, cwd=ROOT)
             self.assertEqual(run.returncode, 0, run.stderr[-3000:])
-            self.assertIn('initGame ok em 400x240', run.stderr)
+            self.assertIn('initGame ok em 800x480', run.stderr)
             for frame in [1, 10]:
                 bmp = (output / ('frame_%05d.bmp' % frame)).read_bytes()
                 self.assertEqual(bmp[:2], b'BM')
-                self.assertEqual(struct.unpack_from('<ii', bmp, 18), (400, 240))
+                self.assertEqual(struct.unpack_from('<ii', bmp, 18), (800, 480))
                 self.assertEqual(len(bmp), struct.unpack_from('<I', bmp, 2)[0])
                 pixels = bmp[struct.unpack_from('<I', bmp, 10)[0]:]
                 self.assertTrue(any(pixels), 'Captura inteiramente preta')

@@ -1,6 +1,6 @@
 {
-  "version": "0.3",
-  "base_commit": "fa92ed696470ac68f2ad8274d9d2f9259f97f3ce",
+  "version": "0.4",
+  "base_commit": "ccd275ba61fe89e1791bcbd6eec64f3e54eaa52d",
   "files": [
     ".gitignore",
     "AGENTS.md",
@@ -32,6 +32,9 @@
     "docs/RELEASE_0.3.md",
     "Compilar Destinia.bat",
     "scripts/compile_windows.sh",
-    "tests/test_compile_windows.py"
+    "tests/test_compile_windows.py",
+    "release/NOTAS_0.4.md",
+    "docs/RELEASE_0.4.md",
+    "docs/ROADMAP.md"
   ]
 }

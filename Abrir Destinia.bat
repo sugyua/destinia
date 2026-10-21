@@ -1,10 +1,12 @@
 @echo off
-setlocal
+setlocal DisableDelayedExpansion
 
 set "ROOT=%~dp0"
 set "HOST_DIR=%ROOT%host"
 set "EXE=%HOST_DIR%\build\destinia_host.exe"
-set "MSYS2_BIN=C:\msys64\ucrt64\bin"
+set "MSYS2_ROOT=%DESTINIA_MSYS2_ROOT%"
+if not defined MSYS2_ROOT set "MSYS2_ROOT=C:\msys64"
+set "MSYS2_BIN=%MSYS2_ROOT%\ucrt64\bin"
 if not defined LOCALAPPDATA (
   echo Nao foi possivel localizar a pasta local de dados do usuario.
   pause
@@ -16,7 +18,7 @@ if not exist "%EXE%" (
   echo Nao encontrei o executavel:
   echo   "%EXE%"
   echo.
-  echo Compile o projeto pelo MSYS2 UCRT64 antes de abrir o jogo.
+  echo Execute Compilar Destinia.bat antes de abrir o jogo.
   pause
   exit /b 1
 )
@@ -31,6 +33,7 @@ if not exist "%MSYS2_BIN%\SDL2.dll" (
 
 set "PATH=%MSYS2_BIN%;%PATH%"
 cd /d "%HOST_DIR%"
+if errorlevel 1 exit /b 1
 
 echo Abrindo Destinia...
 echo Save compartilhado: "%SHARED_SAVE%"

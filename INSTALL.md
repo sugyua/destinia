@@ -1,12 +1,12 @@
-# Instalação e compilação — Destinia 0.3 Beta
+# Instalação e compilação — Destinia 0.4 Beta
 
 > **Versão Beta: pode conter diversos bugs. Faça backup dos saves.**
 
 ## O que está disponível nesta release de fontes
 
-`destinia-0.3-beta-source.zip` contém os fontes dos dois hosts, seus CMakeLists, launchers normais de desenvolvimento e documentação. **Não contém executável Windows nem os dados originais do jogo.** Extrair o ZIP não instala um jogo pronto para jogar.
+`destinia-0.4-beta-source.zip` contém os fontes dos dois hosts, seus CMakeLists, launchers normais de desenvolvimento e documentação. **Não contém executável Windows nem os dados originais do jogo.** Extrair o ZIP não instala um jogo pronto para jogar.
 
-Não há um instalador, assinatura digital ou pacote de DLLs validado nesta entrega. Um ZIP Windows executável só deve ser publicado depois das verificações em máquina limpa descritas em `docs/RELEASE_0.3.md`.
+Não há um instalador, assinatura digital ou pacote de DLLs validado nesta entrega. Um ZIP Windows executável só deve ser publicado depois das verificações em máquina limpa descritas em `docs/RELEASE_0.4.md`.
 
 ## Requisitos para compilar no Windows
 
@@ -100,31 +100,25 @@ Em `host_zoom`, F9 inicia/para a gravação quando iniciado com `--trace-viewpor
 
 Não inclua saves pessoais em um relatório público sem revisá-los.
 
-## Atualização do zoom: enquadramento original
+## Zoom out da 0.4
 
-O host_zoom agora renderiza o jogo em **400×240** e amplia a imagem para uma janela inicial de **800×480**, com pixels nítidos e proporção preservada. A imagem mostra o enquadramento original; deixa de mostrar uma área maior do mapa. Janelas com outra proporção ainda podem ter barras externas para preservar a imagem. PT, F9 e os comandos existentes continuam disponíveis.
+O host_zoom renderiza em **800×480**: mostra uma área maior do mapa e a UI original ocupa uma fração menor da tela. O contador de XP usa fonte ajustada para manter aproximadamente o tamanho visual da 0.3 na mesma resolução de monitor. Não há escala de UI configurável nesta versão; legibilidade e cliques precisam de confirmação no Windows.
 
-**É necessário recompilar o host_zoom**, mesmo que já exista um EXE na pasta. Substituir somente o BAT não atualiza o jogo. Depois de extrair os fontes atuais sobre a pasta do projeto, execute no terminal MSYS2 UCRT64:
+Quando um mapa é menor que a área visível, o cenário é centralizado no eixo correspondente e a área externa é preenchida em cinza. Um mapa de 480×480 ocupa a região central do framebuffer com 160 pixels de margem horizontal em cada lado. Regiões pretas existentes dentro dos próprios mapas são preservadas. O filtro de tiles fora dos limites continua ativo para evitar repetição.
 
-```sh
-cd /c/destinia-main
-cmake -S host_zoom -B host_zoom/build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build host_zoom/build
-```
-
-Feche o jogo antes de compilar. Depois abra `Testar Destinia.bat`, escolha **1** e repita apenas a passagem que apresentou a faixa preta. Os BMPs e as coordenadas F9 agora são de 400×240; a ampliação ocorre somente na apresentação. O diagnóstico recusa o EXE antigo de 800×480 e pede recompilação. O host normal não foi alterado.
+**Recompile** após atualizar. O BAT de diagnóstico agora exige a identificação do zoom centralizado e gera BMPs 800×480. Teste troca de mapa, UI, contador de XP e mouse com a opção 1. A versão normal continua em 400×240.
 
 ## Tela cheia no monitor ultrawide
 
 O launcher `Abrir Destinia Zoom 800x480.bat` inicia o host_zoom com `--fullscreen`, em tela cheia sem bordas, usando a resolução atual do monitor. O nome antigo do BAT foi mantido para preservar atalhos. **F11** alterna entre tela cheia e janela. Pelo terminal, omita `--fullscreen` para iniciar em janela.
 
-A proporção original é preservada, sem esticar nem cortar. Em um monitor 3440×1440, a área do jogo ocupa **2400×1440**, centralizada, com barras pretas externas de **520 pixels em cada lado**. O framebuffer e as capturas F9 continuam em 400×240. O mouse considera a área central, e cliques nas barras não acionam o jogo. Não é suporte nativo a ultrawide.
+A proporção original é preservada, sem esticar nem cortar. Em um monitor 3440×1440, a área do jogo ocupa **2400×1440**, centralizada, com margens cinzas externas de **520 pixels em cada lado**. O framebuffer e as capturas F9 do zoom são 800×480; a versão normal continua 400×240. O mouse considera a área central, e cliques nas barras não acionam o jogo. Não é suporte nativo a ultrawide.
 
 Recompile o host_zoom após atualizar os fontes. Para testar o mesmo modo no diagnóstico de câmera, escolha a opção 1 do `Testar Destinia.bat`: ela agora abre em tela cheia. Na janela guiada, confira também F11, clique em TAP TO START, Alt+Tab e o alinhamento do mouse.
 
 ## Compilação pelo BAT
 
-Depois de instalar as dependências, feche o jogo e abra **Compilar Destinia.bat** na raiz do projeto. Escolha 1 para host_zoom, 2 para host ou 3 para ambos. O BAT configura e compila com os mesmos comandos CMake/Ninja da seção manual, reaproveitando o build existente e parando na primeira falha. Ele mantém a janela aberta para leitura do resultado e mostra o caminho do EXE. Não limpa caches, instala ferramentas, abre o jogo ou acessa saves.
+Depois de instalar as dependências, feche o jogo e abra **Compilar Destinia.bat** na raiz do projeto. O duplo clique compila ambos os hosts; os argumentos opcionais host_zoom e host permitem compilar apenas um. O BAT configura e compila com os mesmos comandos CMake/Ninja da seção manual, reaproveitando o build existente e parando na primeira falha. Ele mantém a janela aberta para leitura do resultado e mostra o caminho do EXE. Não limpa caches, instala ferramentas, abre o jogo ou acessa saves.
 
 O BAT precisa do arquivo `scripts/compile_windows.sh` junto ao projeto. O caminho padrão é `C:\msys64`; se o seu MSYS2 estiver em outro local, execute pelo Prompt:
 
@@ -133,6 +127,6 @@ set "DESTINIA_MSYS2_ROOT=D:\msys64"
 "Compilar Destinia.bat" host_zoom
 ```
 
-Também aceita `host` e `ambos`. Sem argumento, apresenta o menu. Se o CMake informar incompatibilidade de gerador ou de pasta de origem em um cache antigo, envie o erro para análise; o BAT não apaga o build automaticamente. A primeira compilação pode demorar mais; nas seguintes, o Ninja recompila somente o necessário. Mudanças apenas na documentação ou no diagnóstico não exigem recompilar o jogo.
+Também aceita `host` e `ambos`. Sem argumento, compila ambos. Se o CMake informar incompatibilidade de gerador ou de pasta de origem em um cache antigo, envie o erro para análise; o BAT não apaga o build automaticamente. A primeira compilação pode demorar mais; nas seguintes, o Ninja recompila somente o necessário. Mudanças apenas na documentação ou no diagnóstico não exigem recompilar o jogo.
 
 Os testes do executor foram realizados em Linux com ferramentas simuladas: caminhos com espaços, ambos os hosts, recusa de alvo inválido, falha de configuração e falha de build com propagação do código e interrupção. O menu e a execução completa pelo Bash do MSYS2 ainda precisam de confirmação no Windows.
