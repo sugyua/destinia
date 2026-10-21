@@ -12,7 +12,7 @@ No Windows, use **I** (menu por padrão), o comando de menu configurado ou o bot
 - **DERROTADO:** a rotina original de confirmação de derrota foi observada, com o monstro em estado de morte e sem vida.
 - **MORTOS:** quantidade de derrotas confirmadas daquela espécie. Repetir o processamento do mesmo cadáver não soma outra morte; um novo indivíduo ou reaparecimento pode somar.
 
-Esta primeira versão mostra nomes originais em inglês, sem retratos ou equipamentos. Somente espécies descobertas aparecem. O Códex é aberto pelo menu durante a partida e fica vazio até haver descobertas.
+Na `main` e no site, cada entrada mostra uma **miniatura original do monstro**, seu nome em inglês, estado e contador; equipamentos continuam pendentes. Quatro monstros por página mantêm as imagens legíveis. Somente espécies descobertas aparecem. O Códex é aberto pelo menu durante a partida e fica vazio até haver descobertas.
 
 ## Onde os dados ficam
 
@@ -39,3 +39,11 @@ Testes cobrem modelo, deduplicação, reaparecimento, slots, escrita/releitura, 
 ## Verificação da correção do menu
 
 A biblioteca ARM e os nove IDs originais de menu são preservados: o livro é uma extensão do host ligada à tela original de menu, sem substituir Craft/Pets ou gravar um ID novo na memória ARM. Retornar preserva a opção anterior. Os testes de ABI conferem abertura pelo toque, navegação entre as abas e o livro, volta, isolamento de submenus e ausência de botão no gameplay. O teste web confirma que a memória do jogo não avança durante a consulta e que não há diálogo/botão Códex no HTML externo. Chromium com toque verificou retrato, paisagem, contador via fixture ARM e pausa/retomada; Safari físico e campanha completa continuam pendentes.
+
+## Miniaturas originais — alteração após a release 0.7
+
+Os retratos usam os arquivos `monN_V_head.wmb`/`bossN_head.wmb` e as poses `monN.agd`/`bossN.agd` já presentes em `game/assets`. O leitor combina as partes do corpo da primeira pose, sem sombras/efeitos externos, preserva a transparência e reduz a figura proporcionalmente em uma área de 28×28 pixels. As 63 variantes normais e os dez IDs de chefes foram lidos nos testes. O chefe 103 reutiliza a arte do 101, como no carregador original.
+
+No Windows, as imagens são carregadas em cache para as páginas consultadas, sem chamar rotinas ARM nem alterar partida ou `codex-v1.txt`. A leitura de ZCP usa zlib externa, documentada em Dependências. No navegador, as imagens são preparadas durante a inicialização a partir dos recursos já presentes; é necessário suporte a `DecompressionStream` para vê-las. Recurso ausente, corrompido ou formato incompatível mostra `?`, preservando nome/estado/contador. A leitura limita tamanho descomprimido, dimensões e índices antes de desenhar.
+
+As referências de teste incluem figuras completas de Fungus, Scorpion, Dungeon Guardian, chefe 102 e Lava Guardian, verificadas também por hash dos pixels RGB565, além de todas as variantes. Consulta e mudança de página preservam os contadores e a memória ARM. A QA por toque verifica duas páginas, inclusive chefes, em retrato/paisagem no Chromium. Isso não substitui a verificação no Windows com jogo real nem no Safari/iPhone físico.

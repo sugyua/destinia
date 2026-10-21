@@ -52,5 +52,12 @@ int main(int argc,char** argv) {
  auto original=std::vector<uint8_t>(FB_BYTES,0x35),closed=original;
  destinia::codexPaint(closed.data(),SCREEN_W,SCREEN_H,codex,false,0,true);
  if(closed!=original)return 43;
+ codex.select(0);for(int id=1;id<=5;++id)codex.observe(10000+id,id,true);
+ auto progress=codex.entries;std::vector<uint8_t> gameBefore(32056),gameAfter(32056);rd(game,gameBefore.data(),gameBefore.size());
+ codexPortraits.clear();codexPage=0;codexChangePage(0);if(codexPortraits.size()!=4)return 50;
+ for(int id=1;id<=4;++id)if(codexPortraits.at(id).pixels.empty())return 51;
+ codexChangePage(1);if(codexPage!=1 || codexPortraits.size()!=5 || codexPortraits.at(5).pixels.empty())return 52;
+ codexChangePage(1);if(codexPage!=1)return 53;codexChangePage(-1);if(codexPage!=0)return 54;
+ rd(game,gameAfter.data(),gameAfter.size());if(gameBefore!=gameAfter || codex.entries[0][1].kills!=progress[0][1].kills)return 55;
  std::puts("CODEX_ARM_OK");uc_close(uc);uc=nullptr;return 0;
 }

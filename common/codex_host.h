@@ -4,9 +4,22 @@
 static destinia::Codex codex;
 static bool codexAvailable=false,codexWritable=true,codexOpen=false;
 static size_t codexPage=0;
+static destinia::CodexPortraits codexPortraits;
+static void codexEnsurePortraits() {
+ auto character=codex.entries.find(codex.slot);if(character==codex.entries.end())return;
+ size_t row=0;for(const auto& entry:character->second) {
+  if(row++<codexPage*destinia::codexRowsPerPage || row> (codexPage+1)*destinia::codexRowsPerPage)continue;
+  const int id=entry.first;if(codexPortraits.count(id))continue;
+  destinia::CodexPortrait picture;auto paths=destinia::codexPortraitAssets(id);std::vector<uint8_t> sheet,pose;
+  auto bounded=[&](const std::string& name){std::error_code ec;auto size=fs::file_size(assetsDir+"/"+name,ec);return !ec && size>0 && size<=2*1024*1024;};
+  if(!paths.first.empty() && bounded(paths.first) && bounded(paths.second) && readFile(assetsDir+"/"+paths.first,sheet) && readFile(assetsDir+"/"+paths.second,pose))picture=destinia::codexDecodePortrait(destinia::codexUnpackResource(sheet),destinia::codexUnpackResource(pose));
+  if(picture.pixels.empty())hostReport("[codex] Imagem indisponivel para especie %d; nome e contador preservados.\n",id);
+  codexPortraits.emplace(id,std::move(picture));
+ }
+}
 static void codexChangePage(int direction) {
-  auto it=codex.entries.find(codex.slot);const size_t pages=it==codex.entries.end()?1:std::max<size_t>(1,(it->second.size()+7)/8);
-  codexPage=std::min(codexPage,pages-1);if(direction>0 && codexPage+1<pages)++codexPage;else if(direction<0 && codexPage)--codexPage;
+  auto it=codex.entries.find(codex.slot);const size_t pages=it==codex.entries.end()?1:std::max<size_t>(1,(it->second.size()+destinia::codexRowsPerPage-1)/destinia::codexRowsPerPage);
+  codexPage=std::min(codexPage,pages-1);if(direction>0 && codexPage+1<pages)++codexPage;else if(direction<0 && codexPage)--codexPage;codexEnsurePortraits();
 }
 static void codexFlush() {
   if(!codexAvailable || !codexWritable || !codex.dirty) return;
@@ -27,7 +40,7 @@ static void codexEnterMenu() {
   codexNativeTouchDown=false;
  }
  const int slot=rd16(exportsMap.at("Game")+0x4886);if(slot<=9)codex.select(slot);
- codexOpen=true;codexTabSelected=true;codexPage=0;codexFlush();
+ codexOpen=true;codexTabSelected=true;codexPage=0;codexEnsurePortraits();codexFlush();
 }
 static bool codexMenuKey(int key,bool down) {
  if(!down)return false; // Always allow native releases to clear held commands.

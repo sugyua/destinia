@@ -4,7 +4,7 @@ ROOT=pathlib.Path(__file__).resolve().parents[1]
 class CodexNativeTests(unittest.TestCase):
  def test_original_arm_callbacks_discover_count_dedup_and_ignore_offscreen(self):
   self.assertTrue((ROOT/'common/codex_host.h').exists(),'Ponte nativa do Códex ausente')
-  flags=shlex.split(subprocess.check_output(['pkg-config','--cflags','--libs','sdl2','unicorn'],text=True))
+  flags=shlex.split(subprocess.check_output(['pkg-config','--cflags','--libs','sdl2','unicorn','zlib'],text=True))
   with tempfile.TemporaryDirectory() as directory:
    base=pathlib.Path(directory)
    for variant in ['host','host_zoom']:

@@ -15,6 +15,7 @@ Esta preparação não estabelece autorização de redistribuição desses dados
 | SDL2 | Janela, framebuffer, entradas e inicialização de áudio |
 | SDL2_mixer | Música e efeitos; dependência opcional |
 | Unicorn | Emulação da CPU ARM |
+| zlib | Descompressão dos sprites originais do Códex; dependência externa das compilações atuais |
 | Runtime UCRT64/MinGW e codecs | Dependências do executável e das bibliotecas compiladas |
 
 Nenhuma DLL foi incluída nesta candidata. Por orientação do usuário, dependências externas que exigem instalação no PC devem ficar fora do arquivo da release e ser informadas na seção **Dependências** do README. Isso inclui instaladores, ferramentas de compilação e bibliotecas/runtime externos.

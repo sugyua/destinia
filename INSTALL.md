@@ -13,10 +13,10 @@
 Instale separadamente o [MSYS2](https://www.msys2.org/), usando o ambiente **UCRT64**, e os pacotes correspondentes. No terminal UCRT64:
 
 ```sh
-pacman -S --needed mingw-w64-ucrt-x86_64-SDL2 mingw-w64-ucrt-x86_64-SDL2_mixer mingw-w64-ucrt-x86_64-unicorn
+pacman -S --needed mingw-w64-ucrt-x86_64-SDL2 mingw-w64-ucrt-x86_64-SDL2_mixer mingw-w64-ucrt-x86_64-unicorn mingw-w64-ucrt-x86_64-zlib
 ```
 
-O gerenciador instala também as dependências transitivas. Não misture DLLs de MSYS, MINGW64 e UCRT64. SDL2/Unicorn e suas bibliotecas de execução são obrigatórios; os EXEs da 0.6 são compilados com SDL2_mixer e também precisam de suas DLLs. Não baixe DLLs avulsas: use os pacotes do mesmo ambiente. Os inicializadores acrescentam `C:\msys64\ucrt64\bin` ao PATH apenas naquele processo.
+As compilações da `main` com miniaturas no Códex também precisam de **zlib UCRT64**, instalada pelo comando acima; sua DLL fica no MSYS2 e não acompanha os pacotes. O gerenciador instala também as dependências transitivas. Não misture DLLs de MSYS, MINGW64 e UCRT64. SDL2/Unicorn e suas bibliotecas de execução são obrigatórios; os EXEs da 0.6 são compilados com SDL2_mixer e também precisam de suas DLLs. Não baixe DLLs avulsas: use os pacotes do mesmo ambiente. Os inicializadores acrescentam `C:\msys64\ucrt64\bin` ao PATH apenas naquele processo.
 
 Se o MSYS2 estiver em outro local, defina `DESTINIA_MSYS2_ROOT`, por exemplo no Prompt:
 
@@ -56,7 +56,7 @@ Somente quem usa o ZIP de fontes precisa de compilador C++17, CMake ≥ 3.16, Ni
 
 ```sh
 pacman -S --needed mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-ninja mingw-w64-ucrt-x86_64-pkgconf
-pkg-config --modversion sdl2 unicorn SDL2_mixer
+pkg-config --modversion sdl2 unicorn SDL2_mixer zlib
 ```
 
 Feche o jogo e abra **Compilar Destinia.bat**. O duplo clique compila ambos os hosts; os argumentos `host`, `host_zoom` e `ambos` selecionam o alvo. O BAT usa o MSYS2 já instalado, preserva os códigos de falha e não apaga caches ou saves nem instala ferramentas.

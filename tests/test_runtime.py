@@ -27,7 +27,7 @@ class RuntimeHostTests(unittest.TestCase):
     def setUpClass(cls):
         cls.build = tempfile.TemporaryDirectory(prefix='destinia-runtime-bin-')
         cls.addClassCleanup(cls.build.cleanup)
-        flags = shlex.split(subprocess.check_output(['pkg-config','--cflags','--libs','sdl2','unicorn'], text=True))
+        flags = shlex.split(subprocess.check_output(['pkg-config','--cflags','--libs','sdl2','unicorn','zlib'], text=True))
         cls.binaries = {}
         for variant in ['host','host_zoom']:
             exe = Path(cls.build.name)/variant

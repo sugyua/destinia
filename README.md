@@ -42,6 +42,7 @@ A presença no código não equivale a validação completa de gameplay. O host_
 - Registro auxiliar separado por personagem na mesma pasta de save dos dois hosts; preserva o progresso entre instalações/updates sem alterar o save nativo.
 - Observação das rotinas ARM originais de desenho e confirmação de derrota; proteção contra contagem duplicada e IDs incompatíveis.
 - Interface de consulta com paginação e pausa da partida; importação de histórico antigo não está disponível.
+- **Na `main` e no site:** miniatura original ao lado do nome de cada monstro descoberto, inclusive variantes e chefes. Quatro entradas por página, com nome, estado e contador preservados. [Pacotes de teste Windows em Actions](https://github.com/sugyua/destinia/actions/workflows/verify-codex-menu.yml); os ZIPs originais da release 0.7 permanecem inalterados.
 - O [protótipo web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site) usa o mesmo acesso **dentro do menu do jogo**, sem botão Códex na interface do site. Na web, o progresso e o Códex continuam apenas na memória da sessão, sem áudio.
 
 Leia [CODEX.md](docs/CODEX.md), [CHANGELOG.md](CHANGELOG.md) e [RELEASE_0.7.md](docs/RELEASE_0.7.md). Não inclui novos equipamentos, novos monstros nem alterações de combate.
@@ -66,6 +67,7 @@ As dependências externas devem ser instaladas separadamente no PC do usuário. 
 | --- | --- |
 | Windows 64 bits e MSYS2 UCRT64 | Ambiente de execução atualmente esperado pelos launchers; instalação padrão em `C:\msys64` |
 | SDL2 e Unicorn para UCRT64 | Execução do host e emulação ARM, com suas dependências transitivas disponíveis no mesmo ambiente |
+| zlib para UCRT64 | Leitura dos sprites originais comprimidos das miniaturas do Códex nas compilações atuais da `main` |
 | SDL2_mixer e suporte OGG/MP3 | Áudio, quando habilitado na compilação |
 | Compilador C++17, CMake ≥ 3.16, Ninja e pkg-config/pkgconf | Somente para quem compilar os fontes |
 | Python ≥ 3.10 | Somente para testar ou gerar pacotes |

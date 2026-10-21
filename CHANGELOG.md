@@ -6,6 +6,12 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 
 ## Correções após a 0.7 — branch main, sem nova release
 
+- Miniatura original de cada monstro ao lado do nome no Códex, nos dois hosts e no protótipo web. Montagem da primeira pose a partir dos sprites WBI/AGD do APK, preservando cores, transparência, variantes e o compartilhamento original de arte entre os chefes 101/103; sem sombras e efeitos externos.
+- Quatro monstros por página para manter as figuras legíveis. Nome, estado e contador de mortes continuam disponíveis; formato dos saves e registros anteriores preservados.
+- Cache de imagens, limites de descompressão/dimensões e indicador `?` quando um recurso estiver ausente ou incompatível, preservando a consulta. No Windows as imagens são carregadas só para as páginas consultadas, sem executar ou modificar memória ARM.
+- zlib declarada nas dependências de instalação e compilação; biblioteca externa permanece fora dos pacotes. Na web a leitura usa DecompressionStream e as imagens derivam dos recursos já existentes.
+- Testes com os 73 IDs originais, variantes, chefes completos, cores e espelhamento, arquivos inválidos, paginação e preservação de contadores/memória ARM.
+
 - Acesso ao Códex transferido para o menu original do jogo, junto de Craft e Pets, nos dois hosts e no protótipo web: livro CODEX ao lado da barra de ícones.
 - Lista e contadores desenhados dentro da imagem do jogo, com VOLTAR para a opção anterior e paginação por toque, teclado e botões de controle no Windows.
 - Removidos o botão do HUD de gameplay e o botão/diálogo externos do site. F8 fica restrito ao menu, preservando remapeamentos existentes.

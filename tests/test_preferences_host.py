@@ -12,7 +12,7 @@ class PreferencesHostTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.build=tempfile.TemporaryDirectory(prefix='destinia preferences host ');cls.addClassCleanup(cls.build.cleanup)
-        flags=shlex.split(subprocess.check_output(['pkg-config','--cflags','--libs','sdl2','SDL2_mixer','unicorn'],text=True))
+        flags=shlex.split(subprocess.check_output(['pkg-config','--cflags','--libs','sdl2','SDL2_mixer','unicorn','zlib'],text=True))
         cls.binaries={}
         for variant in ['host','host_zoom']:
             exe=Path(cls.build.name)/(variant+('.exe' if os.name=='nt' else ''))

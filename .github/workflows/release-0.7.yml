@@ -29,6 +29,7 @@ jobs:
             mingw-w64-ucrt-x86_64-SDL2
             mingw-w64-ucrt-x86_64-SDL2_mixer
             mingw-w64-ucrt-x86_64-unicorn
+            mingw-w64-ucrt-x86_64-zlib
       - name: Compilar os dois hosts com audio
         shell: msys2 {0}
         run: |

@@ -2343,7 +2343,7 @@ static int runHost(int argc, char** argv) {
       }
       if(codexOpen) {
         controls.release();updateAudioState(controls.focused,true);
-        auto panel=arrays[hScreen];destinia::codexPaint(panel.data(),SCREEN_W,SCREEN_H,codex,true,codexPage,codexAvailable);
+        auto panel=arrays[hScreen];destinia::codexPaint(panel.data(),SCREEN_W,SCREEN_H,codex,true,codexPage,codexAvailable,true,true,&codexPortraits);
         if(SDL_UpdateTexture(tex,nullptr,panel.data(),SCREEN_W*2)!=0) {executionFailed=true;break;}
         SDL_Rect dst=gameViewport();SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);SDL_RenderCopy(ren,tex,nullptr,&dst);SDL_RenderPresent(ren);SDL_Delay(16);continue;
       }

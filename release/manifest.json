@@ -78,6 +78,9 @@
     "docs/RELEASE_0.7.md",
     "release/NOTAS_0.7.md",
     "docs/INVESTIGACAO_PETS_TITULOS.md",
-    "docs/INVESTIGACAO_CLASSES.md"
+    "docs/INVESTIGACAO_CLASSES.md",
+    "common/codex_portraits.h",
+    "tests/codex_portrait_cases.cpp",
+    "tests/test_codex_portraits.py"
   ]
 }
