@@ -2,7 +2,7 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs. Faça backup dos saves antes de atualizar.**
 
-Planejamento autorizado pelo autor em **21/10/2026**: **39 melhorias aprovadas**, das quais **8 concluídas** na 0.5/0.6 e **31 futuras**, da 0.7 em diante. A publicação da **0.6 Beta** foi aprovada pelo autor. Testes automáticos passaram; campanha e inspeção manual no Windows continuam pendentes.
+Planejamento autorizado pelo autor em **21/10/2026**: **41 melhorias aprovadas**, das quais **8 concluídas** na 0.5/0.6 e **33 futuras**, da 0.7 em diante. A publicação da **0.6 Beta** foi aprovada pelo autor. Testes automáticos passaram; campanha e inspeção manual no Windows continuam pendentes.
 
 ## Melhorias concluídas com sucesso
 
@@ -30,8 +30,8 @@ As versões abaixo são **metas provisórias**, sem calendário garantido. Uma e
 | 0.7 | Interface e acessibilidade | Alta; depende de investigação ARM/renderização |
 | 0.8 | Saves, compatibilidade e loja offline | Alta; depende de investigação de saves e callbacks ARM |
 | 0.9 | Inventário, coleta e assistência opcional | Alta; depende de dados, UI e persistência nativos |
-| 0.10 | Progressão expandida, equipamentos e títulos | Muito alta; exige prova de viabilidade, IDs/condições de títulos e balanceamento |
-| 0.11 | Missões, armazenamento, desafios e pets | Muito alta; depende de missões, dados, animações/comportamento dos pets e saves |
+| 0.10 | Progressão expandida, equipamentos, títulos e drops exclusivos | Muito alta; exige mapear progressão, IDs/condições, tabelas de drops e balanceamento |
+| 0.11 | Missões, armazenamento, desafios, pets e Códex | Muito alta; depende de dados, animações/comportamento, eventos de descoberta e saves |
 | 0.12 | Pós-jogo e masmorras | Muito alta; etapa exploratória |
 
 ## Regras de implementação
@@ -91,9 +91,9 @@ Reduzir tarefas repetitivas e tornar os equipamentos mais fáceis de entender e 
 
 ### Meta 0.10 — Progressão expandida, equipamentos e títulos
 
-Aumentar o nível máximo e acrescentar ranks, itens inéditos, conjuntos, receitas, recompensas offline e novos títulos.
+Aumentar o nível máximo e acrescentar ranks, itens inéditos, conjuntos, receitas, recompensas offline, novos títulos e drops exclusivos por monstro.
 
-**Dependências:** Depende do mapeamento de XP, limites, tabelas de equipamentos e saves, além do modo expandido da 0.8. Novos títulos também exigem mapear IDs, condições de aquisição, atributos/bônus e seleção do título ativo; ampliar apenas a tabela de nomes não basta.
+**Dependências:** Depende do mapeamento de XP, limites, tabelas de equipamentos e saves, além do modo expandido da 0.8. Novos títulos também exigem mapear IDs, condições de aquisição, atributos/bônus e seleção do título ativo; ampliar apenas a tabela de nomes não basta. Drops exclusivos exigem mapear a relação monstro/equipamento, tabelas ou rotinas de sorteio, chances, requisitos e demais fontes de obtenção.
 
 - [ ] **25. Aumentar o nível máximo:** Aumentar o nível máximo após verificar o limite original e revisar XP, pontos, atributos, equipamentos, inimigos, HUD e saves; novo limite ainda a definir.
 - [ ] **26. Novos ranks de armas:** Criar graus acima do maior atual, com nomes e progressão a definir, incluindo atributos, requisitos, obtenção e identificação visual.
@@ -103,22 +103,24 @@ Aumentar o nível máximo e acrescentar ranks, itens inéditos, conjuntos, recei
 - [ ] **37. Novos itens únicos:** Criar armas, armaduras e acessórios inéditos, com identidade, atributos, efeitos e formas de obtenção próprios, além dos novos ranks.
 - [ ] **38. Novos conjuntos de equipamentos:** Adicionar conjuntos com bônus por combinar peças; verificar primeiro o sistema original e definir bônus e número de peças.
 - [ ] **40. Novos títulos:** Ampliar o sistema original com títulos conquistados por objetivos do jogo, com condições, nomes e eventuais bônus a definir; validar aquisição, seleção, exibição e persistência no modo expandido.
+- [ ] **41. Drops de armas e armaduras exclusivos de monstros específicos:** Associar equipamentos exclusivos a espécies ou chefes determinados, com chances e requisitos a definir; validar que esses itens só caiam dos monstros previstos, sem remover os drops existentes do modo clássico.
 
-**Verificação necessária antes da entrega:** Provar primeiro um avanço além do limite original e um equipamento novo em save descartável; depois conferir XP, atributos, habilidades, requisitos, receitas, bônus de conjunto, economia e persistência. Para títulos, conquistar um título realmente novo, selecioná-lo, verificar seus efeitos e salvar/reabrir sem perder os títulos anteriores.
+**Verificação necessária antes da entrega:** Provar primeiro um avanço além do limite original e um equipamento novo em save descartável; depois conferir XP, atributos, habilidades, requisitos, receitas, bônus de conjunto, economia e persistência. Para títulos, conquistar um título realmente novo, selecioná-lo, verificar seus efeitos e salvar/reabrir sem perder os títulos anteriores. Para drops exclusivos, testar monstros permitidos e não permitidos, conferir as regras e chances, preservar os drops clássicos e validar a persistência dos equipamentos obtidos.
 
-### Meta 0.11 — Missões, armazenamento, desafios e pets
+### Meta 0.11 — Missões, armazenamento, desafios, pets e Códex
 
-Adicionar baú compartilhado, informação de missões, dificuldades opcionais, contratos offline e novos pets.
+Adicionar baú compartilhado, informação de missões, dificuldades opcionais, contratos offline, novos pets e um Códex de descobertas.
 
-**Dependências:** Baú depende da gravação segura da 0.8; missões e recompensas exigem mapear objetivos e validar a economia expandida. Novos pets também exigem mapear IDs, tabelas de habilidades/evolução, animações, comportamento e campos do save. A meta 0.10 fornece a base de expansão e balanceamento.
+**Dependências:** Baú depende da gravação segura da 0.8; missões e recompensas exigem mapear objetivos e validar a economia expandida. Novos pets também exigem mapear IDs, tabelas de habilidades/evolução, animações, comportamento e campos do save. A meta 0.10 fornece a base de expansão e balanceamento. O Códex exige identificar os equipamentos e monstros por IDs estáveis e observar eventos reais de encontro, obtenção e derrota, com persistência por personagem.
 
 - [ ] **18. Baú compartilhado entre personagens:** Transferir itens entre personagens pelo armazenamento local, com proteção contra perda/duplicação.
 - [ ] **23. Rastreador de missão:** Mostrar objetivo ativo e, quando houver coordenadas conhecidas, marcador de destino; verificar os recursos originais existentes.
 - [ ] **32. Dificuldades opcionais:** Perfis de dificuldade com ajustes de inimigos e recompensas; preservar uma experiência equivalente à original.
 - [ ] **35. Contratos repetíveis offline:** Objetivos opcionais de caça/coleta para dar propósito ao pós-jogo, com recompensas e repetição controladas.
 - [ ] **39. Novos pets:** Acrescentar mascotes ao sistema original, com aparência, animações, atributos, habilidades, evolução e obtenção offline a definir; validar IDs, comportamento e salvamento no modo expandido, preservando os pets existentes.
+- [ ] **42. Códex de equipamentos e monstros:** Consultar todas as armas, armaduras e espécies de monstros já registradas pelo personagem, distinguindo equipamento encontrado de obtido e monstro encontrado de derrotado; salvar as descobertas entre sessões e manter o conteúdo ainda não descoberto oculto.
 
-**Verificação necessária antes da entrega:** Transferir itens entre personagens e reabrir sem perdas/duplicações; validar objetivos, marcadores, recompensas e regras de dificuldade, mantendo o perfil original. Para pets, obter um mascote realmente novo e validar movimento, animação, habilidades, evolução quando aplicável, troca/descarte e salvar/reabrir sem alterar os mascotes existentes.
+**Verificação necessária antes da entrega:** Transferir itens entre personagens e reabrir sem perdas/duplicações; validar objetivos, marcadores, recompensas e regras de dificuldade, mantendo o perfil original. Para pets, obter um mascote realmente novo e validar movimento, animação, habilidades, evolução quando aplicável, troca/descarte e salvar/reabrir sem alterar os mascotes existentes. Para o Códex, conferir separadamente encontro/obtenção de equipamento e encontro/derrota de monstro, salvar/reabrir, manter personagens separados e não atribuir descobertas não observadas.
 
 ### Meta 0.12 — Pós-jogo e masmorras
 
@@ -132,6 +134,17 @@ Ampliar a duração do jogo com Novo Jogo+, desafio de chefes e masmorras variá
 
 **Verificação necessária antes da entrega:** Conferir o que o Novo Jogo+ preserva/reinicia; validar entradas, saídas, colisões, chefes, recompensas e retomada do progresso, inclusive após fechar o jogo.
 
+## Planejamento — drops exclusivos e Códex
+
+Adicionados a pedido do autor em **21/10/2026**, ainda sem implementação:
+
+- **41. Drops exclusivos — meta 0.10:** armas e armaduras que caiam apenas de monstros ou chefes específicos. Definir associações, chances e requisitos depois de mapear o sistema de drops original e os IDs dos equipamentos. Pertence ao modo expandido; preservar o modo clássico e não confundir equipamento novo com apenas alterar a aparência de um existente.
+- **42. Códex — meta 0.11:** catálogo consultável das armas, armaduras e espécies de monstros descobertas pelo personagem. Diferenciar equipamento visto/encontrado de realmente obtido, e monstro encontrado de derrotado. Manter descobertas após salvar e reabrir; conteúdos ainda não descobertos permanecem ocultos. A integração com os drops exclusivos depende de validar as associações da 0.10.
+
+**Dependências e critérios:** a base de saves/perfis da 0.8, o mapeamento de inventário da 0.9 e a identificação dos eventos e IDs nativos. Para drops, provar a exclusividade em monstros permitidos e não permitidos e revisar outras fontes de obtenção. Para o Códex, definir em qual evento um equipamento ou monstro passa a contar como encontrado, observar esse evento e testar a gravação separada dos estados de descoberta, obtenção e derrota. Em saves antigos, aproveitar somente informações comprováveis e começar a observar o restante; não reconstruir como fato um histórico de monstros derrotados ou equipamentos vendidos que não esteja disponível. Não substituir, zerar ou converter silenciosamente o save original.
+
+Estas metas são estimativas de planejamento, sem data garantida. Não foi comprovado nesta atualização de documentação que os formatos e rotinas nativos permitem os dois recursos; a investigação e os protótipos descartáveis devem anteceder qualquer entrega.
+
 ## Investigação inicial — novos pets e títulos
 
 Adicionados ao planejamento a pedido do autor em **21/10/2026**: **39. Novos pets** (meta 0.11) e **40. Novos títulos** (meta 0.10). São conteúdo futuro, ainda não implementado nem validado em gameplay.
@@ -142,7 +155,7 @@ A inspeção somente de leitura confirmou sistemas originais de títulos e pets 
 
 ## Investigação da expansão de conteúdo
 
-O aumento do nível máximo (25), os novos ranks (26/27), receitas (28), recompensas de cash jogando (30), itens inéditos (37), conjuntos (38) e novos títulos (40) fazem parte da meta **0.10**. Novos pets (39) ficam inicialmente na meta **0.11**. Novo Jogo+, desafios e masmorras seguem nas etapas de pós-jogo. Os números são uma organização inicial; provas de viabilidade podem ser antecipadas enquanto se concluem melhorias independentes do host.
+O aumento do nível máximo (25), os novos ranks (26/27), receitas (28), recompensas de cash jogando (30), itens inéditos (37), conjuntos (38), novos títulos (40) e drops exclusivos por monstro (41) fazem parte da meta **0.10**. Novos pets (39) e Códex (42) ficam inicialmente na meta **0.11**. Novo Jogo+, desafios e masmorras seguem nas etapas de pós-jogo. Os números são uma organização inicial; provas de viabilidade podem ser antecipadas enquanto se concluem melhorias independentes do host.
 
 Antes de alterar esses sistemas, é necessário:
 
