@@ -1,0 +1,41 @@
+name: Anexar pacotes da correcao de abertura 0.7
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: publish-launcher-fix
+  cancel-in-progress: false
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: destinia-0.7-inicializadores-corrigidos
+          path: verified-packages
+          run-id: 39680736511
+          github-token: ${{ github.token }}
+      - name: Validar os seis arquivos e anexar sem sobrescrever
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cd verified-packages
+          test "$(find . -maxdepth 1 -type f | wc -l)" -eq 6
+          sha256sum -c destinia-0.7-beta-source.zip.sha256
+          sha256sum -c destinia-0.7-beta-windows-x64.zip.sha256
+          sha256sum -c destinia-0.7-corrigir-abertura.zip.sha256
+          printf '%s\n' \
+            'e5e80d8269d2e2cf526a8d838c2a09fe315a723cb2087ff8a84083766a8cd714  destinia-0.7-beta-source.zip' \
+            '4b8f351a70150b4b97b472161494c5453e1ad08232ab28595fdca4dd6f558fa3  destinia-0.7-beta-windows-x64.zip' \
+            '73ad3945936a1e0ebba6fbc34f9a4a16b915ed82623752851aa54ddb52740864  destinia-0.7-corrigir-abertura.zip' | sha256sum -c -
+          gh release upload v0.7-codex-imagens-fix1 \
+            destinia-0.7-beta-source.zip destinia-0.7-beta-source.zip.sha256 \
+            destinia-0.7-beta-windows-x64.zip destinia-0.7-beta-windows-x64.zip.sha256 \
+            destinia-0.7-corrigir-abertura.zip destinia-0.7-corrigir-abertura.zip.sha256 \
+            --repo "$GITHUB_REPOSITORY"
