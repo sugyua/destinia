@@ -1,0 +1,74 @@
+name: Verificar Codex no menu do jogo
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [.github/workflows/verify-codex-menu.yml, common/codex*.h, host/main.cpp, host_zoom/main.cpp, tests/codex*]
+permissions:
+  contents: read
+concurrency:
+  group: verify-codex-menu
+  cancel-in-progress: false
+jobs:
+  windows:
+    runs-on: windows-2022
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-python
+            mingw-w64-ucrt-x86_64-SDL2
+            mingw-w64-ucrt-x86_64-SDL2_mixer
+            mingw-w64-ucrt-x86_64-unicorn
+      - name: Compilar os dois hosts com audio
+        shell: msys2 {0}
+        run: |
+          set -eu
+          echo "DESTINIA_MSYS2_ROOT=$(cygpath -w /)" >> "$GITHUB_ENV"
+          test "$(tr -d '\r\n' < VERSION)" = 0.7
+          for target in host host_zoom; do
+            cmake -S "$target" -B "$target/build" -G Ninja -DCMAKE_BUILD_TYPE=Release
+            cmake --build "$target/build"
+            "$target/build/destinia_host.exe" --version
+            grep -q 'SDL2_MIXER_FOUND:INTERNAL=1' "$target/build/CMakeCache.txt"
+          done
+      - name: Testar ARM estabilidade preferencias Codex e empacotamento
+        shell: msys2 {0}
+        env:
+          DESTINIA_NATIVE_TESTS: '1'
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: |
+          set -eu
+          for pattern in test_runtime.py test_preferences.py test_preferences_host.py test_codex.py test_codex_native.py test_package_release.py test_package_windows.py; do
+            python -m unittest discover -s tests -p "$pattern" -v
+          done
+          DESTINIA_ZOOM_EXE="$PWD/host_zoom/build/destinia_host.exe" python -m unittest discover -s tests -p test_zoom_render.py -v
+      - name: Verificar configuradores e diagnostico PowerShell
+        shell: powershell
+        run: |
+          $ErrorActionPreference='Stop'
+          foreach($name in @('test_diagnostic.ps1','test_camera_mode.ps1','test_save_configuration.ps1','test_game_preferences.ps1','test_configurator_native.ps1')) {
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path 'tests' $name)
+            if($LASTEXITCODE -ne 0) {throw "Falhou: $name"}
+          }
+      - name: Empacotar fontes EXEs e checksums sem dependencias externas
+        shell: msys2 {0}
+        run: |
+          set -eu
+          python scripts/package_release.py --out dist
+          python scripts/package_windows.py --out dist --normal host/build/destinia_host.exe --zoom host_zoom/build/destinia_host.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: destinia-codex-no-menu-pacotes-de-teste
+          path: dist/*
+          if-no-files-found: error

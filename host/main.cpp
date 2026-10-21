@@ -197,7 +197,9 @@ static void sendKey(u32 pressFn, u32 releaseFn, int key, bool down) {
   if (!fn) return;
   callFn(fn, {(u32)key});
 }
+static bool codexMenuKey(int key,bool down);
 static void gameKey(int key, bool down) {
+  if(codexMenuKey(key,down)) return;
   destinia::sessionLog.write("ENTRADA tecla="+std::to_string(key)+(down?" pressionada":" solta"));
   int st = menuState();
   if (st <= 0) { if (down && fnLogoPress) callFn(fnLogoPress, {(u32)key}); return; }
@@ -851,6 +853,7 @@ static int runHost(int argc, char** argv) {
   // [OK] jniTouch(env,obj, x, y, tipo): tipo 0=toque 1=solta 2=move 3=tecla de menu (Thumb decodificado)
   bool mouseDown=false; int lastTouchX=0,lastTouchY=0;
   auto touch = [&](int x, int y, int type) {
+    if(codexMenuTouch(x,y,type)) return;
     lastTouchX=x; lastTouchY=y;
     if(type!=2) destinia::sessionLog.write("ENTRADA toque x="+std::to_string(x)+" y="+std::to_string(y)+" tipo="+std::to_string(type));
     bool ok = callFn(fnTouch, {ENV_OBJ, 0x10, (u32)x, (u32)y, (u32)type});
@@ -952,16 +955,25 @@ static int runHost(int argc, char** argv) {
     if (!headlessFrames) {
       SDL_Event ev;
       while (SDL_PollEvent(&ev)) {
-        if(codexOpen && (ev.type==SDL_CONTROLLERBUTTONDOWN || ev.type==SDL_CONTROLLERBUTTONUP || ev.type==SDL_CONTROLLERAXISMOTION)) continue;
+        if(codexOpen && (ev.type==SDL_CONTROLLERBUTTONDOWN || ev.type==SDL_CONTROLLERBUTTONUP || ev.type==SDL_CONTROLLERAXISMOTION)) {
+          if(ev.type==SDL_CONTROLLERBUTTONDOWN && ev.cbutton.which==controls.controllerId()) {
+            auto binding=preferences.buttons.find((SDL_GameControllerButton)ev.cbutton.button);
+            if(binding!=preferences.buttons.end()) {const int k[]={3,9,5,7,17,10,27};int a=int(binding->second);if(a>=0 && a<7)codexMenuKey(k[a],true);}
+          }
+          continue;
+        }
         if(ev.type==SDL_QUIT) running=false;
         else if(ev.type==SDL_KEYDOWN || ev.type==SDL_KEYUP) {
           if(ev.key.repeat) continue;
           const bool down=ev.type==SDL_KEYDOWN;
-          if(ev.key.keysym.sym==SDLK_F8 && (codexOpen || !preferences.keys.count(SDLK_F8))) {if(down){controls.release();codexOpen=!codexOpen;codexFlush();}continue;}
+          if(ev.key.keysym.sym==SDLK_F8 && (codexOpen || (codexMenuVisible() && !preferences.keys.count(SDLK_F8)))) {if(down){controls.release();if(codexOpen){codexOpen=false;codexTabSelected=true;codexFlush();}else codexEnterMenu();}continue;}
           if(codexOpen && ev.key.keysym.sym!=SDLK_F11) {
-            if(down && ev.key.keysym.sym==SDLK_ESCAPE) codexOpen=false;
-            if(down && (ev.key.keysym.sym==SDLK_RIGHT || ev.key.keysym.sym==SDLK_DOWN) ) codexChangePage(1);
-            if(down && (ev.key.keysym.sym==SDLK_LEFT || ev.key.keysym.sym==SDLK_UP) ) codexChangePage(-1);
+            if(down) {
+              if(ev.key.keysym.sym==SDLK_ESCAPE)codexMenuKey(10,true);
+              else if(ev.key.keysym.sym==SDLK_RIGHT || ev.key.keysym.sym==SDLK_DOWN)codexMenuKey(7,true);
+              else if(ev.key.keysym.sym==SDLK_LEFT || ev.key.keysym.sym==SDLK_UP)codexMenuKey(5,true);
+              else {auto binding=preferences.keys.find(ev.key.keysym.sym);if(binding!=preferences.keys.end()) {const int k[]={3,9,5,7,17,10,27};int a=int(binding->second);if(a>=0 && a<7)codexMenuKey(k[a],true);}}
+            }
             continue;
           }
           if(ev.key.keysym.sym==SDLK_F11) { if(down) setFullscreen(!fullscreen); }
@@ -972,14 +984,8 @@ static int runHost(int argc, char** argv) {
           int wx=ev.type==SDL_MOUSEMOTION?ev.motion.x:ev.button.x,wy=ev.type==SDL_MOUSEMOTION?ev.motion.y:ev.button.y;
           int x=0,y=0;
           bool inside=mapMouseToGame(wx,wy,x,y,mouseDown && ev.type!=SDL_MOUSEBUTTONDOWN);
-          const int codexScale=std::max(1,SCREEN_W/400);
-          if(inside && ev.type==SDL_MOUSEBUTTONDOWN && ev.button.button==SDL_BUTTON_LEFT) {
-            if(codexOpen) {
-              if(y<30*codexScale) codexOpen=false;
-              else if(y>SCREEN_H-30*codexScale) {codexChangePage(x<SCREEN_W/2?-1:1);}
-              continue;
-            }
-            if(x>=SCREEN_W-85*codexScale && y<20*codexScale) {controls.release();codexOpen=true;codexPage=0;codexFlush();continue;}
+          if((inside || codexTouchCaptured) && (ev.type==SDL_MOUSEBUTTONDOWN || ev.type==SDL_MOUSEBUTTONUP) && ev.button.button==SDL_BUTTON_LEFT) {
+            if(codexMenuTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1)){controls.release();continue;}
           }
           if(codexOpen) continue;
           if(probe && ev.type!=SDL_MOUSEMOTION) {
@@ -1054,7 +1060,7 @@ static int runHost(int argc, char** argv) {
       if (getCharacterExperience(currentExperience, requiredExperience))
         drawHudExperienceText(frameBuffer.data(), currentExperience, requiredExperience);
     }
-    destinia::codexPaint(frameBuffer.data(),SCREEN_W,SCREEN_H,codex,false,codexPage,codexAvailable);
+    destinia::codexPaint(frameBuffer.data(),SCREEN_W,SCREEN_H,codex,false,codexPage,codexAvailable,codexMenuVisible(),codexTabSelected);
     const uint8_t* fb = frameBuffer.data();
     if (headlessFrames) {
       if (frame == 1 || frame % 10 == 0) { char nm[64]; snprintf(nm, sizeof nm, "/frame_%05ld.bmp", frame); writeBmp(outDir + nm, fb); }

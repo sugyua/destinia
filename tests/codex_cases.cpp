@@ -1,10 +1,15 @@
 #include "../common/codex.h"
+#include "../common/codex_ui.h"
 #include <cassert>
 #include <filesystem>
 #include <fstream>
 int main(int argc,char** argv) {
   assert(argc==2); std::filesystem::path root=argv[1];std::filesystem::create_directories(root);
   destinia::Codex book;book.names[1]="Fungus";book.names[4]="Scorpion";
+  // No Códex button may cover gameplay outside the in-game menu.
+  std::vector<uint8_t> screen(400*240*2,0x35);auto original=screen;
+  destinia::codexPaint(screen.data(),400,240,book,false,0,true);
+  assert(screen==original);
   book.select(0);book.observe(100,1,false);assert(book.entries[0][1].kills==0);
   book.observe(100,1,true);book.observe(100,1,true);assert(book.entries[0][1].kills==1);
   book.observe(200,1,true);assert(book.entries[0][1].kills==2);

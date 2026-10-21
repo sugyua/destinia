@@ -4,6 +4,14 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## Correções após a 0.7 — branch main, sem nova release
+
+- Acesso ao Códex transferido para o menu original do jogo, junto de Craft e Pets, nos dois hosts e no protótipo web: livro CODEX ao lado da barra de ícones.
+- Lista e contadores desenhados dentro da imagem do jogo, com VOLTAR para a opção anterior e paginação por toque, teclado e botões de controle no Windows.
+- Removidos o botão do HUD de gameplay e o botão/diálogo externos do site. F8 fica restrito ao menu, preservando remapeamentos existentes.
+- Consulta suspende a execução da partida e bloqueia comandos de combate/save; os registros e o formato de codex-v1.txt são preservados. A abertura seleciona o slot atual do personagem.
+- Testes do menu original ARM, ausência de botão no gameplay, retorno, captura de toque e suspensão da memória de jogo; QA de navegador em retrato/paisagem. Workflow separado compila os dois EXEs e disponibiliza pacotes de teste sem alterar a tag/release já publicada.
+
 ## 0.7 Beta — 21/10/2026
 
 - Teste de empacotamento com fixture binária de finais de linha idênticos no Windows e Linux; o pacote continua preservando os bytes dos arquivos originais.

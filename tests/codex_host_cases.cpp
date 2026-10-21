@@ -24,5 +24,33 @@ int main(int argc,char** argv) {
  std::vector<uint8_t> panel(FB_BYTES+16,0);std::fill(panel.end()-16,panel.end(),0xab);destinia::codexPaint(panel.data(),SCREEN_W,SCREEN_H,codex,true,0,true);
  for(auto i=panel.end()-16;i!=panel.end();++i)if(*i!=0xab)return 26;
  if(std::all_of(panel.begin(),panel.end()-16,[](uint8_t b){return !b;}))return 27;
+
+ // Open the real original menu, then finish its animation for this ABI test.
+ if(codexMenuVisible()) return 30;
+ if(!callFn(exportsMap.at("openMainmenu"),{0}))return 31;
+ auto ui=exportsMap.at("GameUI");uint16_t phase=2;wr(ui+0x76,&phase,2);
+ if(!codexMenuVisible())return 32;
+ if(codexMenuTouch(200,100,0))return 45;
+ if(!callFn(exportsMap.at("Java_game_destiniaeng_GameThread_jniTouch"),{ENV_OBJ,0x10,200,100,0}) || !rd16(exportsMap.at("MMain")+0x390c))return 46;
+ if(!codexMenuKey(5,true) || !codexMenuKey(17,true) || !codexOpen)return 47;
+ if(rd16(exportsMap.at("MMain")+0x390c))return 48;
+ codexMenuTouch(200,100,1);codexMenuKey(10,true);codexMenuKey(7,true);
+ const u32 state=rd32(ui+0x7c);auto button=destinia::codexMenuButton(SCREEN_W,SCREEN_H);
+ if(!codexMenuTouch(button.x+30,button.y+12,0) || !codexOpen)return 33;
+ if(!codexMenuTouch(button.x+30,button.y+12,1))return 34;
+ if(!codexMenuKey(10,true) || codexOpen || !codexTabSelected || rd32(ui+0x7c)!=state)return 35;
+ if(!codexMenuKey(7,true) || codexTabSelected)return 44;
+ // The first/last native tabs link to the added book without any invalid ARM ID.
+ if(!codexMenuKey(5,true) || !codexTabSelected || rd32(ui+0x7c)!=state)return 36;
+ if(!codexMenuKey(17,true) || !codexOpen)return 37;
+ if(!codexMenuKey(10,true) || codexOpen)return 38;
+ if(!codexMenuKey(7,true) || codexTabSelected || rd32(ui+0x7c)!=0)return 39;
+ wr32(ui+0x7c,0x80000000);if(!codexMenuKey(7,true) || !codexTabSelected)return 40;
+ if(!codexMenuKey(5,true) || codexTabSelected || rd32(ui+0x7c)!=0x80000000)return 41;
+ wr32(ui+0x7c,0x50000001);if(codexMenuVisible() || codexMenuTouch(button.x,button.y,0))return 42;
+ // Menu-only entry: nothing is painted over normal gameplay.
+ auto original=std::vector<uint8_t>(FB_BYTES,0x35),closed=original;
+ destinia::codexPaint(closed.data(),SCREEN_W,SCREEN_H,codex,false,0,true);
+ if(closed!=original)return 43;
  std::puts("CODEX_ARM_OK");uc_close(uc);uc=nullptr;return 0;
 }

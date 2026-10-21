@@ -25,3 +25,7 @@ A web passou nos oito testes Node e no teste Chromium de Códex com toque, retra
 ## Limitações
 
 Campanha completa, inspeção visual em Windows 3440×1440, controle físico e Safari/iPhone físico continuam pendentes. Nomes originais em inglês; sem retratos, armas/armaduras no Códex ou importação de mortes antigas. O contador pode incluir mortes de uma sessão que depois foi encerrada sem salvar o progresso ARM; é um registro acumulado de eventos. Importar outro personagem manualmente para o mesmo slot pode exigir o auxiliar correspondente. Nenhuma melhoria de loja/rede ou expansão de conteúdo foi implementada nesta versão.
+
+## Correção posterior: Códex no menu original
+
+Após a publicação, o autor solicitou substituir o acesso externo pelo menu do jogo, junto de Craft e Pets. A branch `main` e o site passam a usar o livro CODEX na barra do menu, painel no framebuffer e retorno à mesma opção. A tag e os ZIPs originais da 0.7 não são regravados. O workflow `verify-codex-menu.yml` compila/testa ambos os hosts Windows e prepara pacotes de teste em Actions, sem publicar uma nova release. Veja `docs/CODEX.md`.

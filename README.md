@@ -38,11 +38,11 @@ A presença no código não equivale a validação completa de gameplay. O host_
 
 ## Novidades da 0.7
 
-- Códex de monstros acessível por botão ou F8, com estados de descoberta e contador de mortes por espécie.
+- Códex de monstros acessível pelo livro **CODEX** no menu original do jogo, junto aos ícones de Craft e Pets, com estados de descoberta e contador de mortes por espécie.
 - Registro auxiliar separado por personagem na mesma pasta de save dos dois hosts; preserva o progresso entre instalações/updates sem alterar o save nativo.
 - Observação das rotinas ARM originais de desenho e confirmação de derrota; proteção contra contagem duplicada e IDs incompatíveis.
 - Interface de consulta com paginação e pausa da partida; importação de histórico antigo não está disponível.
-- O [protótipo web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site) também recebeu um botão **Códex** no topo. Na web, o progresso e o Códex continuam apenas na memória da sessão, sem áudio.
+- O [protótipo web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site) usa o mesmo acesso **dentro do menu do jogo**, sem botão Códex na interface do site. Na web, o progresso e o Códex continuam apenas na memória da sessão, sem áudio.
 
 Leia [CODEX.md](docs/CODEX.md), [CHANGELOG.md](CHANGELOG.md) e [RELEASE_0.7.md](docs/RELEASE_0.7.md). Não inclui novos equipamentos, novos monstros nem alterações de combate.
 
@@ -124,7 +124,9 @@ A pasta global de save compartilhada entre hosts e atualizações também foi en
 
 ## Entrega parcial da 0.7 — Códex de monstros
 
-O bestiário inicial do **item 42** está implementado nos dois hosts: botão **CODEX F8** no canto superior direito, ou **F8** quando a tecla não estiver remapeada. Mostra as espécies descobertas, os estados **VISTO/DERROTADO** e **quantos monstros de cada espécie foram mortos**, com paginação. A partida pausa durante a consulta. Nomes de monstros permanecem em inglês nesta primeira etapa.
+**Correção após a publicação da 0.7:** o acesso descrito abaixo está na branch `main` e no site. Os ZIPs da tag `v0.7-beta` preservam a versão originalmente publicada. Para testar no Windows, use o código atual com **Compilar Destinia.bat** ou os pacotes de teste do workflow **Verificar Codex no menu do jogo** em [Actions](https://github.com/sugyua/destinia/actions/workflows/verify-codex-menu.yml); não são uma nova release.
+
+O bestiário inicial do **item 42** está implementado nos dois hosts: livro **CODEX**, à direita da barra de ícones do **menu do próprio jogo**, junto de Craft e Pets. Abra o menu durante a partida e toque/clique no livro; **VOLTAR** retorna ao mesmo menu. Setas e confirmar também permitem selecionar o livro; **F8** é um atalho somente com esse menu aberto, quando a tecla não estiver remapeada. Mostra as espécies descobertas, os estados **VISTO/DERROTADO** e **quantos monstros de cada espécie foram mortos**, com paginação. A partida pausa durante a consulta. Nomes de monstros permanecem em inglês nesta primeira etapa.
 
 Os registros ficam em **codex-v1.txt**, na pasta compartilhada de saves, separados pelo slot de personagem e gravados por substituição de arquivo temporário. Não altera o formato dos saves ARM nem recupera mortes antigas. A contagem começa na 0.7; o slot reutilizado após exclusão pelo jogo tem seus registros reiniciados. Trocar apenas de pasta de instalação preserva o Códex quando a pasta de save é a mesma.
 
