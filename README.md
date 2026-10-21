@@ -136,11 +136,13 @@ Testes automatizados cobrem registro, morte única, reaparecimento, slots, persi
 
 ## Atualizações futuras
 
-Das **42 melhorias aprovadas**, **8 foram concluídas** nas versões 0.5 e 0.6; **34 ainda não estão concluídas**, incluindo o Códex entregue parcialmente, somente da **0.8 em diante**. As versões abaixo são metas provisórias, sem datas garantidas, e dependem de investigação e testes.
+Das **43 melhorias aprovadas**, **8 foram concluídas** nas versões 0.5 e 0.6; **35 ainda não estão concluídas**, incluindo o Códex entregue parcialmente, somente da **0.8 em diante**. As versões abaixo são metas provisórias, sem datas garantidas, e dependem de investigação e testes.
 
 **A expansão continua incluindo aumento do nível máximo, novos ranks de armas, armaduras e acessórios, itens únicos, conjuntos com bônus, novos títulos, novos pets, drops exclusivos por monstro e um Códex de equipamentos e monstros.** Limites, nomes e valores serão definidos após verificar dados originais e balanceamento.
 
 Consulte o [roadmap detalhado](docs/ROADMAP.md) para dependências, critérios de verificação e referências. A [investigação inicial de pets e títulos](docs/INVESTIGACAO_PETS_TITULOS.md) registra a base original encontrada e as condições para as metas 0.10 (títulos) e 0.11 (pets); nenhum desses conteúdos novos está implementado. A aprovação do planejamento não comprova a viabilidade de todos os itens nem autoriza automaticamente novas releases.
+
+**Novas classes em planejamento:** Mago e Berserker (item 44), com versão de entrega e terceira classe ainda a definir.
 
 **Novo objetivo para a 1.0:** cooperativo pela internet e LAN, registrado como item 43 e ainda não implementado.
 
@@ -216,6 +218,12 @@ Ampliar a duração do jogo com Novo Jogo+, desafio de chefes e masmorras variá
 O planejamento da **0.8 até a 0.12 permanece preservado**. A preparação para o cooperativo deverá começar antes da 1.0, em etapas após a 0.12: investigar o MULTI MODE original e suas rotinas, provar uma sessão mínima entre duas instâncias, definir progresso/recompensas e testar os modos internet/LAN, latência, desconexão, reconexão e integridade dos saves. A existência do menu multiplayer original não comprova um modo cooperativo funcional.
 
 O autor definiu as duas modalidades: **internet e rede local (LAN)**. Limite de jogadores, criação/entrada em salas, conteúdo compartilhado e regras de XP, drops e missões serão definidos na etapa de projeto. O escopo inicial é o port Windows; suporte a navegador, iOS ou partidas entre plataformas exige avaliação própria. A versão 1.0 só poderá ser considerada entregue com uma sessão cooperativa real validada, sem comprometer o modo solo nem os saves.
+
+### Novas classes — versão a definir
+
+- [ ] **44. Novas classes: Mago e Berserker:** Classes adicionais em planejamento, solicitadas pelo autor. Mago e Berserker são os dois nomes definidos até agora; a terceira classe mencionada continua a definir. Nenhuma dessas novas classes foi implementada.
+
+Habilidades, armas/armaduras permitidas, atributos, animações e progressão serão definidos na etapa de projeto. Antes de escolher a versão de entrega, investigar os IDs e limites nativos de classes, a seleção/criação de personagens, os equipamentos e os campos dos saves; validar criação, combate, evolução e salvar/reabrir com os novos personagens. Preservar as classes e os saves existentes e avaliar a compatibilidade com o cooperativo planejado para a 1.0. O pedido registra o objetivo; ainda não confirma que a biblioteca ARM permite acrescentar novas classes sem outras alterações.
 
 Os recursos opcionais terão configurações próprias. Mudanças permanentes de progressão/conteúdo dependem de perfis e saves identificados para os modos clássico e expandido, sem conversão silenciosa. Antes de ampliar o jogo, será verificado o que já existe para melhorar os sistemas atuais. A publicação de cada nova release continuará dependendo da revisão das verificações e da aprovação do autor.
 
