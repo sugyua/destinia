@@ -18,3 +18,6 @@
 
 # O novo launcher usa CRLF no Windows e LF normalizado no Git.
 "/Testar Destinia.bat" text eol=crlf
+
+"/Compilar Destinia.bat" text eol=crlf
+/scripts/compile_windows.sh text eol=lf

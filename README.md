@@ -50,6 +50,12 @@ Instale o MSYS2 pela [página oficial](https://www.msys2.org/) e use o gerenciad
 
 A pasta `game` é o APK Android extraído, conforme informado pelo autor. Não é um programa para instalar no Windows: o host lê a biblioteca ARM, os assets e o áudio diretamente dessa pasta. Ter esses dados não substitui as dependências listadas acima.
 
+## Compilar com duplo clique
+
+Abra **Compilar Destinia.bat** e escolha **1 — Zoom**, **2 — Host normal** ou **3 — Ambos**. Mantenha o BAT e `scripts/compile_windows.sh` na pasta do projeto. O compilador usa o MSYS2 UCRT64 já instalado em `C:\msys64`; não instala nem baixa dependências. Feche o jogo antes de compilar. As ferramentas necessárias estão na seção Dependências e em INSTALL.md.
+
+[Baixar somente os arquivos do compilador](https://raw.githubusercontent.com/sugyua/destinia/main/diagnostico/pacotes/compilar-destinia.zip) para extrair na raiz do projeto existente. Esse auxiliar foi adicionado após a publicação da 0.3; os ZIPs já publicados da 0.2 e 0.3 permanecem inalterados.
+
 ## Desenvolvimento e distribuição
 
 Para testar uma instalação existente, execute **[Testar Destinia.bat](Testar%20Destinia.bat)** na raiz do projeto. Ele verifica a inicialização dos dois hosts, usa cópias dos saves e reúne logs/capturas em `relatorios`. No menu, escolha **1 para o novo teste de câmera do host_zoom** ou **2 para o roteiro geral**. O modo guiado geral acompanha testes de gameplay, salvar/reabrir, câmera, mouse, áudio e controle. Veja o [roteiro completo](diagnostico/COMO_TESTAR.md). Não instala dependências nem altera o código do jogo; testes visuais dependem da sua observação.

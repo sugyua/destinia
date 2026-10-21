@@ -29,6 +29,9 @@
     "tests/zoom_native_smoke.cpp",
     "docs/VERIFICACAO_ZOOM_ORIGINAL.md",
     "release/NOTAS_0.3.md",
-    "docs/RELEASE_0.3.md"
+    "docs/RELEASE_0.3.md",
+    "Compilar Destinia.bat",
+    "scripts/compile_windows.sh",
+    "tests/test_compile_windows.py"
   ]
 }

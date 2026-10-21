@@ -121,3 +121,18 @@ O launcher `Abrir Destinia Zoom 800x480.bat` inicia o host_zoom com `--fullscree
 A proporção original é preservada, sem esticar nem cortar. Em um monitor 3440×1440, a área do jogo ocupa **2400×1440**, centralizada, com barras pretas externas de **520 pixels em cada lado**. O framebuffer e as capturas F9 continuam em 400×240. O mouse considera a área central, e cliques nas barras não acionam o jogo. Não é suporte nativo a ultrawide.
 
 Recompile o host_zoom após atualizar os fontes. Para testar o mesmo modo no diagnóstico de câmera, escolha a opção 1 do `Testar Destinia.bat`: ela agora abre em tela cheia. Na janela guiada, confira também F11, clique em TAP TO START, Alt+Tab e o alinhamento do mouse.
+
+## Compilação pelo BAT
+
+Depois de instalar as dependências, feche o jogo e abra **Compilar Destinia.bat** na raiz do projeto. Escolha 1 para host_zoom, 2 para host ou 3 para ambos. O BAT configura e compila com os mesmos comandos CMake/Ninja da seção manual, reaproveitando o build existente e parando na primeira falha. Ele mantém a janela aberta para leitura do resultado e mostra o caminho do EXE. Não limpa caches, instala ferramentas, abre o jogo ou acessa saves.
+
+O BAT precisa do arquivo `scripts/compile_windows.sh` junto ao projeto. O caminho padrão é `C:\msys64`; se o seu MSYS2 estiver em outro local, execute pelo Prompt:
+
+```bat
+set "DESTINIA_MSYS2_ROOT=D:\msys64"
+"Compilar Destinia.bat" host_zoom
+```
+
+Também aceita `host` e `ambos`. Sem argumento, apresenta o menu. Se o CMake informar incompatibilidade de gerador ou de pasta de origem em um cache antigo, envie o erro para análise; o BAT não apaga o build automaticamente. A primeira compilação pode demorar mais; nas seguintes, o Ninja recompila somente o necessário. Mudanças apenas na documentação ou no diagnóstico não exigem recompilar o jogo.
+
+Os testes do executor foram realizados em Linux com ferramentas simuladas: caminhos com espaços, ambos os hosts, recusa de alvo inválido, falha de configuração e falha de build com propagação do código e interrupção. O menu e a execução completa pelo Bash do MSYS2 ainda precisam de confirmação no Windows.

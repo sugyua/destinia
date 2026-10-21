@@ -4,6 +4,14 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## Próxima atualização — após a 0.3, sem nova release
+
+- Adicionado `Compilar Destinia.bat`, com menu para host_zoom, host normal ou ambos, usando MSYS2 UCRT64 e dependências já instaladas.
+- Executor `scripts/compile_windows.sh` configura e compila com CMake/Ninja, usa a pasta do projeto independentemente de onde o BAT foi aberto e interrompe na primeira falha, preservando o código de erro.
+- Caminho padrão do MSYS2 `C:\msys64`, configurável por `DESTINIA_MSYS2_ROOT`; resultados e erros ficam visíveis até fechar a janela.
+- Pacote pequeno com os dois arquivos do compilador e SHA-256, sem executáveis, instaladores ou dependências. Documentação e manifesto atualizados.
+- Fluxo do executor testado em Linux com ferramentas simuladas, incluindo caminhos com espaços e falhas; confirmação do BAT no Windows pendente. Fontes do jogo, saves e releases 0.2/0.3 publicados não foram alterados por este auxiliar.
+
 ## 0.3 Beta — candidata preparada em 21/10/2026
 
 Esta versão registra o estado atual com enquadramento original ampliado. A restauração do zoom out, o fundo cinza, a centralização dos mapas pequenos e o ajuste da UI ficam para a próxima atualização.
