@@ -1,0 +1,67 @@
+name: Compilar e testar candidata Windows
+on:
+  workflow_dispatch:
+  push:
+    branches: [release/v0.6-beta]
+    paths: ['host/**', 'host_zoom/**', 'common/**', 'tests/**', 'scripts/**', 'VERSION', '.github/workflows/windows-candidate.yml']
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-python
+            mingw-w64-ucrt-x86_64-SDL2
+            mingw-w64-ucrt-x86_64-SDL2_mixer
+            mingw-w64-ucrt-x86_64-unicorn
+      - name: Compilar ambos com audio
+        shell: msys2 {0}
+        run: |
+          set -eu
+          for target in host host_zoom; do
+            cmake -S "$target" -B "$target/build" -G Ninja -DCMAKE_BUILD_TYPE=Release
+            cmake --build "$target/build"
+            "$target/build/destinia_host.exe" --version
+            grep -q 'SDL2_MIXER_FOUND:INTERNAL=1' "$target/build/CMakeCache.txt"
+          done
+      - name: Testes nativos ARM, audio e estabilidade
+        shell: msys2 {0}
+        env:
+          DESTINIA_NATIVE_TESTS: '1'
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: |
+          set -eu
+          for pattern in test_runtime.py test_preferences.py test_preferences_host.py test_package_windows.py; do
+            python -m unittest discover -s tests -p "$pattern" -v
+          done
+          for target in host host_zoom; do
+            "$target/build/destinia_host.exe" --game game --save "$RUNNER_TEMP/destinia-test-$target/save" --reports "$RUNNER_TEMP/destinia-test-$target/reports" --headless 10 --out "$RUNNER_TEMP/destinia-test-$target/frames" --no-save-preferences
+          done
+      - name: Configuradores e diagnostico PowerShell 5.1
+        shell: powershell
+        run: |
+          $ErrorActionPreference='Stop'
+          foreach($name in @('test_diagnostic.ps1','test_camera_mode.ps1','test_save_configuration.ps1','test_game_preferences.ps1')) {
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path 'tests' $name)
+            if($LASTEXITCODE -ne 0) {throw "Falhou: $name"}
+          }
+      - name: Empacotar sem dependencias ou dados pessoais
+        shell: msys2 {0}
+        run: python scripts/package_windows.py --out dist --normal host/build/destinia_host.exe --zoom host_zoom/build/destinia_host.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: destinia-0.6-beta-windows-x64
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 30

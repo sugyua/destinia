@@ -63,7 +63,7 @@ class RuntimeHostTests(unittest.TestCase):
             with self.subTest(variant=variant):
                 result=subprocess.run([str(exe),'--version'],cwd=self.base,capture_output=True,text=True,timeout=10)
                 self.assertEqual(result.returncode,0,result.stderr)
-                self.assertEqual(result.stdout.strip(),'Destinia 0.5 Beta')
+                self.assertEqual(result.stdout.strip(),'Destinia '+(ROOT/'VERSION').read_text().strip()+' Beta')
                 self.assertFalse((self.base/'save').exists())
 
     def test_native_android_messages_are_logged_without_verbose_mode(self):
@@ -106,7 +106,7 @@ class RuntimeHostTests(unittest.TestCase):
                 logs=list(reports.glob('jogo_*/log*.txt'))
                 self.assertTrue(logs,'Log TXT de sessao nao criado')
                 text='\n'.join(p.read_text() for p in logs)
-                self.assertIn('0.5 Beta',text)
+                self.assertIn((ROOT/'VERSION').read_text().strip()+' Beta',text)
                 self.assertIn('initGame ok',text)
                 self.assertIn('codigo=0',text)
 
