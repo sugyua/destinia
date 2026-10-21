@@ -1,9 +1,12 @@
 [CmdletBinding()]
 param(
-    [string]$NormalPath=(Join-Path $PSScriptRoot '../host/build/destinia_host.exe'),
-    [string]$ZoomPath=(Join-Path $PSScriptRoot '../host_zoom/build/destinia_host.exe')
+    [string]$NormalPath='',
+    [string]$ZoomPath=''
 )
 $ErrorActionPreference='Stop'
+# Windows PowerShell 5.1 has no PSScriptRoot while binding default parameters.
+if(-not $NormalPath) {$NormalPath=Join-Path $PSScriptRoot '../host/build/destinia_host.exe'}
+if(-not $ZoomPath) {$ZoomPath=Join-Path $PSScriptRoot '../host_zoom/build/destinia_host.exe'}
 $temporary=Join-Path ([IO.Path]::GetTempPath()) ('destinia config nativo '+[guid]::NewGuid().ToString('N'))
 $previousLocal=$env:LOCALAPPDATA
 try {
