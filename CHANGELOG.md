@@ -4,6 +4,13 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## Não lançado — documentação do planejamento (21/10/2026)
+
+- README e roadmap atualizados com as 37 melhorias aprovadas, organizadas por dificuldade e dependências em metas provisórias de 0.5 a 0.12.
+- Log TXT mantido como meta da 0.5; expansão de nível máximo, ranks, itens únicos e conjuntos incluída no planejamento, com investigação de dados, balanceamento e compatibilidade de saves antes da implementação.
+- Referências da pesquisa, critérios de verificação e separação entre recursos atuais e futuros documentados. Descrição da arquitetura do host_zoom alinhada ao zoom out já presente na 0.4.
+- Atualização somente de documentação: sem alterações de gameplay, nova release ou mudança na versão publicada 0.4 Beta.
+
 ## 0.4 Beta — 21/10/2026
 
 ### Compilação e inicializadores
