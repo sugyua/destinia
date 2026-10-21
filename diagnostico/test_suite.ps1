@@ -12,6 +12,8 @@ param(
     [ValidateRange(30, 3600)][int]$InteractiveTimeoutSeconds = 900
 )
 
+. (Join-Path $PSScriptRoot '../scripts/shared_saves.ps1')
+
 function Get-SaveInventory([string]$Directory) {
     if (-not $Directory -or -not (Test-Path -LiteralPath $Directory -PathType Container)) { return }
     $base = [IO.Path]::GetFullPath($Directory).TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
@@ -199,7 +201,9 @@ function Read-ManualResult([string]$Name, [string]$Question) {
 }
 
 function Get-GuidedArguments([string]$Name, [string]$TestMode, [string]$GamePath, [string]$SavePath, [string]$TracePath) {
-    $arguments = @('--game', $GamePath, '--save', $SavePath, '--probe', '--profile')
+    $parent = Split-Path $TracePath -Parent
+    if (-not $parent) { $parent = '.' }
+    $arguments = @('--game', $GamePath, '--save', $SavePath, '--reports', (Join-Path $parent 'logs_do_jogo'), '--probe', '--profile')
     if ($Name -eq 'host_zoom') {
         $arguments += @('--lang', 'pt', '--trace-viewport', '--trace-frames', '1200', '--trace-out', $TracePath)
         if ($TestMode -eq 'Camera') { $arguments += @('--trace-camera', '--fullscreen') }
@@ -236,7 +240,7 @@ function Invoke-DestiniaSuite {
         if (-not (Test-Path -LiteralPath (Join-Path $game 'res/raw') -PathType Container)) { Add-TestResult 'Audio' 'AVISO' 'Pasta res/raw ausente; audio precisa de teste manual.' }
         if (-not $Fresh) {
             if ($SaveSource) { $source = [IO.Path]::GetFullPath($SaveSource) }
-            elseif ($env:LOCALAPPDATA) { $source = Join-Path $env:LOCALAPPDATA 'Destinia/save' }
+            elseif ($env:LOCALAPPDATA -or $env:DESTINIA_SAVE_DIR) { $source = Get-DestiniaSaveDirectory }
             if ($source -and -not (Test-Path -LiteralPath $source -PathType Container)) {
                 if ($SaveSource) { throw 'A origem de save informada nao existe.' }
                 Add-TestResult 'Origem do save' 'AVISO' 'Save compartilhado nao encontrado; serao usadas pastas novas de teste.'
@@ -259,7 +263,7 @@ function Invoke-DestiniaSuite {
             $save = Join-Path $session ($name + '_save_automatico')
             Copy-IsolatedSave $source $save
             $frameDir = Join-Path $session ($name + '_frames')
-            $arguments = @('--game', $game, '--save', $save, '--headless', [string]$Frames, '--out', $frameDir)
+            $arguments = @('--game', $game, '--save', $save, '--headless', [string]$Frames, '--out', $frameDir, '--reports', (Join-Path $session 'logs_do_jogo'))
             if ($name -eq 'host_zoom') { $arguments += @('--lang', 'pt') }
             Set-TestStage ($name + ': inicializacao sem janela em execucao')
             $run = Invoke-OwnedProcess $exe $arguments $hostDirectory (Join-Path $session ($name + '_automatico')) $TimeoutSeconds
@@ -284,7 +288,7 @@ function Invoke-DestiniaSuite {
                 Write-Host '3. F9 NOVAMENTE, ainda com o defeito visivel: captura a tela posterior e inicia outro trecho.'
                 Write-Host '4. Espere alguns segundos, aperte F9 para parar e feche o jogo normalmente.'
                 Write-Host 'F11 alterna tela cheia/janela. Confira o mouse na imagem central e Alt+Tab.'
-                Write-Host '0.4: mapas pequenos devem ter margens cinzas simetricas. Confira a UI menor e o contador de XP.'
+                Write-Host 'Zoom: mapas pequenos devem ter margens cinzas simetricas. Confira a UI menor e o contador de XP.'
                 Write-Host 'Nao e necessario testar audio, controles, salvar/reabrir ou acessar a loja.'
             } else {
                 Write-Host 'ROTEIRO: iniciar/carregar partida, mover, atacar, abrir inventario/equipar, trocar de mapa e salvar.'

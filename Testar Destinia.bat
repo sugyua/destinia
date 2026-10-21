@@ -12,6 +12,11 @@ if not exist "%ROOT%diagnostico\test_suite.ps1" (
   pause
   exit /b 1
 )
+if not exist "%ROOT%scripts\shared_saves.ps1" (
+  echo Falta scripts\shared_saves.ps1. Extraia todos os arquivos do pacote de testes.
+  pause
+  exit /b 1
+)
 if not "%~1"=="" goto argumentos
 echo DESTINIA - ESCOLHA O TESTE
 echo [1] Camera host_zoom - novo teste focado

@@ -1,6 +1,6 @@
 {
-  "version": "0.4",
-  "base_commit": "ccd275ba61fe89e1791bcbd6eec64f3e54eaa52d",
+  "version": "0.5",
+  "base_commit": "8c4081832d81485c41c6c103ce824e5ba14e751c",
   "files": [
     ".gitignore",
     "AGENTS.md",
@@ -35,6 +35,19 @@
     "tests/test_compile_windows.py",
     "release/NOTAS_0.4.md",
     "docs/RELEASE_0.4.md",
-    "docs/ROADMAP.md"
+    "docs/ROADMAP.md",
+    "common/runtime_support.h",
+    "common/elf_image.h",
+    "Configurar pasta de saves.bat",
+    "scripts/shared_saves.ps1",
+    "scripts/configure_saves.ps1",
+    "tests/runtime_host_cases.cpp",
+    "tests/runtime_support_cases.cpp",
+    "tests/test_runtime.py",
+    "tests/test_save_configuration.ps1",
+    "docs/PLANO_0.5.md",
+    "docs/SAVES_E_LOGS.md",
+    "docs/RELEASE_0.5.md",
+    "release/NOTAS_0.5.md"
   ]
 }

@@ -2,13 +2,13 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs. Faça backup dos saves antes de atualizar.**
 
-Seleção concluída e publicação do planejamento autorizada pelo autor em **21/10/2026**: **37 melhorias aprovadas**. Este documento registra trabalho futuro, não funcionalidades entregues. A release atual continua sendo a **0.4 Beta**, publicada; a confirmação visual do zoom, da UI e dos cliques no Windows ainda está pendente.
+Seleção concluída e publicação do planejamento autorizada pelo autor em **21/10/2026**: **37 melhorias aprovadas**. Este documento registra o planejamento; os itens 01, 02 e 05 já foram implementados na 0.5, com publicação aprovada pelo autor. Os demais continuam futuros. A release atual é a **0.5 Beta**; a confirmação visual do zoom, da UI e dos cliques no Windows ainda está pendente.
 
 ## Ordem e critérios
 
 A avaliação inicial considera o host C++17/SDL2/Unicorn, as rotinas de entrada/áudio e a ponte para a biblioteca ARM original. Recursos de diagnóstico e preferências podem começar no host; inventário, missões, UI nativa e progressão exigem compreender dados e rotinas do jogo. Esta é uma estimativa de dificuldade, não uma prova de viabilidade.
 
-As versões abaixo são **metas provisórias**, sem calendário garantido. Uma etapa pode ser dividida ou reordenada conforme os resultados. O log TXT é o pedido reservado para a **0.5**. A aprovação das ideias autoriza o planejamento; cada nova release precisa de revisão das verificações, limitações e aprovação do autor antes de ser publicada.
+As versões abaixo são **metas provisórias**, sem calendário garantido. Uma etapa pode ser dividida ou reordenada conforme os resultados. O log TXT está implementado na **0.5**, junto de backups, correções e configuração global de saves solicitada posteriormente. A aprovação das ideias autoriza o planejamento; cada nova release precisa de revisão das verificações, limitações e aprovação do autor antes de ser publicada.
 
 | Meta | Foco | Dificuldade preliminar |
 | --- | --- | --- |
@@ -23,7 +23,7 @@ As versões abaixo são **metas provisórias**, sem calendário garantido. Uma e
 
 ## Regras de implementação
 
-- Preservar os recursos existentes e verificar primeiro o que o jogo original já oferece. Esta atualização altera somente documentação.
+- Preservar os recursos existentes e verificar primeiro o que o jogo original já oferece. As melhorias seguintes devem seguir esse princípio; confira o escopo da candidata atual em [RELEASE_0.5.md](RELEASE_0.5.md).
 - Priorizar correções isoladas e verificáveis. O item 05 reúne várias correções: cada caminho precisa de seu próprio diagnóstico e teste.
 - Começar a investigação da escrita de saves e dos formatos nativos nas primeiras etapas; a meta 0.8 é a conclusão da base necessária às mudanças permanentes posteriores.
 - Separar os modos clássico e expandido e identificar seus saves antes de mudar progressão/conteúdo. Não converter saves silenciosamente nem testar sobre o único save do jogador.
@@ -34,15 +34,15 @@ As versões abaixo são **metas provisórias**, sem calendário garantido. Uma e
 
 ## Etapas aprovadas
 
-### Meta 0.5 — Diagnóstico e proteção inicial
+### 0.5 — Diagnóstico e proteção inicial
 
-Prioridade imediata: registrar falhas, proteger o progresso e corrigir erros verificáveis do host.
+Publicação aprovada pelo autor em 21/10/2026 após verificações locais; confirmação manual no Windows pendente. Configuração global de pasta de save incluída por solicitação adicional do autor. As caixas marcadas abaixo indicam implementação na 0.5.
 
 **Dependências:** Trabalho concentrado no host; não exige expandir dados do jogo.
 
-- [ ] **01. Log TXT do jogo:** Registrar eventos importantes, mapas, saves, erros e desempenho em TXT na pasta `relatorios`, com limite de tamanho e retenção.
-- [ ] **02. Backups rotativos de saves:** Guardar cópias datadas antes de iniciar o jogo/atualizar, com restauração orientada e quantidade limitada.
-- [ ] **05. Erros tratados e testes de estabilidade:** Corrigir operações fread/fwrite de tamanho zero, validar limites ELF e recursos SDL, propagar falhas reais de emulação e testar os caminhos afetados.
+- [x] **01. Log TXT do jogo:** Registrar eventos importantes, mapas, saves, erros e desempenho em TXT na pasta `relatorios`, com limite de tamanho e retenção.
+- [x] **02. Backups rotativos de saves:** Guardar cópias datadas antes de iniciar o jogo/atualizar, com restauração orientada e quantidade limitada.
+- [x] **05. Erros tratados e testes de estabilidade:** Corrigir operações fread/fwrite de tamanho zero, validar limites ELF e recursos SDL, propagar falhas reais de emulação e testar os caminhos afetados.
 
 **Verificação necessária antes da entrega:** Conferir rotação e limite dos logs, restaurar um backup de teste e exercitar os caminhos de erro, incluindo arquivos ELF inválidos e falhas de recursos SDL.
 

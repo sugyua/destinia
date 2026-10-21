@@ -59,3 +59,11 @@ Claude/exports/
 .env
 .env.*
 !.env.example
+
+# Dados privados criados pela 0.5
+**/*_backups/
+**/.destinia.lock
+**/jogo_host_*/
+**/jogo_host_zoom_*/
+**/config.ini
+**/config.ini.previous

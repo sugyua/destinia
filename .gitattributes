@@ -24,3 +24,7 @@
 
 "/Abrir Destinia.bat" text eol=crlf
 "/Abrir Destinia Zoom 800x480.bat" text eol=crlf
+
+"/Configurar pasta de saves.bat" text eol=crlf
+/scripts/shared_saves.ps1 text eol=crlf
+/scripts/configure_saves.ps1 text eol=crlf
