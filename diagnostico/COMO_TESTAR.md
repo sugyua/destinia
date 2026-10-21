@@ -100,3 +100,8 @@ Codigo final 1 indica falha automatica ou manual. Codigo 0 significa que nenhuma
 ## Verificacao desta ferramenta
 
 Funcoes testadas com PowerShell 7 em Linux: isolamento e copia de saves, deteccao de erro com exit zero, BMP ausente/incorreto/truncado, captura real de stdout/stderr e timeout do proprio processo. Tambem foram testados os avisos de compra/rede, a atualizacao do relatorio e sua preservacao apos encerrar um processo de teste. O roteiro geral ja foi exercitado pelo usuario no Windows. O novo menu BAT e o modo focado em camera ainda precisam de confirmacao no Windows PowerShell 5.1. O fluxo Camera tambem foi exercitado com processo/janela e respostas simulados: somente zoom, falha manual, ausencia de capturas, sem reabertura e com save original preservado. Nenhum jogo foi executado nesses testes. Nenhuma correcao do host e anunciada por esses testes.
+
+
+## Candidata 0.6
+
+Use o diagnóstico e os EXEs da mesma candidata. O roteiro continua usando cópias dos saves e agora envia `--no-save-preferences`, para não guardar mudanças de tamanho/modo de janela do teste na configuração pessoal. Pausa, áudio e perfis seguem a configuração global escolhida; use `Configurar Destinia.bat` com os jogos fechados para ajustá-los. O roteiro guiado não equivale aos testes de código do workflow Windows.

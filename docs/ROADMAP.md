@@ -2,7 +2,7 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs. Faça backup dos saves antes de atualizar.**
 
-Seleção concluída e publicação do planejamento autorizada pelo autor em **21/10/2026**: **37 melhorias aprovadas**. Este documento registra o planejamento; os itens 01, 02 e 05 já foram implementados na 0.5, com publicação aprovada pelo autor. Os itens 07, 10, 11 e 12 foram implementados na candidata 0.6, ainda sem publicação; o pacote Windows está em verificação. Os demais continuam futuros. A release atual é a **0.5 Beta**; a confirmação visual do zoom, da UI e dos cliques no Windows ainda está pendente.
+Seleção concluída e publicação do planejamento autorizada pelo autor em **21/10/2026**: **37 melhorias aprovadas**. Este documento registra o planejamento; os itens 01, 02 e 05 já foram implementados na 0.5, com publicação aprovada pelo autor. Os itens 07, 10, 11 e 12 foram implementados na candidata 0.6, ainda sem publicação; o pacote Windows foi compilado e testado automaticamente; a publicação aguarda aprovação. Os demais continuam futuros. A release atual é a **0.5 Beta**; a confirmação visual do zoom, da UI e dos cliques no Windows ainda está pendente.
 
 ## Ordem e critérios
 
@@ -48,7 +48,7 @@ Publicação aprovada pelo autor em 21/10/2026 após verificações locais; conf
 
 ### Meta 0.6 — Configurações, comandos e distribuição
 
-Preferências e comandos implementados na candidata 0.6; pacote Windows em verificação. A publicação da 0.6 depende de aprovação. Veja [resultados](RELEASE_0.6.md).
+Preferências e comandos implementados na candidata 0.6; pacote Windows compilado e verificado automaticamente. A publicação da 0.6 depende de aprovação. Veja [resultados](RELEASE_0.6.md).
 
 **Dependências:** Usar o diagnóstico da 0.5; preferências servem de base aos recursos opcionais seguintes.
 

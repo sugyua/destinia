@@ -12,7 +12,7 @@ FILES=['README.md','INSTALL.md','CHANGELOG.md','THIRD_PARTY.md','VERSION',
        'Abrir Destinia.bat','Abrir Destinia Zoom 800x480.bat','Configurar Destinia.bat',
        'Configurar pasta de saves.bat','scripts/configure_game.ps1','scripts/game_preferences.ps1',
        'scripts/configure_saves.ps1','scripts/shared_saves.ps1','docs/PREFERENCIAS.md',
-       'docs/SAVES_E_LOGS.md','release/NOTAS_0.6.md']
+       'docs/SAVES_E_LOGS.md','docs/ROADMAP.md','docs/RELEASE_0.6.md','release/NOTAS_0.6.md']
 
 def pe64(path):
     data=Path(path).read_bytes()

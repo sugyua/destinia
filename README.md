@@ -77,7 +77,7 @@ Para testar uma instalação existente, execute **[Testar Destinia.bat](Testar%2
 
 O relatório é salvo ao longo da sessão e informa quando está parcial. Após cada execução, o diagnóstico também destaca compras observadas, alterações de cash e a rede aguardando resposta; esses avisos não significam que o problema da loja foi corrigido.
 
-[Baixar o pacote de testes](https://raw.githubusercontent.com/sugyua/destinia/main/diagnostico/pacotes/testes-destinia.zip) e extrair na raiz do projeto existente. O pacote contém somente o BAT, seu executor PowerShell, o leitor de configuração compartilhada e as instruções. Para testar a 0.6, use o diagnóstico dos fontes atuais com os EXEs da mesma candidata.
+Para esta candidata, use o diagnóstico incluído no pacote completo de fontes 0.6, com EXEs da mesma versão. Não sobreponha os auxiliares antigos da main: eles podem não incluir as proteções de preferências da 0.6.
 
 Consulte [INSTALL.md](INSTALL.md) para compilar e executar com dados próprios compatíveis. Os launchers existentes continuam voltados ao ambiente de desenvolvimento MSYS2 em `C:\msys64\ucrt64\bin`; não são launchers portáteis.
 
@@ -94,7 +94,7 @@ O [manifesto](release/manifest.json) usa a 0.5 como base. O workflow Windows com
 
 ## Atualizações futuras
 
-**37 melhorias aprovadas para planejamento em 21/10/2026.** Os itens 01, 02 e 05 estão implementados na 0.5, publicada com validação manual no Windows pendente; os itens 07, 10, 11 e 12 estão implementados na candidata 0.6; o item 06 depende de concluir a distribuição/aprovação. Os demais continuam planejados. A ordem prioriza mudanças no host e proteção dos saves antes das alterações na biblioteca ARM e no conteúdo. As versões são metas provisórias, sem datas garantidas, e podem ser divididas ou reordenadas conforme a investigação.
+**37 melhorias aprovadas para planejamento em 21/10/2026.** Os itens 01, 02 e 05 estão implementados na 0.5, publicada com validação manual no Windows pendente; os itens 07, 10, 11 e 12 estão implementados na candidata 0.6; o item 06 depende de concluir a distribuição/aprovação. Os demais continuam planejados. **31 testes locais e 19 testes Windows passaram, além dos roteiros PowerShell; campanha manual permanece pendente.** A ordem prioriza mudanças no host e proteção dos saves antes das alterações na biblioteca ARM e no conteúdo. As versões são metas provisórias, sem datas garantidas, e podem ser divididas ou reordenadas conforme a investigação.
 
 **A expansão inclui aumento do nível máximo, novos ranks de armas, armaduras e acessórios, itens únicos inéditos e conjuntos com bônus.** O novo limite de nível, os nomes dos ranks e os valores dos equipamentos ainda serão definidos após verificar os dados originais e o balanceamento.
 
@@ -109,7 +109,7 @@ Prioridade imediata: registrar falhas, proteger o progresso e corrigir erros ver
 
 ### Meta 0.6 — Configurações, comandos e distribuição
 
-Preferências e comandos implementados na candidata 0.6; compilação/testes Windows e distribuição em revisão. A publicação continua pendente de aprovação.
+Preferências e comandos implementados na candidata 0.6; compilação/testes Windows aprovados, com publicação ainda pendente. A publicação continua pendente de aprovação.
 
 - [ ] **06. EXEs Windows prontos nas releases:** Disponibilizar os EXEs dos dois hosts, compilados e verificados no Windows; dependências externas continuam instaladas separadamente, sem serem incluídas no pacote.
 - [x] **07. Configurações persistentes:** Salvar preferências de vídeo, janela e comandos em arquivo próprio, com opção de restaurar padrões.
