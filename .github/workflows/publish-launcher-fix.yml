@@ -1,6 +1,9 @@
 name: Anexar pacotes da correcao de abertura 0.7
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [.github/workflows/publish-launcher-fix.yml]
 permissions:
   contents: read
 concurrency:
