@@ -2,7 +2,7 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs. Faça backup dos saves antes de atualizar.**
 
-Planejamento autorizado pelo autor em **21/10/2026**: **37 melhorias aprovadas**, das quais **8 concluídas** na 0.5/0.6 e **29 futuras**, da 0.7 em diante. A publicação da **0.6 Beta** foi aprovada pelo autor. Testes automáticos passaram; campanha e inspeção manual no Windows continuam pendentes.
+Planejamento autorizado pelo autor em **21/10/2026**: **39 melhorias aprovadas**, das quais **8 concluídas** na 0.5/0.6 e **31 futuras**, da 0.7 em diante. A publicação da **0.6 Beta** foi aprovada pelo autor. Testes automáticos passaram; campanha e inspeção manual no Windows continuam pendentes.
 
 ## Melhorias concluídas com sucesso
 
@@ -30,8 +30,8 @@ As versões abaixo são **metas provisórias**, sem calendário garantido. Uma e
 | 0.7 | Interface e acessibilidade | Alta; depende de investigação ARM/renderização |
 | 0.8 | Saves, compatibilidade e loja offline | Alta; depende de investigação de saves e callbacks ARM |
 | 0.9 | Inventário, coleta e assistência opcional | Alta; depende de dados, UI e persistência nativos |
-| 0.10 | Progressão expandida e novos equipamentos | Muito alta; exige prova de viabilidade e balanceamento |
-| 0.11 | Missões, armazenamento e desafios configuráveis | Muito alta; depende de missões, dados e saves |
+| 0.10 | Progressão expandida, equipamentos e títulos | Muito alta; exige prova de viabilidade, IDs/condições de títulos e balanceamento |
+| 0.11 | Missões, armazenamento, desafios e pets | Muito alta; depende de missões, dados, animações/comportamento dos pets e saves |
 | 0.12 | Pós-jogo e masmorras | Muito alta; etapa exploratória |
 
 ## Regras de implementação
@@ -89,11 +89,11 @@ Reduzir tarefas repetitivas e tornar os equipamentos mais fáceis de entender e 
 
 **Verificação necessária antes da entrega:** Comparar inventário antes/depois de ordenar, filtrar, vender e reabrir; conferir favoritos, coleta e poções sem perda/duplicação, consumo fora das regras ou mudanças na experiência clássica.
 
-### Meta 0.10 — Progressão expandida e novos equipamentos
+### Meta 0.10 — Progressão expandida, equipamentos e títulos
 
-Aumentar o nível máximo e acrescentar ranks, itens inéditos, conjuntos, receitas e recompensas offline.
+Aumentar o nível máximo e acrescentar ranks, itens inéditos, conjuntos, receitas, recompensas offline e novos títulos.
 
-**Dependências:** Depende do mapeamento de XP, limites, tabelas de equipamentos e saves, além do modo expandido da 0.8.
+**Dependências:** Depende do mapeamento de XP, limites, tabelas de equipamentos e saves, além do modo expandido da 0.8. Novos títulos também exigem mapear IDs, condições de aquisição, atributos/bônus e seleção do título ativo; ampliar apenas a tabela de nomes não basta.
 
 - [ ] **25. Aumentar o nível máximo:** Aumentar o nível máximo após verificar o limite original e revisar XP, pontos, atributos, equipamentos, inimigos, HUD e saves; novo limite ainda a definir.
 - [ ] **26. Novos ranks de armas:** Criar graus acima do maior atual, com nomes e progressão a definir, incluindo atributos, requisitos, obtenção e identificação visual.
@@ -102,21 +102,23 @@ Aumentar o nível máximo e acrescentar ranks, itens inéditos, conjuntos, recei
 - [ ] **30. Ganhar cash jogando:** Definir recompensas offline por objetivos, desafios ou missões, com limites e economia equilibrada; independente do aviso de compra indisponível.
 - [ ] **37. Novos itens únicos:** Criar armas, armaduras e acessórios inéditos, com identidade, atributos, efeitos e formas de obtenção próprios, além dos novos ranks.
 - [ ] **38. Novos conjuntos de equipamentos:** Adicionar conjuntos com bônus por combinar peças; verificar primeiro o sistema original e definir bônus e número de peças.
+- [ ] **40. Novos títulos:** Ampliar o sistema original com títulos conquistados por objetivos do jogo, com condições, nomes e eventuais bônus a definir; validar aquisição, seleção, exibição e persistência no modo expandido.
 
-**Verificação necessária antes da entrega:** Provar primeiro um avanço além do limite original e um equipamento novo em save descartável; depois conferir XP, atributos, habilidades, requisitos, receitas, bônus de conjunto, economia e persistência.
+**Verificação necessária antes da entrega:** Provar primeiro um avanço além do limite original e um equipamento novo em save descartável; depois conferir XP, atributos, habilidades, requisitos, receitas, bônus de conjunto, economia e persistência. Para títulos, conquistar um título realmente novo, selecioná-lo, verificar seus efeitos e salvar/reabrir sem perder os títulos anteriores.
 
-### Meta 0.11 — Missões, armazenamento e desafios configuráveis
+### Meta 0.11 — Missões, armazenamento, desafios e pets
 
-Adicionar baú compartilhado, informação de missões, dificuldades opcionais e contratos offline.
+Adicionar baú compartilhado, informação de missões, dificuldades opcionais, contratos offline e novos pets.
 
-**Dependências:** Baú depende da gravação segura da 0.8; missões e recompensas exigem mapear objetivos e validar a economia expandida.
+**Dependências:** Baú depende da gravação segura da 0.8; missões e recompensas exigem mapear objetivos e validar a economia expandida. Novos pets também exigem mapear IDs, tabelas de habilidades/evolução, animações, comportamento e campos do save. A meta 0.10 fornece a base de expansão e balanceamento.
 
 - [ ] **18. Baú compartilhado entre personagens:** Transferir itens entre personagens pelo armazenamento local, com proteção contra perda/duplicação.
 - [ ] **23. Rastreador de missão:** Mostrar objetivo ativo e, quando houver coordenadas conhecidas, marcador de destino; verificar os recursos originais existentes.
 - [ ] **32. Dificuldades opcionais:** Perfis de dificuldade com ajustes de inimigos e recompensas; preservar uma experiência equivalente à original.
 - [ ] **35. Contratos repetíveis offline:** Objetivos opcionais de caça/coleta para dar propósito ao pós-jogo, com recompensas e repetição controladas.
+- [ ] **39. Novos pets:** Acrescentar mascotes ao sistema original, com aparência, animações, atributos, habilidades, evolução e obtenção offline a definir; validar IDs, comportamento e salvamento no modo expandido, preservando os pets existentes.
 
-**Verificação necessária antes da entrega:** Transferir itens entre personagens e reabrir sem perdas/duplicações; validar objetivos, marcadores, recompensas e regras de dificuldade, mantendo o perfil original.
+**Verificação necessária antes da entrega:** Transferir itens entre personagens e reabrir sem perdas/duplicações; validar objetivos, marcadores, recompensas e regras de dificuldade, mantendo o perfil original. Para pets, obter um mascote realmente novo e validar movimento, animação, habilidades, evolução quando aplicável, troca/descarte e salvar/reabrir sem alterar os mascotes existentes.
 
 ### Meta 0.12 — Pós-jogo e masmorras
 
@@ -130,9 +132,17 @@ Ampliar a duração do jogo com Novo Jogo+, desafio de chefes e masmorras variá
 
 **Verificação necessária antes da entrega:** Conferir o que o Novo Jogo+ preserva/reinicia; validar entradas, saídas, colisões, chefes, recompensas e retomada do progresso, inclusive após fechar o jogo.
 
+## Investigação inicial — novos pets e títulos
+
+Adicionados ao planejamento a pedido do autor em **21/10/2026**: **39. Novos pets** (meta 0.11) e **40. Novos títulos** (meta 0.10). São conteúdo futuro, ainda não implementado nem validado em gameplay.
+
+A inspeção somente de leitura confirmou sistemas originais de títulos e pets na biblioteca ARM e nos assets: `nick_en.tdt`, `pet_skill_en.tdt`, arquivos `pet*.agd`/`pet*.wmb` e rotinas de aquisição, seleção, movimento e evolução. Isso permite investigar uma ampliação dos sistemas existentes; não comprova que basta acrescentar arquivos ou nomes. Detalhes e evidências em [INVESTIGACAO_PETS_TITULOS.md](INVESTIGACAO_PETS_TITULOS.md).
+
+**Quando será possível:** começar o mapeamento antes, mas entregar títulos novos na meta **0.10**, após a base de saves/perfis da 0.8 e um protótipo de aquisição/seleção/persistência; entregar pets novos na meta **0.11**, após validar também recursos visuais, comportamento, habilidades e evolução. Essas versões são estimativas condicionais, sem data garantida; podem mudar se os limites nativos exigirem adaptações maiores. Manter a meta 0.7 focada em interface.
+
 ## Investigação da expansão de conteúdo
 
-O aumento do nível máximo (25), os novos ranks (26/27), receitas (28), recompensas de cash jogando (30), itens inéditos (37) e conjuntos (38) fazem parte da meta **0.10**. Novo Jogo+, desafios e masmorras seguem nas etapas de pós-jogo. Os números são uma organização inicial; provas de viabilidade podem ser antecipadas enquanto se concluem melhorias independentes do host.
+O aumento do nível máximo (25), os novos ranks (26/27), receitas (28), recompensas de cash jogando (30), itens inéditos (37), conjuntos (38) e novos títulos (40) fazem parte da meta **0.10**. Novos pets (39) ficam inicialmente na meta **0.11**. Novo Jogo+, desafios e masmorras seguem nas etapas de pós-jogo. Os números são uma organização inicial; provas de viabilidade podem ser antecipadas enquanto se concluem melhorias independentes do host.
 
 Antes de alterar esses sistemas, é necessário:
 

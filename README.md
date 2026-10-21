@@ -114,11 +114,11 @@ A pasta global de save compartilhada entre hosts e atualizações também foi en
 
 ## Atualizações futuras
 
-Das **37 melhorias aprovadas**, **8 foram concluídas** nas versões 0.5 e 0.6; **29 permanecem planejadas**, somente da **0.7 em diante**. As versões abaixo são metas provisórias, sem datas garantidas, e dependem de investigação e testes.
+Das **39 melhorias aprovadas**, **8 foram concluídas** nas versões 0.5 e 0.6; **31 permanecem planejadas**, somente da **0.7 em diante**. As versões abaixo são metas provisórias, sem datas garantidas, e dependem de investigação e testes.
 
-**A expansão continua incluindo aumento do nível máximo, novos ranks de armas, armaduras e acessórios, itens únicos e conjuntos com bônus.** Limites, nomes e valores serão definidos após verificar dados originais e balanceamento.
+**A expansão continua incluindo aumento do nível máximo, novos ranks de armas, armaduras e acessórios, itens únicos, conjuntos com bônus, novos títulos e novos pets.** Limites, nomes e valores serão definidos após verificar dados originais e balanceamento.
 
-Consulte o [roadmap detalhado](docs/ROADMAP.md) para dependências, critérios de verificação e referências. A aprovação do planejamento não comprova a viabilidade de todos os itens nem autoriza automaticamente novas releases.
+Consulte o [roadmap detalhado](docs/ROADMAP.md) para dependências, critérios de verificação e referências. A [investigação inicial de pets e títulos](docs/INVESTIGACAO_PETS_TITULOS.md) registra a base original encontrada e as condições para as metas 0.10 (títulos) e 0.11 (pets); nenhum desses conteúdos novos está implementado. A aprovação do planejamento não comprova a viabilidade de todos os itens nem autoriza automaticamente novas releases.
 
 ### Meta 0.7 — Interface e acessibilidade
 
@@ -150,9 +150,9 @@ Reduzir tarefas repetitivas e tornar os equipamentos mais fáceis de entender e 
 - [ ] **22. Nomes e ranks dos drops por tecla:** Exibir nomes e raridades dos itens no chão ao segurar ou alternar uma tecla, com contraste adequado.
 - [ ] **29. Redistribuição de pontos acessível offline:** Verificar o reset existente e oferecer uma forma clara de redistribuir atributos/habilidades offline, com custo interno a definir e sem compra real.
 
-### Meta 0.10 — Progressão expandida e novos equipamentos
+### Meta 0.10 — Progressão expandida, equipamentos e títulos
 
-Aumentar o nível máximo e acrescentar ranks, itens inéditos, conjuntos, receitas e recompensas offline.
+Aumentar o nível máximo e acrescentar ranks, itens inéditos, conjuntos, receitas, recompensas offline e novos títulos.
 
 - [ ] **25. Aumentar o nível máximo:** Aumentar o nível máximo após verificar o limite original e revisar XP, pontos, atributos, equipamentos, inimigos, HUD e saves; novo limite ainda a definir.
 - [ ] **26. Novos ranks de armas:** Criar graus acima do maior atual, com nomes e progressão a definir, incluindo atributos, requisitos, obtenção e identificação visual.
@@ -161,15 +161,17 @@ Aumentar o nível máximo e acrescentar ranks, itens inéditos, conjuntos, recei
 - [ ] **30. Ganhar cash jogando:** Definir recompensas offline por objetivos, desafios ou missões, com limites e economia equilibrada; independente do aviso de compra indisponível.
 - [ ] **37. Novos itens únicos:** Criar armas, armaduras e acessórios inéditos, com identidade, atributos, efeitos e formas de obtenção próprios, além dos novos ranks.
 - [ ] **38. Novos conjuntos de equipamentos:** Adicionar conjuntos com bônus por combinar peças; verificar primeiro o sistema original e definir bônus e número de peças.
+- [ ] **40. Novos títulos:** Ampliar o sistema original com títulos conquistados por objetivos do jogo, com condições, nomes e eventuais bônus a definir; validar aquisição, seleção, exibição e persistência no modo expandido.
 
-### Meta 0.11 — Missões, armazenamento e desafios configuráveis
+### Meta 0.11 — Missões, armazenamento, desafios e pets
 
-Adicionar baú compartilhado, informação de missões, dificuldades opcionais e contratos offline.
+Adicionar baú compartilhado, informação de missões, dificuldades opcionais, contratos offline e novos pets.
 
 - [ ] **18. Baú compartilhado entre personagens:** Transferir itens entre personagens pelo armazenamento local, com proteção contra perda/duplicação.
 - [ ] **23. Rastreador de missão:** Mostrar objetivo ativo e, quando houver coordenadas conhecidas, marcador de destino; verificar os recursos originais existentes.
 - [ ] **32. Dificuldades opcionais:** Perfis de dificuldade com ajustes de inimigos e recompensas; preservar uma experiência equivalente à original.
 - [ ] **35. Contratos repetíveis offline:** Objetivos opcionais de caça/coleta para dar propósito ao pós-jogo, com recompensas e repetição controladas.
+- [ ] **39. Novos pets:** Acrescentar mascotes ao sistema original, com aparência, animações, atributos, habilidades, evolução e obtenção offline a definir; validar IDs, comportamento e salvamento no modo expandido, preservando os pets existentes.
 
 ### Meta 0.12 — Pós-jogo e masmorras
 
