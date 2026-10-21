@@ -1,9 +1,6 @@
 name: Compilar testar e publicar Destinia 0.7 Beta
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths: [.github/workflows/release-0.7.yml]
 permissions:
   contents: read
 concurrency:
