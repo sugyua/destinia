@@ -13,7 +13,7 @@ jobs:
   upload:
     runs-on: ubuntu-24.04
     steps:
-      - name: Conferir e anexar os pacotes aprovados
+      - name: Conferir e anexar os pacotes aprovados da 0.6
         env:
           GH_TOKEN: ${{ github.token }}
         shell: python
@@ -28,30 +28,47 @@ jobs:
           import zipfile
 
           repository = os.environ['GITHUB_REPOSITORY']
-          approved = [('0.5', '29c442ebbb6c40ca75c7da9c4aaf68b7f8d984ff')]
+          commit = '98e774acb87caf277d185980d45db6a21efa3d8d'
+          approved = [
+              ('source', '1c2f3893741a135d367fbfd65bc1ee2af4f7eba5f21c13e4613e55c41eb0f229'),
+              ('windows-x64', '845673ac8d34364e32ec2601f9379fcd9d80c05f2cc938eea601553deaea104d'),
+          ]
+          expected_exes = {
+              'destinia-0.6-beta/host/build/destinia_host.exe': '76a620910e57bf9649b0a6e7b296b6b1681968ef2ac38d7c5db1ace73fecf42a',
+              'destinia-0.6-beta/host_zoom/build/destinia_host.exe': 'd5c35683d686552e70ffa2fc07fe312c7413cc46b0c7d1730a4d50e9d4a2b9fc',
+          }
           with tempfile.TemporaryDirectory() as directory:
-              for version, commit in approved:
-                  tag = 'v' + version + '-beta'
-                  filename = 'destinia-' + version + '-beta-source.zip'
+              for kind, expected in approved:
+                  filename = 'destinia-0.6-beta-' + kind + '.zip'
                   archive = pathlib.Path(directory, filename)
                   checksum = pathlib.Path(directory, filename + '.sha256')
                   for destination in (archive, checksum):
-                      path = 'release/artifacts/' + tag + '/' + destination.name
+                      path = 'release/artifacts/v0.6-beta/' + destination.name
                       endpoint = 'repos/' + repository + '/contents/' + path + '?ref=' + commit
                       response = subprocess.check_output(['gh', 'api', endpoint], text=True)
                       destination.write_bytes(base64.b64decode(json.loads(response)['content']))
-                  expected = checksum.read_text().split()[0]
-                  if hashlib.sha256(archive.read_bytes()).hexdigest() != expected:
+                  if (checksum.read_text().split()[0] != expected
+                          or hashlib.sha256(archive.read_bytes()).hexdigest() != expected):
                       raise RuntimeError('Checksum invalido: ' + filename)
                   with zipfile.ZipFile(archive) as zipped:
                       if zipped.testzip() is not None:
                           raise RuntimeError('ZIP corrompido: ' + filename)
+                      exes = []
                       for name in zipped.namelist():
                           path = pathlib.PurePosixPath(name)
-                          if ('game' in path.parts or 'relatorios' in path.parts
+                          if (path.is_absolute() or '..' in path.parts or '\\' in name
+                                  or 'game' in path.parts or 'relatorios' in path.parts
                                   or any(part.lower().startswith('save') or part.lower().endswith('_backups') for part in path.parts[:-1])
-                                  or path.suffix.lower() in {'.exe', '.dll', '.so', '.dex', '.dat', '.sav', '.save', '.srm', '.log'}):
+                                  or path.suffix.lower() in {'.dll', '.so', '.dex', '.dat', '.sav', '.save', '.srm', '.log'}):
                               raise RuntimeError('Arquivo indevido no pacote: ' + name)
-                  subprocess.run(['gh', 'release', 'upload', tag, str(archive), str(checksum),
+                          if path.suffix.lower() == '.exe':
+                              if kind != 'windows-x64' or name not in expected_exes:
+                                  raise RuntimeError('Executavel inesperado: ' + name)
+                              if hashlib.sha256(zipped.read(name)).hexdigest() != expected_exes[name]:
+                                  raise RuntimeError('Executavel diferente do verificado: ' + name)
+                              exes.append(name)
+                      if sorted(exes) != (sorted(expected_exes) if kind == 'windows-x64' else []):
+                          raise RuntimeError('Conjunto de EXEs incompleto')
+                  subprocess.run(['gh', 'release', 'upload', 'v0.6-beta', str(archive), str(checksum),
                                   '--repo', repository, '--clobber'], check=True)
-                  print('ZIP e checksum anexados: ' + tag)
+                  print('ZIP e checksum anexados: ' + filename)
