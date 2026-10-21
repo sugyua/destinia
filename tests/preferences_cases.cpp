@@ -60,4 +60,5 @@ int main(int argc,char** argv) {
   assert(destinia::scaledVolume(3,50,false)==38);
   assert(destinia::scaledVolume(5,100,true)==0);
   std::cout<<"OK: preferencias, preservacao do save, perfis, validacao, fontes simultaneas, liberacao e volume\n";
+  return 0;
 }
