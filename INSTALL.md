@@ -2,7 +2,7 @@
 
 > **Versão Beta: pode conter diversos bugs. Faça backup dos saves.**
 
-## O que está disponível nesta candidata de fontes
+## O que está disponível nesta release de fontes
 
 `destinia-0.5-beta-source.zip` contém os fontes dos dois hosts, seus CMakeLists, launchers normais de desenvolvimento e documentação. **Não contém executável Windows nem os dados originais do jogo.** Extrair o ZIP não instala um jogo pronto para jogar.
 

@@ -89,3 +89,9 @@ Orientacao atual — candidata 0.5 (21/10/2026)
 * Manter o padrao LOCALAPPDATA/Destinia/save para compatibilidade com a 0.2–0.4. Versoes antigas nao leem config.ini novo nem respeitam a trava; documentar sem prometer conversao de saves.
 * Diagnostico continua usando copias. Preservar gameplay, zoom, UI, ritmo e fluxo de loja/rede nesta etapa.
 * Preparar candidata 0.5 com verificacoes e pacote revisado. A solicitacao de implementar nao autoriza publicar tag/release: apresentar resultados e limitacoes e aguardar aprovacao do autor.
+
+Orientacao atual — publicacao 0.5 e candidata 0.6 (21/10/2026)
+
+* Autor aprovou publicar a 0.5 com validacao manual no Windows pendente, apos conhecer resultados locais; nao solicitar essa aprovacao novamente.
+* Preparar e testar a 0.6 conforme roadmap: preferencias persistentes, remapeamento de comandos, volumes separados, pausa opcional e distribuicao de EXEs Windows. Nao publicar a release 0.6 antes da aprovacao correspondente.
+* Dependencias externas permanecem fora dos pacotes; documentar requisitos e distinguir verificacao automatizada de gameplay manual.

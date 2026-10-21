@@ -1,8 +1,8 @@
-# Destinia 0.5 Beta — candidata para aprovação
+# Destinia 0.5 Beta — logs, backups e save compartilhado
 
 > **AVISO: o jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves.**
 
-Candidata de fontes; ainda não é uma release publicada. A 0.4 permanece disponível em Releases.
+Release de fontes aprovada pelo autor em 21/10/2026. A validação manual no Windows continua pendente; a 0.4 e as anteriores permanecem disponíveis em Releases.
 
 ## Alterações desde a 0.4
 
@@ -19,6 +19,6 @@ Extraia os fontes completos, preserve os dados próprios em `game` e execute `Co
 
 O ZIP não contém EXEs Windows prontos, dados originais, saves ou dependências externas. Os requisitos continuam na seção Dependências do README. Não há expansão de nível/itens, correção da loja ou mudança de câmera/UI nesta versão.
 
-Compilação e testes locais não substituem a validação de gameplay/UI/áudio no Windows. Consulte [verificações e aprovação](../docs/RELEASE_0.5.md) antes de publicar.
+Os testes locais automatizados não validam uma campanha completa nem substituem gameplay/UI/áudio no Windows. Consulte [verificações e aprovação](../docs/RELEASE_0.5.md) antes de publicar.
 
 Se quiser ajudar no projeto, entre em contato comigo pelo WhatsApp: [+55 21 97468-6880](https://wa.me/5521974686880).

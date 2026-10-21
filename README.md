@@ -1,10 +1,10 @@
-# Destinia para Windows — 0.5 Beta (candidata)
+# Destinia para Windows — 0.5 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**Fontes da candidata: 0.5 Beta, em validação. A última release publicada continua sendo a 0.4 Beta.**
+**Versão atual: 0.5 Beta, distribuída em código-fonte. Publicação aprovada pelo autor com validação manual no Windows ainda pendente.**
 
-**[Baixar a versão 0.4](https://github.com/sugyua/destinia/releases/tag/v0.4-beta)** · [Versão 0.3](https://github.com/sugyua/destinia/releases/tag/v0.3-beta) · [Versão 0.2](https://github.com/sugyua/destinia/releases/tag/v0.2-beta) · [Todas as releases](https://github.com/sugyua/destinia/releases) O pacote contém os fontes, não um jogo pronto para executar. Veja [instalação](INSTALL.md), [changelog](CHANGELOG.md) e [verificações da candidata 0.5](docs/RELEASE_0.5.md).
+**[Baixar a versão 0.5](https://github.com/sugyua/destinia/releases/tag/v0.5-beta)** · [Versão 0.4](https://github.com/sugyua/destinia/releases/tag/v0.4-beta) · [Versão 0.3](https://github.com/sugyua/destinia/releases/tag/v0.3-beta) · [Versão 0.2](https://github.com/sugyua/destinia/releases/tag/v0.2-beta) · [Todas as releases](https://github.com/sugyua/destinia/releases) O pacote contém os fontes, não um jogo pronto para executar. Veja [instalação](INSTALL.md), [changelog](CHANGELOG.md) e [verificações da candidata 0.5](docs/RELEASE_0.5.md).
 
 ## Arquitetura
 
@@ -34,7 +34,7 @@ O repositório atual não inclui saves pessoais, logs de partidas, relatórios l
 
 A presença no código não equivale a validação completa de gameplay. O host_zoom usa framebuffer 800×480 para zoom out, mapas pequenos centralizados, fundo cinza fora dos limites do mapa e UI nativa proporcionalmente menor. Oferece tela cheia com `--fullscreen` e alternância por F11. Em 3440×1440, o jogo ocupa 2400×1440 com barras laterais de 520 pixels. A correção ainda precisa de confirmação visual nas passagens do Windows; compras e rede continuam com limitações documentadas.
 
-## Novidades da candidata 0.5
+## Novidades da 0.5
 
 - Log TXT automático em `relatorios`, com eventos observáveis, erros e desempenho resumido; rotação de três arquivos de até 2 MiB por sessão e dez sessões por host.
 - Backups verificados do save antes de carregar, com dez snapshots e proteção contra abertura simultânea da mesma pasta pelos hosts novos.
@@ -43,7 +43,7 @@ A presença no código não equivale a validação completa de gameplay. O host_
 
 Use os inicializadores normais para continuar sua partida. **O BAT de testes usa cópias: o progresso jogado nele não substitui o save principal.** O configurador não copia nem sobrescreve saves. Configuração personalizada vale nos hosts 0.5 e futuros; mantenha o padrão para compartilhar também com a 0.2–0.4. Veja [saves, restauração e logs](docs/SAVES_E_LOGS.md).
 
-Os testes locais estão descritos em [RELEASE_0.5.md](docs/RELEASE_0.5.md). A confirmação de gameplay/UI/áudio no Windows e a aprovação da publicação continuam pendentes. O ZIP da candidata contém fontes e não inclui dependências externas.
+Os testes locais estão descritos em [RELEASE_0.5.md](docs/RELEASE_0.5.md). A publicação foi aprovada pelo autor em 21/10/2026. A confirmação de gameplay/UI/áudio no Windows continua pendente. O ZIP contém fontes e não inclui dependências externas.
 
 ## Dependências
 
@@ -74,7 +74,7 @@ Para testar uma instalação existente, execute **[Testar Destinia.bat](Testar%2
 
 O relatório é salvo ao longo da sessão e informa quando está parcial. Após cada execução, o diagnóstico também destaca compras observadas, alterações de cash e a rede aguardando resposta; esses avisos não significam que o problema da loja foi corrigido.
 
-[Baixar o pacote de testes](https://raw.githubusercontent.com/sugyua/destinia/release/v0.5-beta/diagnostico/pacotes/testes-destinia.zip) e extrair na raiz do projeto existente. O pacote contém somente o BAT, seu executor PowerShell, o leitor de configuração compartilhada e as instruções. Para testar a 0.5, extraia e compile primeiro os fontes completos da candidata.
+[Baixar o pacote de testes](https://raw.githubusercontent.com/sugyua/destinia/main/diagnostico/pacotes/testes-destinia.zip) e extrair na raiz do projeto existente. O pacote contém somente o BAT, seu executor PowerShell, o leitor de configuração compartilhada e as instruções. Para testar a 0.5, extraia e compile primeiro os fontes completos da versão.
 
 Consulte [INSTALL.md](INSTALL.md) para compilar e executar com dados próprios compatíveis. Os launchers existentes continuam voltados ao ambiente de desenvolvimento MSYS2 em `C:\msys64\ucrt64\bin`; não são launchers portáteis.
 
@@ -87,15 +87,15 @@ python scripts/package_release.py --out dist/candidata-0.5
 
 No Linux, o comando pode ser `python3`. O empacotador cria ZIP e SHA-256, não compila executáveis. Não sobrescreve artefatos existentes. A reprodução byte a byte foi verificada com a mesma versão de Python/zlib; outras versões podem mudar a compressão.
 
-O [manifesto](release/manifest.json) usa a 0.4 como base de comparação. A candidata 0.5 acrescenta logs, backups, configuração de saves e correções de estabilidade, preservando o zoom e a UI da 0.4. Consulte o [roadmap](docs/ROADMAP.md) para as etapas seguintes.
+O [manifesto](release/manifest.json) usa a 0.4 como base de comparação. A 0.5 acrescenta logs, backups, configuração de saves e correções de estabilidade, preservando o zoom e a UI da 0.4. Consulte o [roadmap](docs/ROADMAP.md) para as etapas seguintes.
 
 ## Atualizações futuras
 
-**37 melhorias aprovadas para planejamento em 21/10/2026.** Os itens 01, 02 e 05 estão implementados na candidata 0.5, aguardando validação final e publicação; os demais continuam planejados. A versão publicada continua sendo a **0.4 Beta**. A ordem prioriza mudanças no host e proteção dos saves antes das alterações na biblioteca ARM e no conteúdo. As versões são metas provisórias, sem datas garantidas, e podem ser divididas ou reordenadas conforme a investigação.
+**37 melhorias aprovadas para planejamento em 21/10/2026.** Os itens 01, 02 e 05 estão implementados na 0.5, publicada com validação manual no Windows pendente; os demais continuam planejados. A ordem prioriza mudanças no host e proteção dos saves antes das alterações na biblioteca ARM e no conteúdo. As versões são metas provisórias, sem datas garantidas, e podem ser divididas ou reordenadas conforme a investigação.
 
 **A expansão inclui aumento do nível máximo, novos ranks de armas, armaduras e acessórios, itens únicos inéditos e conjuntos com bônus.** O novo limite de nível, os nomes dos ranks e os valores dos equipamentos ainda serão definidos após verificar os dados originais e o balanceamento.
 
-O log TXT está incluído na **candidata 0.5**. Consulte o [roadmap detalhado](docs/ROADMAP.md) para dificuldades, dependências, critérios de verificação e referências da pesquisa. Caixas marcadas indicam implementação na candidata, não release publicada. Aprovar o planejamento não comprova a viabilidade dos itens restantes nem autoriza automaticamente a publicação.
+O log TXT está incluído na **0.5**. Consulte o [roadmap detalhado](docs/ROADMAP.md) para dificuldades, dependências, critérios de verificação e referências da pesquisa. Caixas marcadas indicam implementação na 0.5. Aprovar o planejamento não comprova a viabilidade dos itens restantes nem autoriza automaticamente a publicação.
 ### Meta 0.5 — Diagnóstico e proteção inicial
 
 Prioridade imediata: registrar falhas, proteger o progresso e corrigir erros verificáveis do host.
@@ -177,9 +177,7 @@ Os recursos opcionais terão configurações próprias. Mudanças permanentes de
 
 ## Publicação
 
-A **0.5 Beta é candidata**: os fontes e o pacote estão sendo preparados para revisão. Sua tag/release só será publicada após apresentar verificações, limitações e obter a aprovação do autor.
-
-Versão **v0.4-beta**, aprovada pelo usuário após revisão das verificações e limitações. A 0.4 é a release principal no GitHub, mas continua **Beta**, com possíveis bugs e recursos incompletos. As versões **v0.2-beta** e **v0.3-beta** permanecem disponíveis em Releases. O ajuste visual da UI e os cliques ainda precisam de confirmação no Windows.
+Versão **v0.5-beta**, publicada com aprovação do autor em 21/10/2026 após os testes locais. A validação manual no Windows continua pendente; testes automatizados e de inicialização não comprovam uma campanha completa. A versão permanece **Beta**. As releases anteriores continuam disponíveis.
 
 O ZIP curado não inclui biblioteca original, APK, DEX, assets, áudio, saves ou DLLs de terceiros. Consulte [THIRD_PARTY.md](THIRD_PARTY.md). Não foi definida uma licença para o código do host nesta etapa.
 

@@ -2,13 +2,13 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs. Faça backup dos saves antes de atualizar.**
 
-Seleção concluída e publicação do planejamento autorizada pelo autor em **21/10/2026**: **37 melhorias aprovadas**. Este documento registra o planejamento; os itens 01, 02 e 05 já foram implementados na candidata 0.5, ainda sem publicação. Os demais continuam futuros. A release atual continua sendo a **0.4 Beta**, publicada; a confirmação visual do zoom, da UI e dos cliques no Windows ainda está pendente.
+Seleção concluída e publicação do planejamento autorizada pelo autor em **21/10/2026**: **37 melhorias aprovadas**. Este documento registra o planejamento; os itens 01, 02 e 05 já foram implementados na 0.5, com publicação aprovada pelo autor. Os demais continuam futuros. A release atual é a **0.5 Beta**; a confirmação visual do zoom, da UI e dos cliques no Windows ainda está pendente.
 
 ## Ordem e critérios
 
 A avaliação inicial considera o host C++17/SDL2/Unicorn, as rotinas de entrada/áudio e a ponte para a biblioteca ARM original. Recursos de diagnóstico e preferências podem começar no host; inventário, missões, UI nativa e progressão exigem compreender dados e rotinas do jogo. Esta é uma estimativa de dificuldade, não uma prova de viabilidade.
 
-As versões abaixo são **metas provisórias**, sem calendário garantido. Uma etapa pode ser dividida ou reordenada conforme os resultados. O log TXT está implementado na candidata **0.5**, junto de backups, correções e configuração global de saves solicitada posteriormente. A aprovação das ideias autoriza o planejamento; cada nova release precisa de revisão das verificações, limitações e aprovação do autor antes de ser publicada.
+As versões abaixo são **metas provisórias**, sem calendário garantido. Uma etapa pode ser dividida ou reordenada conforme os resultados. O log TXT está implementado na **0.5**, junto de backups, correções e configuração global de saves solicitada posteriormente. A aprovação das ideias autoriza o planejamento; cada nova release precisa de revisão das verificações, limitações e aprovação do autor antes de ser publicada.
 
 | Meta | Foco | Dificuldade preliminar |
 | --- | --- | --- |
@@ -34,9 +34,9 @@ As versões abaixo são **metas provisórias**, sem calendário garantido. Uma e
 
 ## Etapas aprovadas
 
-### Candidata 0.5 — Diagnóstico e proteção inicial
+### 0.5 — Diagnóstico e proteção inicial
 
-Implementação local concluída para validação; publicação e confirmação no Windows pendentes. Configuração global de pasta de save incluída por solicitação adicional do autor. As caixas marcadas abaixo indicam implementação na candidata.
+Publicação aprovada pelo autor em 21/10/2026 após verificações locais; confirmação manual no Windows pendente. Configuração global de pasta de save incluída por solicitação adicional do autor. As caixas marcadas abaixo indicam implementação na 0.5.
 
 **Dependências:** Trabalho concentrado no host; não exige expandir dados do jogo.
 

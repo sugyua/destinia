@@ -4,7 +4,7 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
-## 0.5 Beta — candidata em validação (21/10/2026)
+## 0.5 Beta — 21/10/2026
 
 ### Logs e proteção do progresso
 
@@ -30,7 +30,7 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 ### Preparação e limites
 
 - Testes de falhas dos dois hosts e de retenção/backup/configuração adicionados; documentação, versionamento e manifesto de fontes atualizados para a candidata 0.5.
-- Compilação e verificações locais com biblioteca ARM real; gameplay/UI/áudio no Windows e a publicação da release continuam pendentes. Detalhes em `docs/RELEASE_0.5.md`.
+- Compilação e verificações locais com biblioteca ARM real; publicação aprovada pelo autor em 21/10/2026, com confirmação manual de gameplay/UI/áudio no Windows ainda pendente. Detalhes em `docs/RELEASE_0.5.md`.
 - Gameplay, zoom/câmera/UI, ritmo nativo e fluxo de compras/rede preservados. Sem EXEs Windows prontos, dados originais, saves ou dependências externas no pacote.
 
 ## Não lançado — documentação do planejamento (21/10/2026)

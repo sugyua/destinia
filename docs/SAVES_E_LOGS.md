@@ -1,4 +1,4 @@
-# Saves, backups e logs — candidata 0.5 Beta
+# Saves, backups e logs — 0.5 Beta
 
 > **Versão Beta: faça backup do progresso antes de testar.**
 

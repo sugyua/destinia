@@ -2,9 +2,9 @@
 
 > **Versão Beta: pode apresentar bugs. Faça backup dos saves.**
 
-Estado: **candidata em validação; publicação não autorizada nesta etapa**. Pedido de implementação inclui logs, backups, correções de estabilidade e configuração compartilhada de save. A versão pública anterior continua sendo a 0.4.
+Estado: **publicação da 0.5 aprovada pelo autor em 21/10/2026**, com a validação manual no Windows explicitamente adiada. Os testes locais automatizados, de inicialização e as fixtures gráficas não comprovam uma campanha completa. A release permanece Beta.
 
-## Conteúdo da candidata
+## Conteúdo da 0.5
 
 Os dois hosts passam a usar `common/runtime_support.h` (log, backup, trava e configuração) e `common/elf_image.h` (validação da imagem antes das relocações). Gameplay ARM, assets, câmera, zoom, tamanho da UI, F11 e ritmo nativo são preservados. Confira o [plano](PLANO_0.5.md), o [changelog](../CHANGELOG.md) e as [instruções de saves/logs](SAVES_E_LOGS.md).
 
@@ -49,4 +49,4 @@ Não foram validados gameplay e áudio reais no Windows, execução sob PowerShe
 
 Gerar `destinia-0.5-beta-source.zip` e SHA-256 pelo manifesto revisado, incluindo `common`, scripts/configurador e documentação. Não incluir EXEs locais Linux, DLLs, ferramentas, dados do APK, saves, logs ou backups. A seção Dependências permanece no README; instaladores e bibliotecas externos são obtidos separadamente.
 
-Antes de criar tag/release: apresentar o pacote, os resultados e limitações ao autor e obter aprovação, conforme [AGENTS.md](../AGENTS.md). Não alterar a release 0.4 nem seus anexos durante a preparação.
+O autor aprovou publicar a 0.5 e iniciar a preparação/testes da 0.6. As verificações e limitações foram apresentadas; a validação no Windows permanece pendente por decisão explícita do autor. Novas releases exigem aprovação separada, conforme [AGENTS.md](../AGENTS.md). Releases anteriores e seus anexos são preservados.
