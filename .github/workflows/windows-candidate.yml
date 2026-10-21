@@ -4,6 +4,9 @@ on:
   push:
     branches: [release/v0.6-beta]
     paths: ['host/**', 'host_zoom/**', 'common/**', 'tests/**', 'scripts/**', 'VERSION', '.github/workflows/windows-candidate.yml']
+concurrency:
+  group: windows-candidate-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
@@ -29,6 +32,7 @@ jobs:
         run: |
           set -eu
           for target in host host_zoom; do
+            pkg-config --modversion sdl2 SDL2_mixer unicorn
             cmake -S "$target" -B "$target/build" -G Ninja -DCMAKE_BUILD_TYPE=Release
             cmake --build "$target/build"
             "$target/build/destinia_host.exe" --version

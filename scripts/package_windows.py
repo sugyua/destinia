@@ -2,6 +2,7 @@
 """Pacote Windows x64: somente dois EXEs do port, inicializadores e documentacao."""
 import argparse
 import hashlib
+import os
 from pathlib import Path
 import re
 import struct
@@ -30,6 +31,9 @@ def package(root,output,normal,zoom):
     inputs={name:(root/name).read_bytes() for name in FILES}
     inputs['host/build/destinia_host.exe']=pe64(normal)
     inputs['host_zoom/build/destinia_host.exe']=pe64(zoom)
+    commit=os.environ.get('GITHUB_SHA','compilacao-local')
+    if commit!='compilacao-local' and not re.fullmatch(r'[0-9a-f]{40}',commit):raise ValueError('Commit de build invalido')
+    inputs['BUILD_INFO.txt']=('Repositorio: https://github.com/sugyua/destinia\nVersao: '+version+' Beta\nCommit de compilacao: '+commit+'\nPlataforma: Windows x64 / MSYS2 UCRT64\nDependencias externas: consulte README.md e INSTALL.md.\n').encode('utf-8')
     inputs['LEIA_PRIMEIRO.txt']=(
         'Destinia '+version+' Beta - pode apresentar bugs.\n'
         'Instale as dependencias externas listadas em README.md / INSTALL.md.\n'

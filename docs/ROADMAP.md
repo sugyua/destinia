@@ -2,7 +2,7 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs. Faça backup dos saves antes de atualizar.**
 
-Seleção concluída e publicação do planejamento autorizada pelo autor em **21/10/2026**: **37 melhorias aprovadas**. Este documento registra o planejamento; os itens 01, 02 e 05 já foram implementados na 0.5, com publicação aprovada pelo autor. Os demais continuam futuros. A release atual é a **0.5 Beta**; a confirmação visual do zoom, da UI e dos cliques no Windows ainda está pendente.
+Seleção concluída e publicação do planejamento autorizada pelo autor em **21/10/2026**: **37 melhorias aprovadas**. Este documento registra o planejamento; os itens 01, 02 e 05 já foram implementados na 0.5, com publicação aprovada pelo autor. Os itens 07, 10, 11 e 12 foram implementados na candidata 0.6, ainda sem publicação; o pacote Windows está em verificação. Os demais continuam futuros. A release atual é a **0.5 Beta**; a confirmação visual do zoom, da UI e dos cliques no Windows ainda está pendente.
 
 ## Ordem e critérios
 
@@ -23,7 +23,7 @@ As versões abaixo são **metas provisórias**, sem calendário garantido. Uma e
 
 ## Regras de implementação
 
-- Preservar os recursos existentes e verificar primeiro o que o jogo original já oferece. As melhorias seguintes devem seguir esse princípio; confira o escopo da candidata atual em [RELEASE_0.5.md](RELEASE_0.5.md).
+- Preservar os recursos existentes e verificar primeiro o que o jogo original já oferece. As melhorias seguintes devem seguir esse princípio; confira o escopo da candidata atual em [RELEASE_0.6.md](RELEASE_0.6.md).
 - Priorizar correções isoladas e verificáveis. O item 05 reúne várias correções: cada caminho precisa de seu próprio diagnóstico e teste.
 - Começar a investigação da escrita de saves e dos formatos nativos nas primeiras etapas; a meta 0.8 é a conclusão da base necessária às mudanças permanentes posteriores.
 - Separar os modos clássico e expandido e identificar seus saves antes de mudar progressão/conteúdo. Não converter saves silenciosamente nem testar sobre o único save do jogador.
@@ -48,15 +48,15 @@ Publicação aprovada pelo autor em 21/10/2026 após verificações locais; conf
 
 ### Meta 0.6 — Configurações, comandos e distribuição
 
-Preferências persistentes, comandos configuráveis e executáveis Windows verificados.
+Preferências e comandos implementados na candidata 0.6; pacote Windows em verificação. A publicação da 0.6 depende de aprovação. Veja [resultados](RELEASE_0.6.md).
 
 **Dependências:** Usar o diagnóstico da 0.5; preferências servem de base aos recursos opcionais seguintes.
 
 - [ ] **06. EXEs Windows prontos nas releases:** Disponibilizar os EXEs dos dois hosts, compilados e verificados no Windows; dependências externas continuam instaladas separadamente, sem serem incluídas no pacote.
-- [ ] **07. Configurações persistentes:** Salvar preferências de vídeo, janela e comandos em arquivo próprio, com opção de restaurar padrões.
-- [ ] **10. Remapear teclado e controle:** Escolher teclas e botões por ação e guardar perfis; ampliar o suporte atual de comandos fixos.
-- [ ] **11. Volumes separados e persistentes:** Controles independentes para música e efeitos, inclusive silenciar ao perder foco se o usuário quiser.
-- [ ] **12. Pausa ao perder foco ou controle:** Permitir pausa opcional ao perder foco ou desconectar o controle e garantir liberação das direções pressionadas.
+- [x] **07. Configurações persistentes:** Salvar preferências de vídeo, janela e comandos em arquivo próprio, com opção de restaurar padrões.
+- [x] **10. Remapear teclado e controle:** Escolher teclas e botões por ação e guardar perfis; ampliar o suporte atual de comandos fixos.
+- [x] **11. Volumes separados e persistentes:** Controles independentes para música e efeitos, inclusive silenciar ao perder foco se o usuário quiser.
+- [x] **12. Pausa ao perder foco ou controle:** Permitir pausa opcional ao perder foco ou desconectar o controle e garantir liberação das direções pressionadas.
 
 **Verificação necessária antes da entrega:** Reabrir e conferir preferências; testar conflitos de teclas, controle desconectado, Alt+Tab, áudio e inicialização dos dois EXEs em Windows com dependências documentadas.
 
