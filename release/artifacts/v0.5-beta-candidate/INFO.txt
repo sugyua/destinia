@@ -1,0 +1,6 @@
+AVISO: versao Beta, pode conter bugs. Faca backup dos saves.
+Estado: candidata 0.5 para teste e aprovacao; nao e uma release publicada.
+Commit dos fontes: 16460c336b75758214da69f57403087e188b5a89
+SHA-256: 362908f690299db5c43f0006d6253a9cc1a2798a33732c28114e5d70d0dc24d4
+Pacote de fontes; sem EXEs Windows, dados originais, saves ou dependencias externas.
+Verificacoes: docs/RELEASE_0.5.md na branch release/v0.5-beta.
