@@ -36,14 +36,14 @@ if not exist "%ROOT%VERSION" (
   pause
   exit /b 1
 )
-findstr.exe /r /x /c:"[0-9][0-9]*\.[0-9][0-9]*" /c:"[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*" "%ROOT%VERSION" >nul
+set "EXPECTED_VERSION="
+set /p "EXPECTED_VERSION="<"%ROOT%VERSION"
+powershell.exe -NoProfile -Command "if ($env:EXPECTED_VERSION -cmatch '^[0-9]+\.[0-9]+(\.[0-9]+)?$') { exit 0 } else { exit 1 }"
 if errorlevel 1 (
-  echo VERSION invalido. Extraia novamente o pacote completo.
+  echo VERSION invalido ou Windows PowerShell indisponivel. Confira o pacote completo.
   pause
   exit /b 1
 )
-set "EXPECTED_VERSION="
-set /p "EXPECTED_VERSION="<"%ROOT%VERSION"
 "%EXE%" --version 2>nul | findstr.exe /x /c:"Destinia %EXPECTED_VERSION% Beta" >nul
 if errorlevel 1 (
   echo Executavel incompativel com VERSION ou sem acesso ao runtime esperado.

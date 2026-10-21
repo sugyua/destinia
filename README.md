@@ -71,7 +71,7 @@ As dependências externas devem ser instaladas separadamente no PC do usuário. 
 | SDL2_mixer e suporte OGG/MP3 | Áudio, quando habilitado na compilação |
 | Compilador C++17, CMake ≥ 3.16, Ninja e pkg-config/pkgconf | Somente para quem compilar os fontes |
 | Python ≥ 3.10 | Somente para testar ou gerar pacotes |
-| Windows PowerShell 5.1 | Diagnóstico e configuradores; normalmente já acompanha o Windows |
+| Windows PowerShell 5.1 | Inicializadores (validacao de VERSION), diagnóstico e configuradores; normalmente já acompanha o Windows |
 
 Instale o MSYS2 pela [página oficial](https://www.msys2.org/) e use o gerenciador de pacotes desse ambiente. Consulte [INSTALL.md](INSTALL.md) para verificar os pacotes e compilar. O pacote Windows exige também o SDL2_mixer, pois os EXEs são compilados com áudio. Instale seus pacotes e dependências transitivas pelo MSYS2; não copie DLLs avulsas.
 
