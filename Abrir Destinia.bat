@@ -31,9 +31,9 @@ if not exist "%MSYS2_BIN%\SDL2.dll" (
 )
 
 set "PATH=%MSYS2_BIN%;%PATH%"
-"%EXE%" --version 2>nul | findstr.exe /x /c:"Destinia 0.5 Beta" >nul
+"%EXE%" --version 2>nul | findstr.exe /x /c:"Destinia 0.6 Beta" >nul
 if errorlevel 1 (
-  echo Executavel antigo ou sem acesso ao runtime esperado da 0.5.
+  echo Executavel antigo ou sem acesso ao runtime esperado da 0.6.
   echo Execute Compilar Destinia.bat e confira as dependencias antes de abrir.
   pause
   exit /b 1

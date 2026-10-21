@@ -47,18 +47,21 @@ function Set-DestiniaSaveDirectory([string]$Directory, [string]$LocalDataRoot = 
     [void][IO.Directory]::CreateDirectory($selected)
     $data = Join-Path $LocalDataRoot 'Destinia'
     [void][IO.Directory]::CreateDirectory($data)
-    $config = Join-Path $data 'config.ini'
-    $lines = @('# Destinia: pasta compartilhada entre hosts e instalacoes 0.5 ou posteriores.')
-    if (Test-Path -LiteralPath $config) {
-        $lines = @([IO.File]::ReadAllLines($config) | Where-Object { $_ -cnotmatch '^\s*save_dir\s*=' })
-    }
-    $lines += 'save_dir=' + $selected
-    $temporary = $config + '.' + [guid]::NewGuid().ToString('N') + '.tmp'
+    $configLock = [IO.File]::Open((Join-Path $data 'config.lock'),[IO.FileMode]::OpenOrCreate,[IO.FileAccess]::ReadWrite,[IO.FileShare]::None)
     try {
-        [IO.File]::WriteAllText($temporary, ($lines -join "`r`n") + "`r`n", (New-Object Text.UTF8Encoding -ArgumentList $false))
-        if (Test-Path -LiteralPath $config) { [IO.File]::Replace($temporary, $config, ($config + '.previous')) }
-        else { [IO.File]::Move($temporary, $config) }
-    } finally {
-        if (Test-Path -LiteralPath $temporary) { Remove-Item -LiteralPath $temporary -Force }
-    }
+        $config = Join-Path $data 'config.ini'
+        $lines = @('# Destinia: pasta compartilhada entre hosts e instalacoes 0.5 ou posteriores.')
+        if (Test-Path -LiteralPath $config) {
+            $lines = @([IO.File]::ReadAllLines($config) | Where-Object { $_ -cnotmatch '^\s*save_dir\s*=' })
+        }
+        $lines += 'save_dir=' + $selected
+        $temporary = $config + '.' + [guid]::NewGuid().ToString('N') + '.tmp'
+        try {
+            [IO.File]::WriteAllText($temporary, ($lines -join "`r`n") + "`r`n", (New-Object Text.UTF8Encoding -ArgumentList $false))
+            if (Test-Path -LiteralPath $config) { [IO.File]::Replace($temporary, $config, ($config + '.previous')) }
+            else { [IO.File]::Move($temporary, $config) }
+        } finally {
+            if (Test-Path -LiteralPath $temporary) { Remove-Item -LiteralPath $temporary -Force }
+        }
+    } finally { $configLock.Dispose() }
 }

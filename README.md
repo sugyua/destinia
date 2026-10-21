@@ -1,10 +1,12 @@
-# Destinia para Windows — 0.5 Beta
+# Destinia para Windows — 0.6 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**Versão atual: 0.5 Beta, distribuída em código-fonte. Publicação aprovada pelo autor com validação manual no Windows ainda pendente.**
+**[Baixar Destinia 0.6 Beta](https://github.com/sugyua/destinia/releases/tag/v0.6-beta)** — publicação aprovada pelo autor, com pacotes Windows x64 e código-fonte.
 
-**[Baixar a versão 0.5](https://github.com/sugyua/destinia/releases/tag/v0.5-beta)** · [Versão 0.4](https://github.com/sugyua/destinia/releases/tag/v0.4-beta) · [Versão 0.3](https://github.com/sugyua/destinia/releases/tag/v0.3-beta) · [Versão 0.2](https://github.com/sugyua/destinia/releases/tag/v0.2-beta) · [Todas as releases](https://github.com/sugyua/destinia/releases) O pacote contém os fontes, não um jogo pronto para executar. Veja [instalação](INSTALL.md), [changelog](CHANGELOG.md) e [verificações da candidata 0.5](docs/RELEASE_0.5.md).
+A 0.6 adiciona configurações persistentes, comandos remapeáveis, volumes separados, pausa opcional e distribuição Windows x64 com os dois EXEs. Veja [instalação](INSTALL.md), [preferências](docs/PREFERENCIAS.md), [changelog](CHANGELOG.md) e [verificações](docs/RELEASE_0.6.md). Dependências externas e dados originais continuam separados.
+
+[0.5](https://github.com/sugyua/destinia/releases/tag/v0.5-beta) · [0.4](https://github.com/sugyua/destinia/releases/tag/v0.4-beta) · [0.3](https://github.com/sugyua/destinia/releases/tag/v0.3-beta) · [0.2](https://github.com/sugyua/destinia/releases/tag/v0.2-beta) · [Todas as releases](https://github.com/sugyua/destinia/releases)
 
 ## Arquitetura
 
@@ -34,16 +36,17 @@ O repositório atual não inclui saves pessoais, logs de partidas, relatórios l
 
 A presença no código não equivale a validação completa de gameplay. O host_zoom usa framebuffer 800×480 para zoom out, mapas pequenos centralizados, fundo cinza fora dos limites do mapa e UI nativa proporcionalmente menor. Oferece tela cheia com `--fullscreen` e alternância por F11. Em 3440×1440, o jogo ocupa 2400×1440 com barras laterais de 520 pixels. A correção ainda precisa de confirmação visual nas passagens do Windows; compras e rede continuam com limitações documentadas.
 
-## Novidades da 0.5
+## Novidades da 0.6
 
-- Log TXT automático em `relatorios`, com eventos observáveis, erros e desempenho resumido; rotação de três arquivos de até 2 MiB por sessão e dez sessões por host.
-- Backups verificados do save antes de carregar, com dez snapshots e proteção contra abertura simultânea da mesma pasta pelos hosts novos.
-- **Configurar pasta de saves.bat** para escolher uma pasta comum aos dois hosts e a diferentes instalações, mantendo o progresso entre updates. O padrão continua sendo `%LOCALAPPDATA%\Destinia\save`, também usado nas versões anteriores.
-- Correções de operações de arquivo com tamanho zero, validação ELF, tratamento de falhas SDL e códigos de saída de erros emulados.
+- **Configurar Destinia.bat** guarda vídeo por host, áudio, pausa e perfis em `%LOCALAPPDATA%\Destinia\config.ini`, preservando a pasta compartilhada de save entre updates.
+- Tamanho da janela e modo tela cheia/janela são lembrados ao fechar; F11 funciona nos dois hosts, com imagem proporcional e mouse alinhado à área central.
+- Teclas e botões por ação, perfis nomeados e validação de conflitos. Entradas simultâneas deixam de se anular; perder foco/desconectar libera comandos presos.
+- Música/efeitos de 0 a 100%, combinados com o volume original. Silêncio ao perder foco e pausa automática são opcionais; F10 pausa/retoma por padrão.
+- Compilação e testes Windows automatizados, pacote x64 com dois EXEs próprios e checksum; DLLs, ferramentas, instaladores, APK e saves permanecem fora do ZIP.
 
-Use os inicializadores normais para continuar sua partida. **O BAT de testes usa cópias: o progresso jogado nele não substitui o save principal.** O configurador não copia nem sobrescreve saves. Configuração personalizada vale nos hosts 0.5 e futuros; mantenha o padrão para compartilhar também com a 0.2–0.4. Veja [saves, restauração e logs](docs/SAVES_E_LOGS.md).
+A 0.5 já publicada mantém log TXT, backups verificados, trava de save e seleção global da pasta de progresso. **O BAT de testes usa cópias: o progresso jogado nele não substitui o save principal.** Veja [saves, restauração e logs](docs/SAVES_E_LOGS.md).
 
-Os testes locais estão descritos em [RELEASE_0.5.md](docs/RELEASE_0.5.md). A publicação foi aprovada pelo autor em 21/10/2026. A confirmação de gameplay/UI/áudio no Windows continua pendente. O ZIP contém fontes e não inclui dependências externas.
+A 0.6 preserva zoom out, fundo cinza, câmera, UI nativa, ritmo e conteúdo. Testes automáticos não equivalem a confirmação manual da campanha, visual, áudio ou controle físico no Windows. Resultados em [RELEASE_0.6.md](docs/RELEASE_0.6.md).
 
 ## Dependências
 
@@ -55,10 +58,10 @@ As dependências externas devem ser instaladas separadamente no PC do usuário. 
 | SDL2 e Unicorn para UCRT64 | Execução do host e emulação ARM, com suas dependências transitivas disponíveis no mesmo ambiente |
 | SDL2_mixer e suporte OGG/MP3 | Áudio, quando habilitado na compilação |
 | Compilador C++17, CMake ≥ 3.16, Ninja e pkg-config/pkgconf | Somente para quem compilar os fontes |
-| Python ≥ 3.9 | Somente para testar ou gerar o pacote de fontes |
-| Windows PowerShell 5.1 | Diagnóstico e configurador de saves; normalmente já acompanha o Windows |
+| Python ≥ 3.10 | Somente para testar ou gerar pacotes |
+| Windows PowerShell 5.1 | Diagnóstico e configuradores; normalmente já acompanha o Windows |
 
-Instale o MSYS2 pela [página oficial](https://www.msys2.org/) e use o gerenciador de pacotes desse ambiente. Consulte [INSTALL.md](INSTALL.md) para verificar os pacotes e compilar. As versões exatas de runtime e DLLs da futura release executável ainda precisam ser confirmadas por uma compilação Windows.
+Instale o MSYS2 pela [página oficial](https://www.msys2.org/) e use o gerenciador de pacotes desse ambiente. Consulte [INSTALL.md](INSTALL.md) para verificar os pacotes e compilar. O pacote Windows exige também o SDL2_mixer, pois os EXEs são compilados com áudio. Instale seus pacotes e dependências transitivas pelo MSYS2; não copie DLLs avulsas.
 
 A pasta `game` é o APK Android extraído, conforme informado pelo autor. Não é um programa para instalar no Windows: o host lê a biblioteca ARM, os assets e o áudio diretamente dessa pasta. Ter esses dados não substitui as dependências listadas acima.
 
@@ -74,45 +77,48 @@ Para testar uma instalação existente, execute **[Testar Destinia.bat](Testar%2
 
 O relatório é salvo ao longo da sessão e informa quando está parcial. Após cada execução, o diagnóstico também destaca compras observadas, alterações de cash e a rede aguardando resposta; esses avisos não significam que o problema da loja foi corrigido.
 
-[Baixar o pacote de testes](https://raw.githubusercontent.com/sugyua/destinia/main/diagnostico/pacotes/testes-destinia.zip) e extrair na raiz do projeto existente. O pacote contém somente o BAT, seu executor PowerShell, o leitor de configuração compartilhada e as instruções. Para testar a 0.5, extraia e compile primeiro os fontes completos da versão.
+Para esta versão, use o diagnóstico incluído no pacote completo de fontes 0.6, com EXEs da mesma versão. Não sobreponha os auxiliares antigos da main: eles podem não incluir as proteções de preferências da 0.6.
 
 Consulte [INSTALL.md](INSTALL.md) para compilar e executar com dados próprios compatíveis. Os launchers existentes continuam voltados ao ambiente de desenvolvimento MSYS2 em `C:\msys64\ucrt64\bin`; não são launchers portáteis.
 
-Para verificar o empacotador, com Python 3.9 ou superior:
+Para verificar o empacotador, com Python 3.10 ou superior:
 
 ```sh
 python -m unittest discover -s tests -v
-python scripts/package_release.py --out dist/candidata-0.5
+python scripts/package_release.py --out dist/release-0.6
 ```
 
 No Linux, o comando pode ser `python3`. O empacotador cria ZIP e SHA-256, não compila executáveis. Não sobrescreve artefatos existentes. A reprodução byte a byte foi verificada com a mesma versão de Python/zlib; outras versões podem mudar a compressão.
 
-O [manifesto](release/manifest.json) usa a 0.4 como base de comparação. A 0.5 acrescenta logs, backups, configuração de saves e correções de estabilidade, preservando o zoom e a UI da 0.4. Consulte o [roadmap](docs/ROADMAP.md) para as etapas seguintes.
+O [manifesto](release/manifest.json) usa a 0.5 como base. O workflow Windows compila/testa os EXEs e gera um pacote separado; o empacotador de fontes não compila executáveis. Consulte o [roadmap](docs/ROADMAP.md) para as etapas seguintes.
+
+## Melhorias concluídas com sucesso
+
+Os oito itens abaixo foram implementados e tiveram as verificações automatizadas aprovadas. A 0.6 foi aprovada para publicação pelo autor. Isso não substitui a campanha e a inspeção manual no Windows, que permanecem pendentes; veja [verificações](docs/RELEASE_0.6.md).
+
+### Entregues na 0.5
+
+- [x] **01. Log TXT do jogo:** eventos, erros e desempenho em relatórios com rotação e limite de tamanho.
+- [x] **02. Backups rotativos de saves:** cópias verificadas antes de carregar o progresso, com retenção limitada.
+- [x] **05. Erros tratados e testes de estabilidade:** operações de arquivo, limites ELF, recursos SDL e propagação de falhas emuladas.
+
+A pasta global de save compartilhada entre hosts e atualizações também foi entregue na 0.5 e preservada na 0.6.
+
+### Entregues na 0.6
+
+- [x] **06. EXEs Windows nas releases:** os dois hosts compilados e verificados no Windows, em ZIP próprio com checksum e dependências instaladas separadamente.
+- [x] **07. Configurações persistentes:** vídeo por host, preferências globais e restauração dos padrões preservando a pasta de saves.
+- [x] **10. Remapeamento de teclado e controle:** teclas e botões por ação, perfis nomeados e validação de conflitos.
+- [x] **11. Volumes separados e persistentes:** música e efeitos independentes e silêncio opcional sem foco.
+- [x] **12. Pausa e liberação de comandos:** pausa manual/opcional por foco ou controle, com liberação de entradas e retomada do áudio.
 
 ## Atualizações futuras
 
-**37 melhorias aprovadas para planejamento em 21/10/2026.** Os itens 01, 02 e 05 estão implementados na 0.5, publicada com validação manual no Windows pendente; os demais continuam planejados. A ordem prioriza mudanças no host e proteção dos saves antes das alterações na biblioteca ARM e no conteúdo. As versões são metas provisórias, sem datas garantidas, e podem ser divididas ou reordenadas conforme a investigação.
+Das **37 melhorias aprovadas**, **8 foram concluídas** nas versões 0.5 e 0.6; **29 permanecem planejadas**, somente da **0.7 em diante**. As versões abaixo são metas provisórias, sem datas garantidas, e dependem de investigação e testes.
 
-**A expansão inclui aumento do nível máximo, novos ranks de armas, armaduras e acessórios, itens únicos inéditos e conjuntos com bônus.** O novo limite de nível, os nomes dos ranks e os valores dos equipamentos ainda serão definidos após verificar os dados originais e o balanceamento.
+**A expansão continua incluindo aumento do nível máximo, novos ranks de armas, armaduras e acessórios, itens únicos e conjuntos com bônus.** Limites, nomes e valores serão definidos após verificar dados originais e balanceamento.
 
-O log TXT está incluído na **0.5**. Consulte o [roadmap detalhado](docs/ROADMAP.md) para dificuldades, dependências, critérios de verificação e referências da pesquisa. Caixas marcadas indicam implementação na 0.5. Aprovar o planejamento não comprova a viabilidade dos itens restantes nem autoriza automaticamente a publicação.
-### Meta 0.5 — Diagnóstico e proteção inicial
-
-Prioridade imediata: registrar falhas, proteger o progresso e corrigir erros verificáveis do host.
-
-- [x] **01. Log TXT do jogo:** Registrar eventos importantes, mapas, saves, erros e desempenho em TXT na pasta `relatorios`, com limite de tamanho e retenção.
-- [x] **02. Backups rotativos de saves:** Guardar cópias datadas antes de iniciar o jogo/atualizar, com restauração orientada e quantidade limitada.
-- [x] **05. Erros tratados e testes de estabilidade:** Corrigir operações fread/fwrite de tamanho zero, validar limites ELF e recursos SDL, propagar falhas reais de emulação e testar os caminhos afetados.
-
-### Meta 0.6 — Configurações, comandos e distribuição
-
-Preferências persistentes, comandos configuráveis e executáveis Windows verificados.
-
-- [ ] **06. EXEs Windows prontos nas releases:** Disponibilizar os EXEs dos dois hosts, compilados e verificados no Windows; dependências externas continuam instaladas separadamente, sem serem incluídas no pacote.
-- [ ] **07. Configurações persistentes:** Salvar preferências de vídeo, janela e comandos em arquivo próprio, com opção de restaurar padrões.
-- [ ] **10. Remapear teclado e controle:** Escolher teclas e botões por ação e guardar perfis; ampliar o suporte atual de comandos fixos.
-- [ ] **11. Volumes separados e persistentes:** Controles independentes para música e efeitos, inclusive silenciar ao perder foco se o usuário quiser.
-- [ ] **12. Pausa ao perder foco ou controle:** Permitir pausa opcional ao perder foco ou desconectar o controle e garantir liberação das direções pressionadas.
+Consulte o [roadmap detalhado](docs/ROADMAP.md) para dependências, critérios de verificação e referências. A aprovação do planejamento não comprova a viabilidade de todos os itens nem autoriza automaticamente novas releases.
 
 ### Meta 0.7 — Interface e acessibilidade
 
@@ -177,7 +183,7 @@ Os recursos opcionais terão configurações próprias. Mudanças permanentes de
 
 ## Publicação
 
-Versão **v0.5-beta**, publicada com aprovação do autor em 21/10/2026 após os testes locais. A validação manual no Windows continua pendente; testes automatizados e de inicialização não comprovam uma campanha completa. A versão permanece **Beta**. As releases anteriores continuam disponíveis.
+Versão **v0.6-beta**, com publicação aprovada pelo autor em 21/10/2026 após testes automatizados Linux e Windows. A validação manual no Windows continua pendente; testes automatizados e de inicialização não comprovam uma campanha completa. A versão permanece **Beta**. As releases anteriores continuam disponíveis.
 
 O ZIP curado não inclui biblioteca original, APK, DEX, assets, áudio, saves ou DLLs de terceiros. Consulte [THIRD_PARTY.md](THIRD_PARTY.md). Não foi definida uma licença para o código do host nesta etapa.
 

@@ -1,6 +1,6 @@
 {
-  "version": "0.5",
-  "base_commit": "8c4081832d81485c41c6c103ce824e5ba14e751c",
+  "version": "0.6",
+  "base_commit": "43cbfd13f07279b758a72957cccc04bb7241c711",
   "files": [
     ".gitignore",
     "AGENTS.md",
@@ -48,6 +48,24 @@
     "docs/PLANO_0.5.md",
     "docs/SAVES_E_LOGS.md",
     "docs/RELEASE_0.5.md",
-    "release/NOTAS_0.5.md"
+    "release/NOTAS_0.5.md",
+    "common/input_state.h",
+    "common/user_settings.h",
+    "common/player_controls.h",
+    "Configurar Destinia.bat",
+    "scripts/game_preferences.ps1",
+    "scripts/configure_game.ps1",
+    "scripts/package_windows.py",
+    "tests/preferences_cases.cpp",
+    "tests/preferences_host_cases.cpp",
+    "tests/test_preferences.py",
+    "tests/test_preferences_host.py",
+    "tests/test_game_preferences.ps1",
+    "tests/test_package_windows.py",
+    "docs/PLANO_0.6.md",
+    "docs/PREFERENCIAS.md",
+    "docs/RELEASE_0.6.md",
+    "release/NOTAS_0.6.md",
+    "tests/test_configurator_native.ps1"
   ]
 }

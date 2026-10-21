@@ -28,3 +28,8 @@
 "/Configurar pasta de saves.bat" text eol=crlf
 /scripts/shared_saves.ps1 text eol=crlf
 /scripts/configure_saves.ps1 text eol=crlf
+
+"/Configurar Destinia.bat" text eol=crlf
+/diagnostico/test_suite.ps1 text eol=crlf
+/scripts/game_preferences.ps1 text eol=crlf
+/scripts/configure_game.ps1 text eol=crlf

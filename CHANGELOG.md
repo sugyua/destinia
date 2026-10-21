@@ -4,6 +4,20 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.6 Beta — 21/10/2026
+
+- Preferências persistentes por host para tamanho de janela/tela cheia e globais para áudio, pausa e perfil em config.ini, preservando save_dir e opções desconhecidas. Salvamento de vídeo ao encerrar normalmente; flags CLI e modo sem gravação para diagnóstico.
+- Configurar Destinia.bat com validação pelos dois hosts e restauração dos padrões sem alterar progresso. Escritas de preferências e seleção de pasta de save compartilham trava e substituição atômica.
+- Remapeamento de teclado/botões por ação, perfis nomeados e rejeição de conflitos ou teclas reservadas. Contagem por fonte evita que soltar um alias anule outro comando ainda pressionado.
+- Música e efeitos com percentuais separados, persistentes e combinados com o volume nativo; silêncio sem foco opcional. Evitada divisão por zero no mixer ao ajustar volume antes de abrir o dispositivo de áudio.
+- Pausa manual pela ação configurável (F10 por padrão) e pausa opcional por perda de foco/desconexão. Entradas e toque liberados, remoção de outro controle ignorada e analógicos exigem retorno ao centro. Áudio acompanha pausa/retomada.
+- F11, proporção preservada e conversão de mouse por viewport nos dois hosts. Inicializadores deixam o modo salvo prevalecer; normal abre em janela e zoom em tela cheia por padrão.
+- Workflow Windows UCRT64 para compilar/testar ambos os EXEs com áudio e gerar ZIP x64 próprio, sem DLLs, instaladores, dados do APK ou saves. Pacote de fontes e checksums separados.
+- Versionamento, manifesto, instalação, preferências e roadmap atualizados. Testes Linux com ARM/mixer real e verificações Windows automatizadas documentados em docs/RELEASE_0.6.md; campanha e periféricos físicos no Windows permanecem sem confirmação manual.
+- Save compartilhado, logs/backups, câmera/zoom/UI, progressão/itens, ritmo nativo e limitações de compras/rede preservados. Aumento de nível/ranks continua no roadmap futuro.
+
+- Publicação da 0.6 aprovada pelo autor; README e roadmap marcam os oito itens concluídos nas versões 0.5/0.6 e reservam a seção Atualizações futuras aos 29 itens da 0.7 em diante. ZIPs Windows e fontes com checksums disponíveis em Releases.
+
 ## 0.5 Beta — 21/10/2026
 
 ### Logs e proteção do progresso

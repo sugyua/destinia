@@ -203,7 +203,7 @@ function Read-ManualResult([string]$Name, [string]$Question) {
 function Get-GuidedArguments([string]$Name, [string]$TestMode, [string]$GamePath, [string]$SavePath, [string]$TracePath) {
     $parent = Split-Path $TracePath -Parent
     if (-not $parent) { $parent = '.' }
-    $arguments = @('--game', $GamePath, '--save', $SavePath, '--reports', (Join-Path $parent 'logs_do_jogo'), '--probe', '--profile')
+    $arguments = @('--game', $GamePath, '--no-save-preferences', '--save', $SavePath, '--reports', (Join-Path $parent 'logs_do_jogo'), '--probe', '--profile')
     if ($Name -eq 'host_zoom') {
         $arguments += @('--lang', 'pt', '--trace-viewport', '--trace-frames', '1200', '--trace-out', $TracePath)
         if ($TestMode -eq 'Camera') { $arguments += @('--trace-camera', '--fullscreen') }
@@ -263,7 +263,7 @@ function Invoke-DestiniaSuite {
             $save = Join-Path $session ($name + '_save_automatico')
             Copy-IsolatedSave $source $save
             $frameDir = Join-Path $session ($name + '_frames')
-            $arguments = @('--game', $game, '--save', $save, '--headless', [string]$Frames, '--out', $frameDir, '--reports', (Join-Path $session 'logs_do_jogo'))
+            $arguments = @('--game', $game, '--no-save-preferences', '--save', $save, '--headless', [string]$Frames, '--out', $frameDir, '--reports', (Join-Path $session 'logs_do_jogo'))
             if ($name -eq 'host_zoom') { $arguments += @('--lang', 'pt') }
             Set-TestStage ($name + ': inicializacao sem janela em execucao')
             $run = Invoke-OwnedProcess $exe $arguments $hostDirectory (Join-Path $session ($name + '_automatico')) $TimeoutSeconds

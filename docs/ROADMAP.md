@@ -1,8 +1,23 @@
-# Atualizações futuras do Destinia para Windows
+# Roadmap do Destinia para Windows
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs. Faça backup dos saves antes de atualizar.**
 
-Seleção concluída e publicação do planejamento autorizada pelo autor em **21/10/2026**: **37 melhorias aprovadas**. Este documento registra o planejamento; os itens 01, 02 e 05 já foram implementados na 0.5, com publicação aprovada pelo autor. Os demais continuam futuros. A release atual é a **0.5 Beta**; a confirmação visual do zoom, da UI e dos cliques no Windows ainda está pendente.
+Planejamento autorizado pelo autor em **21/10/2026**: **37 melhorias aprovadas**, das quais **8 concluídas** na 0.5/0.6 e **29 futuras**, da 0.7 em diante. A publicação da **0.6 Beta** foi aprovada pelo autor. Testes automáticos passaram; campanha e inspeção manual no Windows continuam pendentes.
+
+## Melhorias concluídas com sucesso
+
+- [x] **01. Log TXT do jogo** — entregue na 0.5, com rotação e retenção.
+- [x] **02. Backups rotativos de saves** — entregue na 0.5, com cópia verificada e retenção.
+- [x] **05. Erros tratados e testes de estabilidade** — entregue na 0.5, com regressões na 0.6.
+- [x] **06. EXEs Windows nas releases** — entregue na 0.6, com os dois hosts e checksum, sem dependências externas no ZIP.
+- [x] **07. Configurações persistentes** — entregue na 0.6, com restauração de padrões preservando save_dir.
+- [x] **10. Remapeamento de teclado e controle** — entregue na 0.6, com perfis e validação de conflitos.
+- [x] **11. Volumes separados e persistentes** — entregue na 0.6, com silêncio sem foco opcional.
+- [x] **12. Pausa e liberação de comandos** — entregue na 0.6, manual/opcional por foco ou controle.
+
+Implementação e verificações automatizadas concluídas com sucesso. A pasta global de save compartilhado também foi entregue na 0.5 e preservada na 0.6. Consulte o [changelog](../CHANGELOG.md) e as [verificações da 0.6](RELEASE_0.6.md) para o escopo e as limitações.
+
+## Atualizações futuras — 0.7 em diante
 
 ## Ordem e critérios
 
@@ -12,8 +27,6 @@ As versões abaixo são **metas provisórias**, sem calendário garantido. Uma e
 
 | Meta | Foco | Dificuldade preliminar |
 | --- | --- | --- |
-| 0.5 | Diagnóstico e proteção inicial | Baixa a média |
-| 0.6 | Configurações, comandos e distribuição | Média |
 | 0.7 | Interface e acessibilidade | Alta; depende de investigação ARM/renderização |
 | 0.8 | Saves, compatibilidade e loja offline | Alta; depende de investigação de saves e callbacks ARM |
 | 0.9 | Inventário, coleta e assistência opcional | Alta; depende de dados, UI e persistência nativos |
@@ -23,7 +36,7 @@ As versões abaixo são **metas provisórias**, sem calendário garantido. Uma e
 
 ## Regras de implementação
 
-- Preservar os recursos existentes e verificar primeiro o que o jogo original já oferece. As melhorias seguintes devem seguir esse princípio; confira o escopo da candidata atual em [RELEASE_0.5.md](RELEASE_0.5.md).
+- Preservar os recursos existentes e verificar primeiro o que o jogo original já oferece. As melhorias seguintes devem seguir esse princípio; confira o escopo da versão atual em [RELEASE_0.6.md](RELEASE_0.6.md).
 - Priorizar correções isoladas e verificáveis. O item 05 reúne várias correções: cada caminho precisa de seu próprio diagnóstico e teste.
 - Começar a investigação da escrita de saves e dos formatos nativos nas primeiras etapas; a meta 0.8 é a conclusão da base necessária às mudanças permanentes posteriores.
 - Separar os modos clássico e expandido e identificar seus saves antes de mudar progressão/conteúdo. Não converter saves silenciosamente nem testar sobre o único save do jogador.
@@ -32,33 +45,7 @@ As versões abaixo são **metas provisórias**, sem calendário garantido. Uma e
 - Manter os programas, ferramentas e bibliotecas externos fora do ZIP da release, conforme pedido do autor; documentar requisitos em [Dependências](../README.md#dependências). EXEs prontos não eliminam as dependências de execução.
 - Distinguir testes automatizados do host de confirmação visual e gameplay no Windows. Não prometer 60 FPS apenas removendo limites: o ritmo da lógica original precisa ser respeitado.
 
-## Etapas aprovadas
-
-### 0.5 — Diagnóstico e proteção inicial
-
-Publicação aprovada pelo autor em 21/10/2026 após verificações locais; confirmação manual no Windows pendente. Configuração global de pasta de save incluída por solicitação adicional do autor. As caixas marcadas abaixo indicam implementação na 0.5.
-
-**Dependências:** Trabalho concentrado no host; não exige expandir dados do jogo.
-
-- [x] **01. Log TXT do jogo:** Registrar eventos importantes, mapas, saves, erros e desempenho em TXT na pasta `relatorios`, com limite de tamanho e retenção.
-- [x] **02. Backups rotativos de saves:** Guardar cópias datadas antes de iniciar o jogo/atualizar, com restauração orientada e quantidade limitada.
-- [x] **05. Erros tratados e testes de estabilidade:** Corrigir operações fread/fwrite de tamanho zero, validar limites ELF e recursos SDL, propagar falhas reais de emulação e testar os caminhos afetados.
-
-**Verificação necessária antes da entrega:** Conferir rotação e limite dos logs, restaurar um backup de teste e exercitar os caminhos de erro, incluindo arquivos ELF inválidos e falhas de recursos SDL.
-
-### Meta 0.6 — Configurações, comandos e distribuição
-
-Preferências persistentes, comandos configuráveis e executáveis Windows verificados.
-
-**Dependências:** Usar o diagnóstico da 0.5; preferências servem de base aos recursos opcionais seguintes.
-
-- [ ] **06. EXEs Windows prontos nas releases:** Disponibilizar os EXEs dos dois hosts, compilados e verificados no Windows; dependências externas continuam instaladas separadamente, sem serem incluídas no pacote.
-- [ ] **07. Configurações persistentes:** Salvar preferências de vídeo, janela e comandos em arquivo próprio, com opção de restaurar padrões.
-- [ ] **10. Remapear teclado e controle:** Escolher teclas e botões por ação e guardar perfis; ampliar o suporte atual de comandos fixos.
-- [ ] **11. Volumes separados e persistentes:** Controles independentes para música e efeitos, inclusive silenciar ao perder foco se o usuário quiser.
-- [ ] **12. Pausa ao perder foco ou controle:** Permitir pausa opcional ao perder foco ou desconectar o controle e garantir liberação das direções pressionadas.
-
-**Verificação necessária antes da entrega:** Reabrir e conferir preferências; testar conflitos de teclas, controle desconectado, Alt+Tab, áudio e inicialização dos dois EXEs em Windows com dependências documentadas.
+## Etapas futuras aprovadas
 
 ### Meta 0.7 — Interface e acessibilidade
 

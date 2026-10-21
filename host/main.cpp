@@ -32,6 +32,7 @@
 #include <vector>
 #include "../common/runtime_support.h"
 #include "../common/elf_image.h"
+#include "../common/player_controls.h"
 using destinia::hostReport;
 
 namespace fs = std::filesystem;
@@ -66,6 +67,9 @@ static const int JNI_FUNCS = 235;
 static uc_engine* uc = nullptr;
 static bool verbose = false, fatal = false, hitMagic = false, executionFailed = false;
 static destinia::FileLock saveLock;
+static destinia::Preferences preferences;
+static bool audioFocused=true, audioPaused=false;
+static int nativeMusicVolume=5, nativeEffectsVolume=5;
 static std::string gameDir = "../game", soPath, assetsDir, saveDir;
 
 static std::vector<std::function<void()>> handlers(STUB_COUNT);
@@ -162,14 +166,29 @@ static void playSoundId(int id) {
   if (!muteAudio && !audioReady) note("playSound ignorado: host compilado sem SDL_mixer");
 #endif
 }
-static void setSoundVol(int ch, int level) {
+static void applyAudioPreferences() {
 #ifdef HAS_SDL_MIXER
-  int v = std::clamp(level, 0, 5) * MIX_MAX_VOLUME / 5;
-  if (ch == 1) Mix_VolumeMusic(v); else Mix_Volume(-1, v);
-#else
-  (void)ch;
-  (void)level;
+  if(!audioReady) return;
+  const bool muted=!audioFocused && preferences.muteUnfocused;
+  Mix_VolumeMusic(destinia::scaledVolume(nativeMusicVolume,preferences.music,muted));
+  Mix_Volume(-1,destinia::scaledVolume(nativeEffectsVolume,preferences.effects,muted));
 #endif
+}
+static void setSoundVol(int ch, int level) {
+  if(ch==1) nativeMusicVolume=std::clamp(level,0,5);
+  else nativeEffectsVolume=std::clamp(level,0,5);
+  applyAudioPreferences();
+}
+static void updateAudioState(bool focused,bool paused) {
+  audioFocused=focused;
+  applyAudioPreferences();
+#ifdef HAS_SDL_MIXER
+  if(audioReady && paused!=audioPaused) {
+    if(paused) { Mix_PauseMusic(); Mix_Pause(-1); }
+    else { Mix_ResumeMusic(); Mix_Resume(-1); }
+  }
+#endif
+  audioPaused=paused;
 }
 
 // Teclas WIPI usadas pelo port Vita: 3/9/5/7 = cima/baixo/esq/dir, 17 = confirmar, 10 = voltar, 27 = menu, 1 = start.
@@ -731,24 +750,34 @@ static void runtimeLogTick(long frame,double emulationMs) {
 
 // ---------------------------------------------------------------- principal
 static int runHost(int argc, char** argv) {
+  int fullscreenOverride=-1; bool explicitScale=false,savePreferences=true;
+  fs::path settingsPath=destinia::preferencesFile();
   int scale = 3, headlessFrames = 0; std::string outDir = "frames", reportsDir;
   for (int i = 1; i < argc; i++) {
     std::string a = argv[i];
     auto next = [&]() { if(i+1>=argc) throw std::runtime_error("Argumento sem valor: "+a); return std::string(argv[++i]); };
     if (a == "--game") gameDir = next(); else if (a == "--so") soPath = next(); else if (a == "--save") saveDir = next();
-    else if (a == "--scale") scale = atoi(next().c_str()); else if (a == "--headless") headlessFrames = atoi(next().c_str());
+    else if (a == "--scale") { scale = atoi(next().c_str()); explicitScale=true; } else if (a == "--headless") headlessFrames = atoi(next().c_str());
     else if (a == "--reports") reportsDir = next();
+    else if (a == "--settings") settingsPath=fs::absolute(next());
+    else if (a == "--no-save-preferences") savePreferences=false;
+    else if (a == "--fullscreen") fullscreenOverride=1;
+    else if (a == "--windowed") fullscreenOverride=0;
     else if (a == "--out") outDir = next(); else if (a == "-v") verbose = true;
     else if (a == "--probe") probe = true;
     else if (a == "--mute") muteAudio = true;
     else if (a == "--profile") profile = true;
     else if (a == "--autotap") { if (sscanf(next().c_str(), "%d,%d,%d", &autoFrame, &autoX, &autoY) != 3) { printf("--autotap precisa de QUADRO,X,Y\n"); return 0; } }
     else if (a == "--autotap2") { if (sscanf(next().c_str(), "%d,%d,%d", &autoFrame2, &autoX2, &autoY2) != 3) { printf("--autotap2 precisa de QUADRO,X,Y\n"); return 0; } }
-    else { printf("Uso: destinia_host [--game PASTA] [--so ARQUIVO] [--save PASTA] [--reports PASTA] [--scale N] [--headless QUADROS --out PASTA] [-v] [--probe] [--mute] [--profile] [--autotap QUADRO,X,Y] [--autotap2 QUADRO,X,Y]\n"); return 0; }
+    else { printf("Uso: destinia_host [--game PASTA] [--so ARQUIVO] [--save PASTA] [--reports PASTA] [--settings ARQUIVO] [--no-save-preferences] [--windowed|--fullscreen] [--scale N] [--headless QUADROS --out PASTA] [-v] [--probe] [--mute] [--profile] [--autotap QUADRO,X,Y] [--autotap2 QUADRO,X,Y]\n"); return 0; }
   }
+  preferences=destinia::Preferences::load(settingsPath,"host");
+  bool fullscreen=fullscreenOverride<0?preferences.fullscreen:fullscreenOverride!=0;
+  int windowWidth=preferences.width,windowHeight=preferences.height;
+  if(explicitScale) { scale=std::clamp(scale,1,10); windowWidth=400*scale; windowHeight=240*scale; }
   const fs::path reports=reportsDir.empty()?destinia::defaultReportsDir():fs::path(reportsDir);
   if(destinia::sessionLog.start(reports,"host")) hostReport("[host] Log TXT: %s\n",(destinia::sessionLog.directory()/"log.txt").string().c_str());
-  hostReport("[host] Destinia 0.5 Beta - host\n");
+  hostReport("[host] Destinia 0.6 Beta - host\n");
   if(saveDir.empty()) saveDir=destinia::configuredSaveDir().string();
   saveDir=fs::absolute(saveDir).lexically_normal().string();
   hostReport("[host] Save compartilhado: %s\n",saveDir.c_str());
@@ -814,7 +843,9 @@ static int runHost(int argc, char** argv) {
   hostReport("[host] initGame ok. Rodando o jogo...\n");
 
   // [OK] jniTouch(env,obj, x, y, tipo): tipo 0=toque 1=solta 2=move 3=tecla de menu (Thumb decodificado)
+  bool mouseDown=false; int lastTouchX=0,lastTouchY=0;
   auto touch = [&](int x, int y, int type) {
+    lastTouchX=x; lastTouchY=y;
     if(type!=2) destinia::sessionLog.write("ENTRADA toque x="+std::to_string(x)+" y="+std::to_string(y)+" tipo="+std::to_string(type));
     bool ok = callFn(fnTouch, {ENV_OBJ, 0x10, (u32)x, (u32)y, (u32)type});
     if (probe && type != 2) { hostReport("[sonda] jniTouch(x=%d, y=%d, tipo=%d) -> %s\n", x, y, type, ok ? "ok" : "FALHOU"); probeState(type == 0 ? "logo apos PRESSIONAR" : type == 1 ? "logo apos SOLTAR" : "logo apos tecla"); }
@@ -840,20 +871,31 @@ static int runHost(int argc, char** argv) {
   };
   struct GraphicsGuard { std::function<void()> release; ~GraphicsGuard() { release(); } } graphicsGuard{releaseGraphics};
 
+  auto setFullscreen = [&](bool enabled) {
+    if(enabled && !(SDL_GetWindowFlags(win)&SDL_WINDOW_FULLSCREEN)) SDL_GetWindowSize(win,&windowWidth,&windowHeight);
+    if(SDL_SetWindowFullscreen(win,enabled?SDL_WINDOW_FULLSCREEN_DESKTOP:0)!=0) {
+      fullscreen=(SDL_GetWindowFlags(win)&SDL_WINDOW_FULLSCREEN)!=0;
+      hostReport("[host] Nao foi possivel alternar tela cheia: %s\n",SDL_GetError()); return false;
+    }
+    fullscreen=enabled;
+    if(!enabled) SDL_SetWindowSize(win,windowWidth,windowHeight);
+    hostReport("[host] Exibicao: %s.\n",enabled?"tela cheia":"janela"); return true;
+  };
   if (!headlessFrames) {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK) != 0) { hostReport("SDL_Init: %s\n", SDL_GetError()); return 1; }
     if (!muteAudio) {
 #ifdef HAS_SDL_MIXER
       Mix_Init(MIX_INIT_OGG | MIX_INIT_MP3);
-      if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) == 0) { Mix_AllocateChannels(16); audioReady = true; }
+      if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) == 0) { Mix_AllocateChannels(16); audioReady = true; applyAudioPreferences(); }
       else hostReport("[host] audio indisponivel: %s\n", Mix_GetError());
 #else
       hostReport("[host] audio indisponivel: compile com SDL2_mixer para habilitar o som.\n");
 #endif
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  // pixels nitidos
-    win = SDL_CreateWindow("Destinia 0.5 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 720, SDL_WINDOW_RESIZABLE);
+    win = SDL_CreateWindow("Destinia 0.6 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
     if(!win) { hostReport("SDL_CreateWindow: %s\n",SDL_GetError()); return 1; }
+    if(fullscreen) setFullscreen(true);
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_PRESENTVSYNC);
     if(!ren) { hostReport("SDL_CreateRenderer: %s\n",SDL_GetError()); return 1; }
     tex = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGB565, SDL_TEXTUREACCESS_STREAMING, SCREEN_W, SCREEN_H);
@@ -862,7 +904,40 @@ static int runHost(int argc, char** argv) {
     hostReport("[host] Teclado: WASD/setas mover, Enter/Z confirmar, Esc/X voltar, I menu, F5 save. DualSense: analogico mover, X atacar, O voltar, triangulo menu, Share save, L1 acelerar.\n");
   } else fs::create_directories(outDir);
 
-  bool running = true, mouseDown = false; long frame = 0;
+  auto gameViewport = [&]() {
+    int ow = 0, oh = 0;
+    SDL_GetRendererOutputSize(ren, &ow, &oh);
+    if (ow <= 0 || oh <= 0) return SDL_Rect{0, 0, 1, 1};
+    int width, height;
+    if ((int64_t)ow * SCREEN_H > (int64_t)oh * SCREEN_W) {
+      height = oh;
+      width = std::max(1, (int)((int64_t)oh * SCREEN_W / SCREEN_H));
+    } else {
+      width = ow;
+      height = std::max(1, (int)((int64_t)ow * SCREEN_H / SCREEN_W));
+    }
+    return SDL_Rect{(ow - width) / 2, (oh - height) / 2, width, height};
+  };
+  auto mapMouseToGame = [&](int wx, int wy, int& x, int& y, bool clampOutside) {
+    int ww = 0, wh = 0, ow = 0, oh = 0;
+    SDL_GetWindowSize(win, &ww, &wh);
+    SDL_GetRendererOutputSize(ren, &ow, &oh);
+    if (ww <= 0 || wh <= 0 || ow <= 0 || oh <= 0) return false;
+    const int ox = (int)((int64_t)wx * ow / ww);
+    const int oy = (int)((int64_t)wy * oh / wh);
+    const SDL_Rect vp = gameViewport();
+    const bool inside = ox >= vp.x && ox < vp.x + vp.w && oy >= vp.y && oy < vp.y + vp.h;
+    if (!inside && !clampOutside) return false;
+    x = std::clamp((int)((int64_t)(ox - vp.x) * SCREEN_W / vp.w), 0, SCREEN_W - 1);
+    y = std::clamp((int)((int64_t)(oy - vp.y) * SCREEN_H / vp.h), 0, SCREEN_H - 1);
+    return inside;
+  };
+
+  destinia::PlayerControls controls(preferences,controller,gameKey,[&](){touch(0,0,3);},[&](){
+    if(mouseDown) { touch(lastTouchX,lastTouchY,1); mouseDown=false; }
+  });
+  bool wasPaused=false;
+  bool running = true; long frame = 0;
   // --profile: acumuladores de tempo por quadro (emulacao, present, sleep) para achar o gargalo de CPU.
   double profEmulMs = 0, profPresentMs = 0, profSleepMs = 0, profWallMs = 0, profMaxEmulMs = 0;
   long profFrames = 0, profOverBudget = 0, profWait1000 = 0; double profWaitSum = 0;
@@ -871,85 +946,43 @@ static int runHost(int argc, char** argv) {
     if (!headlessFrames) {
       SDL_Event ev;
       while (SDL_PollEvent(&ev)) {
-        if (ev.type == SDL_QUIT) running = false;
-        else if (ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_MOUSEBUTTONUP || ev.type == SDL_MOUSEMOTION) {
-          int wx = ev.type == SDL_MOUSEMOTION ? ev.motion.x : ev.button.x, wy = ev.type == SDL_MOUSEMOTION ? ev.motion.y : ev.button.y;
-          int ow = 0, oh = 0; SDL_GetRendererOutputSize(ren, &ow, &oh); if (ow <= 0) ow = 1; if (oh <= 0) oh = 1;
-
-          int x = std::clamp((wx * SCREEN_W) / ow, 0, SCREEN_W - 1);
-          int y = std::clamp((wy * SCREEN_H) / oh, 0, SCREEN_H - 1);
-          if (probe && ev.type != SDL_MOUSEMOTION) {
-            int ww = 0, wh = 0, lw = 0, lh = 0, ow = 0, oh = 0; SDL_GetWindowSize(win, &ww, &wh); SDL_RenderGetLogicalSize(ren, &lw, &lh); SDL_GetRendererOutputSize(ren, &ow, &oh);
-            hostReport("[sonda] SDL %s botao=%d janela_px=(%d,%d) tamanho_janela=%dx%d saida_render=%dx%d tamanho_logico=%dx%d -> jogo=(%d,%d)\n",
-                    ev.type == SDL_MOUSEBUTTONDOWN ? "BAIXO" : "CIMA", (int)ev.button.button, wx, wy, ww, wh, ow, oh, lw, lh, x, y);
+        if(ev.type==SDL_QUIT) running=false;
+        else if(ev.type==SDL_KEYDOWN || ev.type==SDL_KEYUP) {
+          if(ev.key.repeat) continue;
+          const bool down=ev.type==SDL_KEYDOWN;
+          if(ev.key.keysym.sym==SDLK_F11) { if(down) setFullscreen(!fullscreen); }
+          else if(ev.key.keysym.sym==SDLK_F9) {  }
+          else controls.event(ev);
+        } else if(ev.type==SDL_MOUSEBUTTONDOWN || ev.type==SDL_MOUSEBUTTONUP || ev.type==SDL_MOUSEMOTION) {
+          if(!controls.focused || controls.paused()) continue;
+          int wx=ev.type==SDL_MOUSEMOTION?ev.motion.x:ev.button.x,wy=ev.type==SDL_MOUSEMOTION?ev.motion.y:ev.button.y;
+          int x=0,y=0;
+          bool inside=mapMouseToGame(wx,wy,x,y,mouseDown && ev.type!=SDL_MOUSEBUTTONDOWN);
+          if(probe && ev.type!=SDL_MOUSEMOTION) {
+            int ww=0,wh=0,ow=0,oh=0; SDL_GetWindowSize(win,&ww,&wh); SDL_GetRendererOutputSize(ren,&ow,&oh);
+            hostReport("[sonda] SDL %s botao=%d janela_px=(%d,%d) tamanho_janela=%dx%d saida_render=%dx%d -> jogo=(%d,%d) dentro=%d\n",
+                       ev.type==SDL_MOUSEBUTTONDOWN?"BAIXO":"CIMA",(int)ev.button.button,wx,wy,ww,wh,ow,oh,x,y,(int)inside);
           }
-          if (ev.type == SDL_MOUSEBUTTONDOWN && ev.button.button == SDL_BUTTON_LEFT) { mouseDown = true; touch(x, y, 0); }
-          else if (ev.type == SDL_MOUSEBUTTONUP && ev.button.button == SDL_BUTTON_LEFT) { mouseDown = false; touch(x, y, 1); }
-          else if (ev.type == SDL_MOUSEMOTION && mouseDown) touch(x, y, 2);
-        } else if (ev.type == SDL_KEYDOWN || ev.type == SDL_KEYUP) {
-          if (ev.key.repeat) continue;
-          bool down = ev.type == SDL_KEYDOWN;
-          switch (ev.key.keysym.sym) {
-            case SDLK_UP: case SDLK_w: gameKey(3, down); break;
-            case SDLK_DOWN: case SDLK_s: gameKey(9, down); break;
-            case SDLK_LEFT: case SDLK_a: gameKey(5, down); break;
-            case SDLK_RIGHT: case SDLK_d: gameKey(7, down); break;
-            case SDLK_RETURN: case SDLK_SPACE: case SDLK_z: gameKey(17, down); break;
-            case SDLK_ESCAPE: case SDLK_x: gameKey(10, down); break;
-            case SDLK_i: case SDLK_c: gameKey(27, down); break;
-            case SDLK_TAB: if (down) gameKey(1, true); else gameKey(1, false); break;
-            case SDLK_F5: if (down) touch(0, 0, 3); break;  // save rapido (tecla Android menu)
-            case SDLK_LSHIFT: fastForward = down; break;
-          }
-        }
-        else if (ev.type == SDL_CONTROLLERDEVICEADDED && !controller) {
-          controller = SDL_GameControllerOpen(ev.cdevice.which);
-          if (controller) hostReport("[host] Controle plugado: %s\n", SDL_GameControllerName(controller));
-        }
-        else if (ev.type == SDL_CONTROLLERDEVICEREMOVED && controller) {
-          hostReport("[host] Controle desplugado.\n");
-          SDL_GameControllerClose(controller); controller = nullptr;
-        }
-        else if (ev.type == SDL_CONTROLLERBUTTONDOWN || ev.type == SDL_CONTROLLERBUTTONUP) {
-          int b = ev.cbutton.button; bool down = ev.type == SDL_CONTROLLERBUTTONDOWN;
-          if (probe && down) hostReport("[sonda] Controle BOTAO: %d\n", b);
-          if (b == SDL_CONTROLLER_BUTTON_BACK) { if (down) touch(0, 0, 3); }
-          else if (b == SDL_CONTROLLER_BUTTON_A) gameKey(17, down);
-          else if (b == SDL_CONTROLLER_BUTTON_B) gameKey(10, down);
-          else if (b == SDL_CONTROLLER_BUTTON_Y) gameKey(27, down);
-          else if (b == SDL_CONTROLLER_BUTTON_X) gameKey(12, down);
-          else if (b == SDL_CONTROLLER_BUTTON_START) gameKey(1, down);
-          else if (b == SDL_CONTROLLER_BUTTON_DPAD_UP) gameKey(3, down);
-          else if (b == SDL_CONTROLLER_BUTTON_DPAD_DOWN) gameKey(9, down);
-          else if (b == SDL_CONTROLLER_BUTTON_DPAD_LEFT) gameKey(5, down);
-          else if (b == SDL_CONTROLLER_BUTTON_DPAD_RIGHT) gameKey(7, down);
-          else if (b == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) fastForward = down;
-          else if (b == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) gameKey(12, down);
+          if(ev.type==SDL_MOUSEBUTTONDOWN && ev.button.button==SDL_BUTTON_LEFT && inside) { mouseDown=true; touch(x,y,0); }
+          else if(ev.type==SDL_MOUSEBUTTONUP && ev.button.button==SDL_BUTTON_LEFT && mouseDown) { mouseDown=false; touch(x,y,1); }
+          else if(ev.type==SDL_MOUSEMOTION && mouseDown) touch(x,y,2);
+        } else {
+          if(probe && ev.type==SDL_CONTROLLERBUTTONDOWN && ev.cbutton.which==controls.controllerId())
+            hostReport("[sonda] Controle BOTAO: %d\n",(int)ev.cbutton.button);
+          controls.event(ev);
+          if(ev.type==SDL_WINDOWEVENT && ev.window.event==SDL_WINDOWEVENT_SIZE_CHANGED && !fullscreen)
+            SDL_GetWindowSize(win,&windowWidth,&windowHeight);
         }
       }
-      if (controller) {
-        auto axisDir = [](int ax, int ay) {
-          const int dz = 16000;
-          if (std::abs(ax) < dz && std::abs(ay) < dz) return 0;
-          if (std::abs(ax) > std::abs(ay)) return ax < 0 ? 5 : 7;
-          return ay < 0 ? 3 : 9;
-        };
-        int nd = axisDir(SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTX),
-                         SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTY));
-        if (nd != analogDir) {
-          if (analogDir) gameKey(analogDir, false);
-          if (nd) gameKey(nd, true);
-          analogDir = nd;
-        }
-        int skill = axisDir(SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_RIGHTX),
-                            SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_RIGHTY));
-        int skillKey = skill == 5 ? 2 : skill == 7 ? 11 : skill == 3 ? 4 : skill == 9 ? 8 : 0;
-        if (skillKey != rightStickKey) {
-          if (rightStickKey) gameKey(rightStickKey, false);
-          if (skillKey) gameKey(skillKey, true);
-          rightStickKey = skillKey;
-        }
+      controls.pollSticks(); fastForward=controls.accelerating;
+      const bool paused=controls.paused();
+      if(paused!=wasPaused) {
+        controls.release();
+        SDL_SetWindowTitle(win,paused?"Destinia 0.6 Beta - PAUSADO":"Destinia 0.6 Beta");
+        hostReport("[host] %s.\n",paused?"Pausado":"Retomado"); wasPaused=paused;
       }
+      updateAudioState(controls.focused,paused);
+      if(paused) { SDL_Delay(16); continue; }
     }
     if(executionFailed) break;
     // [SONDA] toque sintetico de teste (so com --autotap): pressiona no quadro N e solta 3 quadros depois
@@ -997,7 +1030,7 @@ static int runHost(int argc, char** argv) {
     } else {
       auto tPres0 = std::chrono::steady_clock::now();
       if(SDL_UpdateTexture(tex,nullptr,fb,SCREEN_W*2)!=0) { hostReport("SDL_UpdateTexture: %s\n",SDL_GetError()); executionFailed=true; break; }
-      int ow = 0, oh = 0; SDL_GetRendererOutputSize(ren, &ow, &oh); SDL_Rect dst = {0, 0, ow, oh}; SDL_RenderClear(ren); SDL_RenderCopy(ren, tex, nullptr, &dst); SDL_RenderPresent(ren);
+      SDL_Rect dst=gameViewport(); SDL_SetRenderDrawColor(ren,0,0,0,255); SDL_RenderClear(ren); SDL_RenderCopy(ren, tex, nullptr, &dst); SDL_RenderPresent(ren);
       profPresentMs += (double)std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - tPres0).count() / 1000.0;
     }
     // [?] Java: se jniRun devolve 1000 (houve carga de arquivo) faz GC e dorme 100 ms.
@@ -1028,13 +1061,21 @@ static int runHost(int argc, char** argv) {
     }
   }
   if (headlessFrames) hostReport("[host] %ld quadros executados. Imagens em %s\n", frame, outDir.c_str());
+  if(!headlessFrames && !executionFailed && savePreferences) {
+    try { destinia::saveWindowPreferences(settingsPath,"host",windowWidth,windowHeight,fullscreen); }
+    catch(const std::exception& e) { hostReport("[host] Aviso: %s\n",e.what()); }
+  }
   return executionFailed ? 2 : 0;
 }
 
 
 int main(int argc,char** argv) {
-  if(argc==2 && std::strcmp(argv[1],"--version")==0) { std::puts("Destinia 0.5 Beta"); return 0; }
+  if(argc==2 && std::strcmp(argv[1],"--version")==0) { std::puts("Destinia 0.6 Beta"); return 0; }
   int result=1;
+  if(argc==3 && std::string(argv[1])=="--check-settings") {
+    try { if(!fs::is_regular_file(argv[2])) throw std::runtime_error("Arquivo de preferencias nao encontrado."); destinia::Preferences::load(argv[2],"host"); printf("Preferencias validas.\n"); return 0; }
+    catch(const std::exception& e) { fprintf(stderr,"%s\n",e.what()); return 1; }
+  }
   try { result=runHost(argc,argv); }
   catch(const std::exception& error) { hostReport("[host] ERRO: %s\n",error.what()); }
   for(auto& file:files) if(std::fclose(file.second)!=0) { hostReport("[host] ERRO ao fechar arquivo pendente\n"); result=1; }
