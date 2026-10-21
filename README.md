@@ -2,7 +2,7 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.7 Beta atualizada — Códex com imagens](https://github.com/sugyua/destinia/releases/tag/v0.7-codex-imagens)** — pacote Windows x64 com os dois EXEs prontos, inicializadores e changelog em português. A compilação foi aprovada nos testes Windows. A [release original da 0.7](https://github.com/sugyua/destinia/releases/tag/v0.7-beta) permanece disponível.
+**[Baixar Destinia 0.7 Beta atualizada — Códex com imagens](https://github.com/sugyua/destinia/releases/tag/v0.7-codex-imagens-fix1)** — pacote Windows x64 com os dois EXEs prontos, inicializadores e changelog em português. Os EXEs da compilação aprovada são preservados; este pacote corrige os BATs de abertura e a confirmação do diagnóstico. A [release original da 0.7](https://github.com/sugyua/destinia/releases/tag/v0.7-beta) permanece disponível.
 
 A 0.6 adiciona configurações persistentes, comandos remapeáveis, volumes separados, pausa opcional e distribuição Windows x64 com os dois EXEs. Veja [instalação](INSTALL.md), [preferências](docs/PREFERENCIAS.md), [changelog](CHANGELOG.md) e [verificações](docs/RELEASE_0.6.md). Dependências externas e dados originais continuam separados.
 

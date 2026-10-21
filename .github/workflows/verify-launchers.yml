@@ -1,0 +1,57 @@
+name: Verificar inicializadores e diagnostico Windows
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['Abrir Destinia.bat', 'Abrir Destinia Zoom 800x480.bat', 'diagnostico/test_suite.ps1', 'tests/test_launchers.ps1', 'tests/test_camera_mode.ps1', '.github/workflows/verify-launchers.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Executar regressao dos BATs no CMD e diagnostico no PowerShell
+        shell: powershell
+        run: |
+          $ErrorActionPreference='Stop'
+          foreach($name in @('test_launchers.ps1','test_diagnostic.ps1','test_camera_mode.ps1','test_prompt.ps1')) {
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path 'tests' $name)
+            if($LASTEXITCODE -ne 0) {throw "Falhou: $name"}
+          }
+      - name: Recuperar EXEs da compilacao aprovada sem recompilar gameplay
+        uses: actions/download-artifact@v4
+        with:
+          name: destinia-codex-no-menu-pacotes-de-teste
+          path: previous-packages
+          run-id: 39676483793
+          github-token: ${{ github.token }}
+      - name: Empacotar fontes e Windows com BATs corrigidos
+        shell: python
+        run: |
+          import hashlib, importlib.util, os, pathlib, subprocess, zipfile
+          root=pathlib.Path.cwd()
+          previous=root/'previous-packages/destinia-0.7-beta-windows-x64.zip'
+          assert hashlib.sha256(previous.read_bytes()).hexdigest()=='248313d0b3a4adbc735b877a28883c1b12941ae1dbc551d1326ee132685a22e0'
+          with zipfile.ZipFile(previous) as package:
+              for host in ('host','host_zoom'):
+                  name=host+'/build/destinia_host.exe'
+                  destination=root/name
+                  destination.parent.mkdir(parents=True,exist_ok=True)
+                  destination.write_bytes(package.read('destinia-0.7-beta/'+name))
+          subprocess.run(['python','scripts/package_release.py','--out','dist'],check=True)
+          # BUILD_INFO records the real compilation commit of these unchanged EXEs.
+          os.environ['GITHUB_SHA']='ba18cede75f68ae163754ba6cc03ed1cc6de1004'
+          subprocess.run(['python','scripts/package_windows.py','--out','dist','--normal','host/build/destinia_host.exe','--zoom','host_zoom/build/destinia_host.exe'],check=True)
+          # Small patch for an existing 0.7 installation; no EXE/game/save changes.
+          patch=root/'dist/destinia-0.7-corrigir-abertura.zip'
+          with zipfile.ZipFile(patch,'x',compression=zipfile.ZIP_DEFLATED) as archive:
+              for name in ('Abrir Destinia.bat','Abrir Destinia Zoom 800x480.bat','VERSION','diagnostico/test_suite.ps1'):
+                  archive.write(root/name,arcname=name)
+          patch.with_suffix('.zip.sha256').write_text(hashlib.sha256(patch.read_bytes()).hexdigest()+'  '+patch.name+'\n',encoding='ascii')
+      - uses: actions/upload-artifact@v4
+        with:
+          name: destinia-0.7-inicializadores-corrigidos
+          path: dist/*
+          if-no-files-found: error

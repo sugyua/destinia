@@ -20,7 +20,7 @@ try {
     function Get-Process { return }
     function Read-Host($Prompt) {
         $script:answers++
-        if ($Prompt -like 'Abrir teste guiado*') { return 'S' }
+        if ($Prompt -like 'Abrir teste guiado*') { if ($script:answers -eq 1) { return '' }; return 'S' }
         if ($Prompt -like 'A troca de mapa*') { return 'N' }
         if ($Prompt -like 'UI menor*') { return 'S' }
         if ($Prompt -like 'Descreva o defeito*') { return 'Cenario duplicado na passagem de teste' }
@@ -47,7 +47,7 @@ try {
     $report = Get-ChildItem -LiteralPath (Join-Path $fixture 'relatorios') -Recurse -Filter resultados.json | Select-Object -First 1
     $result = Get-Content -LiteralPath $report.FullName -Raw | ConvertFrom-Json
     if ($code -ne 1 -or $result.Falhas -ne 1 -or $result.Variante -ne 'host_zoom' -or -not $result.Concluido) { throw 'Falha manual ou variante nao registrada corretamente' }
-    if ($script:launches -ne 2 -or $script:answers -ne 4) { throw 'Teste repetiu janelas ou perguntas gerais' }
+    if ($script:launches -ne 2 -or $script:answers -ne 5) { throw 'Teste repetiu janelas ou perguntas gerais' }
     if (@($result.Resultados | Where-Object { $_.Teste -eq 'Capturas F9' -and $_.Estado -eq 'PENDENTE' }).Count -ne 1) { throw 'Ausencia de capturas nao foi destacada' }
     if ((Get-Content -LiteralPath (Join-Path $SaveSource 'msave.dat') -Raw) -ne 'original intacto') { throw 'Save original alterado' }
     $script:oldBinary = $true; $script:launches = 0; $script:answers = 0

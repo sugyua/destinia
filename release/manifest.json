@@ -81,6 +81,8 @@
     "docs/INVESTIGACAO_CLASSES.md",
     "common/codex_portraits.h",
     "tests/codex_portrait_cases.cpp",
-    "tests/test_codex_portraits.py"
+    "tests/test_codex_portraits.py",
+    "tests/test_launchers.ps1",
+    "tests/test_prompt.ps1"
   ]
 }

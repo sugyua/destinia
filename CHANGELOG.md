@@ -4,6 +4,15 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## Correção de abertura da 0.7 — fix1
+
+- Corrigidos os dois inicializadores BAT: a versão esperada agora vem do arquivo VERSION. Eles exigiam 0.6 e bloqueavam os EXEs 0.7 distribuídos; a checagem de versão/runtime permanece ativa.
+- VERSION ausente ou inválido é informado antes de abrir o jogo; preservados os parâmetros de execução, pasta compartilhada de saves, opções de vídeo e configurações existentes.
+- Diagnóstico volta a perguntar quando a resposta S/N está vazia ou inválida, em vez de interpretar como recusa. Aplica-se à abertura da janela e à reabertura da cópia de save. Fim da entrada é tratado como erro explícito.
+- Relatório final destaca etapas pendentes/não executadas mesmo com código zero; isso não comprova teste visual ou gameplay.
+- Testes de regressão dos BATs no CMD do Windows com EXE de teste inofensivo, versão atual/futura, incompatibilidade e caminhos com espaços; regressão do roteiro com resposta vazia antes de S.
+- Pacote completo e correção pequena com somente os dois BATs, VERSION e diagnostico/test_suite.ps1. EXEs verificados da compilação ba18cede reutilizados sem alterações de gameplay; sem dados originais, bibliotecas externas ou saves.
+
 ## Atualização da 0.7 — Códex com imagens
 
 - Pacotes Windows x64 e fontes da compilação verificada `ba18cede` disponibilizados na pré-release `v0.7-codex-imagens`, com dois EXEs e checksums SHA-256. Versão interna continua 0.7 Beta; release original preservada.

@@ -191,6 +191,18 @@ function Add-LogObservations([string]$Label, [string]$Log) {
     }
 }
 
+function Read-TestYesNo([string]$Question) {
+    while ($true) {
+        $answer = Read-Host ($Question + ' [S/N]')
+        if ($null -eq $answer) { throw 'Entrada encerrada antes da resposta S/N; janela nao foi aberta.' }
+        switch ($answer.Trim().ToUpperInvariant()) {
+            'S' { return $true }
+            'N' { return $false }
+        }
+        Write-Host 'Resposta vazia ou invalida. Digite S para sim ou N para nao e pressione Enter.'
+    }
+}
+
 function Read-ManualResult([string]$Name, [string]$Question) {
     Set-TestStage ('Aguardando resposta: ' + $Name)
     $answer = (Read-Host ($Question + ' [S=sim/N=falhou/P=nao testado]')).Trim().ToUpperInvariant()
@@ -298,7 +310,7 @@ function Invoke-DestiniaSuite {
             if ($name -eq 'host_zoom') { Write-Host 'Teste PT. Na falha de mapa: F9 antes da transicao, F9 para parar; F9 outra vez captura o estado posterior.' }
             Write-Host 'Compras/rede NAO sao acionadas por este roteiro. Use somente o save de teste. Feche a janela ao terminar.'
             Set-TestStage ($name + ': aguardando permissao para abrir janela guiada')
-            if ((Read-Host ('Abrir teste guiado de ' + $name + '? [S/N]')).Trim().ToUpperInvariant() -ne 'S') {
+            if (-not (Read-TestYesNo ('Abrir teste guiado de ' + $name + '?'))) {
                 Add-TestResult ($name + ' teste guiado') 'PENDENTE' 'Usuario optou por nao abrir.'
                 continue
             }
@@ -340,7 +352,7 @@ function Invoke-DestiniaSuite {
             Read-ManualResult ($name + ' controle e foco') 'Controle/desconexao e Alt+Tab funcionaram sem direcao presa?'
             if ($name -eq 'host_zoom') { Read-ManualResult 'host_zoom PT e F9' 'Textos PT e captura/trace F9 funcionaram?' }
             Set-TestStage ($name + ': aguardando decisao de salvar/reabrir')
-            if ((Read-Host 'Salvou e quer reabrir a MESMA copia para conferir o progresso? [S/N]').Trim().ToUpperInvariant() -eq 'S') {
+            if (Read-TestYesNo 'Salvou e quer reabrir a MESMA copia para conferir o progresso?') {
                 Set-TestStage ($name + ': reabertura em execucao; carregue a partida e confira o progresso')
                 $reload = Invoke-OwnedProcess $exe $guiArgs $hostDirectory (Join-Path $session ($name + '_reabrir')) $InteractiveTimeoutSeconds
                 $reloadLog = [IO.File]::ReadAllText($reload.Stdout) + [IO.File]::ReadAllText($reload.Stderr)
@@ -371,6 +383,8 @@ function Invoke-DestiniaSuite {
         Write-Host ('Relatorio salvo: ' + (Join-Path $session 'relatorio.txt'))
         $warningCount = @($script:TestResults | Where-Object { $_.Estado -eq 'AVISO' }).Count
         if ($warningCount) { Write-Host ('ATENCAO: {0} aviso(s) registrado(s). Codigo zero nao elimina avisos ou testes pendentes.' -f $warningCount) }
+        $pendingCount = @($script:TestResults | Where-Object { $_.Estado -in @('PENDENTE', 'NAO_TESTADO') }).Count
+        if ($pendingCount) { Write-Host ('ATENCAO: {0} teste(s) pendente(s)/nao executado(s). Codigo zero nao confirma a abertura da janela nem aprova gameplay.' -f $pendingCount) }
     }
     return $exitCode
 }

@@ -105,3 +105,9 @@ Funcoes testadas com PowerShell 7 em Linux: isolamento e copia de saves, detecca
 ## Candidata 0.6
 
 Use o diagnóstico e os EXEs da mesma candidata. O roteiro continua usando cópias dos saves e agora envia `--no-save-preferences`, para não guardar mudanças de tamanho/modo de janela do teste na configuração pessoal. Pausa, áudio e perfis seguem a configuração global escolhida; use `Configurar Destinia.bat` com os jogos fechados para ajustá-los. O roteiro guiado não equivale aos testes de código do workflow Windows.
+
+## Correção de abertura da 0.7 (fix1)
+
+Na pergunta **Abrir teste guiado de host_zoom? [S/N]**, digite **S e Enter** para abrir a janela. Somente N pula o teste; resposta vazia/inválida pede novamente. Código zero com etapas PENDENTE/NAO_TESTADO não confirma que a janela foi aberta ou que o jogo foi testado.
+
+Os dois inicializadores agora consultam VERSION. As cópias anteriores ainda exigiam 0.6 e podiam recusar um EXE 0.7 válido. Baixe o pacote corrigido ou extraia a correção pequena na raiz da instalação, substituindo somente seus quatro arquivos. A pasta game, os EXEs e os saves não são alterados pela correção pequena.

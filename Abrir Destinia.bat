@@ -31,9 +31,22 @@ if not exist "%MSYS2_BIN%\SDL2.dll" (
 )
 
 set "PATH=%MSYS2_BIN%;%PATH%"
-"%EXE%" --version 2>nul | findstr.exe /x /c:"Destinia 0.6 Beta" >nul
+if not exist "%ROOT%VERSION" (
+  echo Falta VERSION. Extraia todos os arquivos do pacote na mesma pasta.
+  pause
+  exit /b 1
+)
+findstr.exe /r /x /c:"[0-9][0-9]*\.[0-9][0-9]*" /c:"[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*" "%ROOT%VERSION" >nul
 if errorlevel 1 (
-  echo Executavel antigo ou sem acesso ao runtime esperado da 0.6.
+  echo VERSION invalido. Extraia novamente o pacote completo.
+  pause
+  exit /b 1
+)
+set "EXPECTED_VERSION="
+set /p "EXPECTED_VERSION="<"%ROOT%VERSION"
+"%EXE%" --version 2>nul | findstr.exe /x /c:"Destinia %EXPECTED_VERSION% Beta" >nul
+if errorlevel 1 (
+  echo Executavel incompativel com VERSION ou sem acesso ao runtime esperado.
   echo Execute Compilar Destinia.bat e confira as dependencias antes de abrir.
   pause
   exit /b 1

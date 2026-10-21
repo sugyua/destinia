@@ -2,7 +2,7 @@
 
 > **O jogo está em versão Beta e pode apresentar bugs. Faça backup dos saves.**
 
-**Acesso corrigido na branch `main` e no site após a publicação da 0.7.** Os ZIPs originais da tag `v0.7-beta` continuam com o acesso antigo; baixe a [0.7 Beta atualizada com os dois EXEs](https://github.com/sugyua/destinia/releases/tag/v0.7-codex-imagens), compile os fontes atuais ou use os pacotes de teste de Actions para conferir esta mudança no Windows.
+**Acesso corrigido na branch `main` e no site após a publicação da 0.7.** Os ZIPs originais da tag `v0.7-beta` continuam com o acesso antigo; baixe a [0.7 Beta atualizada com os dois EXEs](https://github.com/sugyua/destinia/releases/tag/v0.7-codex-imagens-fix1), compile os fontes atuais ou use os pacotes de teste de Actions para conferir esta mudança no Windows.
 
 Durante a partida, abra o **menu do próprio jogo**, o mesmo que contém Craft e Pets. Toque/clique no livro **CODEX**, à direita da barra de ícones. A lista, os contadores e a paginação são desenhados dentro da imagem do jogo; nenhum botão do Códex ocupa a tela de gameplay ou a interface externa do site.
 
