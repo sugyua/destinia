@@ -1,0 +1,12 @@
+Destinia 0.6 Beta - candidata, ainda nao publicada em Releases.
+Fontes/documentacao: 13def46c4c0158b84fcf1e07eb1feb418afd0245
+EXEs Windows: 3c20976d2368ca3e0359f9483775ce56ed082f42
+Run Windows aprovado: https://github.com/sugyua/destinia/actions/runs/39592853103
+31 testes Python no Linux; 19 no Windows e 5 scripts PowerShell 5.1 aprovados.
+Campanha manual, periféricos fisicos e inspecao visual/audio permanecem pendentes.
+ZIP Windows remontado com os mesmos EXEs do run e documentacao final; nenhum binario foi alterado.
+Sem game, saves, logs, backups, DLLs, instaladores ou ferramentas externas.
+Reproducao byte a byte dos dois ZIPs conferida com o mesmo ambiente Python/zlib.
+
+destinia-0.6-beta-source.zip (190967 bytes): ed344c164a02d76d451bf5b88cd44c1b5845fa763f9d3a129ceaf366fdd4e193
+destinia-0.6-beta-windows-x64.zip (401755 bytes): c8558095ea2952090da9451b491b6ef62e9b18fdc06b6d1cb9a250250e2cce91
