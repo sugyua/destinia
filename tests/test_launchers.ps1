@@ -26,12 +26,20 @@ public class LauncherFixture {
         foreach($case in @(@($current,$current,$true),@('0.8','0.8',$true),@($current,'0.6',$false),@('invalid',$current,$false))) {
             [IO.File]::WriteAllText($versionFile,($case[0]+"`n"));$env:DESTINIA_FIXTURE_VERSION=$case[1]
             $marker=Join-Path $fixture 'launched.txt';$env:DESTINIA_FIXTURE_MARKER=$marker;if(Test-Path $marker){Remove-Item $marker}
-            $out=Join-Path $fixture 'stdout.txt';$err=Join-Path $fixture 'stderr.txt'
             $args='/d /s /c ""'+$bat+'""'
-            $process=Start-Process -FilePath $env:ComSpec -ArgumentList $args -WorkingDirectory $fixture -RedirectStandardInput $inputFile -RedirectStandardOutput $out -RedirectStandardError $err -PassThru
-            if(-not $process.WaitForExit(15000)) {$process.Kill();throw 'BAT ficou aguardando indefinidamente'}
-            $process.WaitForExit();$launched=Test-Path -LiteralPath $marker
-            if($launched -ne $case[2] -or ($case[2] -and $process.ExitCode -ne 0) -or (-not $case[2] -and $process.ExitCode -eq 0)) {throw ($name+' nao respeitou VERSION/EXE: '+$case[0]+'/'+$case[1]+"`n"+[IO.File]::ReadAllText($out)+[IO.File]::ReadAllText($err))}
+            $start=New-Object Diagnostics.ProcessStartInfo
+            $start.FileName=$env:ComSpec;$start.Arguments=$args;$start.WorkingDirectory=$fixture;$start.UseShellExecute=$false
+            $start.RedirectStandardInput=$true;$start.RedirectStandardOutput=$true;$start.RedirectStandardError=$true
+            $process=New-Object Diagnostics.Process;$process.StartInfo=$start
+            try {
+                if(-not $process.Start()){throw 'Nao iniciou CMD do teste'}
+                $outTask=$process.StandardOutput.ReadToEndAsync();$errTask=$process.StandardError.ReadToEndAsync()
+                $process.StandardInput.WriteLine('x');$process.StandardInput.Close()
+                if(-not $process.WaitForExit(15000)) {$process.Kill();throw 'BAT ficou aguardando indefinidamente'}
+                $code=$process.ExitCode;$output=$outTask.Result+$errTask.Result;$launched=Test-Path -LiteralPath $marker
+                if($launched -ne $case[2] -or ($case[2] -and $code -ne 0) -or (-not $case[2] -and $code -eq 0)) {throw ($name+' nao respeitou VERSION/EXE: '+$case[0]+'/'+$case[1]+'; iniciou='+$launched+'; codigo='+$code+"`n"+$output)}
+            }finally{$process.Dispose()}
+
         }
     }
     Write-Host 'OK: dois BATs executados no CMD, versao atual/futura, recusa de EXE antigo e VERSION invalido, pasta com espacos.'
