@@ -12,7 +12,6 @@ if not defined LOCALAPPDATA (
   pause
   exit /b 1
 )
-set "SHARED_SAVE=%LOCALAPPDATA%\Destinia\save"
 
 if not exist "%EXE%" (
   echo Nao encontrei o executavel do teste de zoom:
@@ -32,16 +31,24 @@ if not exist "%MSYS2_BIN%\SDL2.dll" (
 )
 
 set "PATH=%MSYS2_BIN%;%PATH%"
+"%EXE%" --version 2>nul | findstr.exe /x /c:"Destinia 0.5 Beta" >nul
+if errorlevel 1 (
+  echo Executavel antigo ou sem acesso ao runtime esperado da 0.5.
+  echo Execute Compilar Destinia.bat e confira as dependencias antes de abrir.
+  pause
+  exit /b 1
+)
 cd /d "%HOST_DIR%"
 if errorlevel 1 exit /b 1
 
 echo Abrindo Destinia em tela cheia com proporcao original. F11 alterna para janela.
 echo A imagem mantem a proporcao original ao redimensionar a janela.
-echo Save compartilhado: "%SHARED_SAVE%"
+echo Pasta de save: configuracao global do Destinia.
+echo Use Configurar pasta de saves.bat para escolher o local do progresso.
 echo O host de zoom e independente; o save e compartilhado com as demais versoes.
 echo O diretorio game original sera apenas lido.
 echo.
-"%EXE%" --save "%SHARED_SAVE%" --fullscreen
+"%EXE%" --fullscreen
 set "RESULT=%ERRORLEVEL%"
 
 echo.

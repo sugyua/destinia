@@ -82,3 +82,10 @@ Orientacao atual — candidata 0.4 (21/10/2026)
 * Manter contador XP aproximadamente no tamanho visual da 0.3, preservando tela cheia proporcional e F11.
 * Log TXT detalhado de eventos reservado para a 0.5; nao implementar na 0.4.
 * Nao confundir testes ARM com mapas sinteticos e testes locais com validacao de gameplay/UI no Windows. Publicacao da release 0.4 aprovada em 21/10/2026; manter solicitacao de aprovacao para novas releases.
+
+Orientacao atual — candidata 0.5 (21/10/2026)
+
+* Implementacao autorizada: log TXT limitado, backups rotativos, correcoes verificaveis de estabilidade e configuracao global de save compartilhado entre hosts/instalacoes.
+* Manter o padrao LOCALAPPDATA/Destinia/save para compatibilidade com a 0.2–0.4. Versoes antigas nao leem config.ini novo nem respeitam a trava; documentar sem prometer conversao de saves.
+* Diagnostico continua usando copias. Preservar gameplay, zoom, UI, ritmo e fluxo de loja/rede nesta etapa.
+* Preparar candidata 0.5 com verificacoes e pacote revisado. A solicitacao de implementar nao autoriza publicar tag/release: apresentar resultados e limitacoes e aguardar aprovacao do autor.

@@ -30,15 +30,12 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include "../common/runtime_support.h"
+#include "../common/elf_image.h"
+using destinia::hostReport;
 
 namespace fs = std::filesystem;
 using u32 = uint32_t;
-
-static std::string defaultSaveDir() {
-  const char* localAppData = std::getenv("LOCALAPPDATA");
-  if (!localAppData || !*localAppData) return "save";
-  return (fs::path(localAppData) / "Destinia" / "save").string();
-}
 
 // ---------------------------------------------------------------- constantes
 // [OK] resolucao e formato: GameThread passa 400x240 e um buffer de 192000
@@ -69,8 +66,9 @@ static const int JNI_FUNCS = 235;
 
 // ---------------------------------------------------------------- estado
 static uc_engine* uc = nullptr;
-static bool verbose = false, fatal = false, hitMagic = false;
-static std::string gameDir = "../game", soPath, assetsDir, saveDir = defaultSaveDir();
+static bool verbose = false, fatal = false, hitMagic = false, executionFailed = false;
+static destinia::FileLock saveLock;
+static std::string gameDir = "../game", soPath, assetsDir, saveDir;
 static u32 loadedSoSpan = 0;
 
 static std::vector<std::function<void()>> handlers(STUB_COUNT);
@@ -82,7 +80,8 @@ static std::vector<std::string> ring;        // ultimas chamadas (para debug)
 static void note(const std::string& s) {
   ring.push_back(s);
   if (ring.size() > 40) ring.erase(ring.begin());
-  if (verbose) fprintf(stderr, "[host] %s\n", s.c_str());
+  destinia::sessionLog.write("EVENTO "+s);
+  if (verbose) hostReport("[host] %s\n", s.c_str());
 }
 
 // ---------------------------------------------------------------- registradores
@@ -220,6 +219,7 @@ static void sendKey(u32 pressFn, u32 releaseFn, int key, bool down) {
   callFn(fn, {(u32)key});
 }
 static void gameKey(int key, bool down) {
+  destinia::sessionLog.write("ENTRADA tecla="+std::to_string(key)+(down?" pressionada":" solta"));
   int st = menuState();
   if (st <= 0) { if (down && fnLogoPress) callFn(fnLogoPress, {(u32)key}); return; }
   if (st == 1) sendKey(fnMenuPress, fnMenuRelease, key, down);
@@ -227,8 +227,8 @@ static void gameKey(int key, bool down) {
 }
 static void probeState(const char* tag) {
   if (!probe) return;
-  if (!gMMain || !gMenu) { fprintf(stderr, "[sonda] %s: enderecos ainda nao descobertos (MMain=%08x Menu=%08x Grp=%08x)\n", tag, gMMain, gMenu, gGrp); return; }
-  fprintf(stderr, "[sonda] %s: rede=%u (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=%u menu.anim=%u | lista: y0=%u altura=%u itens=%u | tecla_toque=%u | tela=%ux%u\n",
+  if (!gMMain || !gMenu) { hostReport("[sonda] %s: enderecos ainda nao descobertos (MMain=%08x Menu=%08x Grp=%08x)\n", tag, gMMain, gMenu, gGrp); return; }
+  hostReport("[sonda] %s: rede=%u (0=livre 1=aguardando 2=erro 3=aviso) | menu.estado=%u menu.anim=%u | lista: y0=%u altura=%u itens=%u | tecla_toque=%u | tela=%ux%u\n",
           tag, rd16(gMMain + 14624), rd32(gMenu + 156), rd16(gMenu + 178), rd16(gMenu + 172), rd16(gMenu + 174), rd16(gMenu + 176),
           rd32(gMMain + 14604), gGrp ? rd16(gGrp + 92) : 0, gGrp ? rd16(gGrp + 94) : 0);
 }
@@ -243,7 +243,7 @@ static void cameraTick(long frame) {
   int neg = (camX < 0 || camY < 0) ? 1 : 0;
   if (frame % 60 != 0 && mw == lastW && mh == lastH && neg == lastNeg) return;
   lastW = mw; lastH = mh; lastNeg = neg;
-  fprintf(stderr, "[camera] quadro %ld camX=%d camY=%d mapa=%dx%d tiles (%dx%d px) tela=%dx%d divisao_prevista_x=%d %s\n",
+  hostReport("[camera] quadro %ld camX=%d camY=%d mapa=%dx%d tiles (%dx%d px) tela=%dx%d divisao_prevista_x=%d %s\n",
           frame, camX, camY, mw, mh, mw * 16, mh * 16, SCREEN_W, SCREEN_H, SCREEN_W - mw * 16,
           neg ? "<< CAMERA NEGATIVA" : "");
 }
@@ -324,7 +324,7 @@ static u32 hmalloc(u32 n) {
   n = (std::max<u32>(n, 1) + 15) & ~15u;
   auto& fl = freeLists[n];
   if (!fl.empty()) { u32 p = fl.back(); fl.pop_back(); chunkSize[p] = n; return p; }
-  if (heapPtr + n > HEAP_BASE + HEAP_SIZE) { fprintf(stderr, "[host] heap esgotado (pediu %u)\n", n); return 0; }
+  if (heapPtr + n > HEAP_BASE + HEAP_SIZE) { hostReport("[host] heap esgotado (pediu %u)\n", n); return 0; }
   u32 p = heapPtr; heapPtr += n; chunkSize[p] = n; return p;
 }
 static void hfree(u32 p) {
@@ -365,6 +365,7 @@ static std::string fmtPrintf(u32 fmtAddr, int ai) {
 
 // ---------------------------------------------------------------- arquivos
 static std::map<u32, FILE*> files;
+static std::map<u32,std::string> filePaths;
 static u32 nextFile = 0x5000;
 static std::string hostPath(const std::string& p) {
   // [OK] a .so grava saves em /data/data/game.destiniaeng/files/<arquivo>
@@ -1322,9 +1323,9 @@ static void setupStubs() {
   L("memcpy", [] { u32 d = R(0), s = R(1), c = R(2); std::vector<uint8_t> b(c); rd(s, b.data(), c); wr(d, b.data(), c); W(0, d); });
   L("memset", [] {
     u32 d = R(0), c = R(2); std::vector<uint8_t> b(c, (uint8_t)R(1)); wr(d, b.data(), c); W(0, d);
-    if (c == 0x3928 && !gMMain) { gMMain = d; if (probe) fprintf(stderr, "[sonda] MMain em %08x (lib+%x)\n", d, d - SO_BASE); }
-    else if (c == 0x214 && !gMenu) { gMenu = d; if (probe) fprintf(stderr, "[sonda] Menu em %08x (lib+%x)\n", d, d - SO_BASE); }
-    else if (c == 0x7c && gMMain && !gGrp) { gGrp = d; if (probe) fprintf(stderr, "[sonda] Grp em %08x (lib+%x)\n", d, d - SO_BASE); }
+    if (c == 0x3928 && !gMMain) { gMMain = d; if (probe) hostReport("[sonda] MMain em %08x (lib+%x)\n", d, d - SO_BASE); }
+    else if (c == 0x214 && !gMenu) { gMenu = d; if (probe) hostReport("[sonda] Menu em %08x (lib+%x)\n", d, d - SO_BASE); }
+    else if (c == 0x7c && gMMain && !gGrp) { gGrp = d; if (probe) hostReport("[sonda] Grp em %08x (lib+%x)\n", d, d - SO_BASE); }
   });
   L("strlen", [] { W(0, (u32)cstr(R(0)).size()); });
   L("strcpy", [] { std::string s = cstr(R(1)); wr(R(0), s.c_str(), s.size() + 1); });
@@ -1345,25 +1346,52 @@ static void setupStubs() {
     FILE* f = fopen(p.c_str(), m.c_str());
     note("fopen " + p + " [" + m + "] -> " + (f ? "ok" : "falhou"));
     if (!f) { W(0, 0); return; }
-    u32 h = nextFile; nextFile += 16; files[h] = f; W(0, h);
+    u32 h = nextFile; nextFile += 16; files[h] = f; filePaths[h] = p; W(0, h);
   });
-  L("fclose", [] { auto it = files.find(R(0)); if (it != files.end()) { fclose(it->second); files.erase(it); } W(0, 0); });
+  L("fclose", [] {
+    const u32 handle=R(0); auto it=files.find(handle); int result=0;
+    if (it!=files.end()) {
+      result=fclose(it->second); files.erase(it);
+      auto name=filePaths.find(handle);
+      if (name!=filePaths.end()) {
+        destinia::sessionLog.write("ARQUIVO fechado: "+name->second+" resultado="+std::to_string(result),true);
+        filePaths.erase(name);
+      }
+    }
+    W(0,static_cast<u32>(result));
+  });
   L("fread", [] {
-    auto it = files.find(R(3)); if (it == files.end()) { W(0, 0); return; }
-    u32 sz = R(1), cnt = R(2); std::vector<uint8_t> b((size_t)sz * cnt);
-    size_t got = fread(b.data(), sz ? sz : 1, cnt, it->second);
-    wr(R(0), b.data(), got * sz); W(0, (u32)got);
+    const u32 size=R(1),count=R(2);
+    if (!size || !count) { W(0,0); return; }
+    auto it=files.find(R(3)); if (it==files.end()) { W(0,0); return; }
+    const uint64_t bytes=uint64_t(size)*count;
+    if (bytes>HEAP_SIZE) { hostReport("[host] fread excede limite de memoria\n"); fatal=true; uc_emu_stop(uc); W(0,0); return; }
+    std::vector<uint8_t> buffer(static_cast<size_t>(bytes));
+    const size_t got=fread(buffer.data(),size,count,it->second);
+    if (!wr(R(0),buffer.data(),got*size)) { hostReport("[host] fread: destino ARM invalido\n"); fatal=true; uc_emu_stop(uc); W(0,0); return; }
+    W(0,static_cast<u32>(got));
   });
   L("fwrite", [] {
-    auto it = files.find(R(3)); if (it == files.end()) { W(0, 0); return; }
-    u32 sz = R(1), cnt = R(2); std::vector<uint8_t> b((size_t)sz * cnt); rd(R(0), b.data(), b.size());
-    W(0, (u32)fwrite(b.data(), sz ? sz : 1, cnt, it->second));
+    const u32 size=R(1),count=R(2),handle=R(3);
+    if (!size || !count) { W(0,0); return; }
+    auto it=files.find(handle); if (it==files.end()) { W(0,0); return; }
+    const uint64_t bytes=uint64_t(size)*count;
+    if (bytes>HEAP_SIZE) { hostReport("[host] fwrite excede limite de memoria\n"); fatal=true; uc_emu_stop(uc); W(0,0); return; }
+    std::vector<uint8_t> buffer(static_cast<size_t>(bytes));
+    if (!rd(R(0),buffer.data(),buffer.size())) { hostReport("[host] fwrite: origem ARM invalida\n"); fatal=true; uc_emu_stop(uc); W(0,0); return; }
+    const size_t written=fwrite(buffer.data(),size,count,it->second);
+    destinia::sessionLog.write("SAVE escrita observada: "+filePaths[handle]+" bytes="+std::to_string(written*size)+" solicitados="+std::to_string(bytes),true);
+    W(0,static_cast<u32>(written));
   });
   L("fseek", [] { auto it = files.find(R(0)); W(0, it == files.end() ? (u32)-1 : (u32)fseek(it->second, (long)(int)R(1), (int)R(2))); });
   L("ftell", [] { auto it = files.find(R(0)); W(0, it == files.end() ? (u32)-1 : (u32)ftell(it->second)); });
   L("remove", [] { std::string p = hostPath(cstr(R(0))); W(0, (u32)remove(p.c_str())); });
-  L("__android_log_print", [] { if (verbose) { std::string s = fmtPrintf(R(2), 3); fprintf(stderr, "[jogo:%s] %s\n", cstr(R(1)).c_str(), s.c_str()); } });
-  L("__stack_chk_fail", [] { fprintf(stderr, "[host] __stack_chk_fail chamado (pilha corrompida)\n"); fatal = true; uc_emu_stop(uc); });
+  L("__android_log_print", [] {
+    const std::string message=fmtPrintf(R(2),3),tag=cstr(R(1));
+    if(verbose) hostReport("[jogo:%s] %s\n",tag.c_str(),message.c_str());
+    else destinia::sessionLog.write("JOGO ["+tag+"] "+message,R(0)>=6);
+  });
+  L("__stack_chk_fail", [] { hostReport("[host] __stack_chk_fail chamado (pilha corrompida)\n"); fatal = true; uc_emu_stop(uc); });
   L("__aeabi_unwind_cpp_pr0", [] {});
   L("__aeabi_unwind_cpp_pr1", [] {});
   L("__aeabi_idiv", [] { int a = (int)R(0), b = (int)R(1); W(0, b ? (u32)(a / b) : 0); });
@@ -1439,7 +1467,8 @@ static void setupStubs() {
       std::string nm = arrText(R(3)); std::vector<uint8_t> data;
       if (!readFile(assetsDir + "/" + nm, data)) { note("getAssetRes " + nm + " -> NAO EXISTE"); W(0, 0); return; }
       bool translated = applyPortugueseText(nm, data);
-      if (translated) fprintf(stderr, "[host] textos PT aplicados em %s\n", nm.c_str());
+      if (translated) hostReport("[host] textos PT aplicados em %s\n", nm.c_str());
+      destinia::sessionLog.write("ASSET carregado: "+nm+" bytes="+std::to_string(data.size()));
       u32 h = nextArr++; arrays[h] = std::move(data); W(0, h);
     } else { note("CallStaticObjectMethod metodo desconhecido " + std::to_string(mid)); W(0, 0); }
   });
@@ -1483,11 +1512,6 @@ static void setupStubs() {
 static u32 stubAddr(u32 id) { return STUB_BASE + id * 4; }
 
 // ---------------------------------------------------------------- carregador ELF
-struct Ehdr { uint8_t ident[16]; uint16_t type, machine; u32 version, entry, phoff, shoff, flags; uint16_t ehsize, phentsize, phnum, shentsize, shnum, shstrndx; };
-struct Phdr { u32 type, offset, vaddr, paddr, filesz, memsz, flags, align; };
-struct Dyn { int32_t tag; u32 val; };
-struct Sym { u32 name, value, size; uint8_t info, other; uint16_t shndx; };
-struct Rel { u32 offset, info; };
 
 static std::map<std::string, u32> exportsMap;
 
@@ -1543,7 +1567,7 @@ static void stopTraceViewportRecording(const char* reason) {
   }
   traceViewportDimensions(reason);
   traceViewportLog.flush();
-  fprintf(stderr, "[trace] viewport recording stopped (%s).\n", reason);
+  hostReport("[trace] viewport recording stopped (%s).\n", reason);
 }
 
 static void traceViewportWriteFrameSummary(long frame) {
@@ -1665,7 +1689,7 @@ static bool installTraceViewportHook(const char* symbol) {
 static bool startTraceViewport() {
   std::error_code ec;
   fs::create_directories(traceViewportOutDir, ec);
-  if (ec) { fprintf(stderr, "[trace] nao consegui criar %s: %s\n", traceViewportOutDir.c_str(), ec.message().c_str()); return false; }
+  if (ec) { hostReport("[trace] nao consegui criar %s: %s\n", traceViewportOutDir.c_str(), ec.message().c_str()); return false; }
   const auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now().time_since_epoch()).count();
   const fs::path path = fs::path(traceViewportOutDir) /
@@ -1673,13 +1697,13 @@ static bool startTraceViewport() {
   fs::path uniquePath = path;
   unsigned int suffix = 1;
   while (fs::exists(uniquePath, ec)) {
-    if (ec) { fprintf(stderr, "[trace] erro verificando %s: %s\n", uniquePath.string().c_str(), ec.message().c_str()); return false; }
+    if (ec) { hostReport("[trace] erro verificando %s: %s\n", uniquePath.string().c_str(), ec.message().c_str()); return false; }
     uniquePath = fs::path(traceViewportOutDir) /
         ("viewport_trace_" + std::to_string(millis) + "_" + std::to_string(suffix++) + ".log");
   }
-  if (ec) { fprintf(stderr, "[trace] erro verificando %s: %s\n", uniquePath.string().c_str(), ec.message().c_str()); return false; }
+  if (ec) { hostReport("[trace] erro verificando %s: %s\n", uniquePath.string().c_str(), ec.message().c_str()); return false; }
   traceViewportLog.open(uniquePath, std::ios::out | std::ios::trunc);
-  if (!traceViewportLog) { fprintf(stderr, "[trace] nao consegui abrir %s\n", uniquePath.string().c_str()); return false; }
+  if (!traceViewportLog) { hostReport("[trace] nao consegui abrir %s\n", uniquePath.string().c_str()); return false; }
   traceViewportLog << "# Destinia host_zoom viewport trace (passive)\n"
                    << "# frame limit per F9 recording=" << traceViewportFrames
                    << " event limit per function per recording=" << TRACE_VIEWPORT_MAX_EVENTS_PER_FUNCTION
@@ -1694,7 +1718,7 @@ static bool startTraceViewport() {
   for (const char* symbol : TRACE_VIEWPORT_FUNCTIONS)
     installTraceViewportHook(symbol);
   traceViewportDimensions("before-init");
-  fprintf(stderr, "[trace] viewport pronto: %s; pressione F9 para iniciar/parar o registro (limite %ld quadros por captura).\n",
+  hostReport("[trace] viewport pronto: %s; pressione F9 para iniciar/parar o registro (limite %ld quadros por captura).\n",
           uniquePath.string().c_str(), traceViewportFrames);
   return true;
 }
@@ -1703,81 +1727,67 @@ static u32 resolveImport(const std::string& name) {
   if (name == "__stack_chk_guard") return GUARD;
   auto it = importId.find(name);
   if (it != importId.end()) return stubAddr(it->second);
+  if (nextMissing>=STUB_COUNT) throw std::runtime_error("Limite de imports ELF excedido");
   u32 id = nextMissing++;
-  stubSet(id, "FALTANDO:" + name, [name] { fprintf(stderr, "[host] a .so chamou a funcao nao implementada: %s\n", name.c_str()); fatal = true; uc_emu_stop(uc); });
+  stubSet(id, "FALTANDO:" + name, [name] { hostReport("[host] a .so chamou a funcao nao implementada: %s\n", name.c_str()); fatal = true; uc_emu_stop(uc); });
   importId[name] = id;
-  fprintf(stderr, "[host] aviso: importacao sem implementacao: %s\n", name.c_str());
+  hostReport("[host] aviso: importacao sem implementacao: %s\n", name.c_str());
   return stubAddr(id);
 }
 
 static bool loadSo(const std::string& path) {
-  std::vector<uint8_t> file;
-  if (!readFile(path, file)) { fprintf(stderr, "Nao consegui abrir %s\n", path.c_str()); return false; }
-  if (file.size() < sizeof(Ehdr) || memcmp(file.data(), "\x7f" "ELF", 4) != 0) { fprintf(stderr, "Nao e um ELF.\n"); return false; }
-  Ehdr eh; memcpy(&eh, file.data(), sizeof eh);
-  if (eh.machine != 40) { fprintf(stderr, "ELF nao e ARM (machine=%d)\n", eh.machine); return false; }
-  u32 span = 0;
-  std::vector<Phdr> ph(eh.phnum);
-  for (int i = 0; i < eh.phnum; i++) { memcpy(&ph[i], file.data() + eh.phoff + i * eh.phentsize, sizeof(Phdr)); if (ph[i].type == 1) span = std::max(span, ph[i].vaddr + ph[i].memsz); }
-  span = (span + 0xFFF) & ~0xFFFu;
-  std::vector<uint8_t> img(span, 0);
-  u32 dynAddr = 0;
-  for (auto& p : ph) {
-    if (p.type == 1) memcpy(img.data() + p.vaddr, file.data() + p.offset, p.filesz);
-    if (p.type == 2) dynAddr = p.vaddr;
-  }
-  if (!dynAddr) { fprintf(stderr, "Sem secao dinamica.\n"); return false; }
-  u32 hash = 0, strtab = 0, symtab = 0, rel = 0, relsz = 0, jmprel = 0, pltrelsz = 0;
-  for (Dyn d; ; dynAddr += 8) {
-    memcpy(&d, img.data() + dynAddr, 8);
-    if (d.tag == 0) break;
-    if (d.tag == 4) hash = d.val; else if (d.tag == 5) strtab = d.val; else if (d.tag == 6) symtab = d.val;
-    else if (d.tag == 17) rel = d.val; else if (d.tag == 18) relsz = d.val; else if (d.tag == 23) jmprel = d.val; else if (d.tag == 2) pltrelsz = d.val;
-  }
-  u32 nsyms; memcpy(&nsyms, img.data() + hash + 4, 4);  // DT_HASH: nchain = numero de simbolos
-  auto sym = [&](u32 i) { Sym s; memcpy(&s, img.data() + symtab + i * 16, 16); return s; };
-  auto symName = [&](const Sym& s) { return std::string((const char*)img.data() + strtab + s.name); };
-
-  for (u32 i = 0; i < nsyms; i++) { Sym s = sym(i); if (s.shndx != 0 && s.name) exportsMap[symName(s)] = SO_BASE + s.value; }
-
-  auto applyRel = [&](u32 off, u32 sz) {
-    for (u32 i = 0; i < sz / 8; i++) {
-      Rel r; memcpy(&r, img.data() + off + i * 8, 8);
-      u32 type = r.info & 0xFF, si = r.info >> 8, *where = (u32*)(img.data() + r.offset);
-      if (type == 23) *where += SO_BASE;                                           // R_ARM_RELATIVE
-      else if (type == 21 || type == 22 || type == 2) {                            // GLOB_DAT / JUMP_SLOT / ABS32
-        Sym s = sym(si); std::string nm = symName(s);
-        u32 addr = s.shndx != 0 ? SO_BASE + s.value : resolveImport(nm);
-        if (type == 2) *where += addr; else *where = addr;
-      } else fprintf(stderr, "[host] aviso: relocacao tipo %u ignorada\n", type);
+  try {
+    if (fs::file_size(path) > destinia::ArmElfImage::maxSize) throw std::runtime_error("arquivo excede 64 MiB");
+    std::vector<uint8_t> file;
+    if (!readFile(path, file)) throw std::runtime_error("nao foi possivel abrir a biblioteca");
+    destinia::ArmElfImage image; image.parse(file);
+    for (size_t i=0;i<image.symbols.size();++i) {
+      const auto& s=image.symbols[i];
+      if (s.shndx!=0 && s.name) exportsMap[image.names[i]]=SO_BASE+s.value;
     }
-  };
-  applyRel(rel, relsz);
-  applyRel(jmprel, pltrelsz);
-
-  if (uc_mem_map(uc, SO_BASE, span, UC_PROT_ALL) != UC_ERR_OK) { fprintf(stderr, "Falha ao mapear a .so\n"); return false; }
-  wr(SO_BASE, img.data(), img.size());
-  loadedSoSpan = span;
-  fprintf(stderr, "[host] .so carregada: %u KB, %zu simbolos exportados\n", span / 1024, exportsMap.size());
-  return true;
+    for (const auto& r:image.relocations) {
+      u32 value=0; std::memcpy(&value,image.bytes.data()+r.offset,4);
+      if (r.type==23) value+=SO_BASE;
+      else if (r.type==21 || r.type==22 || r.type==2) {
+        const auto& s=image.symbols[r.symbol];
+        const u32 address=s.shndx!=0 ? SO_BASE+s.value : resolveImport(image.names[r.symbol]);
+        value=r.type==2 ? value+address : address;
+      } else { hostReport("[host] aviso: relocacao tipo %u ignorada\n",r.type); continue; }
+      std::memcpy(image.bytes.data()+r.offset,&value,4);
+    }
+    const u32 span=static_cast<u32>(image.bytes.size());
+    if (uc_mem_map(uc,SO_BASE,span,UC_PROT_ALL)!=UC_ERR_OK || !wr(SO_BASE,image.bytes.data(),span)) {
+      hostReport("[host] Falha ao mapear/carregar a .so\n"); return false;
+    }
+    loadedSoSpan=span;
+    hostReport("[host] .so carregada: %u KB, %zu simbolos exportados\n",span/1024,exportsMap.size());
+    return true;
+  } catch (const std::exception& error) {
+    hostReport("[host] ELF invalido ou indisponivel: %s\n",error.what()); return false;
+  }
 }
 
 // ---------------------------------------------------------------- execucao
 static void dumpState(const char* why) {
-  fprintf(stderr, "\n=== PROBLEMA: %s ===\n", why);
+  hostReport("\n=== PROBLEMA: %s ===\n", why);
   u32 pc = regPC();
-  fprintf(stderr, "pc=0x%08x (na .so: 0x%x, no Ghidra: 0x%x)  lr=0x%08x  sp=0x%08x\n", pc, pc - SO_BASE, pc - SO_BASE + 0x10000, regLR(), regSP());
-  for (int i = 0; i < 13; i++) fprintf(stderr, "r%d=0x%08x%s", i, R(i), (i % 4 == 3) ? "\n" : "  ");
-  fprintf(stderr, "\nultimas chamadas ao host:\n");
-  for (auto& s : ring) fprintf(stderr, "  %s\n", s.c_str());
-  fprintf(stderr, "Copie tudo isto e mande para o Claude.\n");
+  hostReport("pc=0x%08x (na .so: 0x%x, no Ghidra: 0x%x)  lr=0x%08x  sp=0x%08x\n", pc, pc - SO_BASE, pc - SO_BASE + 0x10000, regLR(), regSP());
+  for (int i = 0; i < 13; i++) hostReport("r%d=0x%08x%s", i, R(i), (i % 4 == 3) ? "\n" : "  ");
+  hostReport("\nultimas chamadas ao host:\n");
+  for (auto& s : ring) hostReport("  %s\n", s.c_str());
+  hostReport("Copie tudo isto e mande para o Claude.\n");
 }
 
 static void stubHook(uc_engine*, uint64_t address, uint32_t, void*) {
   if (address == MAGIC_RET) { hitMagic = true; uc_emu_stop(uc); return; }
   u32 id = ((u32)address - STUB_BASE) / 4;
-  if (id < STUB_COUNT && handlers[id]) handlers[id]();
-  else { fprintf(stderr, "[host] stub sem handler id=0x%x\n", id); fatal = true; uc_emu_stop(uc); }
+  if (id < STUB_COUNT && handlers[id]) {
+    try { handlers[id](); }
+    catch(const std::exception& error) {
+      fatal=true; uc_emu_stop(uc);
+      hostReport("[host] ERRO no stub %s: %s\n",stubName[id].c_str(),error.what());
+    }
+  } else { hostReport("[host] stub sem handler id=0x%x\n", id); fatal = true; uc_emu_stop(uc); }
 }
 
 static bool callFn(u32 addr, std::initializer_list<u32> args, u32* ret) {
@@ -1791,10 +1801,10 @@ static bool callFn(u32 addr, std::initializer_list<u32> args, u32* ret) {
   u32 lr = MAGIC_RET; uc_reg_write(uc, UC_ARM_REG_LR, &lr);
   hitMagic = false; fatal = false;
   uc_err e = uc_emu_start(uc, addr, MAGIC_RET, 5 * 1000 * 1000 /*5 s*/, 0);
-  if (e != UC_ERR_OK) { dumpState(uc_strerror(e)); return false; }
-  if (fatal) { dumpState("chamada fatal"); return false; }
+  if (e != UC_ERR_OK) { dumpState(uc_strerror(e)); executionFailed=true; destinia::sessionLog.write("ERRO de emulacao",true); return false; }
+  if (fatal) { dumpState("chamada fatal"); executionFailed=true; destinia::sessionLog.write("ERRO de emulacao",true); return false; }
   if (!hitMagic && (regPC() & ~1u) == MAGIC_RET) hitMagic = true;  // o Unicorn para ANTES de executar o endereco final
-  if (!hitMagic) { dumpState("tempo esgotado (a .so ficou presa num laco ou parou)"); return false; }
+  if (!hitMagic) { dumpState("tempo esgotado (a .so ficou presa num laco ou parou)"); executionFailed=true; destinia::sessionLog.write("ERRO de emulacao",true); return false; }
   if (ret) *ret = R(0);
   return true;
 }
@@ -1825,7 +1835,7 @@ static bool captureTraceViewportFrame(const std::vector<uint8_t>& frameBuffer, l
   if (frameBuffer.size() < FB_BYTES) {
     traceViewportLog << "[trace] timestamp_ms=" << traceViewportTimestampMs()
                      << " frame=" << frame << " framebuffer_bmp_error=incomplete-buffer\n";
-    fprintf(stderr, "[trace] BMP ignorado: framebuffer incompleto (%zu de %u bytes).\n",
+    hostReport("[trace] BMP ignorado: framebuffer incompleto (%zu de %u bytes).\n",
             frameBuffer.size(), FB_BYTES);
     return false;
   }
@@ -1844,7 +1854,7 @@ static bool captureTraceViewportFrame(const std::vector<uint8_t>& frameBuffer, l
       traceViewportLog << "[trace] timestamp_ms=" << traceViewportTimestampMs()
                        << " frame=" << frame << " framebuffer_bmp_error="
                        << ec.message() << "\n";
-      fprintf(stderr, "[trace] nao consegui verificar destino do BMP %s: %s\n",
+      hostReport("[trace] nao consegui verificar destino do BMP %s: %s\n",
               path.string().c_str(), ec.message().c_str());
       return false;
     }
@@ -1853,7 +1863,7 @@ static bool captureTraceViewportFrame(const std::vector<uint8_t>& frameBuffer, l
     traceViewportLog << "[trace] timestamp_ms=" << traceViewportTimestampMs()
                      << " frame=" << frame << " framebuffer_bmp_error="
                      << ec.message() << "\n";
-    fprintf(stderr, "[trace] nao consegui verificar destino do BMP %s: %s\n",
+    hostReport("[trace] nao consegui verificar destino do BMP %s: %s\n",
             path.string().c_str(), ec.message().c_str());
     return false;
   }
@@ -1861,13 +1871,13 @@ static bool captureTraceViewportFrame(const std::vector<uint8_t>& frameBuffer, l
     traceViewportLog << "[trace] timestamp_ms=" << traceViewportTimestampMs()
                      << " frame=" << frame << " framebuffer_bmp_error=write-failed path="
                      << path.string() << "\n";
-    fprintf(stderr, "[trace] falha ao gravar BMP %s\n", path.string().c_str());
+    hostReport("[trace] falha ao gravar BMP %s\n", path.string().c_str());
     return false;
   }
 
   traceViewportLog << "[trace] timestamp_ms=" << traceViewportTimestampMs()
                    << " frame=" << frame << " framebuffer_bmp=" << path.string() << "\n";
-  fprintf(stderr, "[trace] framebuffer salvo: %s\n", path.string().c_str());
+  hostReport("[trace] framebuffer salvo: %s\n", path.string().c_str());
   return true;
 }
 
@@ -1888,7 +1898,7 @@ static void toggleTraceViewportRecording(long frame, const std::vector<uint8_t>&
   traceViewportDimensions("recording-start");
   captureTraceViewportFrame(frameBuffer, frame);
   traceViewportLog.flush();
-  fprintf(stderr, "[trace] viewport recording started at frame %ld.\n", frame);
+  hostReport("[trace] viewport recording started at frame %ld.\n", frame);
 }
 
 static uint16_t read565(const uint8_t* pixels, int x, int y) {
@@ -1999,15 +2009,34 @@ static bool getCharacterExperience(uint32_t& current, uint32_t& required) {
   return true;
 }
 
+static void runtimeLogTick(long frame,double emulationMs) {
+  static double elapsed=0; static long measured=0; static std::string previous;
+  elapsed+=emulationMs; ++measured;
+  if (frame==1 || frame%16==0) {
+    std::string state="menu="+std::to_string(menuState());
+    if (gMMain) state+=" rede="+std::to_string(rd16(gMMain+14624));
+    auto game=exportsMap.find("Game");
+    if (game!=exportsMap.end()) state+=" nivel="+std::to_string(rd16(game->second+0x48FA))+" xp="+std::to_string(rd32(game->second+0x48FC));
+    auto map=exportsMap.find("curMapData");
+    if (map!=exportsMap.end()) state+=" mapa_tiles="+std::to_string(rd16(map->second))+"x"+std::to_string(rd16(map->second+2));
+    if (state!=previous) { destinia::sessionLog.write("ESTADO observado: "+state,true); previous=state; }
+  }
+  if (frame%80==0) {
+    destinia::sessionLog.write("DESEMPENHO quadro="+std::to_string(frame)+" emulacao_media_ms="+std::to_string(elapsed/measured),true);
+    elapsed=0; measured=0;
+  }
+}
+
 // ---------------------------------------------------------------- principal
-int main(int argc, char** argv) {
+static int runHost(int argc, char** argv) {
   bool fullscreen = false;
-  int scale = 3, headlessFrames = 0; std::string outDir = "frames";
+  int scale = 3, headlessFrames = 0; std::string outDir = "frames", reportsDir;
   for (int i = 1; i < argc; i++) {
     std::string a = argv[i];
-    auto next = [&]() { return i + 1 < argc ? std::string(argv[++i]) : std::string(); };
+    auto next = [&]() { if(i+1>=argc) throw std::runtime_error("Argumento sem valor: "+a); return std::string(argv[++i]); };
     if (a == "--game") gameDir = next(); else if (a == "--so") soPath = next(); else if (a == "--save") saveDir = next();
     else if (a == "--scale") scale = atoi(next().c_str()); else if (a == "--headless") headlessFrames = atoi(next().c_str());
+    else if (a == "--reports") reportsDir = next();
     else if (a == "--out") outDir = next(); else if (a == "-v") verbose = true;
     else if (a == "--fullscreen") fullscreen = true;
     else if (a == "--probe") probe = true;
@@ -2028,13 +2057,24 @@ int main(int argc, char** argv) {
     else if (a == "--trace-out") traceViewportOutDir = next();
     else if (a == "--autotap") { if (sscanf(next().c_str(), "%d,%d,%d", &autoFrame, &autoX, &autoY) != 3) { printf("--autotap precisa de QUADRO,X,Y\n"); return 0; } }
     else if (a == "--autotap2") { if (sscanf(next().c_str(), "%d,%d,%d", &autoFrame2, &autoX2, &autoY2) != 3) { printf("--autotap2 precisa de QUADRO,X,Y\n"); return 0; } }
-    else { printf("Uso: destinia_host [--game PASTA] [--so ARQUIVO] [--save PASTA] [--scale N] [--fullscreen] [--lang pt] [--headless QUADROS --out PASTA] [--trace-viewport --trace-frames N --trace-out PASTA] [-v] [--probe] [--profile] [--mute] [--autotap QUADRO,X,Y] [--autotap2 QUADRO,X,Y]\n"); return 0; }
+    else { printf("Uso: destinia_host [--game PASTA] [--so ARQUIVO] [--save PASTA] [--reports PASTA] [--scale N] [--fullscreen] [--lang pt] [--headless QUADROS --out PASTA] [--trace-viewport --trace-frames N --trace-out PASTA] [-v] [--probe] [--profile] [--mute] [--autotap QUADRO,X,Y] [--autotap2 QUADRO,X,Y]\n"); return 0; }
   }
+  const fs::path reports=reportsDir.empty()?destinia::defaultReportsDir():fs::path(reportsDir);
+  if(destinia::sessionLog.start(reports,"host_zoom")) hostReport("[host] Log TXT: %s\n",(destinia::sessionLog.directory()/"log.txt").string().c_str());
+  hostReport("[host] Destinia 0.5 Beta - host_zoom\n");
+  if(saveDir.empty()) saveDir=destinia::configuredSaveDir().string();
+  saveDir=fs::absolute(saveDir).lexically_normal().string();
+  hostReport("[host] Save compartilhado: %s\n",saveDir.c_str());
   if (soPath.empty()) soPath = gameDir + "/lib/armeabi/libdestinia_jni.so";
   assetsDir = gameDir + "/assets";
   fs::create_directories(saveDir);
+  if(!saveLock.acquire(fs::path(saveDir)/".destinia.lock")) {
+    hostReport("[host] Nao foi possivel travar a pasta de save: outro jogo pode estar aberto ou falta acesso.\n"); return 1;
+  }
+  const auto backup=destinia::backupSave(saveDir);
+  hostReport("[host] Backup: %s\n",backup.empty()?"nenhum progresso anterior para copiar":backup.string().c_str());
 
-  if (uc_open(UC_ARCH_ARM, UC_MODE_ARM, &uc) != UC_ERR_OK) { fprintf(stderr, "uc_open falhou\n"); return 1; }
+  if (uc_open(UC_ARCH_ARM, UC_MODE_ARM, &uc) != UC_ERR_OK) { hostReport("uc_open falhou\n"); return 1; }
   uc_mem_map(uc, HEAP_BASE, HEAP_SIZE, UC_PROT_ALL);
   uc_mem_map(uc, STUB_BASE, STUB_COUNT * 4, UC_PROT_ALL);
   uc_mem_map(uc, MAGIC_RET & ~0xFFFu, 0x1000, UC_PROT_ALL);
@@ -2050,13 +2090,13 @@ int main(int argc, char** argv) {
   wr32(ENV_OBJ, ENV_TAB);
   for (int i = 0; i < JNI_FUNCS; i++) {
     u32 id = ID_JNI + i;
-    if (!handlers[id]) { stubSet(id, "JNI.#" + std::to_string(i), [i] { fprintf(stderr, "[host] JNI nao implementado: indice %d\n", i); fatal = true; uc_emu_stop(uc); }); }
+    if (!handlers[id]) { stubSet(id, "JNI.#" + std::to_string(i), [i] { hostReport("[host] JNI nao implementado: indice %d\n", i); fatal = true; uc_emu_stop(uc); }); }
     wr32(ENV_TAB + 4 * i, stubAddr(id));
   }
   wr32(VM_OBJ, VM_TAB);
   for (int i = 0; i < 8; i++) {
     u32 id = ID_VM + i;
-    if (!handlers[id]) stubSet(id, "VM.#" + std::to_string(i), [i] { fprintf(stderr, "[host] JavaVM nao implementado: indice %d\n", i); fatal = true; uc_emu_stop(uc); });
+    if (!handlers[id]) stubSet(id, "VM.#" + std::to_string(i), [i] { hostReport("[host] JavaVM nao implementado: indice %d\n", i); fatal = true; uc_emu_stop(uc); });
     wr32(VM_TAB + 4 * i, stubAddr(id));
   }
   wr32(GUARD, 0xA5C3F00D);
@@ -2065,12 +2105,12 @@ int main(int argc, char** argv) {
   uc_hook hk; uc_hook_add(uc, &hk, UC_HOOK_CODE, (void*)stubHook, nullptr, STUB_BASE, STUB_BASE + STUB_COUNT * 4 - 1);
   uc_hook hk2; uc_hook_add(uc, &hk2, UC_HOOK_CODE, (void*)stubHook, nullptr, MAGIC_RET, MAGIC_RET + 3);
   if (exportsMap["Game"] != SO_BASE + 0x77EE0 || exportsMap["curMapData"] != SO_BASE + 0x80B18) {
-    fprintf(stderr, "[host] Layout ARM incompativel com a camera do zoom.\n"); return 1;
+    hostReport("[host] Layout ARM incompativel com a camera do zoom.\n"); return 1;
   }
   uc_hook cameraHook;
   if (uc_hook_add(uc, &cameraHook, UC_HOOK_MEM_READ, (void*)cameraReadHook, nullptr,
                   SO_BASE + 0x77EE0 + 18552, SO_BASE + 0x77EE0 + 18555) != UC_ERR_OK) {
-    fprintf(stderr, "[host] Falha ao registrar centralizacao da camera.\n"); return 1;
+    hostReport("[host] Falha ao registrar centralizacao da camera.\n"); return 1;
   }
   if (fixMapEdge) {
     uc_hook hk3, hk4;
@@ -2081,7 +2121,7 @@ int main(int argc, char** argv) {
   }
 
   for (const char* n : {"Java_game_destiniaeng_GameThread_initGame", "Java_game_destiniaeng_GameThread_jniRun", "Java_game_destiniaeng_GameThread_jniTouch"})
-    if (!exportsMap.count(n)) { fprintf(stderr, "Simbolo nao encontrado: %s\n", n); return 1; }
+    if (!exportsMap.count(n)) { hostReport("Simbolo nao encontrado: %s\n", n); return 1; }
   if (traceViewport && !startTraceViewport()) return 1;
   u32 fnInit = exportsMap["Java_game_destiniaeng_GameThread_initGame"];
   u32 fnRun = exportsMap["Java_game_destiniaeng_GameThread_jniRun"];
@@ -2102,46 +2142,69 @@ int main(int argc, char** argv) {
   arrays[hScreen].assign(FB_BYTES, 0);
   if (!callFn(fnInit, {ENV_OBJ, 0x10, hId, (u32)devId.size(), hModel, (u32)model.size(), SCREEN_W, SCREEN_H, 0})) return 2;
   if (traceViewport) traceViewportDimensions("after-init");
-  fprintf(stderr, "[host] initGame ok em %dx%d. Rodando o jogo...\n", SCREEN_W, SCREEN_H);
-  fprintf(stderr, "[host] zoom out: mapas pequenos centralizados; fundo cinza; UI nativa.\n");
-  if (portugueseTextTest) fprintf(stderr, "[host] traducao PT ativa: itens, equipamentos, habilidades, menus, Fabricacao e Missoes.\n");
+  hostReport("[host] initGame ok em %dx%d. Rodando o jogo...\n", SCREEN_W, SCREEN_H);
+  hostReport("[host] zoom out: mapas pequenos centralizados; fundo cinza; UI nativa.\n");
+  if (portugueseTextTest) hostReport("[host] traducao PT ativa: itens, equipamentos, habilidades, menus, Fabricacao e Missoes.\n");
 
   // [OK] jniTouch(env,obj, x, y, tipo): tipo 0=toque 1=solta 2=move 3=tecla de menu (Thumb decodificado)
   auto touch = [&](int x, int y, int type) {
+    if(type!=2) destinia::sessionLog.write("ENTRADA toque x="+std::to_string(x)+" y="+std::to_string(y)+" tipo="+std::to_string(type));
     bool ok = callFn(fnTouch, {ENV_OBJ, 0x10, (u32)x, (u32)y, (u32)type});
-    if (probe && type != 2) { fprintf(stderr, "[sonda] jniTouch(x=%d, y=%d, tipo=%d) -> %s\n", x, y, type, ok ? "ok" : "FALHOU"); probeState(type == 0 ? "logo apos PRESSIONAR" : type == 1 ? "logo apos SOLTAR" : "logo apos tecla"); }
+    if (probe && type != 2) { hostReport("[sonda] jniTouch(x=%d, y=%d, tipo=%d) -> %s\n", x, y, type, ok ? "ok" : "FALHOU"); probeState(type == 0 ? "logo apos PRESSIONAR" : type == 1 ? "logo apos SOLTAR" : "logo apos tecla"); }
   };
 
   SDL_Window* win = nullptr; SDL_Renderer* ren = nullptr; SDL_Texture* tex = nullptr; SDL_GameController* controller = nullptr;
+  auto releaseGraphics=[&]() {
+    if (audioReady) {
+#ifdef HAS_SDL_MIXER
+      Mix_HaltMusic();
+      for (auto& p:sfxCache) Mix_FreeChunk(p.second);
+      for (auto& p:musCache) Mix_FreeMusic(p.second);
+      sfxCache.clear(); musCache.clear();
+      Mix_CloseAudio(); Mix_Quit();
+#endif
+      audioReady=false;
+    }
+    if (controller) SDL_GameControllerClose(controller);
+    if (tex) SDL_DestroyTexture(tex);
+    if (ren) SDL_DestroyRenderer(ren);
+    if (win) SDL_DestroyWindow(win);
+    if (!headlessFrames) SDL_Quit();
+  };
+  struct GraphicsGuard { std::function<void()> release; ~GraphicsGuard() { release(); } } graphicsGuard{releaseGraphics};
+
   auto setFullscreen = [&](bool enabled) {
     if (SDL_SetWindowFullscreen(win, enabled ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
-      fprintf(stderr, "[host] Nao foi possivel alternar tela cheia: %s\n", SDL_GetError());
+      hostReport("[host] Nao foi possivel alternar tela cheia: %s\n", SDL_GetError());
       return false;
     }
-    fprintf(stderr, "[host] modo de exibicao: %s (proporcao original preservada).\n", enabled ? "tela cheia" : "janela");
+    hostReport("[host] modo de exibicao: %s (proporcao original preservada).\n", enabled ? "tela cheia" : "janela");
     return true;
   };
   if (!headlessFrames) {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK) != 0) { fprintf(stderr, "SDL_Init: %s\n", SDL_GetError()); return 1; }
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK) != 0) { hostReport("SDL_Init: %s\n", SDL_GetError()); return 1; }
     if (!muteAudio) {
 #ifdef HAS_SDL_MIXER
       Mix_Init(MIX_INIT_OGG | MIX_INIT_MP3);
       if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) == 0) { Mix_AllocateChannels(16); audioReady = true; }
-      else fprintf(stderr, "[host] audio indisponivel: %s\n", Mix_GetError());
+      else hostReport("[host] audio indisponivel: %s\n", Mix_GetError());
 #else
-      fprintf(stderr, "[host] audio indisponivel: compile com SDL2_mixer para habilitar o som.\n");
+      hostReport("[host] audio indisponivel: compile com SDL2_mixer para habilitar o som.\n");
 #endif
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  // pixels nitidos
-    win = SDL_CreateWindow("Destinia 0.4 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_W, WINDOW_H, SDL_WINDOW_RESIZABLE);
+    win = SDL_CreateWindow("Destinia 0.5 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_W, WINDOW_H, SDL_WINDOW_RESIZABLE);
+    if(!win) { hostReport("SDL_CreateWindow: %s\n",SDL_GetError()); return 1; }
     if (fullscreen) setFullscreen(true);
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_PRESENTVSYNC);
+    if(!ren) { hostReport("SDL_CreateRenderer: %s\n",SDL_GetError()); return 1; }
     tex = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGB565, SDL_TEXTUREACCESS_STREAMING, SCREEN_W, SCREEN_H);
-    for (int i = 0; i < SDL_NumJoysticks(); i++) { if (SDL_IsGameController(i)) { controller = SDL_GameControllerOpen(i); if (controller) { fprintf(stderr, "[host] Controle conectado: %s\n", SDL_GameControllerName(controller)); break; } } }
+    if(!tex) { hostReport("SDL_CreateTexture: %s\n",SDL_GetError()); return 1; }
+    for (int i = 0; i < SDL_NumJoysticks(); i++) { if (SDL_IsGameController(i)) { controller = SDL_GameControllerOpen(i); if (controller) { hostReport("[host] Controle conectado: %s\n", SDL_GameControllerName(controller)); break; } } }
     if (traceViewport)
-      fprintf(stderr, "[host] Teclado: WASD/setas mover, Enter/Z confirmar, Esc/X voltar, I menu, F5 save, F11 tela cheia, F9 iniciar/parar trace viewport. DualSense: analogico mover, X atacar, O voltar, triangulo menu, Share save, L1 acelerar.\n");
+      hostReport("[host] Teclado: WASD/setas mover, Enter/Z confirmar, Esc/X voltar, I menu, F5 save, F11 tela cheia, F9 iniciar/parar trace viewport. DualSense: analogico mover, X atacar, O voltar, triangulo menu, Share save, L1 acelerar.\n");
     else
-      fprintf(stderr, "[host] Teclado: WASD/setas mover, Enter/Z confirmar, Esc/X voltar, I menu, F5 save, F11 tela cheia. DualSense: analogico mover, X atacar, O voltar, triangulo menu, Share save, L1 acelerar.\n");
+      hostReport("[host] Teclado: WASD/setas mover, Enter/Z confirmar, Esc/X voltar, I menu, F5 save, F11 tela cheia. DualSense: analogico mover, X atacar, O voltar, triangulo menu, Share save, L1 acelerar.\n");
   } else fs::create_directories(outDir);
 
   auto gameViewport = [&]() {
@@ -2178,7 +2241,7 @@ int main(int argc, char** argv) {
   long profileWindowFrames = 0;
   double profileRunMs = 0.0, profileRenderMs = 0.0, profileSleepMs = 0.0, profileOtherMs = 0.0;
   double profileMaxRunMs = 0.0;
-  while (running) {
+  while (running && !executionFailed) {
     traceViewportFrame = frame;
     auto t0 = std::chrono::steady_clock::now();
     double runMs = 0.0, renderMs = 0.0, sleepMeasuredMs = 0.0;
@@ -2196,7 +2259,7 @@ int main(int argc, char** argv) {
             SDL_RenderGetLogicalSize(ren, &lw, &lh);
             int ow = 0, oh = 0;
             SDL_GetRendererOutputSize(ren, &ow, &oh);
-            fprintf(stderr, "[sonda] SDL %s botao=%d janela_px=(%d,%d) tamanho_janela=%dx%d saida_render=%dx%d tamanho_logico=%dx%d -> jogo=(%d,%d)\n",
+            hostReport("[sonda] SDL %s botao=%d janela_px=(%d,%d) tamanho_janela=%dx%d saida_render=%dx%d tamanho_logico=%dx%d -> jogo=(%d,%d)\n",
                     ev.type == SDL_MOUSEBUTTONDOWN ? "BAIXO" : "CIMA", (int)ev.button.button, wx, wy, ww, wh, ow, oh, lw, lh, x, y);
           }
           if (ev.type == SDL_MOUSEBUTTONDOWN && ev.button.button == SDL_BUTTON_LEFT && inside) { mouseDown = true; touch(x, y, 0); }
@@ -2226,15 +2289,15 @@ int main(int argc, char** argv) {
         }
         else if (ev.type == SDL_CONTROLLERDEVICEADDED && !controller) {
           controller = SDL_GameControllerOpen(ev.cdevice.which);
-          if (controller) fprintf(stderr, "[host] Controle plugado: %s\n", SDL_GameControllerName(controller));
+          if (controller) hostReport("[host] Controle plugado: %s\n", SDL_GameControllerName(controller));
         }
         else if (ev.type == SDL_CONTROLLERDEVICEREMOVED && controller) {
-          fprintf(stderr, "[host] Controle desplugado.\n");
+          hostReport("[host] Controle desplugado.\n");
           SDL_GameControllerClose(controller); controller = nullptr;
         }
         else if (ev.type == SDL_CONTROLLERBUTTONDOWN || ev.type == SDL_CONTROLLERBUTTONUP) {
           int b = ev.cbutton.button; bool down = ev.type == SDL_CONTROLLERBUTTONDOWN;
-          if (probe && down) fprintf(stderr, "[sonda] Controle BOTAO: %d\n", b);
+          if (probe && down) hostReport("[sonda] Controle BOTAO: %d\n", b);
           if (b == SDL_CONTROLLER_BUTTON_BACK) { if (down) touch(0, 0, 3); }
           else if (b == SDL_CONTROLLER_BUTTON_A) gameKey(17, down);
           else if (b == SDL_CONTROLLER_BUTTON_B) gameKey(10, down);
@@ -2273,11 +2336,13 @@ int main(int argc, char** argv) {
         }
       }
     }
+    if(executionFailed) break;
     // [SONDA] toque sintetico de teste (so com --autotap): pressiona no quadro N e solta 3 quadros depois
     if (autoFrame >= 0 && frame == autoFrame) touch(autoX, autoY, 0);
     if (autoFrame >= 0 && frame == autoFrame + 3) touch(autoX, autoY, 1);
     if (autoFrame2 >= 0 && frame == autoFrame2) touch(autoX2, autoY2, 0);
     if (autoFrame2 >= 0 && frame == autoFrame2 + 3) touch(autoX2, autoY2, 1);
+    if(executionFailed) break;
     // [OK] jniRun(env,obj, byte[] framebuffer, int contador) -> ms ate o proximo quadro (0 = sair)
     u32 wait = 0;
     const auto runStart = std::chrono::steady_clock::now();
@@ -2299,30 +2364,31 @@ int main(int argc, char** argv) {
                        ? std::max<u32>(cash, 170000)
                        : cash + pendingCashAmount;
         if (!callFn(fnSetCash, {next})) break;
-        fprintf(stderr, "[host] cash local %u -> %u.\n", cash, next);
+        hostReport("[host] cash local %u -> %u.\n", cash, next);
         if (purchaseCancelTest) {
           if (!fnProcCommMsg) {
-            fprintf(stderr, "[host] erro: procCommMsg nao foi exportada; teste de cancelamento indisponivel.\n");
+            hostReport("[host] erro: procCommMsg nao foi exportada; teste de cancelamento indisponivel.\n");
             break;
           }
-          fprintf(stderr, "[host] teste: enviando resposta nativa de compra cancelada (-10); pode surgir aviso ou ocorrer crash.\n");
+          hostReport("[host] teste: enviando resposta nativa de compra cancelada (-10); pode surgir aviso ou ocorrer crash.\n");
           if (!callFn(fnProcCommMsg, {ENV_OBJ, 0x10, 1, static_cast<u32>(-10)})) break;
         } else {
-          fprintf(stderr, "[host] resposta da loja nao simulada (spinner pode permanecer).\n");
+          hostReport("[host] resposta da loja nao simulada (spinner pode permanecer).\n");
         }
       } else {
-        fprintf(stderr, "[host] erro: getMyCash/setMyCash nao exportadas; cash nao foi alterado.\n");
+        hostReport("[host] erro: getMyCash/setMyCash nao exportadas; cash nao foi alterado.\n");
       }
       pendingCashAmount = 0;
     }
     frame++;
+    runtimeLogTick(frame,runMs);
     probeTick(frame);
     cameraTick(frame);
     if (traceViewportRecording &&
         frame - traceViewportStartFrame >= traceViewportFrames)
       stopTraceViewportRecording("frame-limit");
     if (wait == 0) {
-      fprintf(stderr, "[host] o jogo pediu para encerrar.\n");
+      hostReport("[host] o jogo pediu para encerrar.\n");
       if (traceViewportRecording) stopTraceViewportRecording("game-exit");
       break;
     }
@@ -2340,7 +2406,7 @@ int main(int argc, char** argv) {
       if (frame >= headlessFrames) break;
     } else {
       const auto renderStart = std::chrono::steady_clock::now();
-      SDL_UpdateTexture(tex, nullptr, fb, SCREEN_W * 2);
+      if(SDL_UpdateTexture(tex,nullptr,fb,SCREEN_W*2)!=0) { hostReport("SDL_UpdateTexture: %s\n",SDL_GetError()); executionFailed=true; break; }
       int ow = 0, oh = 0;
       SDL_GetRendererOutputSize(ren, &ow, &oh);
       SDL_Rect dst = gameViewport();
@@ -2374,7 +2440,7 @@ int main(int argc, char** argv) {
       const double profileSeconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - profileWindowStart).count();
       if (profileSeconds >= 5.0) {
         const double divisor = static_cast<double>(profileWindowFrames);
-        fprintf(stderr,
+        hostReport(
                 "[perfil] %.1fs: %.1f FPS | por quadro (ms): emulacao %.2f media/%.2f max; render %.2f; espera %.2f; restante %.2f\n",
                 profileSeconds, profileWindowFrames / profileSeconds,
                 profileRunMs / divisor, profileMaxRunMs, profileRenderMs / divisor,
@@ -2386,20 +2452,21 @@ int main(int argc, char** argv) {
     }
   }
   if (traceViewportRecording) stopTraceViewportRecording("host-exit");
-  if (headlessFrames) fprintf(stderr, "[host] %ld quadros executados. Imagens em %s\n", frame, outDir.c_str());
-  if (!headlessFrames) {
-    if (audioReady) {
-#ifdef HAS_SDL_MIXER
-      Mix_HaltMusic();
-      for (auto& p : sfxCache) Mix_FreeChunk(p.second);
-      for (auto& p : musCache) Mix_FreeMusic(p.second);
-      Mix_CloseAudio();
-      Mix_Quit();
-#endif
-    }
-    if (controller) SDL_GameControllerClose(controller);
-    SDL_DestroyTexture(tex); SDL_DestroyRenderer(ren); SDL_DestroyWindow(win); SDL_Quit();
-  }
-  uc_close(uc);
-  return 0;
+  if (headlessFrames) hostReport("[host] %ld quadros executados. Imagens em %s\n", frame, outDir.c_str());
+  return executionFailed ? 2 : 0;
+}
+
+
+int main(int argc,char** argv) {
+  if(argc==2 && std::strcmp(argv[1],"--version")==0) { std::puts("Destinia 0.5 Beta"); return 0; }
+  int result=1;
+  try { result=runHost(argc,argv); }
+  catch(const std::exception& error) { hostReport("[host] ERRO: %s\n",error.what()); }
+  for(auto& file:files) if(std::fclose(file.second)!=0) { hostReport("[host] ERRO ao fechar arquivo pendente\n"); result=1; }
+  files.clear(); filePaths.clear();
+  saveLock.release();
+  if(uc) uc_close(uc);
+  destinia::sessionLog.write("FIM DA SESSAO codigo="+std::to_string(result),true);
+  destinia::sessionLog.close();
+  return result;
 }

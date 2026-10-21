@@ -1,12 +1,12 @@
-# Instalação e compilação — Destinia 0.4 Beta
+# Instalação e compilação — Destinia 0.5 Beta
 
 > **Versão Beta: pode conter diversos bugs. Faça backup dos saves.**
 
-## O que está disponível nesta release de fontes
+## O que está disponível nesta candidata de fontes
 
-`destinia-0.4-beta-source.zip` contém os fontes dos dois hosts, seus CMakeLists, launchers normais de desenvolvimento e documentação. **Não contém executável Windows nem os dados originais do jogo.** Extrair o ZIP não instala um jogo pronto para jogar.
+`destinia-0.5-beta-source.zip` contém os fontes dos dois hosts, seus CMakeLists, launchers normais de desenvolvimento e documentação. **Não contém executável Windows nem os dados originais do jogo.** Extrair o ZIP não instala um jogo pronto para jogar.
 
-Não há um instalador, assinatura digital ou pacote de DLLs validado nesta entrega. Um ZIP Windows executável só deve ser publicado depois das verificações em máquina limpa descritas em `docs/RELEASE_0.4.md`.
+Não há um instalador, assinatura digital ou pacote de DLLs validado nesta entrega. Um ZIP Windows executável só deve ser publicado depois das verificações em máquina limpa descritas em `docs/RELEASE_0.5.md`.
 
 ## Requisitos para compilar no Windows
 
@@ -46,7 +46,7 @@ Saídas esperadas após compilação bem-sucedida:
 - `host/build/destinia_host.exe`
 - `host_zoom/build/destinia_host.exe`
 
-Essas compilações ainda precisam ser executadas no Windows para validar esta candidata.
+Os fontes foram compilados e testados em Linux. As compilações e o funcionamento ainda precisam de confirmação no Windows para validar esta candidata.
 
 ## Dados necessários em execução
 
@@ -69,8 +69,8 @@ A biblioteca ARM e os assets são necessários para iniciar. `res/raw` fornece m
 A partir da raiz, no terminal UCRT64:
 
 ```sh
-./host/build/destinia_host.exe --game ./game --save ./save_release_02_host
-./host_zoom/build/destinia_host.exe --game ./game --save ./save_release_02_zoom --lang pt
+./host/build/destinia_host.exe --game ./game --save ./save_release_05_host
+./host_zoom/build/destinia_host.exe --game ./game --save ./save_release_05_zoom --lang pt
 ```
 
 Essas pastas são criadas pelo host. Para testar progresso existente, copie primeiro o save completo para uma nova pasta e aponte `--save` para essa cópia. Não teste a candidata sobre o único save de uma partida.
@@ -78,10 +78,16 @@ Essas pastas são criadas pelo host. Para testar progresso existente, copie prim
 Os launchers normais `Abrir Destinia.bat` e `Abrir Destinia Zoom 800x480.bat`:
 - procuram o binário em `host/build` ou `host_zoom/build`;
 - exigem `C:\msys64\ucrt64\bin\SDL2.dll` e acrescentam essa pasta ao PATH;
-- usam o save compartilhado `%LOCALAPPDATA%\Destinia\save`;
+- respeitam a configuração global de save; o padrão continua sendo `%LOCALAPPDATA%\Destinia\save`;
 - não compilam automaticamente e não ativam tradução PT no launcher de zoom.
 
 Os scripts antigos de teste de tradução/compra do repositório completo ainda procuram `host_zoom/save_zoom800`. Essa origem pode não refletir a partida atual. Eles não estão no ZIP curado; não migre nem sobrescreva saves para satisfazer esses scripts.
+
+## Progresso entre updates, backups e logs
+
+Abra **Configurar pasta de saves.bat** para apontar os dois hosts à pasta que já contém sua partida. O caminho fica no arquivo global `%LOCALAPPDATA%\Destinia\config.ini`, fora da pasta de instalação; não é preciso copiá-lo a cada update. O configurador não transfere nem sobrescreve arquivos de progresso. Para compartilhar com as versões antigas 0.2–0.4, mantenha o caminho padrão, que elas já usam.
+
+O host cria um backup verificado antes de carregar o save, guarda dez snapshots ao lado da pasta selecionada e registra a sessão em `relatorios/jogo_HOST_DATA/log.txt`. Use os inicializadores normais para jogar; o diagnóstico continua usando cópias separadas. Veja [instruções completas de seleção, prioridade, restauração e limites do log](docs/SAVES_E_LOGS.md).
 
 ## Controles
 
@@ -96,11 +102,11 @@ Em `host_zoom`, F9 inicia/para a gravação quando iniciado com `--trace-viewpor
 - Sem áudio: verifique SDL2_mixer, codecs, `res/raw` e a ausência de `--mute`.
 - Tela ou clique incorreto: informe host, resolução da janela, escala DPI do Windows e passos de reprodução.
 - Compra aguardando indefinidamente ou mapa duplicado: são problemas conhecidos; não são anunciados como corrigidos.
-- O código de saída atual pode ser zero mesmo após uma falha emulada; confira também o log.
+- Na candidata 0.5, falhas emuladas e de inicialização retornam erro. Confira também o TXT da sessão; código zero não valida visualmente o jogo nem elimina avisos.
 
 Não inclua saves pessoais em um relatório público sem revisá-los.
 
-## Zoom out da 0.4
+## Zoom out preservado da 0.4 na candidata 0.5
 
 O host_zoom renderiza em **800×480**: mostra uma área maior do mapa e a UI original ocupa uma fração menor da tela. O contador de XP usa fonte ajustada para manter aproximadamente o tamanho visual da 0.3 na mesma resolução de monitor. Não há escala de UI configurável nesta versão; legibilidade e cliques precisam de confirmação no Windows.
 

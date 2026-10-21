@@ -4,6 +4,35 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.5 Beta — candidata em validação (21/10/2026)
+
+### Logs e proteção do progresso
+
+- Log TXT automático dos dois hosts em `relatorios`, com identificação da sessão, entradas e eventos observáveis, mensagens Android nativas sem exigir `-v`, arquivos/recursos, escritas de save, estados amostrados, desempenho resumido e erros. Não há decodificação completa dos eventos internos ARM nem despejo de todos os quadros.
+- Rotação de três arquivos de até 2 MiB por sessão e retenção de dez sessões por host, preservando sessões ativas. `--reports` permite escolher o destino; avisos de disco/permissão não interrompem o jogo somente por falha do logger.
+- Backup verificado dos arquivos existentes antes da inicialização da partida, com dez snapshots por pasta de save. Falha na cópia impede carregar o progresso existente, preservando a origem e os snapshots completos anteriores.
+- Trava por pasta para impedir que dois hosts novos escrevam a mesma partida simultaneamente; arquivo de trava é liberado pelo sistema ao encerrar e não acompanha backups. Versões antigas não respeitam essa proteção.
+
+### Save compartilhado entre updates
+
+- Adicionado `Configurar pasta de saves.bat` e configuração global em `%LOCALAPPDATA%\Destinia\config.ini`, usada por normal, zoom e instalações futuras compatíveis, sem copiar/apagar/mesclar partidas.
+- Padrão `%LOCALAPPDATA%\Destinia\save` preservado, permitindo compartilhar também com a 0.2–0.4. Configuração personalizada só é lida pelos hosts novos; o configurador explica essa diferença e preserva a configuração anterior.
+- Precedência: `--save`, `DESTINIA_SAVE_DIR`, configuração global, padrão. Configuração inválida não inicia silenciosamente outra partida.
+- Inicializadores verificam a identificação 0.5 via `--version` e orientam recompilar EXEs antigos; deixam de fixar `--save`, respeitando a seleção global. Diagnóstico obtém a origem pela mesma configuração, mantém clones isolados e reúne os novos TXT dentro da sessão de teste.
+
+### Estabilidade
+
+- fread/fwrite de tamanho ou contagem zero retornam zero sem acessar o buffer ARM; tamanho total e erros de acesso à memória passam a ser verificados nesses caminhos.
+- Carregador valida ELF32 ARM little-endian, segmentos, limites de memória, metadados dinâmicos, strings, símbolos e relocações antes de aplicá-las. Leituras sem limite/terminador e alocações excessivas são recusadas com mensagem.
+- Falhas de janela, renderer e textura SDL são tratadas com liberação dos recursos criados. Falhas de execução emulada, inclusive em entradas, passam a propagar código de erro ao final.
+- Encerramento fecha arquivos e libera a trava após a última escrita pendente. Exceções de stubs são contidas na fronteira do callback C do Unicorn; erros tratados geram mensagem e código de falha.
+
+### Preparação e limites
+
+- Testes de falhas dos dois hosts e de retenção/backup/configuração adicionados; documentação, versionamento e manifesto de fontes atualizados para a candidata 0.5.
+- Compilação e verificações locais com biblioteca ARM real; gameplay/UI/áudio no Windows e a publicação da release continuam pendentes. Detalhes em `docs/RELEASE_0.5.md`.
+- Gameplay, zoom/câmera/UI, ritmo nativo e fluxo de compras/rede preservados. Sem EXEs Windows prontos, dados originais, saves ou dependências externas no pacote.
+
 ## Não lançado — documentação do planejamento (21/10/2026)
 
 - README e roadmap atualizados com as 37 melhorias aprovadas, organizadas por dificuldade e dependências em metas provisórias de 0.5 a 0.12.

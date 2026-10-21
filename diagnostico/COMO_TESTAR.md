@@ -4,13 +4,13 @@ Execute **Testar Destinia.bat**, na raiz do projeto, com o jogo fechado. O BAT c
 
 Sao necessarios os executaveis compilados em `host/build/destinia_host.exe` e `host_zoom/build/destinia_host.exe`, os dados originais em `game` e as dependencias do jogo instaladas separadamente, conforme o README. Se faltar um executavel, o script informa a falha; nao compila nem baixa arquivos. O caminho padrao de runtime e `C:\msys64\ucrt64\bin`.
 
-Ao baixar o pacote de testes, extraia todos os arquivos **na raiz do projeto existente**, mantendo a subpasta diagnostico. O pacote nao inclui o jogo, executaveis nem dependencias externas.
+Ao baixar o pacote de testes, extraia todos os arquivos **na raiz do projeto existente**, mantendo as subpastas diagnostico e scripts (incluindo scripts/shared_saves.ps1). O pacote nao inclui o jogo, executaveis nem dependencias externas.
 
 ## Teste da correcao de camera do host_zoom
 
 No duplo clique, escolha **1 — Camera host_zoom**. A opcao 2 conserva o roteiro geral. Argumentos pelo Prompt continuam funcionando sem menu.
 
-Na 0.4 os BMPs do zoom sao 800x480. Mapas pequenos devem estar centralizados, com margens cinzas; confira UI menor e tamanho de XP.
+Na candidata 0.5 os BMPs do zoom continuam sendo 800x480, como na 0.4. Mapas pequenos devem estar centralizados, com margens cinzas; confira UI menor e tamanho de XP.
 
 Este modo verifica a inicializacao apenas do host_zoom, abre uma copia isolada do save e ativa `--trace-camera` junto com o trace de viewport. A correcao de enquadramento exige recompilar host_zoom com os fontes atuais; consulte INSTALL.md. Um EXE sem identificacao de mapas pequenos centralizados e recusado. Abre em tela cheia proporcional; F11 alterna para janela. Confira o alinhamento do mouse e Alt+Tab. Nao solicita os testes gerais nem reabertura do save.
 
@@ -72,11 +72,13 @@ ExecutionPolicy vale apenas para esse processo, sem mudar a politica do sistema.
 
 ## Saves e resultados
 
+A origem padrao e obtida da configuracao global de save: variavel DESTINIA_SAVE_DIR, config.ini e depois LOCALAPPDATA/Destinia/save. -SaveSource tem prioridade e -Fresh pede uma partida nova de teste. O diagnostico continua passando --save para os clones, sem usar a pasta principal diretamente.
+
 Cada sessao cria `relatorios/testes_DATA_HORA_ID/`. Ha copias separadas para os testes automaticos e guiados de cada host. Salvar/reabrir reutiliza apenas a copia guiada. Nenhuma pasta antiga de teste e sobrescrita.
 
 O relatorio e criado no inicio, atualizado apos cada resultado e antes de abrir janelas ou fazer perguntas. Enquanto a sessao nao terminar, o texto informa PARCIAL e o JSON registra `Concluido=false`, a etapa atual e `Codigo=null`. Se fechar o terminal, os resultados ja gravados permanecem; nao devem ser tratados como uma sessao aprovada. Cada arquivo e substituido por uma nova versao completa, evitando salvar JSON pela metade durante atualizacoes normais.
 
-Os logs do processo do jogo continuam sendo gravados ao encerrar cada execucao. Um fechamento abrupto do terminal pode perder os logs dessa ultima execucao, mesmo com o relatorio parcial preservado. A deteccao de compra/rede e feita apos o retorno do processo, nao em tempo real.
+Na candidata 0.5, os TXT automaticos do host ficam em `logs_do_jogo/jogo_HOST_DATA/log.txt` dentro da sessao e sao atualizados durante o jogo, com retencao limitada. Esses TXT sao independentes da captura externa. Os logs stdout/stderr do processo continuam sendo gravados ao encerrar cada execucao. Um fechamento abrupto do terminal pode perder os logs dessa ultima execucao, mesmo com o relatorio parcial preservado. A deteccao de compra/rede e feita apos o retorno do processo, nao em tempo real.
 
 O script compara hashes da origem antes/depois. Nao restaura nem migra saves. Nao abra outra instancia sobre o save original durante o teste. Saves com links simbolicos/junctions sao recusados para evitar copiar caminhos externos.
 
@@ -87,9 +89,11 @@ Arquivos gerados:
 - `*.stdout.log` e `*.stderr.log`: logs das execucoes.
 - `*_frames/`: BMPs de inicializacao.
 - `trace_viewport/`: logs/BMPs de F9, quando usados em host_zoom.
+- `logs_do_jogo/`: logs TXT automaticos da candidata 0.5; podem ser enviados para analise.
+- `*_backups/`: snapshots dos clones de teste; contem progresso e nao precisam ser enviados.
 - `*_save_*`: copias de save; **nao enviar essas pastas**.
 
-`OK` automatico confirma somente a verificacao indicada; `MANUAL_OK` e uma resposta sua. `PENDENTE` e `NAO_TESTADO` nao significam aprovado. BMPs sao verificados quanto a formato, dimensoes e integridade basica, nao a correcao visual da cena. Como o host pode retornar zero apos uma falha, o teste tambem exige inicializacao/contagem no log, procura erros conhecidos e verifica as capturas esperadas.
+`OK` automatico confirma somente a verificacao indicada; `MANUAL_OK` e uma resposta sua. `PENDENTE` e `NAO_TESTADO` nao significam aprovado. BMPs sao verificados quanto a formato, dimensoes e integridade basica, nao a correcao visual da cena. A 0.5 corrige os caminhos de falha emulada testados, mas codigo zero nao e suficiente para validar tudo; por isso o teste tambem exige inicializacao/contagem no log, procura erros conhecidos e verifica as capturas esperadas.
 
 Codigo final 1 indica falha automatica ou manual. Codigo 0 significa que nenhuma falha foi registrada; ainda pode haver AVISOS ou pendencias, destacados no resumo. Codigo 2 e reservado a uma interrupcao detectada antes da conclusao. Um relatorio parcial com `Codigo=null` nao e sucesso. Revise relatorio/logs/capturas antes de compartilhar. Nada e enviado a internet e nenhuma dependencia e instalada.
 
