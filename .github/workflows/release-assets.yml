@@ -28,7 +28,7 @@ jobs:
           import zipfile
 
           repository = os.environ['GITHUB_REPOSITORY']
-          approved = [('0.4', '098f61fa7095004a37ae54e9b0b084b0fc26ce28')]
+          approved = [('0.4', '09be5c429e9dff2ceb502cc69f9f8374693ccd3b')]
           with tempfile.TemporaryDirectory() as directory:
               for version, commit in approved:
                   tag = 'v' + version + '-beta'
