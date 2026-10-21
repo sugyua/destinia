@@ -31,6 +31,7 @@ jobs:
         shell: msys2 {0}
         run: |
           set -eu
+          echo "DESTINIA_MSYS2_ROOT=$(cygpath -w /)" >> "$GITHUB_ENV"
           for target in host host_zoom; do
             pkg-config --modversion sdl2 SDL2_mixer unicorn
             cmake -S "$target" -B "$target/build" -G Ninja -DCMAKE_BUILD_TYPE=Release
@@ -56,7 +57,7 @@ jobs:
         shell: powershell
         run: |
           $ErrorActionPreference='Stop'
-          foreach($name in @('test_diagnostic.ps1','test_camera_mode.ps1','test_save_configuration.ps1','test_game_preferences.ps1')) {
+          foreach($name in @('test_diagnostic.ps1','test_camera_mode.ps1','test_save_configuration.ps1','test_game_preferences.ps1','test_configurator_native.ps1')) {
             & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path 'tests' $name)
             if($LASTEXITCODE -ne 0) {throw "Falhou: $name"}
           }

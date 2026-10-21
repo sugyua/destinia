@@ -65,6 +65,7 @@
     "docs/PLANO_0.6.md",
     "docs/PREFERENCIAS.md",
     "docs/RELEASE_0.6.md",
-    "release/NOTAS_0.6.md"
+    "release/NOTAS_0.6.md",
+    "tests/test_configurator_native.ps1"
   ]
 }
