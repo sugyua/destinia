@@ -1,12 +1,12 @@
-# Destinia para Windows — 0.6 Beta
+# Destinia para Windows — 0.7 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.6 Beta](https://github.com/sugyua/destinia/releases/tag/v0.6-beta)** — publicação aprovada pelo autor, com pacotes Windows x64 e código-fonte.
+**[Baixar Destinia 0.7 Beta](https://github.com/sugyua/destinia/releases/tag/v0.7-beta)** — publicação autorizada pelo autor; os pacotes de fontes e Windows x64 são publicados pelo workflow somente após os testes passarem.
 
 A 0.6 adiciona configurações persistentes, comandos remapeáveis, volumes separados, pausa opcional e distribuição Windows x64 com os dois EXEs. Veja [instalação](INSTALL.md), [preferências](docs/PREFERENCIAS.md), [changelog](CHANGELOG.md) e [verificações](docs/RELEASE_0.6.md). Dependências externas e dados originais continuam separados.
 
-[0.5](https://github.com/sugyua/destinia/releases/tag/v0.5-beta) · [0.4](https://github.com/sugyua/destinia/releases/tag/v0.4-beta) · [0.3](https://github.com/sugyua/destinia/releases/tag/v0.3-beta) · [0.2](https://github.com/sugyua/destinia/releases/tag/v0.2-beta) · [Todas as releases](https://github.com/sugyua/destinia/releases)
+[0.6](https://github.com/sugyua/destinia/releases/tag/v0.6-beta) · [0.5](https://github.com/sugyua/destinia/releases/tag/v0.5-beta) · [0.4](https://github.com/sugyua/destinia/releases/tag/v0.4-beta) · [0.3](https://github.com/sugyua/destinia/releases/tag/v0.3-beta) · [0.2](https://github.com/sugyua/destinia/releases/tag/v0.2-beta) · [Todas as releases](https://github.com/sugyua/destinia/releases)
 
 ## Arquitetura
 
@@ -35,6 +35,16 @@ O repositório atual não inclui saves pessoais, logs de partidas, relatórios l
 - Tradução opcional `--lang pt` e trace F9 com `--trace-viewport`, apenas em `host_zoom`.
 
 A presença no código não equivale a validação completa de gameplay. O host_zoom usa framebuffer 800×480 para zoom out, mapas pequenos centralizados, fundo cinza fora dos limites do mapa e UI nativa proporcionalmente menor. Oferece tela cheia com `--fullscreen` e alternância por F11. Em 3440×1440, o jogo ocupa 2400×1440 com barras laterais de 520 pixels. A correção ainda precisa de confirmação visual nas passagens do Windows; compras e rede continuam com limitações documentadas.
+
+## Novidades da 0.7
+
+- Códex de monstros acessível por botão ou F8, com estados de descoberta e contador de mortes por espécie.
+- Registro auxiliar separado por personagem na mesma pasta de save dos dois hosts; preserva o progresso entre instalações/updates sem alterar o save nativo.
+- Observação das rotinas ARM originais de desenho e confirmação de derrota; proteção contra contagem duplicada e IDs incompatíveis.
+- Interface de consulta com paginação e pausa da partida; importação de histórico antigo não está disponível.
+- O [protótipo web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site) também recebeu um botão **Códex** no topo. Na web, o progresso e o Códex continuam apenas na memória da sessão, sem áudio.
+
+Leia [CODEX.md](docs/CODEX.md), [CHANGELOG.md](CHANGELOG.md) e [RELEASE_0.7.md](docs/RELEASE_0.7.md). Não inclui novos equipamentos, novos monstros nem alterações de combate.
 
 ## Novidades da 0.6
 
@@ -85,7 +95,7 @@ Para verificar o empacotador, com Python 3.10 ou superior:
 
 ```sh
 python -m unittest discover -s tests -v
-python scripts/package_release.py --out dist/release-0.6
+python scripts/package_release.py --out dist/release-0.7
 ```
 
 No Linux, o comando pode ser `python3`. O empacotador cria ZIP e SHA-256, não compila executáveis. Não sobrescreve artefatos existentes. A reprodução byte a byte foi verificada com a mesma versão de Python/zlib; outras versões podem mudar a compressão.
@@ -112,30 +122,34 @@ A pasta global de save compartilhada entre hosts e atualizações também foi en
 - [x] **11. Volumes separados e persistentes:** música e efeitos independentes e silêncio opcional sem foco.
 - [x] **12. Pausa e liberação de comandos:** pausa manual/opcional por foco ou controle, com liberação de entradas e retomada do áudio.
 
+## Entrega parcial da 0.7 — Códex de monstros
+
+O bestiário inicial do **item 42** está implementado nos dois hosts: botão **CODEX F8** no canto superior direito, ou **F8** quando a tecla não estiver remapeada. Mostra as espécies descobertas, os estados **VISTO/DERROTADO** e **quantos monstros de cada espécie foram mortos**, com paginação. A partida pausa durante a consulta. Nomes de monstros permanecem em inglês nesta primeira etapa.
+
+Os registros ficam em **codex-v1.txt**, na pasta compartilhada de saves, separados pelo slot de personagem e gravados por substituição de arquivo temporário. Não altera o formato dos saves ARM nem recupera mortes antigas. A contagem começa na 0.7; o slot reutilizado após exclusão pelo jogo tem seus registros reiniciados. Trocar apenas de pasta de instalação preserva o Códex quando a pasta de save é a mesma.
+
+Testes automatizados cobrem registro, morte única, reaparecimento, slots, persistência e callbacks originais ARM com estruturas controladas, além de desenho dos painéis. Campanha completa e inspeção visual no Windows continuam pendentes. Veja [como usar o Códex](docs/CODEX.md) e [verificações da 0.7](docs/RELEASE_0.7.md).
+
+**O item 42 completo continua desmarcado:** armas, armaduras e integração com drops exclusivos permanecem na 0.11. Os outros quatro ajustes de interface antes previstos para a 0.7 foram mantidos como pendências da 0.8.
+
 ## Atualizações futuras
 
-Das **41 melhorias aprovadas**, **8 foram concluídas** nas versões 0.5 e 0.6; **33 permanecem planejadas**, somente da **0.7 em diante**. As versões abaixo são metas provisórias, sem datas garantidas, e dependem de investigação e testes.
+Das **41 melhorias aprovadas**, **8 foram concluídas** nas versões 0.5 e 0.6; **33 ainda não estão concluídas**, incluindo o Códex entregue parcialmente, somente da **0.8 em diante**. As versões abaixo são metas provisórias, sem datas garantidas, e dependem de investigação e testes.
 
 **A expansão continua incluindo aumento do nível máximo, novos ranks de armas, armaduras e acessórios, itens únicos, conjuntos com bônus, novos títulos, novos pets, drops exclusivos por monstro e um Códex de equipamentos e monstros.** Limites, nomes e valores serão definidos após verificar dados originais e balanceamento.
 
 Consulte o [roadmap detalhado](docs/ROADMAP.md) para dependências, critérios de verificação e referências. A [investigação inicial de pets e títulos](docs/INVESTIGACAO_PETS_TITULOS.md) registra a base original encontrada e as condições para as metas 0.10 (títulos) e 0.11 (pets); nenhum desses conteúdos novos está implementado. A aprovação do planejamento não comprova a viabilidade de todos os itens nem autoriza automaticamente novas releases.
 
-**Metas dos novos pedidos:** Códex inicial somente de monstros na **0.7**, drops exclusivos por monstro na **0.10** e ampliação do Códex com armas e armaduras na **0.11**. A antecipação depende de validar IDs, eventos reais de encontro/derrota e persistência por personagem. No save antigo, registrar apenas o que puder ser comprovado; não inventar o histórico de monstros derrotados ou itens já vendidos. Ainda são recursos planejados, sujeitos à investigação.
+**Novos pedidos:** o Códex inicial de monstros e seu contador foram implementados na **0.7**, sujeitos às limitações de verificação acima. Drops exclusivos continuam como meta da **0.10**, e a ampliação do Códex com armas e armaduras fica na **0.11**. Não existe reconstrução automática do histórico antigo.
 
-### Meta 0.7 — Interface, acessibilidade e Códex inicial de monstros
+### Meta 0.8 — Interface e acessibilidade
 
-Separar o tamanho da UI do zoom, melhorar a apresentação para teclado, controle e português e antecipar a fase de monstros do Códex.
+Separar o tamanho da UI do zoom e melhorar a apresentação para teclado, controle e português. Estes ajustes não entraram na 0.7 e continuam pendentes para a 0.8.
 
 - [ ] **08. Escala de UI independente do zoom:** Escolher tamanho da interface e do texto sem mudar a quantidade de cenário visível; alinhar as regiões clicáveis.
 - [ ] **09. Ocultar botões virtuais:** Opção de esconder direcional e botões de toque ao jogar por teclado/controle, mantendo os comandos físicos.
 - [ ] **19. Atalhos visíveis nas habilidades:** Mostrar a tecla ou botão configurado junto às habilidades e adaptar os símbolos ao controle usado.
 - [ ] **24. Português mais completo e legível:** Completar diálogos e descrições ainda em inglês e investigar suporte a acentos/fontes, preservando espaço e quebras de linha.
-
-**Antecipação do item 42 — Códex inicial de monstros (bestiário):** Meta da **0.7**, limitada a uma lista consultável das espécies encontradas pelo personagem, com os estados **visto** e **derrotado** separados e um **contador de derrotas por espécie**. Monstros ainda não descobertos permanecem ocultos. Preservar o registro entre sessões sem mudar a lógica de combate nem reescrever o formato do save original. Armas, armaduras e integração com drops exclusivos continuam para a **0.11**. Esta é uma entrega parcial planejada; o item 42 completo permanece pendente.
-
-**Condição para antecipar:** investigar um arquivo auxiliar associado de forma estável ao personagem, junto à pasta compartilhada de saves, sem depender de editar o save ARM. Validar salvar/reabrir, isolamento entre personagens e atualizações; a viabilidade dessa associação ainda precisa ser comprovada. Não haverá promessa de recuperar encontros ou derrotas antigos que o jogo não tenha guardado.
-
-**Contador por espécie — fase inicial da 0.7:** mostrar no Códex quantos monstros de cada espécie o personagem derrotou. Um monstro apenas visto permanece com zero derrotas registradas; cada nova derrota confirmada soma uma unidade, contando cada morte uma única vez. Preservar os totais por personagem entre sessões, hosts e atualizações que usam a mesma pasta de saves. Em saves antigos, importar apenas contagens comprováveis; na ausência de histórico, identificar a contagem como registrada desde a implementação, sem apresentar zero como prova de que o personagem nunca matou aquela espécie.
 
 ### Meta 0.8 — Saves, compatibilidade e loja offline
 
@@ -181,7 +195,7 @@ Adicionar baú compartilhado, informação de missões, dificuldades opcionais, 
 - [ ] **32. Dificuldades opcionais:** Perfis de dificuldade com ajustes de inimigos e recompensas; preservar uma experiência equivalente à original.
 - [ ] **35. Contratos repetíveis offline:** Objetivos opcionais de caça/coleta para dar propósito ao pós-jogo, com recompensas e repetição controladas.
 - [ ] **39. Novos pets:** Acrescentar mascotes ao sistema original, com aparência, animações, atributos, habilidades, evolução e obtenção offline a definir; validar IDs, comportamento e salvamento no modo expandido, preservando os pets existentes.
-- [ ] **42. Códex de equipamentos e monstros:** Entrega em fases: bestiário com monstros vistos/derrotados e contador de derrotas por espécie antecipado como meta da 0.7; armas e armaduras encontradas/obtidas e integração com drops exclusivos ficam na 0.11. Preservar descobertas por personagem entre sessões e ocultar conteúdos ainda não descobertos; marcar o item completo somente após entregar as duas fases.
+- [ ] **42. Códex de equipamentos e monstros:** Entrega em fases: bestiário com monstros vistos/derrotados e contador por espécie entregue na 0.7 (fase parcial); armas e armaduras encontradas/obtidas e integração com drops exclusivos ficam na 0.11. Preservar descobertas por personagem entre sessões e ocultar conteúdos ainda não descobertos; marcar o item completo somente após entregar as duas fases.
 
 ### Meta 0.12 — Pós-jogo e masmorras
 
@@ -195,7 +209,7 @@ Os recursos opcionais terão configurações próprias. Mudanças permanentes de
 
 ## Publicação
 
-Versão **v0.6-beta**, com publicação aprovada pelo autor em 21/10/2026 após testes automatizados Linux e Windows. A validação manual no Windows continua pendente; testes automatizados e de inicialização não comprovam uma campanha completa. A versão permanece **Beta**. As releases anteriores continuam disponíveis.
+Versão **v0.7-beta**, com publicação autorizada pelo autor em 21/10/2026. O workflow só cria a release após compilar e testar os dois hosts no Windows. A validação manual no Windows continua pendente; testes automatizados e de inicialização não comprovam uma campanha completa. A versão permanece **Beta**. As releases anteriores continuam disponíveis.
 
 O ZIP curado não inclui biblioteca original, APK, DEX, assets, áudio, saves ou DLLs de terceiros. Consulte [THIRD_PARTY.md](THIRD_PARTY.md). Não foi definida uma licença para o código do host nesta etapa.
 

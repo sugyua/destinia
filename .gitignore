@@ -67,3 +67,7 @@ Claude/exports/
 **/jogo_host_zoom_*/
 **/config.ini
 **/config.ini.previous
+
+# Registro pessoal do bestiario
+codex-v1.txt
+.build-dependencies-ready

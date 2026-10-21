@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Chamado pelo BAT com o Bash do MSYS2. Nao instala dependencias nem acessa saves.
 set -eu
-export PATH="/ucrt64/bin:/usr/bin:$PATH"
+# UCRT64 deve ter prioridade no MSYS2; fora dele, preservar o PATH do chamador.
+if [[ -d /ucrt64/bin ]]; then export PATH="/ucrt64/bin:/usr/bin:$PATH"; fi
 case "${2-}" in
   host_zoom) targets=(host_zoom) ;;
   host) targets=(host) ;;

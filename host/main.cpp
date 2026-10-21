@@ -294,6 +294,8 @@ static std::string arrText(u32 h) { auto it = arrays.find(h); return it == array
 
 static void stubSet(u32 id, const std::string& name, std::function<void()> f) { stubName[id] = name; handlers[id] = std::move(f); }
 
+static void codexFileRemoved(const std::string& path);
+
 static void setupStubs() {
   u32 n = ID_LIBC;
   auto L = [&](const char* name, std::function<void()> f) { importId[name] = n; stubSet(n, name, std::move(f)); n++; };
@@ -363,7 +365,7 @@ static void setupStubs() {
   });
   L("fseek", [] { auto it = files.find(R(0)); W(0, it == files.end() ? (u32)-1 : (u32)fseek(it->second, (long)(int)R(1), (int)R(2))); });
   L("ftell", [] { auto it = files.find(R(0)); W(0, it == files.end() ? (u32)-1 : (u32)ftell(it->second)); });
-  L("remove", [] { std::string p = hostPath(cstr(R(0))); W(0, (u32)remove(p.c_str())); });
+  L("remove", [] { const auto path=hostPath(cstr(R(0))); const int result=std::remove(path.c_str()); if(result==0) codexFileRemoved(path); W(0,(u32)result); });
   L("__android_log_print", [] {
     const std::string message=fmtPrintf(R(2),3),tag=cstr(R(1));
     if(verbose) hostReport("[jogo:%s] %s\n",tag.c_str(),message.c_str());
@@ -730,6 +732,9 @@ static bool getCharacterExperience(uint32_t& current, uint32_t& required) {
   return true;
 }
 
+#include "../common/codex_host.h"
+#include "../common/codex_ui.h"
+
 static void runtimeLogTick(long frame,double emulationMs) {
   static double elapsed=0; static long measured=0; static std::string previous;
   elapsed+=emulationMs; ++measured;
@@ -777,7 +782,7 @@ static int runHost(int argc, char** argv) {
   if(explicitScale) { scale=std::clamp(scale,1,10); windowWidth=400*scale; windowHeight=240*scale; }
   const fs::path reports=reportsDir.empty()?destinia::defaultReportsDir():fs::path(reportsDir);
   if(destinia::sessionLog.start(reports,"host")) hostReport("[host] Log TXT: %s\n",(destinia::sessionLog.directory()/"log.txt").string().c_str());
-  hostReport("[host] Destinia 0.6 Beta - host\n");
+  hostReport("[host] Destinia 0.7 Beta - host\n");
   if(saveDir.empty()) saveDir=destinia::configuredSaveDir().string();
   saveDir=fs::absolute(saveDir).lexically_normal().string();
   hostReport("[host] Save compartilhado: %s\n",saveDir.c_str());
@@ -840,6 +845,7 @@ static int runHost(int argc, char** argv) {
   arrays[hModel].assign(model.begin(), model.end());
   arrays[hScreen].assign(FB_BYTES, 0);
   if (!callFn(fnInit, {ENV_OBJ, 0x10, hId, (u32)devId.size(), hModel, (u32)model.size(), SCREEN_W, SCREEN_H, 0})) return 2;
+  installCodex();
   hostReport("[host] initGame ok. Rodando o jogo...\n");
 
   // [OK] jniTouch(env,obj, x, y, tipo): tipo 0=toque 1=solta 2=move 3=tecla de menu (Thumb decodificado)
@@ -893,7 +899,7 @@ static int runHost(int argc, char** argv) {
 #endif
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  // pixels nitidos
-    win = SDL_CreateWindow("Destinia 0.6 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
+    win = SDL_CreateWindow("Destinia 0.7 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
     if(!win) { hostReport("SDL_CreateWindow: %s\n",SDL_GetError()); return 1; }
     if(fullscreen) setFullscreen(true);
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_PRESENTVSYNC);
@@ -946,18 +952,36 @@ static int runHost(int argc, char** argv) {
     if (!headlessFrames) {
       SDL_Event ev;
       while (SDL_PollEvent(&ev)) {
+        if(codexOpen && (ev.type==SDL_CONTROLLERBUTTONDOWN || ev.type==SDL_CONTROLLERBUTTONUP || ev.type==SDL_CONTROLLERAXISMOTION)) continue;
         if(ev.type==SDL_QUIT) running=false;
         else if(ev.type==SDL_KEYDOWN || ev.type==SDL_KEYUP) {
           if(ev.key.repeat) continue;
           const bool down=ev.type==SDL_KEYDOWN;
+          if(ev.key.keysym.sym==SDLK_F8 && (codexOpen || !preferences.keys.count(SDLK_F8))) {if(down){controls.release();codexOpen=!codexOpen;codexFlush();}continue;}
+          if(codexOpen && ev.key.keysym.sym!=SDLK_F11) {
+            if(down && ev.key.keysym.sym==SDLK_ESCAPE) codexOpen=false;
+            if(down && (ev.key.keysym.sym==SDLK_RIGHT || ev.key.keysym.sym==SDLK_DOWN) ) codexChangePage(1);
+            if(down && (ev.key.keysym.sym==SDLK_LEFT || ev.key.keysym.sym==SDLK_UP) ) codexChangePage(-1);
+            continue;
+          }
           if(ev.key.keysym.sym==SDLK_F11) { if(down) setFullscreen(!fullscreen); }
           else if(ev.key.keysym.sym==SDLK_F9) {  }
           else controls.event(ev);
         } else if(ev.type==SDL_MOUSEBUTTONDOWN || ev.type==SDL_MOUSEBUTTONUP || ev.type==SDL_MOUSEMOTION) {
-          if(!controls.focused || controls.paused()) continue;
+          if(!controls.focused || (controls.paused() && !codexOpen)) continue;
           int wx=ev.type==SDL_MOUSEMOTION?ev.motion.x:ev.button.x,wy=ev.type==SDL_MOUSEMOTION?ev.motion.y:ev.button.y;
           int x=0,y=0;
           bool inside=mapMouseToGame(wx,wy,x,y,mouseDown && ev.type!=SDL_MOUSEBUTTONDOWN);
+          const int codexScale=std::max(1,SCREEN_W/400);
+          if(inside && ev.type==SDL_MOUSEBUTTONDOWN && ev.button.button==SDL_BUTTON_LEFT) {
+            if(codexOpen) {
+              if(y<30*codexScale) codexOpen=false;
+              else if(y>SCREEN_H-30*codexScale) {codexChangePage(x<SCREEN_W/2?-1:1);}
+              continue;
+            }
+            if(x>=SCREEN_W-85*codexScale && y<20*codexScale) {controls.release();codexOpen=true;codexPage=0;codexFlush();continue;}
+          }
+          if(codexOpen) continue;
           if(probe && ev.type!=SDL_MOUSEMOTION) {
             int ww=0,wh=0,ow=0,oh=0; SDL_GetWindowSize(win,&ww,&wh); SDL_GetRendererOutputSize(ren,&ow,&oh);
             hostReport("[sonda] SDL %s botao=%d janela_px=(%d,%d) tamanho_janela=%dx%d saida_render=%dx%d -> jogo=(%d,%d) dentro=%d\n",
@@ -974,11 +998,17 @@ static int runHost(int argc, char** argv) {
             SDL_GetWindowSize(win,&windowWidth,&windowHeight);
         }
       }
+      if(codexOpen) {
+        controls.release();updateAudioState(controls.focused,true);
+        auto panel=arrays[hScreen];destinia::codexPaint(panel.data(),SCREEN_W,SCREEN_H,codex,true,codexPage,codexAvailable);
+        if(SDL_UpdateTexture(tex,nullptr,panel.data(),SCREEN_W*2)!=0) {executionFailed=true;break;}
+        SDL_Rect dst=gameViewport();SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);SDL_RenderCopy(ren,tex,nullptr,&dst);SDL_RenderPresent(ren);SDL_Delay(16);continue;
+      }
       controls.pollSticks(); fastForward=controls.accelerating;
       const bool paused=controls.paused();
       if(paused!=wasPaused) {
         controls.release();
-        SDL_SetWindowTitle(win,paused?"Destinia 0.6 Beta - PAUSADO":"Destinia 0.6 Beta");
+        SDL_SetWindowTitle(win,paused?"Destinia 0.7 Beta - PAUSADO":"Destinia 0.7 Beta");
         hostReport("[host] %s.\n",paused?"Pausado":"Retomado"); wasPaused=paused;
       }
       updateAudioState(controls.focused,paused);
@@ -1013,6 +1043,7 @@ static int runHost(int argc, char** argv) {
     }
     frame++;
     runtimeLogTick(frame,emulMs);
+    if(frame%16==0) codexFlush();
     probeTick(frame);
     if (wait == 0) { hostReport("[host] o jogo pediu para encerrar.\n"); break; }
 
@@ -1023,6 +1054,7 @@ static int runHost(int argc, char** argv) {
       if (getCharacterExperience(currentExperience, requiredExperience))
         drawHudExperienceText(frameBuffer.data(), currentExperience, requiredExperience);
     }
+    destinia::codexPaint(frameBuffer.data(),SCREEN_W,SCREEN_H,codex,false,codexPage,codexAvailable);
     const uint8_t* fb = frameBuffer.data();
     if (headlessFrames) {
       if (frame == 1 || frame % 10 == 0) { char nm[64]; snprintf(nm, sizeof nm, "/frame_%05ld.bmp", frame); writeBmp(outDir + nm, fb); }
@@ -1070,7 +1102,7 @@ static int runHost(int argc, char** argv) {
 
 
 int main(int argc,char** argv) {
-  if(argc==2 && std::strcmp(argv[1],"--version")==0) { std::puts("Destinia 0.6 Beta"); return 0; }
+  if(argc==2 && std::strcmp(argv[1],"--version")==0) { std::puts("Destinia 0.7 Beta"); return 0; }
   int result=1;
   if(argc==3 && std::string(argv[1])=="--check-settings") {
     try { if(!fs::is_regular_file(argv[2])) throw std::runtime_error("Arquivo de preferencias nao encontrado."); destinia::Preferences::load(argv[2],"host"); printf("Preferencias validas.\n"); return 0; }
@@ -1080,6 +1112,7 @@ int main(int argc,char** argv) {
   catch(const std::exception& error) { hostReport("[host] ERRO: %s\n",error.what()); }
   for(auto& file:files) if(std::fclose(file.second)!=0) { hostReport("[host] ERRO ao fechar arquivo pendente\n"); result=1; }
   files.clear(); filePaths.clear();
+  codexFlush();
   saveLock.release();
   if(uc) uc_close(uc);
   destinia::sessionLog.write("FIM DA SESSAO codigo="+std::to_string(result),true);

@@ -4,6 +4,20 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.7 Beta — 21/10/2026
+
+- Códex inicial de monstros nos dois hosts, com estados visto/derrotado e contador de mortes por espécie.
+- Botão CODEX F8, atalho F8 quando não remapeado, paginação e pausa da partida durante a consulta.
+- Registro auxiliar por slot em codex-v1.txt na pasta global de saves, compartilhado entre instalações e hosts; não muda o formato do save ARM nem importa mortes antigas.
+- Observação de desenho/derrota pelas rotinas ARM originais, validação de compatibilidade e deduplicação por monstro/reaparecimento. O contador acumula eventos mesmo que a sessão termine sem salvar a partida.
+- Gravação periódica/ao sair por temporário e substituição; arquivo auxiliar inválido preservado, com aviso e registros novos apenas na memória da sessão.
+- Reinício dos registros de um slot quando seu save é excluído pelo próprio jogo; importação manual de outro personagem no mesmo slot exige o auxiliar correspondente.
+- Correção do PATH do compilador para impor UCRT64 apenas no MSYS2, preservando ferramentas do chamador em outros ambientes e permitindo os testes de falhas do compilador.
+- Novos testes de modelo, persistência, callbacks ARM e renderização do Códex; workflow para compilar/testar/publicar ZIPs e checksums.
+- Protótipo web independente com botão Códex no topo, diálogo, contador e pausa/retomada; dados apenas durante a sessão, sem áudio.
+- Ajustes maiores da UI continuam pendentes na 0.8. O Códex de equipamentos permanece para a 0.11; não foram implementados novos itens, pets, títulos, drops ou alterações de combate.
+- Validação manual de campanha Windows e Safari/iPhone físico permanece pendente. Consulte docs/RELEASE_0.7.md e docs/CODEX.md.
+
 ## 0.6 Beta — 21/10/2026
 
 - Preferências persistentes por host para tamanho de janela/tela cheia e globais para áudio, pausa e perfil em config.ini, preservando save_dir e opções desconhecidas. Salvamento de vídeo ao encerrar normalmente; flags CLI e modo sem gravação para diagnóstico.

@@ -1,6 +1,6 @@
 {
-  "version": "0.6",
-  "base_commit": "43cbfd13f07279b758a72957cccc04bb7241c711",
+  "version": "0.7",
+  "base_commit": "a6330135d9005d54538efc1141b78a5ea71d820b",
   "files": [
     ".gitignore",
     "AGENTS.md",
@@ -66,6 +66,17 @@
     "docs/PREFERENCIAS.md",
     "docs/RELEASE_0.6.md",
     "release/NOTAS_0.6.md",
-    "tests/test_configurator_native.ps1"
+    "tests/test_configurator_native.ps1",
+    "common/codex.h",
+    "common/codex_host.h",
+    "common/codex_ui.h",
+    "tests/codex_cases.cpp",
+    "tests/codex_host_cases.cpp",
+    "tests/test_codex.py",
+    "tests/test_codex_native.py",
+    "docs/CODEX.md",
+    "docs/RELEASE_0.7.md",
+    "release/NOTAS_0.7.md",
+    "docs/INVESTIGACAO_PETS_TITULOS.md"
   ]
 }
