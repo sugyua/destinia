@@ -1,0 +1,58 @@
+name: Guardar candidata Windows para download
+on:
+  workflow_dispatch:
+  push:
+    branches: [release/v0.6-beta]
+    paths: [.github/workflows/candidate-artifacts.yml]
+permissions:
+  contents: write
+jobs:
+  preserve:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Conferir a compilacao de origem
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: python
+        run: |
+          import json,os,subprocess
+          data=json.loads(subprocess.check_output(['gh','api','repos/'+os.environ['GITHUB_REPOSITORY']+'/actions/runs/39592853103'],text=True))
+          if data['conclusion']!='success' or data['head_sha']!='3c20976d2368ca3e0359f9483775ce56ed082f42':
+              raise RuntimeError('A compilacao Windows revisada precisa estar aprovada pelos testes')
+      - uses: actions/checkout@v4
+        with:
+          ref: release-artifacts/v0.6-beta
+      - uses: actions/download-artifact@v4
+        with:
+          name: destinia-0.6-beta-windows-x64
+          run-id: 39592853103
+          github-token: ${{ github.token }}
+          path: release/artifacts/v0.6-beta
+      - name: Verificar integridade e conteudo
+        shell: python
+        run: |
+          import hashlib,pathlib,zipfile
+          root=pathlib.Path('release/artifacts/v0.6-beta')
+          archive=root/'destinia-0.6-beta-windows-x64.zip'
+          expected=archive.with_suffix('.zip.sha256').read_text().split()[0]
+          if hashlib.sha256(archive.read_bytes()).hexdigest()!=expected:raise RuntimeError('SHA-256 invalido')
+          with zipfile.ZipFile(archive) as zipped:
+              if zipped.testzip():raise RuntimeError('ZIP corrompido')
+              exes=[]
+              for name in zipped.namelist():
+                  path=pathlib.PurePosixPath(name)
+                  if path.is_absolute() or '..' in path.parts or 'game' in path.parts or 'relatorios' in path.parts or path.suffix.lower() in {'.dll','.so','.dex','.dat','.sav','.save','.srm','.log'}:
+                      raise RuntimeError('Conteudo indevido: '+name)
+                  if path.suffix.lower()=='.exe':exes.append(name)
+              if sorted(exes)!=['destinia-0.6-beta/host/build/destinia_host.exe','destinia-0.6-beta/host_zoom/build/destinia_host.exe']:
+                  raise RuntimeError('EXEs inesperados')
+      - name: Preservar candidata sem publicar release
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -- release/artifacts/v0.6-beta/destinia-0.6-beta-windows-x64.zip release/artifacts/v0.6-beta/destinia-0.6-beta-windows-x64.zip.sha256
+          if ! git diff --cached --quiet; then
+            git commit -m 'Preserva candidata Windows 0.6 verificada pelo workflow'
+            git push origin HEAD:release-artifacts/v0.6-beta
+          fi
