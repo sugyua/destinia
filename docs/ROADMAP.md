@@ -2,7 +2,7 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs. Faça backup dos saves antes de atualizar.**
 
-Planejamento autorizado pelo autor em **21/10/2026**: **41 melhorias aprovadas**, das quais **8 concluídas** na 0.5/0.6 e **33 ainda não concluídas**, incluindo o Códex entregue parcialmente, da 0.8 em diante. A publicação da **0.6 Beta** foi aprovada pelo autor. Testes automáticos passaram; campanha e inspeção manual no Windows continuam pendentes.
+Planejamento autorizado pelo autor em **21/10/2026**: **42 melhorias aprovadas**, das quais **8 concluídas** na 0.5/0.6 e **34 ainda não concluídas**, incluindo o Códex entregue parcialmente, da 0.8 em diante. A publicação da **0.6 Beta** foi aprovada pelo autor. Testes automáticos passaram; campanha e inspeção manual no Windows continuam pendentes.
 
 ## Melhorias concluídas com sucesso
 
@@ -19,7 +19,7 @@ Implementação e verificações automatizadas concluídas com sucesso. A pasta 
 
 ## Entrega parcial da 0.7 — Códex de monstros
 
-O bestiário inicial do **item 42** está implementado nos dois hosts: botão **CODEX F8** no canto superior direito, ou **F8** quando a tecla não estiver remapeada. Mostra as espécies descobertas, os estados **VISTO/DERROTADO** e **quantos monstros de cada espécie foram mortos**, com paginação. A partida pausa durante a consulta. Nomes de monstros permanecem em inglês nesta primeira etapa.
+O bestiário inicial do **item 42** está implementado nos dois hosts: livro **CODEX** no menu original do jogo, junto da barra de Craft e Pets. A correção do acesso está na branch `main`; F8 funciona como atalho nesse menu quando a tecla não estiver remapeada. Os ZIPs originais da tag 0.7 preservam o acesso anterior. Mostra as espécies descobertas, os estados **VISTO/DERROTADO** e **quantos monstros de cada espécie foram mortos**, com paginação. A partida pausa durante a consulta. Nomes de monstros permanecem em inglês nesta primeira etapa.
 
 Os registros ficam em **codex-v1.txt**, na pasta compartilhada de saves, separados pelo slot de personagem e gravados por substituição de arquivo temporário. Não altera o formato dos saves ARM nem recupera mortes antigas. A contagem começa na 0.7; o slot reutilizado após exclusão pelo jogo tem seus registros reiniciados. Trocar apenas de pasta de instalação preserva o Códex quando a pasta de save é a mesma.
 
@@ -42,6 +42,7 @@ As versões abaixo são **metas provisórias**, sem calendário garantido. Uma e
 | 0.10 | Progressão expandida, equipamentos, títulos e drops exclusivos | Muito alta; exige mapear progressão, IDs/condições, tabelas de drops e balanceamento |
 | 0.11 | Missões, armazenamento, desafios, pets e Códex | Muito alta; depende de dados, animações/comportamento, eventos de descoberta e saves |
 | 0.12 | Pós-jogo e masmorras | Muito alta; etapa exploratória |
+| 1.0 | Cooperativo pela internet e LAN; preparação em etapas após a 0.12 | Muito alta; depende de investigação de rede, sincronização e saves |
 
 ## Regras de implementação
 
@@ -142,6 +143,14 @@ Ampliar a duração do jogo com Novo Jogo+, desafio de chefes e masmorras variá
 - [ ] **34. Masmorras variáveis:** Estudar masmorras geradas ou montadas com salas existentes, se os formatos nativos permitirem; validar colisões, saídas, inimigos e persistência.
 
 **Verificação necessária antes da entrega:** Conferir o que o Novo Jogo+ preserva/reinicia; validar entradas, saídas, colisões, chefes, recompensas e retomada do progresso, inclusive após fechar o jogo.
+
+### Meta 1.0 — Cooperativo pela internet e LAN
+
+- [ ] **43. Cooperativo pela internet e LAN:** Permitir que jogadores participem da mesma sessão, com personagens, inimigos, combate e mudanças de mapa sincronizados. Esta é uma meta nova para a 1.0; ainda não está implementada nem tem viabilidade técnica comprovada no port.
+
+O planejamento da **0.8 até a 0.12 permanece preservado**. A preparação para o cooperativo deverá começar antes da 1.0, em etapas após a 0.12: investigar o MULTI MODE original e suas rotinas, provar uma sessão mínima entre duas instâncias, definir progresso/recompensas e testar os modos internet/LAN, latência, desconexão, reconexão e integridade dos saves. A existência do menu multiplayer original não comprova um modo cooperativo funcional.
+
+O autor definiu as duas modalidades: **internet e rede local (LAN)**. Limite de jogadores, criação/entrada em salas, conteúdo compartilhado e regras de XP, drops e missões serão definidos na etapa de projeto. O escopo inicial é o port Windows; suporte a navegador, iOS ou partidas entre plataformas exige avaliação própria. A versão 1.0 só poderá ser considerada entregue com uma sessão cooperativa real validada, sem comprometer o modo solo nem os saves.
 
 ## Planejamento — drops exclusivos e Códex
 
