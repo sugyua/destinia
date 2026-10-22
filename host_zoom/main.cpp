@@ -282,8 +282,10 @@ static void centerSmallMapCamera() {
     if ((int16_t)rd16(address) != centered) wr(address, &centered, sizeof centered);
   }
 }
-// Antes da leitura ARM: cobre tambem calculos de camera inline, sem depender de Map_setMapView.
-static void cameraReadHook(uc_engine*, uc_mem_type, uint64_t, int, int64_t, void*) {
+// After each verified ARM camera store, including inline movement/scripts/shake.
+// A memory-read hook instruments all emulated loads even with a four-byte filter;
+// these bounded code hooks keep the same centering without that global cost.
+static void cameraWriteHook(uc_engine*, uint64_t, uint32_t, void*) {
   centerSmallMapCamera();
 }
 // Correcao automatica da faixa duplicada em mapas menores que a tela (ex.: 30x30 tiles = 480 px em 800x480).
@@ -2141,10 +2143,22 @@ static int runHost(int argc, char** argv) {
   if (exportsMap["Game"] != SO_BASE + 0x77EE0 || exportsMap["curMapData"] != SO_BASE + 0x80B18) {
     hostReport("[host] Layout ARM incompativel com a camera do zoom.\n"); return 1;
   }
-  uc_hook cameraHook;
-  if (uc_hook_add(uc, &cameraHook, UC_HOOK_MEM_READ, (void*)cameraReadHook, nullptr,
-                  SO_BASE + 0x77EE0 + 18552, SO_BASE + 0x77EE0 + 18555) != UC_ERR_OK) {
-    hostReport("[host] Falha ao registrar centralizacao da camera.\n"); return 1;
+  // Exact APK 1.0.6 layout: all 16 camera STRH completion PCs were disassembled.
+  // Fail explicitly on another binary rather than install hooks at unknown code.
+  std::vector<uint8_t> cameraLibrary;
+  if (!readFile(soPath, cameraLibrary)) {hostReport("[host] Nao foi possivel verificar a camera ARM.\n");return 1;}
+  uint64_t cameraFingerprint=14695981039346656037ull;
+  for(auto byte:cameraLibrary) cameraFingerprint=(cameraFingerprint^byte)*1099511628211ull;
+  if(cameraFingerprint!=0x74b2547839b88777ull) {
+    hostReport("[host] Biblioteca ARM incompativel com a centralizacao verificada do zoom (APK 1.0.6).\n");return 1;
+  }
+  const u32 cameraWriterPCs[]={0x11b96,0x11bc8,0x14e64,0x14eb8,0x14ee4,0x14f0c,0x14f7a,0x14f8e,
+                            0x19666,0x1966e,0x19d32,0x19d3c,0x1e3aa,0x1e3ac,0x1f92e,0x1f94c};
+  for(auto pc:cameraWriterPCs) {
+    uc_hook hook;
+    if(uc_hook_add(uc,&hook,UC_HOOK_CODE,(void*)cameraWriteHook,nullptr,SO_BASE+pc,SO_BASE+pc)!=UC_ERR_OK) {
+      hostReport("[host] Falha ao registrar centralizacao da camera.\n");return 1;
+    }
   }
   if (fixMapEdge) {
     uc_hook hk3, hk4;

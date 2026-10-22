@@ -83,26 +83,58 @@ int main(int argc, char** argv) {
     fprintf(stderr, "FALHA: tela cheia, alternancia F11 ou viewport ultrawide incorretos. Chamadas=%d\n", fullscreenCalls);
     return 1;
   }
-  // Leitura ARM real aciona o hook mesmo apos uma escrita de camera inline.
-  u32 reader = hmalloc(4);
-  const uint8_t code[] = {0x00, 0x88, 0x70, 0x47}; // ldrh r0,[r0]; bx lr
-  wr(reader, code, sizeof code);
+  // Native API: all small-map axes are centered when the writer returns.
   const u32 camera = exportsMap.at("Game") + 18552;
   for (const auto dims : {std::pair<uint16_t,uint16_t>{30,30}, {60,60}, {20,10}}) {
     const uint16_t map[] = {dims.first, dims.second};
     wr(exportsMap.at("curMapData"), map, sizeof map);
     for (u32 position : {0u, 240u, 480u}) {
       if (!callFn(exportsMap.at("Map_setMapView"), {position, position})) return 1;
-      // Simula tambem um escritor inline que nao chama Map_setMapView.
-      if (dims.first == 30) { int16_t old = -320; wr(camera, &old, 2); }
-      u32 value = 0;
-      if (!callFn(reader | 1u, {camera}, &value)) return 1;
-      int x = (int16_t)value, y = (int16_t)rd16(camera + 2);
+      int x = (int16_t)rd16(camera), y = (int16_t)rd16(camera + 2);
       int width = dims.first * 16, height = dims.second * 16;
       int expectedX = width < 800 ? (width - 800)/2 : std::clamp((int)position - 400, 0, width - 800);
       int expectedY = height < 480 ? (height - 480)/2 : std::clamp((int)position - 240, 0, height - 480);
       if (x != expectedX || y != expectedY) {
         fprintf(stderr, "FALHA: camera=(%d,%d), esperado=(%d,%d)\n", x,y,expectedX,expectedY); return 1;
+      }
+    }
+  }
+  // Execute each original STRH, then stop at its completion PC before another
+  // ARM read can mask a missing writer callback. Covers inline movement/script/shake.
+  struct Writer {u32 pc;uint16_t opcode;int source,base,index;char axis;};
+  const Writer writers[] = {
+{0x11b94,0x5338,0,7,4,'X'}, // strh r0, [r7, r4]; completion PC 0x11b96
+{0x11bc6,0x52c1,1,0,3,'Y'}, // strh r1, [r0, r3]; completion PC 0x11bc8
+{0x14e62,0x53de,6,3,7,'X'}, // strh r6, [r3, r7]; completion PC 0x14e64
+{0x14eb6,0x53c8,0,1,7,'Y'}, // strh r0, [r1, r7]; completion PC 0x14eb8
+{0x14ee2,0x5382,2,0,6,'X'}, // strh r2, [r0, r6]; completion PC 0x14ee4
+{0x14f0a,0x5253,3,2,1,'Y'}, // strh r3, [r2, r1]; completion PC 0x14f0c
+{0x14f78,0x53de,6,3,7,'X'}, // strh r6, [r3, r7]; completion PC 0x14f7a
+{0x14f8c,0x53c8,0,1,7,'Y'}, // strh r0, [r1, r7]; completion PC 0x14f8e
+{0x19664,0x5299,1,3,2,'X'}, // strh r1, [r3, r2]; completion PC 0x19666
+{0x1966c,0x5299,1,3,2,'Y'}, // strh r1, [r3, r2]; completion PC 0x1966e
+{0x19d30,0x52f2,2,6,3,'X'}, // strh r2, [r6, r3]; completion PC 0x19d32
+{0x19d3a,0x52f2,2,6,3,'Y'}, // strh r2, [r6, r3]; completion PC 0x19d3c
+{0x1e3a8,0x5262,2,4,1,'X'}, // strh r2, [r4, r1]; completion PC 0x1e3aa
+{0x1e3aa,0x52e0,0,4,3,'Y'}, // strh r0, [r4, r3]; completion PC 0x1e3ac
+{0x1f92c,0x5258,0,3,1,'X'}, // strh r0, [r3, r1]; completion PC 0x1f92e
+{0x1f94a,0x5258,0,3,1,'Y'}, // strh r0, [r3, r1]; completion PC 0x1f94c
+  };
+  for(const auto dims : {std::pair<uint16_t,uint16_t>{30,30},{60,60},{20,10}}) {
+    const uint16_t map[]={dims.first,dims.second};wr(exportsMap.at("curMapData"),map,sizeof map);
+    for(const auto& writer:writers) {
+      if(rd16(SO_BASE+writer.pc)!=writer.opcode) {fprintf(stderr,"FALHA: instrucao ARM de camera incompativel.\n");return 1;}
+      const int16_t before[]={37,51};wr(camera,before,sizeof before);
+      W(writer.source,123);W(writer.base,exportsMap.at("Game"));W(writer.index,writer.axis=='X'?0x4878:0x487a);
+      uc_hook stop;
+      auto stopped=[](uc_engine* engine,uint64_t,uint32_t,void*){uc_emu_stop(engine);};
+      if(uc_hook_add(uc,&stop,UC_HOOK_CODE,reinterpret_cast<void*>(+stopped),nullptr,SO_BASE+writer.pc+2,SO_BASE+writer.pc+2)!=UC_ERR_OK)return 1;
+      auto error=uc_emu_start(uc,(SO_BASE+writer.pc)|1u,SO_BASE+writer.pc+4,5000000,0);
+      uc_hook_del(uc,stop);
+      const int expectedX=dims.first*16<800?(int(dims.first)*16-800)/2:(writer.axis=='X'?123:37);
+      const int expectedY=dims.second*16<480?(int(dims.second)*16-480)/2:(writer.axis=='Y'?123:51);
+      if(error!=UC_ERR_OK || (int16_t)rd16(camera)!=expectedX || (int16_t)rd16(camera+2)!=expectedY) {
+        fprintf(stderr,"FALHA: escritor ARM %x nao centralizou/preservou camera.\n",writer.pc);return 1;
       }
     }
   }

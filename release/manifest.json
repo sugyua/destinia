@@ -83,6 +83,8 @@
     "tests/codex_portrait_cases.cpp",
     "tests/test_codex_portraits.py",
     "tests/test_launchers.ps1",
-    "tests/test_prompt.ps1"
+    "tests/test_prompt.ps1",
+    "tests/test_zoom_camera.py",
+    "docs/CORRECOES_0.7_FIX2.md"
   ]
 }

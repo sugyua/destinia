@@ -40,7 +40,7 @@ inline CodexPortrait codexDecodePortrait(const std::vector<uint8_t>& w,const std
   if(pos+7>w.size())return {};
   Frame f{int(int8_t(w[pos])),int(int8_t(w[pos+1])),u16(w,pos+2),u16(w,pos+4),{}};int colors=w[pos+6];pos+=7;
   if(f.w<1 || f.h<1 || f.w>256 || f.h>256 || (total+=f.w*f.h)>2*1024*1024)return {};
-  if(colors) {++colors;if(pos+colors*3>w.size())return {};palette.clear();for(int j=0;j<colors;++j){const auto b=w[pos++],g=w[pos++],r=w[pos++];palette.push_back(j?0x10000u|((r>>3)<<11)|((g>>2)<<5)|(b>>3):0);}}
+  if(colors) {++colors;if(pos+colors*3>w.size())return {};palette.clear();for(int j=0;j<colors;++j){const auto r=w[pos++],g=w[pos++],b=w[pos++];palette.push_back(j?0x10000u|((r>>3)<<11)|((g>>2)<<5)|(b>>3):0);}}
   if(palette.empty() || pos+f.w*f.h>w.size())return {};
   f.pixels.reserve(f.w*f.h);for(int j=0;j<f.w*f.h;++j){const int index=w[pos++];if(index>=int(palette.size()))return {};f.pixels.push_back(palette[index]);}frames.push_back(std::move(f));
  }
@@ -50,7 +50,9 @@ inline CodexPortrait codexDecodePortrait(const std::vector<uint8_t>& w,const std
   const size_t at=12+i*8;const int flags=a[at+4];if(flags&63)continue; // Other image groups are effects/shadows.
   const int index=a[at+5];if(index>=int(frames.size()) || a[at+7]!=0)return {};
   const auto& f=frames[index];const bool flipX=flags&64,flipY=flags&128;
-  const int x=int(int16_t(u16(a,at)))+(flipX?f.x-f.w+1:-f.x)+origin,y=int(int16_t(u16(a,at+2)))+(flipY?f.y-f.h+1:-f.y)+origin;
+  // drawAGDImageT adds the part offset to the WImg anchor before drawing.
+  const int anchorX=f.x+int(int16_t(u16(a,at))),anchorY=f.y+int(int16_t(u16(a,at+2)));
+  const int x=(flipX?anchorX-f.w+1:-anchorX)+origin,y=(flipY?anchorY-f.h+1:-anchorY)+origin;
   if(x<0 || y<0 || x+f.w>side || y+f.h>side)return {};
   for(int yy=0;yy<f.h;++yy)for(int xx=0;xx<f.w;++xx){auto c=f.pixels[(flipY?f.h-1-yy:yy)*f.w+(flipX?f.w-1-xx:xx)];if(c)canvas[(y+yy)*side+x+xx]=c;}
  }

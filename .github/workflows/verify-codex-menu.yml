@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [.github/workflows/verify-codex-menu.yml, common/codex*.h, host/main.cpp, host_zoom/main.cpp, tests/codex*]
+    paths: [.github/workflows/verify-codex-menu.yml, common/codex*.h, host/main.cpp, host_zoom/main.cpp, tests/codex*, tests/test_zoom_camera.py, tests/zoom_native_smoke.cpp]
 permissions:
   contents: read
 concurrency:
@@ -50,7 +50,7 @@ jobs:
           SDL_AUDIODRIVER: dummy
         run: |
           set -eu
-          for pattern in test_runtime.py test_preferences.py test_preferences_host.py test_codex.py test_codex_native.py test_codex_portraits.py test_package_release.py test_package_windows.py; do
+          for pattern in test_runtime.py test_preferences.py test_preferences_host.py test_codex.py test_codex_native.py test_codex_portraits.py test_zoom_camera.py test_package_release.py test_package_windows.py; do
             python -m unittest discover -s tests -p "$pattern" -v
           done
           DESTINIA_ZOOM_EXE="$PWD/host_zoom/build/destinia_host.exe" python -m unittest discover -s tests -p test_zoom_render.py -v
@@ -58,7 +58,7 @@ jobs:
         shell: powershell
         run: |
           $ErrorActionPreference='Stop'
-          foreach($name in @('test_diagnostic.ps1','test_camera_mode.ps1','test_save_configuration.ps1','test_game_preferences.ps1','test_configurator_native.ps1')) {
+          foreach($name in @('test_diagnostic.ps1','test_camera_mode.ps1','test_save_configuration.ps1','test_game_preferences.ps1','test_configurator_native.ps1','test_launchers.ps1','test_prompt.ps1')) {
             & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path 'tests' $name)
             if($LASTEXITCODE -ne 0) {throw "Falhou: $name"}
           }

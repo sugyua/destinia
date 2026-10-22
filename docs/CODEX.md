@@ -2,7 +2,7 @@
 
 > **O jogo está em versão Beta e pode apresentar bugs. Faça backup dos saves.**
 
-**Acesso corrigido na branch `main` e no site após a publicação da 0.7.** Os ZIPs originais da tag `v0.7-beta` continuam com o acesso antigo; baixe a [0.7 Beta atualizada com os dois EXEs](https://github.com/sugyua/destinia/releases/tag/v0.7-codex-imagens-fix1), compile os fontes atuais ou use os pacotes de teste de Actions para conferir esta mudança no Windows.
+**Acesso corrigido na branch `main` e no site após a publicação da 0.7.** Os ZIPs originais da tag `v0.7-beta` continuam com o acesso antigo; baixe a [0.7 Beta atualizada com os dois EXEs](https://github.com/sugyua/destinia/releases/tag/v0.7-codex-imagens-fix2), compile os fontes atuais ou use os pacotes de teste de Actions para conferir esta mudança no Windows.
 
 Durante a partida, abra o **menu do próprio jogo**, o mesmo que contém Craft e Pets. Toque/clique no livro **CODEX**, à direita da barra de ícones. A lista, os contadores e a paginação são desenhados dentro da imagem do jogo; nenhum botão do Códex ocupa a tela de gameplay ou a interface externa do site.
 
@@ -47,3 +47,9 @@ Os retratos usam os arquivos `monN_V_head.wmb`/`bossN_head.wmb` e as poses `monN
 No Windows, as imagens são carregadas em cache para as páginas consultadas, sem chamar rotinas ARM nem alterar partida ou `codex-v1.txt`. A leitura de ZCP usa zlib externa, documentada em Dependências. No navegador, as imagens são preparadas durante a inicialização a partir dos recursos já presentes; é necessário suporte a `DecompressionStream` para vê-las. Recurso ausente, corrompido ou formato incompatível mostra `?`, preservando nome/estado/contador. A leitura limita tamanho descomprimido, dimensões e índices antes de desenhar.
 
 As referências de teste incluem figuras completas de Fungus, Scorpion, Dungeon Guardian, chefe 102 e Lava Guardian, verificadas também por hash dos pixels RGB565, além de todas as variantes. Consulta e mudança de página preservam os contadores e a memória ARM. A QA por toque verifica duas páginas, inclusive chefes, em retrato/paisagem no Chromium. Isso não substitui a verificação no Windows com jogo real nem no Safari/iPhone físico.
+
+## Correção das figuras — fix2
+
+A composição anterior interpretava o sinal dos deslocamentos de partes ao contrário na pose sem espelhamento e lia a paleta como BGR. A rotina original `drawAGDImageT` soma os deslocamentos à âncora de cada WImg antes do clipping; a paleta original é RGB. Os dois leitores, C++ e JavaScript, foram corrigidos sem mudar o formato do registro do Códex.
+
+O Imperial Soldier passa de uma área dispersa de 75×106 para a figura unida de 30×45 pixels, ajustada proporcionalmente ao mesmo quadro de 28×28. A comparação automatizada com o desenho ARM original usa dois fundos para distinguir transparência de cores opacas; cobre os IDs 1, 4, 61, 100, 102 e 109 pixel a pixel. As referências RGB565 do teste C++ correspondem a essas saídas originais. Os 73 IDs continuam cobertos pelos testes de leitura e recursos inválidos.

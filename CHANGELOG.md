@@ -4,6 +4,16 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## Correção das miniaturas e desempenho da 0.7 — fix2
+
+- Corrigida a montagem das miniaturas do Códex: os deslocamentos das partes agora seguem as âncoras do desenho original. Corpo e arma do Imperial Soldier permanecem unidos; figura ocupa 30×45 pixels antes da redução proporcional, em vez de 75×106.
+- Corrigida a leitura RGB da paleta das miniaturas; vermelho e azul estavam invertidos. Mesma correção aplicada ao protótipo web, sem alterar registros, contadores ou saves.
+- No host_zoom, substituído o observador de leituras de memória da câmera por 16 pontos de atualização ARM verificados. Isso reduz a instrumentação do emulador e mantém zoom out 800×480, centralização, margens cinzas, UI e ritmo original.
+- Endereços da câmera protegidos por impressão do arquivo ARM original 1.0.6 inteiro; outra biblioteca é recusada com mensagem explícita, em vez de executar pontos incompatíveis.
+- Testes dos 16 escritores reais de câmera, mapas pequenos/grandes, tela cheia 3440×1440 com imagem 2400×1440, fundo cinza e tamanho do texto XP. Regressão das miniaturas inclui comparação pixel a pixel com a rotina ARM original para seis figuras, além da leitura dos 73 IDs.
+- No cenário ARM de introdução medido no Linux, mediana de emulação caiu de 216,22 para 88,93 ms por quadro e a imagem final permaneceu idêntica. Não é uma medição de gameplay no Windows nem garantia de FPS; o intervalo solicitado pelo jogo continua em 60 ms nessa cena.
+- Novos EXEs dos dois hosts gerados pela compilação de verificação, com correções anteriores dos inicializadores e diagnóstico mantidas. Dependências externas, dados originais, saves e relatórios pessoais permanecem fora dos pacotes.
+
 ## Correção de abertura da 0.7 — fix1
 
 - Corrigidos os dois inicializadores BAT: a versão esperada agora vem do arquivo VERSION. Eles exigiam 0.6 e bloqueavam os EXEs 0.7 distribuídos; a checagem de versão/runtime permanece ativa.
