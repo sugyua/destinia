@@ -85,6 +85,12 @@
     "tests/test_launchers.ps1",
     "tests/test_prompt.ps1",
     "tests/test_zoom_camera.py",
-    "docs/CORRECOES_0.7_FIX2.md"
+    "docs/CORRECOES_0.7_FIX2.md",
+    "common/codex_details.h",
+    "tests/codex_details_cases.cpp",
+    "tests/codex_details_ui_cases.cpp",
+    "tests/test_codex_details.py",
+    "tests/test_codex_details_ui.py",
+    "docs/CODEX_DETALHES.md"
   ]
 }

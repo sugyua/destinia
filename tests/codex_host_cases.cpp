@@ -74,5 +74,34 @@ int main(int argc,char** argv) {
  // Slot with only the last species opens its actual catalog page, not a compressed list.
  codex.select(2);codex.observe(12000,109,false);wr32(game+0x4886,2);codexEnterMenu();if(codexSelection!=72 || codexPage!=2)return 63;
  codex.select(3);wr32(game+0x4886,3);codexEnterMenu();if(codexSelection!=0 || codexPage!=0 || !codex.entries[3].empty())return 64;
+
+ // Action opens native details; categories and drop subpages never reach ARM.
+ codex.select(0);wr32(game+0x4886,0);codexEnterMenu();codexSelection=0;codexPage=0;
+ const auto beforeDetails=codex.entries[0].at(1).kills;
+ if(!codexMenuKey(17,true) || !codexDetailsOpen || codexDetailPage!=0)return 70;
+ if(codexDetailInfo.sections.size()!=3 || codexDetailInfo.sections[0].id!="drops")return 71;
+ if(!codexMenuKey(9,true) || codexDetailScroll!=1 || codexDetailPage!=0)return 72;
+ if(!codexMenuKey(7,true) || codexDetailPage!=1 || codexDetailScroll!=0)return 73;
+ if(!codexMenuKey(6,true) || codexDetailPage!=2)return 74;
+ codexMenuKey(7,true);if(codexDetailPage!=2)return 75;
+ codexMenuKey(10,true);if(codexDetailsOpen || !codexOpen || codexSelection!=0)return 76;
+ // The selected unknown species must remain undiscovered after opening info.
+ codexSelection=20;codexMenuKey(6,true);if(!codexDetailsOpen || codex.entries[0].count(21))return 77;
+ codexMenuKey(10,true);codexSelection=0;codexMenuKey(17,true);
+ auto previous=destinia::codexPrevious(SCREEN_W,SCREEN_H);next=destinia::codexNext(SCREEN_W,SCREEN_H);
+ auto tap=[&](destinia::CodexRect r){codexMenuTouch(r.x+5,r.y+5,0);codexMenuTouch(r.x+5,r.y+5,1);};
+ tap(next);if(codexDetailPage!=1)return 78;tap(previous);if(codexDetailPage!=0)return 79;
+ tap(destinia::codexDetailDown(SCREEN_W,SCREEN_H));if(codexDetailScroll!=1)return 80;
+ tap(destinia::codexDetailUp(SCREEN_W,SCREEN_H));if(codexDetailScroll!=0)return 81;
+ tap(destinia::codexBack(SCREEN_W,SCREEN_H));if(codexDetailsOpen || !codexOpen)return 82;
+ if(codex.entries[0].at(1).kills!=beforeDetails)return 83;
+ // Facts are read only when an actual monster is observed, separately per slot.
+ codexOpen=false;codexTabSelected=false;shortAt(8,61);shortAt(0x10,2);shortAt(0x12,1);shortAt(0x1a,50);shortAt(0x1c,50);wr32(p+0x20,170);wr32(p+0x24,170);wr32(p+0x4c,0);wr32(game+0x4878,0);
+ uint16_t area=2,map=49;wr(game+0x4870,&area,2);wr(game+0x4872,&map,2);
+ if(!callFn(exportsMap.at("drawMonsterOddEff"),{p}))return 84;
+ codexSelection=60;codexPage=1;codexOpen=true;codexMenuKey(17,true);
+ if(codexDetailInfo.hp.find("170")==std::string::npos || codexDetailInfo.hp.find("2")==std::string::npos)return 85;
+ if(!codexFacts[0].count(61) || codexFacts[1].count(61))return 86;
+ codexMenuKey(10,true);codexMenuKey(10,true);
  std::puts("CODEX_ARM_OK");uc_close(uc);uc=nullptr;return 0;
 }

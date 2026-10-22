@@ -4,6 +4,17 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## Códex com detalhes nos dois hosts Windows — atualização da main 0.7
+
+- AÇÃO/ataque na grade abre a janela interna de informações, com retrato frontal, contador de mortes e HP máximo/nível do último encontro da sessão.
+- Páginas fixas: 1 Drops, 2 Locais de spawn, 3 Variantes. Listas maiores usam SUBIR/DESCER; VOLTAR retorna à mesma seleção. A consulta continua pausando a partida e ocultando os dados de desconhecidos.
+- Um item por linha, subpáginas próprias por categoria e raridade, nomes base de equipamentos e receitas e cores originais: branco, verde, azul, roxo e laranja. Raridades respeitam nível e ramo normal/elite/chefe; ovos e consumíveis preservam branco.
+- Leitura limitada e validada das tabelas originais, 172 mapas e 59 scripts. Arquivos incompatíveis mantêm a grade e contadores disponíveis. Nenhuma alteração de chances, itens, combate ou formato dos saves/codex-v1.txt.
+- Dados de encontro (HP/nível/variante/locais observados) ficam apenas na sessão por personagem; descobertas e mortes continuam persistentes. Não reconstrói informações antigas.
+- Incluídos testes de metadados, cores, paginação, máscara de desconhecidos e rotinas ARM nos dois hosts; workflow Windows passa a executá-los e gerar pacotes de teste com os novos EXEs.
+- Verificação local: ambos os hosts compilados com áudio e 37 testes Python aprovados; revisão de metadados/UI com sanitizadores e inspeção das imagens em 400×240 e 800×480. Compilação e testes Windows/PowerShell ficam registrados separadamente no Actions.
+- Publicação dos fontes na main; tags e ZIPs anteriores não foram substituídos. Verificação visual e campanha completa no Windows continuam pendentes.
+
 ## Lista de drops do Códex web — 22/10/2026
 
 - Um item por linha, com cada categoria de drops em subpáginas próprias; equipamentos e receitas separados por raridade e ovos listados individualmente.
