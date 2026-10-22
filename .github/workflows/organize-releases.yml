@@ -18,7 +18,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: python
         run: |
-          import json,os,subprocess
+          import json,os,subprocess,time
           repository=os.environ['GITHUB_REPOSITORY']
           approved={'v0.2-beta','v0.3-beta','v0.4-beta','v0.5-beta','v0.6-beta','v0.7-beta','v0.7-codex-imagens','v0.7-codex-imagens-fix1','v0.7-codex-imagens-fix2'}
           def api(endpoint,payload=None):
@@ -37,10 +37,13 @@ jobs:
                   updated=api('repos/'+repository+'/releases/'+str(release['id']),{'prerelease':True})
                   if preserved(updated)!=preserved(release):raise RuntimeError('Metadados ou downloads alterados indevidamente')
                   print('Classificacao Beta corrigida:',release['tag_name'])
-          result=api('repos/'+repository+'/releases?per_page=100')
-          ordered=[r for r in result if r['tag_name'] in approved]
-          if not all(r['prerelease'] for r in ordered):raise RuntimeError('Classificacao Beta nao aplicada')
-          expected=sorted(ordered,key=lambda r:r['published_at'],reverse=True)
+          # Release classification is indexed asynchronously by GitHub.
+          for attempt in range(10):
+              result=api('repos/'+repository+'/releases?per_page=100')
+              ordered=[r for r in result if r['tag_name'] in approved]
+              expected=sorted(ordered,key=lambda r:r['published_at'],reverse=True)
+              if all(r['prerelease'] for r in ordered) and [r['id'] for r in ordered]==[r['id'] for r in expected]:break
+              if attempt<9:time.sleep(3)
+          else:raise RuntimeError('Ordem ainda nao convergiu; revisar ordenacao do GitHub')
           print('Ordem retornada:',[r['tag_name'] for r in ordered])
-          if [r['id'] for r in ordered]!=[r['id'] for r in expected]:raise RuntimeError('GitHub ainda retorna ordem diferente da publicacao; revisar ordenacao')
           print('RELEASE_ORDER_OK: datas tags notas e assets preservados')
