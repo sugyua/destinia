@@ -1,0 +1,39 @@
+name: Publicar pacotes verificados da correcao Codex e camera 0.7
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: publish-codex-fix2
+  cancel-in-progress: false
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: destinia-codex-no-menu-pacotes-de-teste
+          path: verified-packages
+          run-id: 39750770186
+          github-token: ${{ github.token }}
+      - name: Conferir commit e hashes e anexar sem sobrescrever
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh api repos/"$GITHUB_REPOSITORY"/git/ref/tags/v0.7-codex-imagens-fix2 --jq .object.sha)" = 26447293115bfc671c21645bb7f9de56606cd03f
+          cd verified-packages
+          test "$(find . -maxdepth 1 -type f | wc -l)" -eq 4
+          sha256sum -c destinia-0.7-beta-source.zip.sha256
+          sha256sum -c destinia-0.7-beta-windows-x64.zip.sha256
+          printf '%s\n' \
+            'f51fcacd66d1c3691d1508547437a661027c6479b4331ca6d585ac414a387207  destinia-0.7-beta-source.zip' \
+            '574de0adb836091a2574c36cc7e5f051b34c0e3033f80bf561156cc4435dd721  destinia-0.7-beta-windows-x64.zip' | sha256sum -c -
+          gh release upload v0.7-codex-imagens-fix2 \
+            destinia-0.7-beta-source.zip destinia-0.7-beta-source.zip.sha256 \
+            destinia-0.7-beta-windows-x64.zip destinia-0.7-beta-windows-x64.zip.sha256 \
+            --repo "$GITHUB_REPOSITORY"
