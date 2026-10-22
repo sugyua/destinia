@@ -4,6 +4,13 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## Lista de drops do Códex web — 22/10/2026
+
+- Um item por linha, com cada categoria de drops em subpáginas próprias; equipamentos e receitas separados por raridade e ovos listados individualmente.
+- Nomes base e raridades nas cores originais: Comum branco, Mágico verde, Raro azul, Épico roxo e Lendário laranja. Consumíveis, materiais e ovos preservam a cor branca original.
+- Raridades respeitam nível observado e ramo de monstro normal, elite ou chefe; receitas originais aparecem separadas, sem anéis.
+- Mantidas as categorias 1 Drops, 2 Locais de spawn e 3 Variantes. Mudança exclusiva da consulta web, sem alterar drops reais, gameplay, saves ou EXEs Windows.
+
 ## Organização dos detalhes do Códex web
 
 - Separadas categorias fixas: página 1 Drops; página 2 Locais de spawn; página 3 Variantes.

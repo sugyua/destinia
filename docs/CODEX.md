@@ -67,3 +67,11 @@ O aviso de derrota em `procMonster` é feito antes da gravação do estado morto
 ## Categorias dos detalhes na web
 
 A janela web mantém categorias fixas: **página 1: Drops; página 2: Locais de spawn; página 3: Variantes**. ANTERIOR/PROXIMA, esquerda/direita e AÇÃO trocam a categoria. Listas grandes são percorridas com SUBIR/DESCER ou cima/baixo, sem misturar categorias nem mudar sua numeração. Retrato, HP máximo, nível e contador permanecem no cabeçalho; VOLTAR conserva a seleção da grade. Essa organização continua exclusiva do protótipo web nesta etapa.
+
+## Drops organizados e cores de raridade — web
+
+Um item ocupa uma linha. Cada categoria de drops começa uma subpágina própria; equipamentos e receitas são separados por raridade. SUBIR/DESCER ou cima/baixo percorrem as subpáginas, mantendo Drops como página principal 1. As páginas 2 Locais de spawn e 3 Variantes permanecem separadas.
+
+Equipamentos e receitas exibem nome base e raridade nas cores RGB565 originais: Comum branco `ffff`, Mágico verde `07e0`, Raro azul `041f`, Épico roxo `bb9f` e Lendário laranja `fc08`. Os prefixos dos equipamentos variam durante a geração. Consumíveis, materiais e todos os ovos preservam o branco original; o tier de um ovo não equivale à raridade de equipamento.
+
+As possibilidades respeitam o nível registrado do último encontro e a variação de +0 a +2 do gerador: Épico a partir de nível 38, Lendário a partir de 78. Elites e chefes usam o ramo de equipamentos Raros ou superiores; o pool normal inclui receitas separadas, para os sete tipos originais sem anéis. Itens de missão continuam condicionais. Essa consulta não muda as chances nem os itens realmente gerados e ainda não faz parte dos EXEs Windows.
