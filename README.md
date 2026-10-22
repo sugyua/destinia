@@ -8,7 +8,23 @@
 
 A 0.6 adiciona configurações persistentes, comandos remapeáveis, volumes separados, pausa opcional e distribuição Windows x64 com os dois EXEs. Veja [instalação](INSTALL.md), [preferências](docs/PREFERENCIAS.md), [changelog](CHANGELOG.md) e [verificações](docs/RELEASE_0.6.md). Dependências externas e dados originais continuam separados.
 
-[0.6](https://github.com/sugyua/destinia/releases/tag/v0.6-beta) · [0.5](https://github.com/sugyua/destinia/releases/tag/v0.5-beta) · [0.4](https://github.com/sugyua/destinia/releases/tag/v0.4-beta) · [0.3](https://github.com/sugyua/destinia/releases/tag/v0.3-beta) · [0.2](https://github.com/sugyua/destinia/releases/tag/v0.2-beta) · [Todas as releases](https://github.com/sugyua/destinia/releases)
+## Releases em ordem de lançamento
+
+Da mais recente para a mais antiga. Os pacotes mais novos da `main` indicados acima são candidatos de teste; esta lista reúne as releases publicadas.
+
+| Release | Lançamento (Brasília) |
+| --- | --- |
+| [0.7 Beta — imagens e câmera, fix2](https://github.com/sugyua/destinia/releases/tag/v0.7-codex-imagens-fix2) | 22/10/2026 05:54 |
+| [0.7 Beta — correção de abertura, fix1](https://github.com/sugyua/destinia/releases/tag/v0.7-codex-imagens-fix1) | 21/10/2026 18:42 |
+| [0.7 Beta — Códex com imagens](https://github.com/sugyua/destinia/releases/tag/v0.7-codex-imagens) | 21/10/2026 18:20 |
+| [0.7 Beta — Códex inicial](https://github.com/sugyua/destinia/releases/tag/v0.7-beta) | 21/10/2026 13:34 |
+| [0.6 Beta](https://github.com/sugyua/destinia/releases/tag/v0.6-beta) | 21/10/2026 08:55 |
+| [0.5 Beta](https://github.com/sugyua/destinia/releases/tag/v0.5-beta) | 21/10/2026 07:56 |
+| [0.4 Beta](https://github.com/sugyua/destinia/releases/tag/v0.4-beta) | 21/10/2026 02:53 |
+| [0.3 Beta](https://github.com/sugyua/destinia/releases/tag/v0.3-beta) | 20/10/2026 21:18 |
+| [0.2 Beta](https://github.com/sugyua/destinia/releases/tag/v0.2-beta) | 20/10/2026 19:35 |
+
+[Ver todas as releases no GitHub](https://github.com/sugyua/destinia/releases)
 
 ## Arquitetura
 

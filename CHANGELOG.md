@@ -4,6 +4,11 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## Organização das releases — 22/10/2026
+
+- Índice do README em ordem de lançamento, da mais recente para a mais antiga, incluindo as correções da 0.7 e horários de Brasília.
+- Padronização das versões Beta como pré-lançamentos no GitHub, com preservação das datas, tags, notas e arquivos existentes. Sem alterações no jogo.
+
 ## Códex com detalhes nos dois hosts Windows — atualização da main 0.7
 
 - AÇÃO/ataque na grade abre a janela interna de informações, com retrato frontal, contador de mortes e HP máximo/nível do último encontro da sessão.
