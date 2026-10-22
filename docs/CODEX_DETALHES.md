@@ -27,3 +27,7 @@ Arquivos de metadados incompatíveis são recusados e a grade/contadores continu
 Esta atualização pertence à main; os ZIPs e tags antigos não são substituídos. Baixe os fontes atuais e execute Compilar Destinia.bat com o jogo fechado, preservando sua pasta game. O workflow verify-codex-menu compila os dois EXEs Windows e gera pacotes de teste somente após suas verificações.
 
 Verificação local em Linux: ambos os hosts compilados com áudio; 37 testes Python aprovados, incluindo inicialização ARM, persistência do contador, metadados, paginação, controles, backups, áudio, câmera e framebuffer 800×480. Metadados e renderização também passaram em AddressSanitizer/UndefinedBehaviorSanitizer na revisão. As imagens do painel em 400×240 e 800×480 foram inspecionadas. A compilação e os roteiros PowerShell do Windows são verificados separadamente pelo workflow no GitHub Actions. Campanha completa, monitor 3440×1440 e controle físico no Windows ainda exigem verificação manual.
+
+### Resultado Windows
+
+[Execução 39858876580 aprovada](https://github.com/sugyua/destinia/actions/runs/39858876580), commit f50bcfbed4c38ce000d26cb07fea54809b5f23b6: dois hosts compilados com áudio, testes ARM/metadados/UI/estabilidade e sete roteiros PowerShell passaram. [Pacotes de teste Windows e fontes com SHA-256](https://github.com/sugyua/destinia/actions/runs/39858876580/artifacts/12461226530). O GitHub pode exigir login; abra o artefato e extraia o ZIP Windows interno. Dependências externas e dados originais continuam fora dos pacotes.

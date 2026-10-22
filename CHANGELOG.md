@@ -13,6 +13,7 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 - Dados de encontro (HP/nível/variante/locais observados) ficam apenas na sessão por personagem; descobertas e mortes continuam persistentes. Não reconstrói informações antigas.
 - Incluídos testes de metadados, cores, paginação, máscara de desconhecidos e rotinas ARM nos dois hosts; workflow Windows passa a executá-los e gerar pacotes de teste com os novos EXEs.
 - Verificação local: ambos os hosts compilados com áudio e 37 testes Python aprovados; revisão de metadados/UI com sanitizadores e inspeção das imagens em 400×240 e 800×480. Compilação e testes Windows/PowerShell ficam registrados separadamente no Actions.
+- Compilação dos dois EXEs com áudio, testes ARM e roteiros PowerShell aprovados no [workflow Windows](https://github.com/sugyua/destinia/actions/runs/39858876580), commit f50bcfbed4c38ce000d26cb07fea54809b5f23b6. Pacotes de fontes e Windows com SHA-256 disponíveis nos artefatos dessa execução.
 - Publicação dos fontes na main; tags e ZIPs anteriores não foram substituídos. Verificação visual e campanha completa no Windows continuam pendentes.
 
 ## Lista de drops do Códex web — 22/10/2026
