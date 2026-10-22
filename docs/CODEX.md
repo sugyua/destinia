@@ -4,15 +4,15 @@
 
 **Acesso corrigido na branch `main` e no site após a publicação da 0.7.** Os ZIPs originais da tag `v0.7-beta` continuam com o acesso antigo; baixe a [0.7 Beta atualizada com os dois EXEs](https://github.com/sugyua/destinia/releases/tag/v0.7-codex-imagens-fix2), compile os fontes atuais ou use os pacotes de teste de Actions para conferir esta mudança no Windows.
 
-Durante a partida, abra o **menu do próprio jogo**, o mesmo que contém Craft e Pets. Toque/clique no livro **CODEX**, à direita da barra de ícones. A lista, os contadores e a paginação são desenhados dentro da imagem do jogo; nenhum botão do Códex ocupa a tela de gameplay ou a interface externa do site.
+Durante a partida, abra o **menu do próprio jogo**, o mesmo que contém Craft e Pets. Toque/clique no livro **CODEX**, à direita da barra de ícones. A grade, os contadores e a paginação são desenhados dentro da imagem do jogo; nenhum botão do Códex ocupa a tela de gameplay ou a interface externa do site.
 
-No Windows, use **I** (menu por padrão), o comando de menu configurado ou o botão original. Na web, toque em **Menu** ou no botão original. **VOLTAR**, Esc ou o comando de voltar retorna à opção do menu que estava selecionada. Os botões **ANTERIOR/PROXIMA** ou setas mudam a página. No menu principal, esquerda a partir da primeira aba ou direita a partir da última seleciona o livro; confirmar abre. O atalho F8 só abre com esse menu disponível e sem remapeamento de F8. A partida fica suspensa durante a consulta, preservando a pausa manual anterior.
+No Windows, use **I** (menu por padrão), o comando de menu configurado ou o botão original. Na web, toque em **Menu** ou no botão original. **VOLTAR**, Esc ou o comando de voltar retorna à opção do menu que estava selecionada. Os botões **ANTERIOR/PROXIMA** mudam a página. Toque/clique num quadrado ou use as setas para selecionar (cima/baixo deslocam uma linha de oito). No menu principal, esquerda a partir da primeira aba ou direita a partir da última seleciona o livro; confirmar abre. O atalho F8 só abre com esse menu disponível e sem remapeamento de F8. A partida fica suspensa durante a consulta, preservando a pausa manual anterior.
 
 - **VISTO:** uma espécie foi desenhada pelo jogo, com o centro do monstro dentro da área visível. Não basta carregar os inimigos do mapa.
 - **DERROTADO:** a rotina original de confirmação de derrota foi observada, com o monstro em estado de morte e sem vida.
 - **MORTOS:** quantidade de derrotas confirmadas daquela espécie. Repetir o processamento do mesmo cadáver não soma outra morte; um novo indivíduo ou reaparecimento pode somar.
 
-Na `main` e no site, cada entrada mostra uma **miniatura original do monstro**, seu nome em inglês, estado e contador; equipamentos continuam pendentes. Quatro monstros por página mantêm as imagens legíveis. Somente espécies descobertas aparecem. O Códex é aberto pelo menu durante a partida e fica vazio até haver descobertas.
+Na `main` e no site, o catálogo tem **8 colunas × 4 linhas por página**, com 73 espécies em três páginas. Desconhecidos mostram `?`; encontrados mostram a **figura frontal original completa**, reduzida proporcionalmente. Ao selecionar, a faixa inferior mostra nome ou `??????`, **ENCONTRADO** ou `???????` e **MORTOS** com a quantidade registrada. Consultar desconhecidos não registra encontro nem revela a espécie. Equipamentos continuam pendentes. As releases anteriores conservam o visual da sua versão.
 
 ## Onde os dados ficam
 
@@ -42,14 +42,18 @@ A biblioteca ARM e os nove IDs originais de menu são preservados: o livro é um
 
 ## Miniaturas originais — alteração após a release 0.7
 
-Os retratos usam os arquivos `monN_V_head.wmb`/`bossN_head.wmb` e as poses `monN.agd`/`bossN.agd` já presentes em `game/assets`. O leitor combina as partes do corpo da primeira pose, sem sombras/efeitos externos, preserva a transparência e reduz a figura proporcionalmente em uma área de 28×28 pixels. As 63 variantes normais e os dez IDs de chefes foram lidos nos testes. O chefe 103 reutiliza a arte do 101, como no carregador original.
+Os retratos usam os arquivos `monN_V_head.wmb`/`bossN_head.wmb` e as poses `monN.agd`/`bossN.agd` já presentes em `game/assets`. O leitor combina as partes do corpo da pose frontal (ação 1 dos monstros comuns e ação 0 dos chefes), sem sombras/efeitos externos, preserva a transparência e reduz a figura proporcionalmente em uma área de 30×30 pixels. As 63 variantes normais e os dez IDs de chefes foram lidos nos testes. O chefe 103 reutiliza a arte do 101, como no carregador original.
 
 No Windows, as imagens são carregadas em cache para as páginas consultadas, sem chamar rotinas ARM nem alterar partida ou `codex-v1.txt`. A leitura de ZCP usa zlib externa, documentada em Dependências. No navegador, as imagens são preparadas durante a inicialização a partir dos recursos já presentes; é necessário suporte a `DecompressionStream` para vê-las. Recurso ausente, corrompido ou formato incompatível mostra `?`, preservando nome/estado/contador. A leitura limita tamanho descomprimido, dimensões e índices antes de desenhar.
 
-As referências de teste incluem figuras completas de Fungus, Scorpion, Dungeon Guardian, chefe 102 e Lava Guardian, verificadas também por hash dos pixels RGB565, além de todas as variantes. Consulta e mudança de página preservam os contadores e a memória ARM. A QA por toque verifica duas páginas, inclusive chefes, em retrato/paisagem no Chromium. Isso não substitui a verificação no Windows com jogo real nem no Safari/iPhone físico.
+As referências de teste incluem figuras completas de Fungus, Scorpion, Dungeon Guardian, chefe 102 e Lava Guardian, verificadas também por hash dos pixels RGB565, além de todas as variantes. Consulta e mudança de página preservam os contadores e a memória ARM. A QA por toque verifica três páginas, inclusive chefes, em retrato/paisagem no Chromium. Isso não substitui a verificação no Windows com jogo real nem no Safari/iPhone físico.
 
 ## Correção das figuras — fix2
 
 A composição anterior interpretava o sinal dos deslocamentos de partes ao contrário na pose sem espelhamento e lia a paleta como BGR. A rotina original `drawAGDImageT` soma os deslocamentos à âncora de cada WImg antes do clipping; a paleta original é RGB. Os dois leitores, C++ e JavaScript, foram corrigidos sem mudar o formato do registro do Códex.
 
 O Imperial Soldier passa de uma área dispersa de 75×106 para a figura unida de 30×45 pixels, ajustada proporcionalmente ao mesmo quadro de 28×28. A comparação automatizada com o desenho ARM original usa dois fundos para distinguir transparência de cores opacas; cobre os IDs 1, 4, 61, 100, 102 e 109 pixel a pixel. As referências RGB565 do teste C++ correspondem a essas saídas originais. Os 73 IDs continuam cobertos pelos testes de leitura e recursos inválidos.
+
+## Grade e pose frontal — após fix2
+
+O catálogo completo exibe os espaços desconhecidos desde a primeira consulta. A seleção e a página são apenas estado de apresentação, sem gravar descobertas ou alterar mortes. O cache nativo considera as posições das espécies no catálogo, carregando apenas as imagens descobertas da página consultada. A escolha da pose foi conferida nas rotinas originais Monster_setDir/Monster_setAction e por comparação dos pixels com drawAGDImageT. O Imperial Soldier frontal tem 47×46 pixels antes da redução; a medida 30×45 da fix2 descreve a pose traseira daquela versão.

@@ -3,23 +3,34 @@
 #include "codex_ui.h"
 static destinia::Codex codex;
 static bool codexAvailable=false,codexWritable=true,codexOpen=false;
-static size_t codexPage=0;
+static size_t codexPage=0,codexSelection=0;
 static destinia::CodexPortraits codexPortraits;
 static void codexEnsurePortraits() {
  auto character=codex.entries.find(codex.slot);if(character==codex.entries.end())return;
- size_t row=0;for(const auto& entry:character->second) {
-  if(row++<codexPage*destinia::codexRowsPerPage || row> (codexPage+1)*destinia::codexRowsPerPage)continue;
+ size_t row=0;for(const auto& entry:codex.names) {
+  const size_t index=row++;if(index<codexPage*destinia::codexEntriesPerPage || index>=(codexPage+1)*destinia::codexEntriesPerPage || !character->second.count(entry.first))continue;
   const int id=entry.first;if(codexPortraits.count(id))continue;
   destinia::CodexPortrait picture;auto paths=destinia::codexPortraitAssets(id);std::vector<uint8_t> sheet,pose;
   auto bounded=[&](const std::string& name){std::error_code ec;auto size=fs::file_size(assetsDir+"/"+name,ec);return !ec && size>0 && size<=2*1024*1024;};
-  if(!paths.first.empty() && bounded(paths.first) && bounded(paths.second) && readFile(assetsDir+"/"+paths.first,sheet) && readFile(assetsDir+"/"+paths.second,pose))picture=destinia::codexDecodePortrait(destinia::codexUnpackResource(sheet),destinia::codexUnpackResource(pose));
+  if(!paths.first.empty() && bounded(paths.first) && bounded(paths.second) && readFile(assetsDir+"/"+paths.first,sheet) && readFile(assetsDir+"/"+paths.second,pose))picture=destinia::codexDecodePortrait(destinia::codexUnpackResource(sheet),destinia::codexUnpackResource(pose),id>=100?0:1);
   if(picture.pixels.empty())hostReport("[codex] Imagem indisponivel para especie %d; nome e contador preservados.\n",id);
   codexPortraits.emplace(id,std::move(picture));
  }
 }
+static void codexMoveSelection(int delta) {
+ if(codex.names.empty()){codexSelection=codexPage=0;return;}
+ const auto next=static_cast<long long>(codexSelection)+delta;
+ codexSelection=size_t(std::max<long long>(0,std::min<long long>(next,codex.names.size()-1)));
+ codexPage=codexSelection/destinia::codexEntriesPerPage;codexEnsurePortraits();
+}
 static void codexChangePage(int direction) {
-  auto it=codex.entries.find(codex.slot);const size_t pages=it==codex.entries.end()?1:std::max<size_t>(1,(it->second.size()+destinia::codexRowsPerPage-1)/destinia::codexRowsPerPage);
-  codexPage=std::min(codexPage,pages-1);if(direction>0 && codexPage+1<pages)++codexPage;else if(direction<0 && codexPage)--codexPage;codexEnsurePortraits();
+ if(codex.names.empty()){codexSelection=codexPage=0;return;}
+ const size_t pages=(codex.names.size()+destinia::codexEntriesPerPage-1)/destinia::codexEntriesPerPage;
+ codexPage=std::min(codexPage,pages-1);if(direction>0 && codexPage+1<pages)++codexPage;else if(direction<0 && codexPage)--codexPage;
+ const size_t start=codexPage*destinia::codexEntriesPerPage,last=std::min(destinia::codexEntriesPerPage,codex.names.size()-start)-1;
+ size_t offset=codexSelection%destinia::codexEntriesPerPage;
+ if(offset>last){const size_t col=offset%destinia::codexGridColumns;offset=col<=last?last-(last-col)%destinia::codexGridColumns:last;}
+ codexSelection=start+offset;codexEnsurePortraits();
 }
 static void codexFlush() {
   if(!codexAvailable || !codexWritable || !codex.dirty) return;
@@ -40,14 +51,18 @@ static void codexEnterMenu() {
   codexNativeTouchDown=false;
  }
  const int slot=rd16(exportsMap.at("Game")+0x4886);if(slot<=9)codex.select(slot);
- codexOpen=true;codexTabSelected=true;codexPage=0;codexEnsurePortraits();codexFlush();
+ codexOpen=true;codexTabSelected=true;codexSelection=0;
+ auto records=codex.entries.find(codex.slot);if(records!=codex.entries.end()){size_t index=0;for(const auto& name:codex.names){if(records->second.count(name.first)){codexSelection=index;break;}++index;}}
+ codexPage=codexSelection/destinia::codexEntriesPerPage;codexEnsurePortraits();codexFlush();
 }
 static bool codexMenuKey(int key,bool down) {
  if(!down)return false; // Always allow native releases to clear held commands.
  if(codexOpen) {
   if(key==10 || key==27){codexOpen=false;codexTabSelected=true;codexFlush();}
-  else if(key==5 || key==3)codexChangePage(-1);
-  else if(key==7 || key==9)codexChangePage(1);
+  else if(key==5)codexMoveSelection(-1);
+  else if(key==7)codexMoveSelection(1);
+  else if(key==3)codexMoveSelection(-int(destinia::codexGridColumns));
+  else if(key==9)codexMoveSelection(int(destinia::codexGridColumns));
   return true;
  }
  if(!codexMenuVisible()){codexTabSelected=false;return false;}
@@ -65,10 +80,11 @@ static bool codexMenuTouch(int x,int y,int phase) {
  if(codexTouchCaptured && phase!=0){if(phase==1)codexTouchCaptured=false;return true;}
  if(codexOpen) {
   if(phase==0) {
-   codexTouchCaptured=true;const auto panel=destinia::codexPanel(SCREEN_W,SCREEN_H);
-   if(destinia::CodexRect{panel.x+298,panel.y+4,58,20}.contains(x,y)){codexOpen=false;codexTabSelected=true;codexFlush();}
-   else if(destinia::CodexRect{panel.x+4,panel.y+185,90,27}.contains(x,y))codexChangePage(-1);
-   else if(destinia::CodexRect{panel.x+280,panel.y+185,76,27}.contains(x,y))codexChangePage(1);
+   codexTouchCaptured=true;
+   if(destinia::codexBack(SCREEN_W,SCREEN_H).contains(x,y)){codexOpen=false;codexTabSelected=true;codexFlush();}
+   else if(destinia::codexPrevious(SCREEN_W,SCREEN_H).contains(x,y))codexChangePage(-1);
+   else if(destinia::codexNext(SCREEN_W,SCREEN_H).contains(x,y))codexChangePage(1);
+   else {const int index=destinia::codexHitTest(x,y,codex.names.size(),codexPage,SCREEN_W,SCREEN_H);if(index>=0)codexSelection=size_t(index);}
   }
   return true;
  }

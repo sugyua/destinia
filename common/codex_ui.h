@@ -9,9 +9,20 @@ struct CodexRect { int x,y,w,h; bool contains(int px,int py) const { return px>=
 // beside its nine icons; never replace an existing native tab/hitbox.
 inline CodexRect codexMenuButton(int width,int height) { return {width/2+120,height/2-120,76,24}; }
 inline CodexRect codexPanel(int width,int height) { return {(width-360)/2,(height-240)/2+25,360,215}; }
-inline void codexPaint(uint8_t* pixels,int width,int height,const Codex& book,bool open,size_t page,bool available,bool inMenu=false,bool selected=false,const CodexPortraits* portraits=nullptr) {
+constexpr size_t codexGridColumns=8,codexGridRows=4,codexEntriesPerPage=codexGridColumns*codexGridRows;
+inline CodexRect codexGrid(int width,int height){auto p=codexPanel(width,height);return {p.x+24,p.y+28,312,134};}
+inline CodexRect codexCell(size_t index,int width,int height){auto g=codexGrid(width,height);return {g.x+int(index%codexGridColumns)*40,g.y+int(index/codexGridColumns)*34,32,32};}
+inline CodexRect codexDetails(int width,int height){auto p=codexPanel(width,height);return {p.x+8,p.y+167,344,23};}
+inline CodexRect codexPrevious(int width,int height){auto p=codexPanel(width,height);return {p.x+4,p.y+192,90,20};}
+inline CodexRect codexNext(int width,int height){auto p=codexPanel(width,height);return {p.x+280,p.y+192,76,20};}
+inline CodexRect codexBack(int width,int height){auto p=codexPanel(width,height);return {p.x+298,p.y+4,58,20};}
+inline int codexHitTest(int x,int y,size_t count,size_t page,int width,int height){
+ for(size_t i=0;i<codexEntriesPerPage && page*codexEntriesPerPage+i<count;++i)if(codexCell(i,width,height).contains(x,y))return int(page*codexEntriesPerPage+i);
+ return -1;
+}
+inline void codexPaint(uint8_t* pixels,int width,int height,const Codex& book,bool open,size_t page,bool available,bool inMenu=false,bool selected=false,const CodexPortraits* portraits=nullptr,size_t selectedIndex=0) {
  if(!open && !inMenu) return;
- const int scale=1;auto pixel=[&](int x,int y,uint16_t c){if(x>=0&&x<width&&y>=0&&y<height){pixels[(y*width+x)*2]=c&255;pixels[(y*width+x)*2+1]=c>>8;}};
+ auto pixel=[&](int x,int y,uint16_t c){if(x>=0&&x<width&&y>=0&&y<height){pixels[(y*width+x)*2]=c&255;pixels[(y*width+x)*2+1]=c>>8;}};
  auto rect=[&](int x,int y,int w,int h,uint16_t c){for(int dy=0;dy<h;++dy)for(int dx=0;dx<w;++dx)pixel(x+dx,y+dy,c);};
  auto glyph=[](char c)->std::array<uint8_t,5>{
   static const std::array<uint8_t,5> letters[]={
@@ -20,7 +31,7 @@ inline void codexPaint(uint8_t* pixels,int width,int height,const Codex& book,bo
   c=char(std::toupper(static_cast<unsigned char>(c)));if(c>='A'&&c<='Z')return letters[c-'A'];if(c>='0'&&c<='9')return digits[c-'0'];
   if(c=='?')return {2,1,81,9,6};if(c=='.')return {0,96,96,0,0};if(c==':')return {0,54,54,0,0};if(c=='-')return {8,8,8,8,8};if(c=='/')return {32,16,8,4,2};return {0,0,0,0,0};
  };
- auto text=[&](int x,int y,const std::string& s,uint16_t color){for(char c:s){auto bits=glyph(c);for(int i=0;i<5;++i)for(int j=0;j<7;++j)if(bits[i]&(1<<j))rect(x+i*scale,y+j*scale,scale,scale,color);x+=6*scale;}};
+ auto text=[&](int x,int y,const std::string& s,uint16_t color,int scale=1){for(char c:s){auto bits=glyph(c);for(int i=0;i<5;++i)for(int j=0;j<7;++j)if(bits[i]&(1<<j))rect(x+i*scale,y+j*scale,scale,scale,color);x+=6*scale;}};
  const uint16_t dark=0x1946,gold=0xe5b2,white=0xe71c,muted=0x8c92,border=0x6b6b;
  auto button=codexMenuButton(width,height);
  if(selected || open) {
@@ -37,25 +48,27 @@ inline void codexPaint(uint8_t* pixels,int width,int height,const Codex& book,bo
  text(button.x+24,button.y+9,"CODEX",selected||open?gold:white);
  if(!open) return;
  auto panel=codexPanel(width,height);const int x=panel.x,y=panel.y;
- rect(x,y,panel.w,panel.h,border);rect(x+2,y+2,panel.w-4,panel.h-4,dark);
- rect(x+5,y+5,panel.w-10,17,0x0000);text(x+12,y+10,"CODEX - MONSTROS",gold);text(x+305,y+10,"VOLTAR",white);
- text(x+12,y+31,"MORTES REGISTRADAS DESDE A 0.7",muted);
- std::vector<std::pair<int,CodexEntry>> rows;auto character=book.entries.find(book.slot);if(character!=book.entries.end())for(auto entry:character->second)rows.push_back(entry);
- if(!available)text(x+12,y+72,"OBSERVADOR INDISPONIVEL",white);
- else if(rows.empty()){text(x+12,y+72,"NENHUM MONSTRO DESCOBERTO AINDA",white);text(x+12,y+90,"EXPLORE O MAPA PARA REGISTRAR MONSTROS",muted);}
- else {
-  page=std::min(page,(rows.size()-1)/codexRowsPerPage);text(x+12,y+50,"MONSTRO",muted);text(x+170,y+50,"ESTADO",muted);text(x+250,y+50,"MORTOS",muted);
-  for(size_t i=page*codexRowsPerPage;i<rows.size()&&i<page*codexRowsPerPage+codexRowsPerPage;++i) {
-   const auto& row=rows[i];const int rowY=y+66+int(i-page*codexRowsPerPage)*32;
-   rect(x+11,rowY,30,30,border);rect(x+12,rowY+1,28,28,0x10a3);
-   const CodexPortrait* art=nullptr;if(portraits){auto found=portraits->find(row.first);if(found!=portraits->end()&&!found->second.pixels.empty())art=&found->second;}
-   if(art && art->width>0 && art->height>0 && art->pixels.size()==size_t(art->width*art->height)) {
-    const int dw=std::max(1,28*art->width/std::max(art->width,art->height)),dh=std::max(1,28*art->height/std::max(art->width,art->height));
-    for(int yy=0;yy<dh;++yy)for(int xx=0;xx<dw;++xx){const auto c=art->pixels[(yy*art->height/dh)*art->width+xx*art->width/dw];if(c&0x10000)pixel(x+12+(28-dw)/2+xx,rowY+1+(28-dh)/2+yy,uint16_t(c));}
-   }else text(x+23,rowY+12,"?",muted);
-   text(x+47,rowY+12,book.names.at(row.first),white);text(x+170,rowY+12,row.second.kills?"DERROTADO":"VISTO",row.second.kills?gold:muted);text(x+250,rowY+12,std::to_string(row.second.kills),white);
-  }
+ rect(x,y,panel.w,panel.h,border);rect(x+2,y+2,panel.w-4,panel.h-4,white);
+ rect(x+5,y+5,panel.w-10,17,0);text(x+12,y+10,"CODEX - MONSTROS",gold);text(x+305,y+10,"VOLTAR",white);
+ // Catalog order is independent of discovered records; an unseen record stays masked.
+ std::vector<std::pair<int,std::string>> rows(book.names.begin(),book.names.end());
+ const auto character=book.entries.find(book.slot);
+ auto entry=[&](int id)->const CodexEntry*{if(!available || character==book.entries.end())return nullptr;auto found=character->second.find(id);return found==character->second.end()?nullptr:&found->second;};
+ page=std::min(page,rows.empty()?size_t(0):(rows.size()-1)/codexEntriesPerPage);
+ const size_t start=page*codexEntriesPerPage,end=std::min(start+codexEntriesPerPage,rows.size());
+ selectedIndex=rows.empty()?0:std::max(start,std::min(selectedIndex,end-1));
+ for(size_t i=start;i<end;++i) {
+  auto cell=codexCell(i-start,width,height);rect(cell.x,cell.y,32,32,i==selectedIndex?gold:border);rect(cell.x+1,cell.y+1,30,30,0xbdd7);
+  const CodexPortrait* art=nullptr;if(entry(rows[i].first) && portraits){auto found=portraits->find(rows[i].first);if(found!=portraits->end())art=&found->second;}
+  if(art && art->width>0 && art->height>0 && art->pixels.size()==size_t(art->width*art->height)) {
+   const int dw=std::max(1,30*art->width/std::max(art->width,art->height)),dh=std::max(1,30*art->height/std::max(art->width,art->height));
+   for(int yy=0;yy<dh;++yy)for(int xx=0;xx<dw;++xx){const auto c=art->pixels[(yy*art->height/dh)*art->width+xx*art->width/dw];if(c&0x10000)pixel(cell.x+1+(30-dw)/2+xx,cell.y+1+(30-dh)/2+yy,uint16_t(c));}
+  }else text(cell.x+11,cell.y+9,"?",0x4208,2);
  }
- text(x+12,y+196,"ANTERIOR",gold);text(x+145,y+196,"PAG "+std::to_string(page+1)+"/"+std::to_string(std::max<size_t>(1,(rows.size()+codexRowsPerPage-1)/codexRowsPerPage)),muted);text(x+298,y+196,"PROXIMA",gold);
+ auto detail=codexDetails(width,height);const CodexEntry* selectedEntry=rows.empty()?nullptr:entry(rows[selectedIndex].first);
+ rect(detail.x,detail.y,detail.w,detail.h,0xffff);rect(x+156,detail.y,1,detail.h,border);rect(x+254,detail.y,1,detail.h,border);
+ text(x+12,y+169,"MONSTRO",border);text(x+164,y+169,"ESTADO",border);text(x+270,y+169,"MORTOS",border);
+ text(x+12,y+180,selectedEntry?rows[selectedIndex].second.substr(0,23):"??????",0);text(x+164,y+180,selectedEntry?"ENCONTRADO":"???????",0);text(x+270,y+180,std::to_string(selectedEntry?selectedEntry->kills:0),0);
+ text(x+12,y+198,"ANTERIOR",page?0:muted);text(x+145,y+198,"PAG "+std::to_string(page+1)+"/"+std::to_string(std::max<size_t>(1,(rows.size()+codexEntriesPerPage-1)/codexEntriesPerPage)),border);text(x+298,y+198,"PROXIMA",end<rows.size()?0:muted);
 }
 } // namespace destinia

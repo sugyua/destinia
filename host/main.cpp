@@ -970,8 +970,12 @@ static int runHost(int argc, char** argv) {
           if(codexOpen && ev.key.keysym.sym!=SDLK_F11) {
             if(down) {
               if(ev.key.keysym.sym==SDLK_ESCAPE)codexMenuKey(10,true);
-              else if(ev.key.keysym.sym==SDLK_RIGHT || ev.key.keysym.sym==SDLK_DOWN)codexMenuKey(7,true);
-              else if(ev.key.keysym.sym==SDLK_LEFT || ev.key.keysym.sym==SDLK_UP)codexMenuKey(5,true);
+              else if(ev.key.keysym.sym==SDLK_RIGHT)codexMenuKey(7,true);
+              else if(ev.key.keysym.sym==SDLK_LEFT)codexMenuKey(5,true);
+              else if(ev.key.keysym.sym==SDLK_UP)codexMenuKey(3,true);
+              else if(ev.key.keysym.sym==SDLK_DOWN)codexMenuKey(9,true);
+              else if(ev.key.keysym.sym==SDLK_PAGEUP)codexChangePage(-1);
+              else if(ev.key.keysym.sym==SDLK_PAGEDOWN)codexChangePage(1);
               else {auto binding=preferences.keys.find(ev.key.keysym.sym);if(binding!=preferences.keys.end()) {const int k[]={3,9,5,7,17,10,27};int a=int(binding->second);if(a>=0 && a<7)codexMenuKey(k[a],true);}}
             }
             continue;
@@ -1006,7 +1010,7 @@ static int runHost(int argc, char** argv) {
       }
       if(codexOpen) {
         controls.release();updateAudioState(controls.focused,true);
-        auto panel=arrays[hScreen];destinia::codexPaint(panel.data(),SCREEN_W,SCREEN_H,codex,true,codexPage,codexAvailable,true,true,&codexPortraits);
+        auto panel=arrays[hScreen];destinia::codexPaint(panel.data(),SCREEN_W,SCREEN_H,codex,true,codexPage,codexAvailable,true,true,&codexPortraits,codexSelection);
         if(SDL_UpdateTexture(tex,nullptr,panel.data(),SCREEN_W*2)!=0) {executionFailed=true;break;}
         SDL_Rect dst=gameViewport();SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);SDL_RenderCopy(ren,tex,nullptr,&dst);SDL_RenderPresent(ren);SDL_Delay(16);continue;
       }

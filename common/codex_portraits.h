@@ -8,7 +8,7 @@
 #include <vector>
 #include <zlib.h>
 namespace destinia {
-constexpr size_t codexRowsPerPage=4;
+constexpr size_t codexRowsPerPage=32;
 struct CodexPortrait { int width=0,height=0;std::vector<uint32_t> pixels; }; // bit 16 = opaque, low 16 = RGB565
 using CodexPortraits=std::map<int,CodexPortrait>;
 // Same resource selection as Monster_loadMonster / Monster_loadBoss in APK 1.0.6.
@@ -28,10 +28,24 @@ inline std::vector<uint8_t> codexUnpackResource(const std::vector<uint8_t>& byte
  if(uncompress(out.data(),&length,bytes.data()+12,packed)!=Z_OK || length!=size)return {};
  return out;
 }
-// Decode WBI indexed sheets and compose only body group 0 of the first AGD pose.
+// Decode WBI indexed sheets and compose only body group 0 of the original front idle pose.
 // Shadows/effects are deliberately excluded. No ARM memory or game state is used.
-inline CodexPortrait codexDecodePortrait(const std::vector<uint8_t>& w,const std::vector<uint8_t>& a) {
- if(w.size()<8 || w.size()>2*1024*1024 || w[0]!='W' || w[1]!='B' || w[2]!='I' || w[3]!=0 || a.size()<12 || !a[0] || !a[2] || !a[11] || a[11]>64 || 12+size_t(a[11])*8>a.size())return {};
+inline CodexPortrait codexDecodePortrait(const std::vector<uint8_t>& w,const std::vector<uint8_t>& a,int action=1) {
+ if(w.size()<8 || w.size()>2*1024*1024 || w[0]!='W' || w[1]!='B' || w[2]!='I' || w[3]!=0 || a.size()<12 || a.size()>2*1024*1024 || action<0 || action>=a[0])return {};
+ // Monster_setAction uses action 1 for normal down/front idle, 0 for boss idle.
+ // loadAGD: 2-byte action header, then 9-byte frame header + 8 bytes/part.
+ size_t pose=1;
+ for(int n=0;n<=action;++n) {
+  if(pose+2>a.size())return {};
+  const int count=a[pose+1];pose+=2;if(!count)return {};
+  if(n==action)break;
+  for(int frame=0;frame<count;++frame) {
+   if(pose+9>a.size() || a[pose+8]>64)return {};
+   const size_t end=pose+9+size_t(a[pose+8])*8;if(end>a.size())return {};pose=end;
+  }
+ }
+ if(pose+9>a.size() || !a[pose+8] || a[pose+8]>64 || pose+9+size_t(a[pose+8])*8>a.size())return {};
+ const int parts=a[pose+8];const size_t partStart=pose+9;
  auto u16=[](const std::vector<uint8_t>& b,size_t p){return int(b[p])|(int(b[p+1])<<8);};
  struct Frame{int x,y,w,h;std::vector<uint32_t> pixels;};std::vector<Frame> frames;
  size_t pos=8,total=0;const int count=u16(w,4);if(count<1 || count>256)return {};
@@ -46,8 +60,8 @@ inline CodexPortrait codexDecodePortrait(const std::vector<uint8_t>& w,const std
  }
  if(pos!=w.size())return {};
  constexpr int side=512,origin=256;std::vector<uint32_t> canvas(side*side);
- for(int i=0;i<a[11];++i) {
-  const size_t at=12+i*8;const int flags=a[at+4];if(flags&63)continue; // Other image groups are effects/shadows.
+ for(int i=0;i<parts;++i) {
+  const size_t at=partStart+i*8;const int flags=a[at+4];if(flags&63)continue; // Other image groups are effects/shadows.
   const int index=a[at+5];if(index>=int(frames.size()) || a[at+7]!=0)return {};
   const auto& f=frames[index];const bool flipX=flags&64,flipY=flags&128;
   // drawAGDImageT adds the part offset to the WImg anchor before drawing.

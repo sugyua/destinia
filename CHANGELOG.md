@@ -4,6 +4,16 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## Códex em grade — atualização da main após a 0.7
+
+- Grade de 8 colunas × 4 linhas por página, com as 73 espécies originais distribuídas em três páginas.
+- Monstros desconhecidos exibem `?`; encontrados exibem a miniatura frontal completa, reduzida proporcionalmente. A seleção mostra abaixo nome ou `??????`, estado ENCONTRADO ou `???????` e contador MORTOS.
+- Toque/clique e setas selecionam quadrados; ANTERIOR/PROXIMA mudam a página. Teclas e gestos da consulta não passam ao combate; voltar preserva a aba original de Craft/Pets.
+- Corrigida a escolha da pose: ação 1 dos monstros comuns, que corresponde à frente na rotina original de direção, e ação 0 dos chefes. Imperial Soldier frontal ocupa 47×46 pixels antes da redução.
+- Descobertas e mortes por personagem, arquivo codex-v1.txt, saves e lógica original preservados. Consultar um quadrado desconhecido não registra encontro.
+- Protótipo web recebe a mesma grade e pose frontal, além de otimização própria de desenho e meta de apresentação de 16 FPS, sem alterar os EXEs por essa otimização.
+- Esta mudança na main não substitui os ZIPs das releases anteriores. Validação manual no Windows e Safari físico permanece pendente.
+
 ## Correção das miniaturas e desempenho da 0.7 — fix2
 
 - Corrigida a montagem das miniaturas do Códex: os deslocamentos das partes agora seguem as âncoras do desenho original. Corpo e arma do Imperial Soldier permanecem unidos; figura ocupa 30×45 pixels antes da redução proporcional, em vez de 75×106.
