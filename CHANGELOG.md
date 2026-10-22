@@ -4,6 +4,13 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## Contagem de derrotas comuns — correção após a grade
+
+- Corrigido o aviso de derrota do Códex nos dois hosts: `procMonster` chama `checkQuestMonster` antes de escrever o estado morto 2. A exigência desse estado descartava mortes comuns, como as de Imperial Soldier; o observador agora considera o HP esgotado nessa rotina original.
+- Preservadas a deduplicação do mesmo cadáver, separação por personagem e gravação em codex-v1.txt. Não há reconstrução retroativa de mortes não registradas.
+- Regressão nativa com o estado prévio à marcação de morte, além de teste web que carrega o mapa original Dungeon Prison -4 e processa dois Imperial Soldiers pelo fluxo ARM de morte.
+- Na web, AÇÃO/ataque na grade abre detalhes dentro do jogo: HP máximo observado e nível, locais conhecidos e categorias de drops. As informações vêm dos mapas/scripts/tabelas originais; janela e dados de encontro são exclusivos do protótipo web nesta etapa.
+
 ## Códex em grade — atualização da main após a 0.7
 
 - Grade de 8 colunas × 4 linhas por página, com as 73 espécies originais distribuídas em três páginas.

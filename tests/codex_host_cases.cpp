@@ -13,7 +13,8 @@ int main(int argc,char** argv) {
  auto shortAt=[&](u32 at,uint16_t v){wr(p+at,&v,2);};
  shortAt(8,1);shortAt(0x12,1);shortAt(0x1a,50);shortAt(0x1c,50);wr32(p+0x20,10);
  if(!callFn(exportsMap.at("drawMonsterOddEff"),{p}) || codex.entries[0].at(1).kills!=0) return 21;
- shortAt(0x12,2);wr32(p+0x20,0);
+ // Normal deaths notify quests while state is still 1, before state 2 is written.
+ shortAt(0x12,1);wr32(p+0x20,0);
  if(!callFn(exportsMap.at("checkQuestMonster"),{p})) return 22;
  if(!callFn(exportsMap.at("checkQuestMonster"),{p}) || codex.entries[0].at(1).kills!=1) return 23;
  shortAt(8,4);shortAt(0x1a,65000);shortAt(0x12,1);wr32(p+0x20,10);

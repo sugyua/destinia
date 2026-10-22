@@ -57,3 +57,9 @@ O Imperial Soldier passa de uma área dispersa de 75×106 para a figura unida de
 ## Grade e pose frontal — após fix2
 
 O catálogo completo exibe os espaços desconhecidos desde a primeira consulta. A seleção e a página são apenas estado de apresentação, sem gravar descobertas ou alterar mortes. O cache nativo considera as posições das espécies no catálogo, carregando apenas as imagens descobertas da página consultada. A escolha da pose foi conferida nas rotinas originais Monster_setDir/Monster_setAction e por comparação dos pixels com drawAGDImageT. O Imperial Soldier frontal tem 47×46 pixels antes da redução; a medida 30×45 da fix2 descreve a pose traseira daquela versão.
+
+## Correção das mortes comuns e detalhes na web
+
+O aviso de derrota em `procMonster` é feito antes da gravação do estado morto 2; exigir esse estado fazia o Códex ignorar mortes comuns, incluindo Imperial Soldier. A rotina original de confirmação passa a ser aceita quando o HP já está esgotado, preservando a deduplicação. Registros anteriores e formato do auxiliar são preservados; mortes não registradas antes da correção não são recuperadas automaticamente.
+
+**No protótipo web**, selecione um quadrado e pressione AÇÃO/ataque para consultar os detalhes. VOLTAR retorna à mesma seleção; setas e ANTERIOR/PROXIMA percorrem as páginas. A janela exibe HP máximo e nível do último encontro, mapas conhecidos e tipos de drops possíveis. Monstros desconhecidos mantêm os dados ocultos. HP varia com nível/dificuldade/elite; itens de missão exigem missão ativa e drops não são garantidos. A leitura usa posicionamentos reais dos 172 mapas e estágios dos 59 scripts originais; locais especiais ainda não mapeados são indicados. Essa janela ainda não faz parte dos EXEs Windows; a correção de contagem é compartilhada pelos dois hosts.

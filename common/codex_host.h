@@ -112,7 +112,8 @@ static void codexHook(uc_engine*,uint64_t,uint32_t,void* context) {
     if(kind==0) {codex.respawn(p);return;}
     uint16_t species=0,state=0;int32_t hp=0;int16_t x=0,y=0,cx=0,cy=0;
     if(!rd(p+8,&species,2) || !rd(p+0x12,&state,2) || !rd(p+0x20,&hp,4)) return;
-    if(kind==2) {if(state==2 && hp<=0) codex.observe(p,species,true);return;}
+    // Normal procMonster notifies quests before it writes death state 2.
+    if(kind==2) {if(hp<=0) codex.observe(p,species,true);return;}
     if(!rd(p+0x1a,&x,2) || !rd(p+0x1c,&y,2) || !rd(game+0x4878,&cx,2) || !rd(game+0x487a,&cy,2)) return;
     if(x-cx>=0 && x-cx<SCREEN_W && y-cy>=0 && y-cy<SCREEN_H) codex.observe(p,species,false);
   }catch(...) {codexAvailable=false;hostReport("[codex] Observador desativado por leitura incompatível.\n");}

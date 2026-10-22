@@ -43,7 +43,8 @@ A presença no código não equivale a validação completa de gameplay. O host_
 - Observação das rotinas ARM originais de desenho e confirmação de derrota; proteção contra contagem duplicada e IDs incompatíveis.
 - Interface de consulta com paginação e pausa da partida; importação de histórico antigo não está disponível.
 - **Na `main` e no site:** grade de 8×4 quadrados por página, com 73 espécies. Encontrados mostram a figura frontal original; desconhecidos mostram `?`. Ao selecionar, a faixa inferior mostra nome ou `??????`, **ENCONTRADO** ou `???????` e contador de mortes. [Pacotes de teste Windows em Actions](https://github.com/sugyua/destinia/actions/workflows/verify-codex-menu.yml); os ZIPs originais da release 0.7 permanecem inalterados.
-- O [protótipo web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site) usa o mesmo acesso **dentro do menu do jogo**, sem botão Códex na interface do site. Na web, o progresso e o Códex continuam apenas na memória da sessão, sem áudio.
+- O [protótipo web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site) usa o mesmo acesso **dentro do menu do jogo**, sem botão Códex na interface do site. Na web, o progresso e o Códex continuam apenas na memória da sessão, sem áudio. Na web, AÇÃO/ataque sobre o monstro selecionado abre uma janela interna com HP máximo do último encontro e nível, locais conhecidos e tipos de drops; VOLTAR retorna à grade.
+- **Correção atual da `main`:** mortes comuns de Imperial Soldier e outros monstros são registradas mesmo quando o aviso original ocorre antes de marcar o estado morto. Mantida a proteção contra contagem repetida. Mortes antigas não registradas não são recuperadas automaticamente.
 
 Leia [CODEX.md](docs/CODEX.md), [CHANGELOG.md](CHANGELOG.md) e [RELEASE_0.7.md](docs/RELEASE_0.7.md). Não inclui novos equipamentos, novos monstros nem alterações de combate.
 
