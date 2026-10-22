@@ -4,6 +4,13 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## Organização dos detalhes do Códex web
+
+- Separadas categorias fixas: página 1 Drops; página 2 Locais de spawn; página 3 Variantes.
+- Listas longas têm subpáginas na própria categoria, com SUBIR/DESCER ou cima/baixo; ANTERIOR/PROXIMA, esquerda/direita e AÇÃO mudam a categoria.
+- Cabeçalho com retrato frontal, HP máximo, nível e contador preservado. VOLTAR retorna à seleção anterior; desconhecidos continuam ocultos. Sem alterações de gameplay, drops ou saves.
+- Alteração exclusiva do protótipo web; documentação atualizada sem modificar os EXEs Windows.
+
 ## Contagem de derrotas comuns — correção após a grade
 
 - Corrigido o aviso de derrota do Códex nos dois hosts: `procMonster` chama `checkQuestMonster` antes de escrever o estado morto 2. A exigência desse estado descartava mortes comuns, como as de Imperial Soldier; o observador agora considera o HP esgotado nessa rotina original.
