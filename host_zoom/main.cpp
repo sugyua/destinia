@@ -1,3 +1,4 @@
+#include "../common/safe_save.h"
 #include "../common/virtual_controls.h"
 // destinia_host - executa a libdestinia_jni.so ORIGINAL (ARM 32 bits) no PC.
 //
@@ -388,6 +389,7 @@ static std::string fmtPrintf(u32 fmtAddr, int ai) {
 }
 
 // ---------------------------------------------------------------- arquivos
+static destinia::SaveTransaction saveTransaction;
 static std::map<u32, FILE*> files;
 static std::map<u32,std::string> filePaths;
 static u32 nextFile = 0x5000;
@@ -1367,9 +1369,7 @@ static void setupStubs() {
   });
   L("fopen", [] {
     std::string p = hostPath(cstr(R(0))), m = cstr(R(1));
-    if (m.find('w') != std::string::npos || m.find('a') != std::string::npos || m.find('+') != std::string::npos)
-      fs::create_directories(fs::path(p).parent_path());
-    FILE* f = fopen(p.c_str(), m.c_str());
+    FILE* f = saveTransaction.open(fs::path(p),m);
     note("fopen " + p + " [" + m + "] -> " + (f ? "ok" : "falhou"));
     if (!f) { W(0, 0); return; }
     u32 h = nextFile; nextFile += 16; files[h] = f; filePaths[h] = p; W(0, h);
@@ -1377,7 +1377,7 @@ static void setupStubs() {
   L("fclose", [] {
     const u32 handle=R(0); auto it=files.find(handle); int result=0;
     if (it!=files.end()) {
-      result=fclose(it->second); files.erase(it);
+      result=saveTransaction.close(it->second); files.erase(it);
       auto name=filePaths.find(handle);
       if (name!=filePaths.end()) {
         destinia::sessionLog.write("ARQUIVO fechado: "+name->second+" resultado="+std::to_string(result),true);
@@ -1411,7 +1411,7 @@ static void setupStubs() {
   });
   L("fseek", [] { auto it = files.find(R(0)); W(0, it == files.end() ? (u32)-1 : (u32)fseek(it->second, (long)(int)R(1), (int)R(2))); });
   L("ftell", [] { auto it = files.find(R(0)); W(0, it == files.end() ? (u32)-1 : (u32)ftell(it->second)); });
-  L("remove", [] { const auto path=hostPath(cstr(R(0))); const int result=std::remove(path.c_str()); if(result==0) codexFileRemoved(path); W(0,(u32)result); });
+  L("remove", [] { const auto path=hostPath(cstr(R(0))); const int result=saveTransaction.remove(fs::path(path)); W(0,(u32)result); });
   L("__android_log_print", [] {
     const std::string message=fmtPrintf(R(2),3),tag=cstr(R(1));
     if(verbose) hostReport("[jogo:%s] %s\n",tag.c_str(),message.c_str());
@@ -1817,6 +1817,7 @@ static void stubHook(uc_engine*, uint64_t address, uint32_t, void*) {
 }
 
 static bool callFn(u32 addr, std::initializer_list<u32> args, u32* ret) {
+  destinia::SaveCall saveCall(saveTransaction);
   std::vector<u32> a(args);
   u32 sp = STACK_BASE + STACK_SIZE - 0x100;
   size_t extra = a.size() > 4 ? a.size() - 4 : 0;
@@ -1832,6 +1833,8 @@ static bool callFn(u32 addr, std::initializer_list<u32> args, u32* ret) {
   if (!hitMagic && (regPC() & ~1u) == MAGIC_RET) hitMagic = true;  // o Unicorn para ANTES de executar o endereco final
   if (!hitMagic) { dumpState("tempo esgotado (a .so ficou presa num laco ou parou)"); executionFailed=true; destinia::sessionLog.write("ERRO de emulacao",true); return false; }
   if (ret) *ret = R(0);
+  try {saveCall.commit();for(const auto& path:saveTransaction.committedRemovals())codexFileRemoved(path.string());}
+  catch(const std::exception& error) {hostReport("[host] Save nao publicado: %s\n",error.what());executionFailed=true;return false;}
   return true;
 }
 
@@ -2108,6 +2111,8 @@ static int runHost(int argc, char** argv) {
   if(!saveLock.acquire(fs::path(saveDir)/".destinia.lock")) {
     hostReport("[host] Nao foi possivel travar a pasta de save: outro jogo pode estar aberto ou falta acesso.\n"); return 1;
   }
+  saveTransaction.configure(saveDir);
+  saveTransaction.recover();
   const auto backup=destinia::backupSave(saveDir);
   hostReport("[host] Backup: %s\n",backup.empty()?"nenhum progresso anterior para copiar":backup.string().c_str());
 
@@ -2516,7 +2521,7 @@ int main(int argc,char** argv) {
   }
   try { result=runHost(argc,argv); }
   catch(const std::exception& error) { hostReport("[host] ERRO: %s\n",error.what()); }
-  for(auto& file:files) if(std::fclose(file.second)!=0) { hostReport("[host] ERRO ao fechar arquivo pendente\n"); result=1; }
+  for(auto& file:files) if(saveTransaction.close(file.second)!=0) { hostReport("[host] ERRO ao fechar arquivo pendente\n"); result=1; }
   files.clear(); filePaths.clear();
   codexFlush();
   saveLock.release();

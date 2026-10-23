@@ -1,6 +1,6 @@
 # Destinia 0.8 e 0.9 — desenho proposto para implementação
 
-Estado: proposta, sem implementação destas funcionalidades novas. O autor solicitou concluir/publicar 0.8 e depois 0.9 em GitHub e web. A publicação está autorizada; a proposta abaixo explicita as escolhas de comportamento ainda ausentes do roadmap.
+Estado: aprovado explicitamente pelo autor em23/10/2026; implementação em andamento, sem novas releases completas ainda. O autor solicitou concluir/publicar 0.8 e depois 0.9 em GitHub e web. A publicação está autorizada; a proposta abaixo explicita as escolhas de comportamento ainda ausentes do roadmap.
 
 ## Objetivo e sequência
 
