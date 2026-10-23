@@ -19,7 +19,7 @@ try {
     Write-Host 'DESTINIA - PREFERENCIAS DOS DOIS HOSTS'
     Write-Host 'Feche os jogos antes de alterar. As preferencias valem tambem nas proximas atualizacoes.'
     while($true) {
-        Write-Host "`n[1] Video [2] Audio [3] Pausa [4] Perfil e comandos [5] Restaurar padroes [6] Controles virtuais [7] Modo de jogo [0] Sair"
+        Write-Host "`n[1] Video [2] Audio [3] Pausa [4] Perfil e comandos [5] Restaurar padroes [6] Controles virtuais [7] Modo de jogo [8] Tamanho da interface [0] Sair"
         $option=Read-Host 'Opcao'
         if($option -eq '0') {break}
         try {
@@ -64,6 +64,12 @@ try {
                     if($hostName -eq '1') {$hostName='host'} elseif($hostName -eq '2') {$hostName='host_zoom'} else {throw 'Escolha 1 ou 2.'}
                     $changes["interface.$hostName.controles_virtuais"]=Read-Host 'Mostrar controles virtuais na partida: 1 sim, 0 nao'
                     Write-Host 'Menus mantem seus botoes. Teclado e controle continuam disponiveis. Reinicie o jogo para aplicar.'
+                }
+                '8' {
+                    $hostName=Read-Host 'Host: 1 normal ou 2 zoom'
+                    if($hostName -eq '1') {$hostName='host'} elseif($hostName -eq '2') {$hostName='host_zoom'} else {throw 'Escolha 1 ou 2.'}
+                    $changes["interface.$hostName.escala"]=Read-Host 'Tamanho da UI: 75, 100 ou 125 (%)'
+                    Write-Host 'Mapa e XP mantem o tamanho atual. Paineis grandes limitam a ampliacao para caber na tela. Reinicie para aplicar.'
                 }
                 '7' {
                     $mode=Read-Host 'Modo: 1 classico, 2 expandido (partida separada)'

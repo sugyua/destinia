@@ -1,5 +1,7 @@
 #include "../common/safe_save.h"
 #include "../common/virtual_controls.h"
+#include "../common/ui_renderer.h"
+static destinia::UiRenderer uiRenderer;
 // destinia_host - executa a libdestinia_jni.so ORIGINAL (ARM 32 bits) no PC.
 //
 // Papel: faz o que o Java (GameThread/GameMainView) fazia no Android.
@@ -837,6 +839,8 @@ static int runHost(int argc, char** argv) {
   for (const char* n : {"Java_game_destiniaeng_GameThread_initGame", "Java_game_destiniaeng_GameThread_jniRun", "Java_game_destiniaeng_GameThread_jniTouch"})
     if (!exportsMap.count(n)) { hostReport("Simbolo nao encontrado: %s\n", n); return 1; }
   u32 fnInit = exportsMap["Java_game_destiniaeng_GameThread_initGame"];
+  uiRenderer.statusBaseScale=2;
+  uiRenderer.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,preferences.uiScale,false,soPath);
   u32 fnRun = exportsMap["Java_game_destiniaeng_GameThread_jniRun"];
   u32 fnTouch = exportsMap["Java_game_destiniaeng_GameThread_jniTouch"];
   auto grab = [&](const char* n) { auto it = exportsMap.find(n); return it == exportsMap.end() ? 0u : it->second; };
@@ -862,6 +866,7 @@ static int runHost(int argc, char** argv) {
     if(codexMenuTouch(x,y,type)) return;
     lastTouchX=x; lastTouchY=y;
     if(type!=2) destinia::sessionLog.write("ENTRADA toque x="+std::to_string(x)+" y="+std::to_string(y)+" tipo="+std::to_string(type));
+    if(preferences.uiScale!=100&&type!=3){u32 state=0;if(!callFn(exportsMap.at("_getTouchState"),{},&state))return;auto point=uiRenderer.touchPoint(x,y,int(state));x=point.first;y=point.second;}
     bool ok = callFn(fnTouch, {ENV_OBJ, 0x10, (u32)x, (u32)y, (u32)type});
     if (probe && type != 2) { hostReport("[sonda] jniTouch(x=%d, y=%d, tipo=%d) -> %s\n", x, y, type, ok ? "ok" : "FALHOU"); probeState(type == 0 ? "logo apos PRESSIONAR" : type == 1 ? "logo apos SOLTAR" : "logo apos tecla"); }
   };
@@ -1016,7 +1021,7 @@ static int runHost(int argc, char** argv) {
       }
       if(codexOpen) {
         controls.release();updateAudioState(controls.focused,true);
-        auto panel=arrays[hScreen];destinia::codexPaint(panel.data(),SCREEN_W,SCREEN_H,codex,true,codexPage,codexAvailable,true,true,&codexPortraits,codexSelection,codexDetailsOpen,&codexDetailInfo,codexDetailPage,codexDetailScroll);
+        auto panel=arrays[hScreen];destinia::codexPaint(panel.data(),SCREEN_W,SCREEN_H,codex,true,codexPage,codexAvailable,true,true,&codexPortraits,codexSelection,codexDetailsOpen,&codexDetailInfo,codexDetailPage,codexDetailScroll,preferences.uiScale);
         if(SDL_UpdateTexture(tex,nullptr,panel.data(),SCREEN_W*2)!=0) {executionFailed=true;break;}
         SDL_Rect dst=gameViewport();SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);SDL_RenderCopy(ren,tex,nullptr,&dst);SDL_RenderPresent(ren);SDL_Delay(16);continue;
       }
@@ -1040,6 +1045,7 @@ static int runHost(int argc, char** argv) {
     // [OK] jniRun(env,obj, byte[] framebuffer, int contador) -> ms ate o proximo quadro (0 = sair)
     u32 wait = 0;
     auto tEmul0 = std::chrono::steady_clock::now();
+    uiRenderer.beginFrame();
     if (!callFn(fnRun, {ENV_OBJ, 0x10, hScreen, (u32)frame}, &wait)) break;
     double emulMs = (double)std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - tEmul0).count() / 1000.0;
     if (pendingBuyCash) {
@@ -1055,13 +1061,13 @@ static int runHost(int argc, char** argv) {
     if (wait == 0) { hostReport("[host] o jogo pediu para encerrar.\n"); break; }
 
     auto& frameBuffer = arrays[hScreen];
-    if (hasPlayerStatusHud(frameBuffer.data())) {
-      drawEnlargedStatusHud(frameBuffer.data());
+    if (preferences.uiScale==100?hasPlayerStatusHud(frameBuffer.data()):uiRenderer.statusDrawn) {
+      if(preferences.uiScale==100)drawEnlargedStatusHud(frameBuffer.data());
       uint32_t currentExperience = 0, requiredExperience = 0;
       if (getCharacterExperience(currentExperience, requiredExperience))
         drawHudExperienceText(frameBuffer.data(), currentExperience, requiredExperience);
     }
-    destinia::codexPaint(frameBuffer.data(),SCREEN_W,SCREEN_H,codex,false,codexPage,codexAvailable,codexMenuVisible(),codexTabSelected);
+    destinia::codexPaint(frameBuffer.data(),SCREEN_W,SCREEN_H,codex,false,codexPage,codexAvailable,codexMenuVisible(),codexTabSelected,nullptr,0,false,nullptr,0,0,preferences.uiScale);
     const uint8_t* fb = frameBuffer.data();
     if (headlessFrames) {
       if (frame == 1 || frame % 10 == 0) { char nm[64]; snprintf(nm, sizeof nm, "/frame_%05ld.bmp", frame); writeBmp(outDir + nm, fb); }

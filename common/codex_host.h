@@ -131,6 +131,7 @@ static bool codexMenuKey(int key,bool down) {
  return false;
 }
 static bool codexMenuTouch(int x,int y,int phase) {
+ const auto point=destinia::codexTransform(SCREEN_W,SCREEN_H,preferences.uiScale,codexOpen).inverse(x,y);x=point.first;y=point.second;
  if(codexTouchCaptured && phase!=0){if(phase==1)codexTouchCaptured=false;return true;}
  if(codexOpen) {
   if(phase==0) {

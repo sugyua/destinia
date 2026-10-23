@@ -1,5 +1,6 @@
 #pragma once
 #include "codex.h"
+#include "ui_transform.h"
 #include "codex_portraits.h"
 #include "codex_details.h"
 #include <array>
@@ -33,9 +34,12 @@ inline int codexHitTest(int x,int y,size_t count,size_t page,int width,int heigh
  for(size_t i=0;i<codexEntriesPerPage && page*codexEntriesPerPage+i<count;++i)if(codexCell(i,width,height).contains(x,y))return int(page*codexEntriesPerPage+i);
  return -1;
 }
-inline void codexPaint(uint8_t* pixels,int width,int height,const Codex& book,bool open,size_t page,bool available,bool inMenu=false,bool selected=false,const CodexPortraits* portraits=nullptr,size_t selectedIndex=0,bool detailsOpen=false,const CodexInfoView* info=nullptr,size_t detailPage=0,size_t detailScroll=0) {
+inline UiTransform codexTransform(int width,int height,int percent,bool open){auto p=codexPanel(width,height);return open?UiTransform{width,height,percent,UiAnchor::Center,p.w,p.h,p.x,p.y}:UiTransform{width,height,percent,UiAnchor::Center,232,240};}
+inline void codexPaint(uint8_t* pixels,int width,int height,const Codex& book,bool open,size_t page,bool available,bool inMenu=false,bool selected=false,const CodexPortraits* portraits=nullptr,size_t selectedIndex=0,bool detailsOpen=false,const CodexInfoView* info=nullptr,size_t detailPage=0,size_t detailScroll=0,int uiPercent=100) {
  if(!open && !inMenu) return;
- auto pixel=[&](int x,int y,uint16_t c){if(x>=0&&x<width&&y>=0&&y<height){pixels[(y*width+x)*2]=c&255;pixels[(y*width+x)*2+1]=c>>8;}};
+ const auto transform=codexTransform(width,height,uiPercent,open);
+ auto rawPixel=[&](int x,int y,uint16_t c){if(x>=0&&x<width&&y>=0&&y<height){pixels[(y*width+x)*2]=c&255;pixels[(y*width+x)*2+1]=c>>8;}};
+ auto pixel=[&](int x,int y,uint16_t c){auto r=transform.rect(x,y,1,1);for(int yy=std::max(0,r.y);yy<std::min(height,r.y+r.h);++yy)for(int xx=std::max(0,r.x);xx<std::min(width,r.x+r.w);++xx)rawPixel(xx,yy,c);};
  auto rect=[&](int x,int y,int w,int h,uint16_t c){for(int dy=0;dy<h;++dy)for(int dx=0;dx<w;++dx)pixel(x+dx,y+dy,c);};
  auto glyph=[](char c)->std::array<uint8_t,5>{
   static const std::array<uint8_t,5> letters[]={
@@ -48,11 +52,9 @@ inline void codexPaint(uint8_t* pixels,int width,int height,const Codex& book,bo
  const uint16_t dark=0x1946,gold=0xe5b2,white=0xe71c,muted=0x8c92,border=0x6b6b;
  auto button=codexMenuButton(width,height);
  if(selected || open) {
-  // Dim only the old toolbar highlight while the added tab has focus.
-  for(int yy=height/2-120;yy<height/2-95;++yy)for(int xx=width/2-116;xx<width/2+116;++xx) {
-   if(xx<0 || yy<0 || xx>=width || yy>=height)continue;
-   const int at=(yy*width+xx)*2;uint16_t c=pixels[at]|(pixels[at+1]<<8);pixel(xx,yy,(c>>1)&0x7bef);
-  }
+  const auto menu=codexTransform(width,height,uiPercent,false);
+  for(int yy=height/2-120;yy<height/2-95;++yy)for(int xx=width/2-116;xx<width/2+116;++xx){auto r=menu.rect(xx,yy,1,1);for(int y2=std::max(0,r.y);y2<std::min(height,r.y+r.h);++y2)for(int x2=std::max(0,r.x);x2<std::min(width,r.x+r.w);++x2){const int at=(y2*width+x2)*2;uint16_t c=pixels[at]|(pixels[at+1]<<8);rawPixel(x2,y2,(c>>1)&0x7bef);}}
+
  }
  rect(button.x,button.y,button.w,button.h,selected||open?gold:border);
  rect(button.x+1,button.y+1,button.w-2,button.h-2,dark);

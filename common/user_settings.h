@@ -79,7 +79,7 @@ inline int scaledVolume(int nativeLevel,int percent,bool muted) {
   return muted?0:128*std::clamp(nativeLevel,0,5)*std::clamp(percent,0,100)/500;
 }
 struct Preferences {
-  bool virtualControls=true;
+  bool virtualControls=true;int uiScale=100;
   bool fullscreen=false,muteUnfocused=false,pauseUnfocused=false,pauseDisconnected=false;
   int width=1200,height=720,music=100,effects=100;
   std::string profile="padrao",gameMode="classico";
@@ -94,6 +94,8 @@ struct Preferences {
     p.height=preferenceInt(values,video+"altura",zoom?480:720,240,4320);
     p.fullscreen=preferenceInt(values,video+"tela_cheia",zoom?1:0,0,1)!=0;
     p.virtualControls=preferenceInt(values,"interface."+host+".controles_virtuais",1,0,1)!=0;
+    p.uiScale=preferenceInt(values,"interface."+host+".escala",100,75,125);
+    if(p.uiScale!=75&&p.uiScale!=100&&p.uiScale!=125)throw std::runtime_error("Escala de interface deve ser 75, 100 ou 125.");
     p.music=preferenceInt(values,"audio.musica",100,0,100);
     p.effects=preferenceInt(values,"audio.efeitos",100,0,100);
     p.muteUnfocused=preferenceInt(values,"audio.silenciar_sem_foco",0,0,1)!=0;

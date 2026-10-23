@@ -1,0 +1,3 @@
+#include "../common/codex_ui.h"
+#include <cassert>
+int main(){for(int percent:{75,100,125})for(int w:{400,800})for(auto anchor:{destinia::UiAnchor::TopLeft,destinia::UiAnchor::TopRight,destinia::UiAnchor::BottomLeft,destinia::UiAnchor::BottomRight,destinia::UiAnchor::Center}){destinia::UiTransform t{w,w*3/5,percent,anchor};for(int x=-30;x<w+30;++x){auto r=t.rect(x,0,1,1);for(int xx=r.x;xx<r.x+r.w;++xx)assert(t.inverse(xx,0).first==x);}auto panel=destinia::codexPanel(w,w*3/5);auto fit=destinia::codexTransform(w,w*3/5,percent,true);auto box=fit.rect(panel.x,panel.y,panel.w,panel.h);assert(box.x>=0&&box.y>=0&&box.x+box.w<=w&&box.y+box.h<=w*3/5);}}

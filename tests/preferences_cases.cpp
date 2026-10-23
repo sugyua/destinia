@@ -14,7 +14,9 @@ int main(int argc,char** argv) {
   {
     auto p=destinia::Preferences::load(config,"host_zoom");
     assert(p.fullscreen && p.width==800 && p.height==480);
-    assert(p.virtualControls);assert(p.gameMode=="classico");
+    assert(p.virtualControls);assert(p.uiScale==100);
+    std::ofstream(config)<<"interface.host_zoom.escala=75\n";assert(destinia::Preferences::load(config,"host_zoom").uiScale==75);
+    std::ofstream(config)<<"interface.host_zoom.escala=80\n";bool invalidUi=false;try{destinia::Preferences::load(config,"host_zoom");}catch(...){invalidUi=true;}assert(invalidUi);fs::remove(config);assert(p.gameMode=="classico");
     std::ofstream(config)<<"jogo.modo=expandido\n";assert(destinia::Preferences::load(config,"host_zoom").gameMode=="expandido");
     std::ofstream(config)<<"jogo.modo=wrong\n";bool badMode=false;try{destinia::Preferences::load(config,"host_zoom");}catch(...){badMode=true;}assert(badMode);fs::remove(config);
     assert(p.music==100 && p.effects==100 && !p.pauseUnfocused && !p.pauseDisconnected);
