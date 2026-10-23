@@ -1513,16 +1513,8 @@ static void setupStubs() {
       }
       case 7: break;                                                              // fechar socket
       case 8: {
-        static const u32 cashByProduct[] = {170000, 80000, 45000, 14000, 6500, 1000};
-        if (a0 < sizeof(cashByProduct) / sizeof(cashByProduct[0])) {
-          pendingCashAmount = cashByProduct[a0];
-          pendingBuyCash = true;
-          note("buyCash(" + std::to_string((int)a0) + ") -> compra local gratuita de " + std::to_string(pendingCashAmount) + " cash");
-        } else {
-          pendingCashAmount = 0;
-          pendingBuyCash = false;
-          note("buyCash(" + std::to_string((int)a0) + ") ignorado: produto desconhecido");
-        }
+        pendingCashAmount=0;pendingBuyCash=true;
+        note("buyCash("+std::to_string(a0)+"): compra indisponivel; cancelamento offline agendado");
         break;
       }
       case 9: break;                                                              // logEvent (Flurry): descartado
@@ -2060,6 +2052,8 @@ static void runtimeLogTick(long frame,double emulationMs) {
 }
 
 // ---------------------------------------------------------------- principal
+#include "../common/offline_store_host.h"
+
 static int runHost(int argc, char** argv) {
   int fullscreenOverride=-1; bool explicitScale=false,savePreferences=true;
   fs::path settingsPath=destinia::preferencesFile();
@@ -2102,7 +2096,7 @@ static int runHost(int argc, char** argv) {
   const fs::path reports=reportsDir.empty()?destinia::defaultReportsDir():fs::path(reportsDir);
   if(destinia::sessionLog.start(reports,"host_zoom")) hostReport("[host] Log TXT: %s\n",(destinia::sessionLog.directory()/"log.txt").string().c_str());
   hostReport("[host] Destinia 0.7 Beta - host_zoom\n");
-  if(saveDir.empty()) saveDir=destinia::configuredSaveDir().string();
+  if(saveDir.empty()) saveDir=destinia::modeSaveDir(destinia::configuredSaveDir(),preferences.gameMode).string();
   saveDir=fs::absolute(saveDir).lexically_normal().string();
   hostReport("[host] Save compartilhado: %s\n",saveDir.c_str());
   if (soPath.empty()) soPath = gameDir + "/lib/armeabi/libdestinia_jni.so";
@@ -2111,6 +2105,8 @@ static int runHost(int argc, char** argv) {
   if(!saveLock.acquire(fs::path(saveDir)/".destinia.lock")) {
     hostReport("[host] Nao foi possivel travar a pasta de save: outro jogo pode estar aberto ou falta acesso.\n"); return 1;
   }
+  destinia::verifySaveMode(saveDir,preferences.gameMode);
+  hostReport("[host] Modo de jogo: %s\n",preferences.gameMode.c_str());
   saveTransaction.configure(saveDir);
   saveTransaction.recover();
   const auto backup=destinia::backupSave(saveDir);
@@ -2405,29 +2401,10 @@ static int runHost(int argc, char** argv) {
       break;
     }
     if (pendingBuyCash) {
-      pendingBuyCash = false;
-      if (fnGetCash && fnSetCash) {
-        u32 cash = 0;
-        if (!callFn(fnGetCash, {}, &cash)) break;
-        u32 next = cash >= 170000 || pendingCashAmount >= 170000 - cash
-                       ? std::max<u32>(cash, 170000)
-                       : cash + pendingCashAmount;
-        if (!callFn(fnSetCash, {next})) break;
-        hostReport("[host] cash local %u -> %u.\n", cash, next);
-        if (purchaseCancelTest) {
-          if (!fnProcCommMsg) {
-            hostReport("[host] erro: procCommMsg nao foi exportada; teste de cancelamento indisponivel.\n");
-            break;
-          }
-          hostReport("[host] teste: enviando resposta nativa de compra cancelada (-10); pode surgir aviso ou ocorrer crash.\n");
-          if (!callFn(fnProcCommMsg, {ENV_OBJ, 0x10, 1, static_cast<u32>(-10)})) break;
-        } else {
-          hostReport("[host] resposta da loja nao simulada (spinner pode permanecer).\n");
-        }
-      } else {
-        hostReport("[host] erro: getMyCash/setMyCash nao exportadas; cash nao foi alterado.\n");
-      }
-      pendingCashAmount = 0;
+      controls.release();
+      if(!finishOfflinePurchase()){executionFailed=true;break;}
+      if(!headlessFrames && SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION,"Loja offline","Compras indisponiveis neste modo. Seu saldo nao foi alterado.",win)!=0)
+        hostReport("[host] Aviso: nao foi possivel mostrar a mensagem da loja.\n");
     }
     frame++;
     runtimeLogTick(frame,runMs);
@@ -2515,6 +2492,10 @@ static int runHost(int argc, char** argv) {
 int main(int argc,char** argv) {
   if(argc==2 && std::strcmp(argv[1],"--version")==0) { std::puts("Destinia 0.7 Beta"); return 0; }
   int result=1;
+  if(argc==2 && std::string(argv[1])=="--import-classic") {
+    try {const auto base=destinia::configuredSaveDir();destinia::importClassicSave(base,destinia::modeSaveDir(base,"expandido"));printf("Copia criada no modo expandido; a partida classica foi preservada.\n");return 0;}
+    catch(const std::exception& error){fprintf(stderr,"%s\n",error.what());return 1;}
+  }
   if(argc==3 && std::string(argv[1])=="--check-settings") {
     try { if(!fs::is_regular_file(argv[2])) throw std::runtime_error("Arquivo de preferencias nao encontrado."); destinia::Preferences::load(argv[2],"host_zoom"); printf("Preferencias validas.\n"); return 0; }
     catch(const std::exception& e) { fprintf(stderr,"%s\n",e.what()); return 1; }

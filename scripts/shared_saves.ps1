@@ -9,32 +9,34 @@ function Test-DestiniaAbsolutePath([string]$Path) {
 }
 
 function Get-DestiniaSaveDirectory([string]$LocalDataRoot = $env:LOCALAPPDATA) {
-    $selected = $env:DESTINIA_SAVE_DIR
-    if (-not $selected -and $LocalDataRoot) {
-        $config = Join-Path $LocalDataRoot 'Destinia/config.ini'
-        if (Test-Path -LiteralPath $config) {
-            $found = $false
-            foreach ($raw in [IO.File]::ReadAllLines($config)) {
-                $line = $raw.Trim().TrimStart([char]0xFEFF)
-                if (-not $line -or $line.StartsWith('#') -or $line.StartsWith(';')) { continue }
-                $equal = $line.IndexOf('=')
-                if ($equal -lt 0) { throw 'Linha invalida em config.ini.' }
-                if ($line.Substring(0, $equal).Trim() -ceq 'save_dir') {
-                    if ($found) { throw 'save_dir repetido em config.ini.' }
-                    $selected = $line.Substring($equal + 1).Trim()
-                    $found = $true
-                    if (-not $selected) { throw 'save_dir vazio em config.ini; o save nao sera trocado silenciosamente.' }
+    $selected=$env:DESTINIA_SAVE_DIR;$mode='classico';$found=$false;$modeFound=$false
+    if($LocalDataRoot) {
+        $config=Join-Path $LocalDataRoot 'Destinia/config.ini'
+        if(Test-Path -LiteralPath $config) {
+            foreach($raw in [IO.File]::ReadAllLines($config)) {
+                $line=$raw.Trim().TrimStart([char]0xFEFF)
+                if(-not $line -or $line.StartsWith('#') -or $line.StartsWith(';')) {continue}
+                $equal=$line.IndexOf('=');if($equal -lt 1) {throw 'Linha invalida em config.ini.'}
+                $key=$line.Substring(0,$equal).Trim();$value=$line.Substring($equal+1).Trim()
+                if($key -ceq 'jogo.modo') {
+                    if($modeFound -or $value -cnotmatch '^(classico|expandido)$') {throw 'Modo de jogo invalido ou repetido.'}
+                    $mode=$value;$modeFound=$true
+                }
+                if($key -ceq 'save_dir' -and -not $env:DESTINIA_SAVE_DIR) {
+                    if($found -or -not $value) {throw 'save_dir vazio ou repetido em config.ini.'}
+                    $selected=$value;$found=$true
                 }
             }
         }
     }
-    if (-not $selected) {
-        if (-not $LocalDataRoot) { throw 'LOCALAPPDATA ausente. Informe DESTINIA_SAVE_DIR ou uma origem explicita para o diagnostico.' }
-        return (Join-Path $LocalDataRoot 'Destinia/save')
+    if(-not $selected) {
+        if(-not $LocalDataRoot) {throw 'LOCALAPPDATA ausente. Informe DESTINIA_SAVE_DIR ou uma origem explicita para o diagnostico.'}
+        $selected=Join-Path $LocalDataRoot 'Destinia/save'
     }
-    if (-not (Test-DestiniaAbsolutePath $selected)) { throw 'A pasta de save precisa ser um caminho absoluto valido.' }
-    $full = [IO.Path]::GetFullPath($selected)
-    if ($full.TrimEnd('\', '/') -eq [IO.Path]::GetPathRoot($full).TrimEnd('\', '/')) { throw 'A raiz do disco nao pode ser usada como pasta de save.' }
+    if(-not (Test-DestiniaAbsolutePath $selected)) {throw 'A pasta de save precisa ser um caminho absoluto valido.'}
+    $full=[IO.Path]::GetFullPath($selected)
+    if($full.TrimEnd('\','/') -eq [IO.Path]::GetPathRoot($full).TrimEnd('\','/')) {throw 'A raiz do disco nao pode ser usada como pasta de save.'}
+    if($mode -eq 'expandido') {$full=$full.TrimEnd('\','/')+'_expandido'}
     return $full
 }
 

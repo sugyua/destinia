@@ -19,7 +19,7 @@ try {
     Write-Host 'DESTINIA - PREFERENCIAS DOS DOIS HOSTS'
     Write-Host 'Feche os jogos antes de alterar. As preferencias valem tambem nas proximas atualizacoes.'
     while($true) {
-        Write-Host "`n[1] Video [2] Audio [3] Pausa [4] Perfil e comandos [5] Restaurar padroes [6] Controles virtuais [0] Sair"
+        Write-Host "`n[1] Video [2] Audio [3] Pausa [4] Perfil e comandos [5] Restaurar padroes [6] Controles virtuais [7] Modo de jogo [0] Sair"
         $option=Read-Host 'Opcao'
         if($option -eq '0') {break}
         try {
@@ -64,6 +64,19 @@ try {
                     if($hostName -eq '1') {$hostName='host'} elseif($hostName -eq '2') {$hostName='host_zoom'} else {throw 'Escolha 1 ou 2.'}
                     $changes["interface.$hostName.controles_virtuais"]=Read-Host 'Mostrar controles virtuais na partida: 1 sim, 0 nao'
                     Write-Host 'Menus mantem seus botoes. Teclado e controle continuam disponiveis. Reinicie o jogo para aplicar.'
+                }
+                '7' {
+                    $mode=Read-Host 'Modo: 1 classico, 2 expandido (partida separada)'
+                    if($mode -eq '1') {$changes['jogo.modo']='classico'}
+                    elseif($mode -eq '2') {
+                        Write-Host 'Expandido prepara um save separado para futuras expansoes; ainda usa o conteudo e limites originais. Nao aumenta nivel nem cria itens nesta versao.'
+                        Write-Host 'A copia e opcional, somente para destino novo. Depois as partidas divergem. Nada sera sobrescrito.'
+                        if((Read-Host 'Copiar a partida classica agora? Digite S para autorizar') -match '^[sS]$') {
+                            & $executables[0] --import-classic
+                            if($LASTEXITCODE -ne 0) {throw 'Importacao nao concluida; o modo nao foi alterado.'}
+                        }
+                        $changes['jogo.modo']='expandido'
+                    } else {throw 'Escolha 1 ou 2.'}
                 }
                 '5' {Reset-DestiniaPreferences $config $validate;Write-Host 'Preferencias restauradas. Pasta de saves preservada.';continue}
                 default {throw 'Opcao desconhecida.'}

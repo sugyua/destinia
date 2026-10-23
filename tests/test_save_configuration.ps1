@@ -25,6 +25,15 @@ try {
     $failed = $false
     try { Set-DestiniaSaveDirectory 'pasta relativa' $local } catch { $failed = $true }
     if (-not $failed) { throw 'Pasta relativa aceita.' }
+    $config=Join-Path $local 'Destinia/config.ini'
+    [IO.File]::AppendAllText($config,"jogo.modo=expandido`n")
+    if((Get-DestiniaSaveDirectory $local) -ne ($default+'_expandido')) {throw 'Modo expandido nao isolou a origem do diagnostico.'}
+    $env:DESTINIA_SAVE_DIR=$chosen
+    if((Get-DestiniaSaveDirectory $local) -ne ($chosen+'_expandido')) {throw 'Override nao manteve isolamento do modo.'}
+    $env:DESTINIA_SAVE_DIR=''
+    [IO.File]::WriteAllText($config,'jogo.modo=errado')
+    $failed=$false;try {Get-DestiniaSaveDirectory $local} catch {$failed=$true}
+    if(-not $failed) {throw 'Modo invalido aceito.'}
     [IO.File]::WriteAllText((Join-Path $local 'Destinia/config.ini'), 'save_dir=')
     $failed = $false
     try { Get-DestiniaSaveDirectory $local } catch { $failed = $true }

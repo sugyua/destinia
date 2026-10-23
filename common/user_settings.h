@@ -1,5 +1,6 @@
 #pragma once
 #include "runtime_support.h"
+#include "save_modes.h"
 #include "input_state.h"
 #include <SDL.h>
 #include <cctype>
@@ -81,11 +82,13 @@ struct Preferences {
   bool virtualControls=true;
   bool fullscreen=false,muteUnfocused=false,pauseUnfocused=false,pauseDisconnected=false;
   int width=1200,height=720,music=100,effects=100;
-  std::string profile="padrao";
+  std::string profile="padrao",gameMode="classico";
   std::map<SDL_Keycode,Action> keys;
   std::map<SDL_GameControllerButton,Action> buttons;
   static Preferences load(const fs::path& file,const std::string& host) {
     Preferences p; const auto values=readPreferencesFile(file); const bool zoom=host=="host_zoom";
+    if(values.count("jogo.modo"))p.gameMode=values.at("jogo.modo");
+    if(!validGameMode(p.gameMode))throw std::runtime_error("Modo de jogo invalido.");
     const std::string video="video."+host+".";
     p.width=preferenceInt(values,video+"largura",zoom?800:1200,400,7680);
     p.height=preferenceInt(values,video+"altura",zoom?480:720,240,4320);

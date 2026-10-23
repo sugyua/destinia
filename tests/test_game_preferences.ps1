@@ -6,7 +6,7 @@ try {
     $config=Join-Path $root 'config.ini'
     [IO.File]::WriteAllText($config,"save_dir=C:\Partidas`nchave_futura=preservar`n")
     $validate={param($file) if([IO.File]::ReadAllText($file).Contains('audio.musica=999')) { throw 'Volume invalido' }}
-    Set-DestiniaPreferences $config @{'interface.host_zoom.controles_virtuais'='0';'audio.musica'='35';'controle_perfil'='meu_controle';'perfil.meu_controle.tecla.ataque'='Return,Z'} $validate
+    Set-DestiniaPreferences $config @{'jogo.modo'='expandido';'interface.host_zoom.controles_virtuais'='0';'audio.musica'='35';'controle_perfil'='meu_controle';'perfil.meu_controle.tecla.ataque'='Return,Z'} $validate
     $values=Read-DestiniaPreferences $config
     if($values['save_dir'] -cne 'C:\Partidas' -or $values['chave_futura'] -cne 'preservar' -or $values['audio.musica'] -cne '35') {throw 'Configuracao nao preservada'}
     $before=[IO.File]::ReadAllText($config); $rejected=$false
@@ -14,7 +14,7 @@ try {
     if(-not $rejected -or [IO.File]::ReadAllText($config) -cne $before) {throw 'Configuracao invalida sobrescreveu original'}
     Reset-DestiniaPreferences $config $validate
     $values=Read-DestiniaPreferences $config
-    if($values.Contains('interface.host_zoom.controles_virtuais') -or $values.Contains('audio.musica') -or $values.Contains('controle_perfil') -or $values.Contains('perfil.meu_controle.tecla.ataque')) {throw 'Reset incompleto'}
+    if($values.Contains('jogo.modo') -or $values.Contains('interface.host_zoom.controles_virtuais') -or $values.Contains('audio.musica') -or $values.Contains('controle_perfil') -or $values.Contains('perfil.meu_controle.tecla.ataque')) {throw 'Reset incompleto'}
     if($values['save_dir'] -cne 'C:\Partidas' -or $values['chave_futura'] -cne 'preservar') {throw 'Reset atingiu save ou chave desconhecida'}
     [IO.File]::WriteAllText($config,"audio.musica=35`naudio.musica=70`n")
     $rejected=$false
