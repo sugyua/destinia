@@ -14,10 +14,14 @@ int main(int argc,char** argv) {
   {
     auto p=destinia::Preferences::load(config,"host_zoom");
     assert(p.fullscreen && p.width==800 && p.height==480);
+    assert(p.virtualControls);
     assert(p.music==100 && p.effects==100 && !p.pauseUnfocused && !p.pauseDisconnected);
     assert(p.keys.at(SDLK_w)==destinia::Action::Up);
     assert(p.buttons.at(SDL_CONTROLLER_BUTTON_A)==destinia::Action::Attack);
   }
+  std::ofstream(config)<<"interface.host_zoom.controles_virtuais=0\ninterface.host.controles_virtuais=1\n";
+  assert(!destinia::Preferences::load(config,"host_zoom").virtualControls);
+  assert(destinia::Preferences::load(config,"host").virtualControls);
   std::cerr<<"PREF: padroes OK\n";
   std::ofstream(config)<<"save_dir=C:\\partida antiga\ncontrole_perfil=alternativo\n"
     <<"video.host_zoom.largura=1600\nvideo.host_zoom.altura=960\nvideo.host_zoom.tela_cheia=0\n"
@@ -37,7 +41,7 @@ int main(int argc,char** argv) {
   assert(raw.at("audio.musica")=="35");
   assert(destinia::Preferences::load(config,"host_zoom").fullscreen);
   std::cerr<<"PREF: configuracao preservada\n";
-  for(auto bad:{"audio.musica=101\n","video.host.largura=0\n","perfil.padrao.tecla.cima=TeclaInexistente\n",
+  for(auto bad:{"interface.host.controles_virtuais=2\n","audio.musica=101\n","video.host.largura=0\n","perfil.padrao.tecla.cima=TeclaInexistente\n",
                 "perfil.padrao.tecla.cima=F11\n","perfil.padrao.tecla.cima=A\n"}) {
     std::ofstream(config)<<bad;
     bool failed=false; try {destinia::Preferences::load(config,"host");} catch(const std::exception&) {failed=true;}

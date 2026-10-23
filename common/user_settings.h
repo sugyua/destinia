@@ -78,6 +78,7 @@ inline int scaledVolume(int nativeLevel,int percent,bool muted) {
   return muted?0:128*std::clamp(nativeLevel,0,5)*std::clamp(percent,0,100)/500;
 }
 struct Preferences {
+  bool virtualControls=true;
   bool fullscreen=false,muteUnfocused=false,pauseUnfocused=false,pauseDisconnected=false;
   int width=1200,height=720,music=100,effects=100;
   std::string profile="padrao";
@@ -89,6 +90,7 @@ struct Preferences {
     p.width=preferenceInt(values,video+"largura",zoom?800:1200,400,7680);
     p.height=preferenceInt(values,video+"altura",zoom?480:720,240,4320);
     p.fullscreen=preferenceInt(values,video+"tela_cheia",zoom?1:0,0,1)!=0;
+    p.virtualControls=preferenceInt(values,"interface."+host+".controles_virtuais",1,0,1)!=0;
     p.music=preferenceInt(values,"audio.musica",100,0,100);
     p.effects=preferenceInt(values,"audio.efeitos",100,0,100);
     p.muteUnfocused=preferenceInt(values,"audio.silenciar_sem_foco",0,0,1)!=0;

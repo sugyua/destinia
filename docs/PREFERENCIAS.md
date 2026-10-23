@@ -32,3 +32,18 @@ Acoes: `cima`, `baixo`, `esquerda`, `direita`, `ataque`, `voltar`, `inventario`,
 Restaurar padroes remove apenas preferencias conhecidas e perfis; preserva a pasta de saves e chaves desconhecidas. O configurador guarda a configuracao anterior em `config.ini.previous`. Nao restaure esse arquivo sem conferir `save_dir`.
 
 Opcoes avancadas: `--settings ARQUIVO` seleciona preferencias, `--check-settings ARQUIVO` valida sem abrir jogo/save, `--windowed`/`--fullscreen` prevalecem sobre modo salvo e `--scale N` sobre tamanho salvo. `--no-save-preferences` impede gravar video ao sair, usado pelo diagnostico. O local do save continua seguindo `--save`, `DESTINIA_SAVE_DIR`, `save_dir` global e padrao, nessa ordem; `--settings` nao troca a configuracao de save.
+
+## Em preparação para 0.8 — controles virtuais
+
+Com os dois jogos fechados, abra `Configurar Destinia.bat`, escolha **6 — Controles virtuais**, selecione o host normal ou zoom e informe **0** para ocultar ou **1** para mostrar. Reinicie o jogo para aplicar. O padrão continua sendo mostrar.
+
+A escolha é independente para cada host e permanece entre instalações que suportem a opção:
+
+```ini
+interface.host.controles_virtuais=1
+interface.host_zoom.controles_virtuais=0
+```
+
+Durante a partida, a opção oculta os controles virtuais e desativa suas áreas de toque. Teclado e controle físico continuam disponíveis; os botões de navegação dos menus permanecem. A escala do HUD e o zoom do cenário não mudam nesta primeira etapa. Restaurar padrões volta a mostrar os controles e preserva `save_dir`.
+
+Implementação nativa verificada com a biblioteca Android 1.0.6 conhecida. Uma biblioteca incompatível é rejeitada ao solicitar ocultação, em vez de aplicar interceptações desconhecidas. Verificações automáticas locais não substituem o teste visual e de campanha no Windows. Esta opção ainda não foi incorporada à versão web publicada.

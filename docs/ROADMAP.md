@@ -65,7 +65,7 @@ Separar o tamanho da UI do zoom e melhorar a apresentação para teclado, contro
 **Dependências:** Depende das configurações da 0.6 e da identificação de como a UI nativa é desenhada e recebe cliques.
 
 - [ ] **08. Escala de UI independente do zoom:** Escolher tamanho da interface e do texto sem mudar a quantidade de cenário visível; alinhar as regiões clicáveis.
-- [ ] **09. Ocultar botões virtuais:** Opção de esconder direcional e botões de toque ao jogar por teclado/controle, mantendo os comandos físicos.
+- [ ] **09. Ocultar botões virtuais:** Opção de esconder direcional e botões de toque ao jogar por teclado/controle, mantendo os comandos físicos. Implementação nativa em preparação na branch `feature/08-hide-touch-controls`, com preferência por host; falta validação visual/campanha Windows antes de marcar como entregue.
 - [ ] **19. Atalhos visíveis nas habilidades:** Mostrar a tecla ou botão configurado junto às habilidades e adaptar os símbolos ao controle usado.
 - [ ] **24. Português mais completo e legível:** Completar diálogos e descrições ainda em inglês e investigar suporte a acentos/fontes, preservando espaço e quebras de linha.
 

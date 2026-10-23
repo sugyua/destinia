@@ -24,14 +24,14 @@ try {
     $marker=Join-Path $save 'personagem.bin';[IO.File]::WriteAllText($marker,'progresso intocado')
     [IO.File]::WriteAllText($config,('save_dir='+$save+"`nchave_futura=preservada`n"))
     $inputFile=Join-Path $temporary 'entrada.txt'
-    [IO.File]::WriteAllText($inputFile,"2`n35`n70`n1`n3`n1`n1`n4`nmeu_controle`nataque`ntecla`nF8`n0`n",(New-Object Text.UTF8Encoding -ArgumentList $false))
+    [IO.File]::WriteAllText($inputFile,"2`n35`n70`n1`n3`n1`n1`n4`nmeu_controle`nataque`ntecla`nF8`n6`n2`n0`n0`n",(New-Object Text.UTF8Encoding -ArgumentList $false))
     $shell=Join-Path $PSHOME 'powershell.exe';if(-not (Test-Path -LiteralPath $shell)) {$shell=Join-Path $PSHOME 'pwsh'}
     $script=Join-Path $root 'scripts/configure_game.ps1'
     $output=Join-Path $temporary 'saida.txt';$errors=Join-Path $temporary 'erros.txt'
     $process=Start-Process -FilePath $shell -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',('"'+$script+'"')) -RedirectStandardInput $inputFile -RedirectStandardOutput $output -RedirectStandardError $errors -Wait -PassThru
     if($process.ExitCode -ne 0) {throw ([IO.File]::ReadAllText($output)+[IO.File]::ReadAllText($errors))}
     $text=[IO.File]::ReadAllText($config)
-    foreach($line in @(('save_dir='+$save),'chave_futura=preservada','audio.musica=35','audio.efeitos=70','audio.silenciar_sem_foco=1','pausa.sem_foco=1','pausa.sem_controle=1','controle_perfil=meu_controle','perfil.meu_controle.tecla.ataque=F8')) {
+    foreach($line in @(('save_dir='+$save),'chave_futura=preservada','audio.musica=35','interface.host_zoom.controles_virtuais=0','audio.efeitos=70','audio.silenciar_sem_foco=1','pausa.sem_foco=1','pausa.sem_controle=1','controle_perfil=meu_controle','perfil.meu_controle.tecla.ataque=F8')) {
         if(-not $text.Contains($line)) {throw ('A interface nao guardou '+$line+"`n"+[IO.File]::ReadAllText($output))}
     }
     if([IO.File]::ReadAllText($marker) -cne 'progresso intocado') {throw 'O configurador alterou progresso'}

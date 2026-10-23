@@ -4,6 +4,13 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## Em preparação — 0.8 Beta (ainda não publicada)
+
+- Adicionada preferência independente por host para ocultar os controles virtuais durante a partida e desativar suas áreas de toque. Por padrão continuam visíveis; comandos físicos e navegação de menus são preservados.
+- Configurador oferece a opção 6 — Controles virtuais. Restaurar padrões volta a exibi-los sem alterar o caminho de saves.
+- Interceptações pontuais verificam a biblioteca ARM conhecida antes da ativação. A escala da UI independente do zoom permanece pendente para a etapa seguinte.
+- Testes automatizados usam as rotinas ARM reais com estados e saves temporários; validação visual/campanha Windows pendente. Sem publicação ou atualização da web nesta etapa.
+
 ## Organização das releases — 22/10/2026
 
 - Índice do README em ordem de lançamento, da mais recente para a mais antiga, incluindo as correções da 0.7 e horários de Brasília.

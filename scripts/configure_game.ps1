@@ -19,7 +19,7 @@ try {
     Write-Host 'DESTINIA - PREFERENCIAS DOS DOIS HOSTS'
     Write-Host 'Feche os jogos antes de alterar. As preferencias valem tambem nas proximas atualizacoes.'
     while($true) {
-        Write-Host "`n[1] Video [2] Audio [3] Pausa [4] Perfil e comandos [5] Restaurar padroes [0] Sair"
+        Write-Host "`n[1] Video [2] Audio [3] Pausa [4] Perfil e comandos [5] Restaurar padroes [6] Controles virtuais [0] Sair"
         $option=Read-Host 'Opcao'
         if($option -eq '0') {break}
         try {
@@ -58,6 +58,12 @@ try {
                         Write-Host 'Separe alternativas por virgula ou use none para desassociar. Conflitos serao rejeitados.'
                         $changes["perfil.$profile.$device.$action"]=Read-Host 'Novos comandos'
                     }
+                }
+                '6' {
+                    $hostName=Read-Host 'Host: 1 normal ou 2 zoom'
+                    if($hostName -eq '1') {$hostName='host'} elseif($hostName -eq '2') {$hostName='host_zoom'} else {throw 'Escolha 1 ou 2.'}
+                    $changes["interface.$hostName.controles_virtuais"]=Read-Host 'Mostrar controles virtuais na partida: 1 sim, 0 nao'
+                    Write-Host 'Menus mantem seus botoes. Teclado e controle continuam disponiveis. Reinicie o jogo para aplicar.'
                 }
                 '5' {Reset-DestiniaPreferences $config $validate;Write-Host 'Preferencias restauradas. Pasta de saves preservada.';continue}
                 default {throw 'Opcao desconhecida.'}

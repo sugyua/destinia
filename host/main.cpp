@@ -1,3 +1,4 @@
+#include "../common/virtual_controls.h"
 // destinia_host - executa a libdestinia_jni.so ORIGINAL (ARM 32 bits) no PC.
 //
 // Papel: faz o que o Java (GameThread/GameMainView) fazia no Android.
@@ -825,6 +826,10 @@ static int runHost(int argc, char** argv) {
   wr32(GUARD, 0xA5C3F00D);
 
   if (!loadSo(soPath)) return 1;
+  if(!destinia::installVirtualControls(uc,SO_BASE,soPath,preferences.virtualControls)) {
+    hostReport("[host] Nao foi possivel ocultar controles: biblioteca ARM incompativel ou falha nos hooks.\n");return 1;
+  }
+  hostReport("[host] Controles virtuais durante gameplay: %s\n",preferences.virtualControls?"visiveis":"ocultos (teclado/controle e menus preservados)");
   uc_hook hk; uc_hook_add(uc, &hk, UC_HOOK_CODE, (void*)stubHook, nullptr, STUB_BASE, STUB_BASE + STUB_COUNT * 4 - 1);
   uc_hook hk2; uc_hook_add(uc, &hk2, UC_HOOK_CODE, (void*)stubHook, nullptr, MAGIC_RET, MAGIC_RET + 3);
 
