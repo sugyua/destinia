@@ -1,5 +1,6 @@
 #pragma once
 #include "user_settings.h"
+#include "skill_labels.h"
 #include <functional>
 
 namespace destinia {
@@ -10,6 +11,8 @@ class PlayerControls {
   SDL_GameController*& controller;
   std::function<void(int,bool)> key;
   std::function<void()> save, releaseTouch;
+  InputDevice lastDevice=InputDevice::Keyboard;
+  Action previousLeft=Action::None,previousRight=Action::None;
   bool manualPause=false, disconnectedPause=false, neutralRequired=false;
   static uint64_t source(unsigned type,unsigned value) { return (uint64_t(type)<<32)|value; }
   void emit(Action action,bool down) {
@@ -38,6 +41,7 @@ public:
   bool focused=true,accelerating=false;
   PlayerControls(const Preferences& p,SDL_GameController*& pad,std::function<void(int,bool)> k,
                  std::function<void()> s,std::function<void()> touch):preferences(p),controller(pad),key(k),save(s),releaseTouch(touch) {}
+  InputDevice lastInputDevice() const { return lastDevice; }
   bool paused() const { return manualPause || disconnectedPause || (!focused && preferences.pauseUnfocused); }
   SDL_JoystickID controllerId() const { return controller?SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller)):-1; }
   void release() {
@@ -48,10 +52,15 @@ public:
     if(ev.type==SDL_WINDOWEVENT) {
       if(ev.window.event==SDL_WINDOWEVENT_FOCUS_LOST) { focused=false; release(); }
       else if(ev.window.event==SDL_WINDOWEVENT_FOCUS_GAINED) focused=true;
+    } else if(ev.type==SDL_MOUSEBUTTONDOWN || ev.type==SDL_FINGERDOWN) {
+      if(focused && !paused())lastDevice=InputDevice::Touch;
     } else if(ev.type==SDL_KEYDOWN || ev.type==SDL_KEYUP) {
       if(ev.key.repeat) return;
       auto found=preferences.keys.find(ev.key.keysym.sym);
-      if(found!=preferences.keys.end()) input(source(1,(unsigned)ev.key.keysym.sym),found->second,ev.type==SDL_KEYDOWN);
+      if(found!=preferences.keys.end()) {
+        if(ev.type==SDL_KEYDOWN && focused && !paused())lastDevice=InputDevice::Keyboard;
+        input(source(1,(unsigned)ev.key.keysym.sym),found->second,ev.type==SDL_KEYDOWN);
+      }
     } else if(ev.type==SDL_CONTROLLERDEVICEADDED && !controller) {
       controller=SDL_GameControllerOpen(ev.cdevice.which);
       if(controller) { disconnectedPause=false; neutralRequired=true; hostReport("[host] Controle conectado: %s\n",SDL_GameControllerName(controller)); }
@@ -61,7 +70,10 @@ public:
       hostReport("[host] Controle desconectado; comandos liberados.\n");
     } else if((ev.type==SDL_CONTROLLERBUTTONDOWN || ev.type==SDL_CONTROLLERBUTTONUP) && controller && ev.cbutton.which==controllerId()) {
       auto found=preferences.buttons.find((SDL_GameControllerButton)ev.cbutton.button);
-      if(found!=preferences.buttons.end()) input(source(2,ev.cbutton.button),found->second,ev.type==SDL_CONTROLLERBUTTONDOWN);
+      if(found!=preferences.buttons.end()) {
+        if(ev.type==SDL_CONTROLLERBUTTONDOWN && focused && !paused())lastDevice=InputDevice::Controller;
+        input(source(2,ev.cbutton.button),found->second,ev.type==SDL_CONTROLLERBUTTONDOWN);
+      }
     }
   }
   void pollSticks() {
@@ -69,6 +81,8 @@ public:
     auto left=axis(SDL_GameControllerGetAxis(controller,SDL_CONTROLLER_AXIS_LEFTX),SDL_GameControllerGetAxis(controller,SDL_CONTROLLER_AXIS_LEFTY),false);
     auto right=axis(SDL_GameControllerGetAxis(controller,SDL_CONTROLLER_AXIS_RIGHTX),SDL_GameControllerGetAxis(controller,SDL_CONTROLLER_AXIS_RIGHTY),true);
     if(neutralRequired) { if(left==Action::None && right==Action::None) neutralRequired=false; else return; }
+    if((left!=Action::None && left!=previousLeft) || (right!=Action::None && right!=previousRight))lastDevice=InputDevice::Controller;
+    previousLeft=left;previousRight=right;
     input(source(3,0),left,left!=Action::None);
     input(source(3,1),right,right!=Action::None);
   }

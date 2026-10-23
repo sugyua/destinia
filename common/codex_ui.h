@@ -1,5 +1,6 @@
 #pragma once
 #include "codex.h"
+#include "overlay_font.h"
 #include "codex_portraits.h"
 #include "codex_details.h"
 #include <array>
@@ -37,14 +38,7 @@ inline void codexPaint(uint8_t* pixels,int width,int height,const Codex& book,bo
  if(!open && !inMenu) return;
  auto pixel=[&](int x,int y,uint16_t c){if(x>=0&&x<width&&y>=0&&y<height){pixels[(y*width+x)*2]=c&255;pixels[(y*width+x)*2+1]=c>>8;}};
  auto rect=[&](int x,int y,int w,int h,uint16_t c){for(int dy=0;dy<h;++dy)for(int dx=0;dx<w;++dx)pixel(x+dx,y+dy,c);};
- auto glyph=[](char c)->std::array<uint8_t,5>{
-  static const std::array<uint8_t,5> letters[]={
-   {126,17,17,17,126},{127,73,73,73,54},{62,65,65,65,34},{127,65,65,34,28},{127,73,73,73,65},{127,9,9,9,1},{62,65,73,73,122},{127,8,8,8,127},{0,65,127,65,0},{32,64,65,63,1},{127,8,20,34,65},{127,64,64,64,64},{127,2,12,2,127},{127,4,8,16,127},{62,65,65,65,62},{127,9,9,9,6},{62,65,81,33,94},{127,9,25,41,70},{70,73,73,73,49},{1,1,127,1,1},{63,64,64,64,63},{31,32,64,32,31},{63,64,56,64,63},{99,20,8,20,99},{7,8,112,8,7},{97,81,73,69,67}};
-  static const std::array<uint8_t,5> digits[]={{62,81,73,69,62},{0,66,127,64,0},{98,81,73,73,70},{34,65,73,73,54},{24,20,18,127,16},{39,69,69,69,57},{60,74,73,73,48},{1,113,9,5,3},{54,73,73,73,54},{6,73,73,41,30}};
-  c=char(std::toupper(static_cast<unsigned char>(c)));if(c>='A'&&c<='Z')return letters[c-'A'];if(c>='0'&&c<='9')return digits[c-'0'];
-  if(c=='?')return {2,1,81,9,6};if(c=='.')return {0,96,96,0,0};if(c==':')return {0,54,54,0,0};if(c=='-')return {8,8,8,8,8};if(c=='/')return {32,16,8,4,2};return {0,0,0,0,0};
- };
- auto text=[&](int x,int y,const std::string& s,uint16_t color,int scale=1){for(char c:s){auto bits=glyph(c);for(int i=0;i<5;++i)for(int j=0;j<7;++j)if(bits[i]&(1<<j))rect(x+i*scale,y+j*scale,scale,scale,color);x+=6*scale;}};
+ auto text=[&](int x,int y,const std::string& value,uint16_t color,int scale=1){paintOverlayText(pixels,width,height,x,y,value,color,scale);};
  const uint16_t dark=0x1946,gold=0xe5b2,white=0xe71c,muted=0x8c92,border=0x6b6b;
  auto button=codexMenuButton(width,height);
  if(selected || open) {
@@ -73,24 +67,24 @@ inline void codexPaint(uint8_t* pixels,int width,int height,const Codex& book,bo
  if(detailsOpen){
   const auto selectedEntry=rows.empty()?nullptr:entry(rows[selectedIndex].first);
   if(!selectedEntry)info=nullptr;
-  rect(x+5,y+5,panel.w-10,17,0);text(x+12,y+10,"CODEX - INFORMACOES",gold);text(x+305,y+10,"VOLTAR",white);
+  rect(x+5,y+5,panel.w-10,17,0);text(x+12,y+10,"CÓDEX - INFORMAÇÕES",gold);text(x+305,y+10,"VOLTAR",white);
   rect(x+12,y+28,60,60,border);rect(x+13,y+29,58,58,0xbdd7);
   const CodexPortrait* art=nullptr;if(selectedEntry && portraits){auto found=portraits->find(rows[selectedIndex].first);if(found!=portraits->end())art=&found->second;}
   if(art && art->width>0 && art->height>0 && art->pixels.size()==size_t(art->width*art->height)){
    const int dw=std::max(1,56*art->width/std::max(art->width,art->height)),dh=std::max(1,56*art->height/std::max(art->width,art->height));
    for(int yy=0;yy<dh;++yy)for(int xx=0;xx<dw;++xx){const auto c=art->pixels[(yy*art->height/dh)*art->width+xx*art->width/dw];if(c&0x10000)pixel(x+14+(56-dw)/2+xx,y+30+(56-dh)/2+yy,uint16_t(c));}
   }else text(x+32,y+46,"?",0x4208,2);
-  text(x+82,y+30,selectedEntry?rows[selectedIndex].second.substr(0,43):"??????",0);
+  text(x+82,y+30,selectedEntry?overlayTextClip(rows[selectedIndex].second,43):"??????",0);
   text(x+82,y+44,"HP MAX: "+(info?info->hp:std::string("??????")),0);
   text(x+82,y+58,"MORTOS: "+std::to_string(selectedEntry?selectedEntry->kills:0),0);
-  text(x+82,y+74,(info?info->notes:std::string("???????")).substr(0,43),border);
-  CodexInfoSection fallback{"info","INFORMACOES",{{"","",{{selectedEntry?"DADOS ORIGINAIS INDISPONIVEIS":"MONSTRO AINDA NAO ENCONTRADO",0xffff}}}}};
+  text(x+82,y+74,overlayTextClip(info?info->notes:std::string("???????"),43),border);
+  CodexInfoSection fallback{"info","INFORMACOES",{{"","",{{selectedEntry?"DADOS ORIGINAIS INDISPONÍVEIS":"MONSTRO AINDA NÃO ENCONTRADO",0xffff}}}}};
   const size_t count=info && !info->sections.empty()?info->sections.size():1;detailPage=std::min(detailPage,count-1);
   const auto& section=info && !info->sections.empty()?info->sections[detailPage]:fallback;
   const auto pages=codexDetailPages(section);detailScroll=std::min(detailScroll,pages.size()-1);const auto& list=pages[detailScroll];
-  text(x+12,y+92,(std::to_string(detailPage+1)+" - "+section.title+(list.title.empty()?"":" / "+list.title)).substr(0,55),0);
+  text(x+12,y+92,overlayTextClip(std::to_string(detailPage+1)+" - "+section.title+(list.title.empty()?"":" / "+list.title),55),0);
   rect(x+12,y+101,panel.w-24,1,border);rect(x+12,y+103,panel.w-24,70,dark);
-  for(size_t i=0;i<list.rows.size();++i)text(x+12,y+105+int(i)*10,list.rows[i].text.substr(0,55),list.rows[i].color);
+  for(size_t i=0;i<list.rows.size();++i)text(x+12,y+105+int(i)*10,overlayTextClip(list.rows[i].text,55),list.rows[i].color);
   if(pages.size()>1){
    const auto up=codexDetailUp(width,height),down=codexDetailDown(width,height);
    for(const auto b:{up,down}){rect(b.x,b.y,b.w,b.h,border);rect(b.x+1,b.y+1,b.w-2,b.h-2,white);}
@@ -111,7 +105,7 @@ inline void codexPaint(uint8_t* pixels,int width,int height,const Codex& book,bo
  auto detail=codexDetails(width,height);const CodexEntry* selectedEntry=rows.empty()?nullptr:entry(rows[selectedIndex].first);
  rect(detail.x,detail.y,detail.w,detail.h,0xffff);rect(x+156,detail.y,1,detail.h,border);rect(x+254,detail.y,1,detail.h,border);
  text(x+12,y+169,"MONSTRO",border);text(x+164,y+169,"ESTADO",border);text(x+270,y+169,"MORTOS",border);
- text(x+12,y+180,selectedEntry?rows[selectedIndex].second.substr(0,23):"??????",0);text(x+164,y+180,selectedEntry?"ENCONTRADO":"???????",0);text(x+270,y+180,std::to_string(selectedEntry?selectedEntry->kills:0),0);
+ text(x+12,y+180,selectedEntry?overlayTextClip(rows[selectedIndex].second,23):"??????",0);text(x+164,y+180,selectedEntry?"ENCONTRADO":"???????",0);text(x+270,y+180,std::to_string(selectedEntry?selectedEntry->kills:0),0);
  text(x+12,y+198,"ANTERIOR",page?0:muted);text(x+145,y+198,"PAG "+std::to_string(page+1)+"/"+std::to_string(std::max<size_t>(1,(rows.size()+codexEntriesPerPage-1)/codexEntriesPerPage)),border);text(x+298,y+198,"PROXIMA",end<rows.size()?0:muted);
 }
 } // namespace destinia
