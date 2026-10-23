@@ -1,6 +1,6 @@
 #pragma once
 #include "runtime_support.h"
-#include "save_modes.h"
+#include "game_modes.h"
 #include "input_state.h"
 #include <SDL.h>
 #include <cctype>

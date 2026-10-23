@@ -91,6 +91,19 @@
     "tests/codex_details_ui_cases.cpp",
     "tests/test_codex_details.py",
     "tests/test_codex_details_ui.py",
-    "docs/CODEX_DETALHES.md"
+    "docs/CODEX_DETALHES.md",
+    "common/offline_store_host.h",
+    "common/safe_save.h",
+    "common/game_modes.h",
+    "common/virtual_controls.h",
+    "tests/offline_store_native.cpp",
+    "tests/test_offline_store.py",
+    "tests/game_modes_cases.cpp",
+    "tests/test_save_modes.py",
+    "tests/safe_save_cases.cpp",
+    "tests/safe_save_host_cases.cpp",
+    "tests/test_safe_save.py",
+    "tests/touch_controls_native.cpp",
+    "tests/test_touch_controls.py"
   ]
 }

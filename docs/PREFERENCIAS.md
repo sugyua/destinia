@@ -47,3 +47,18 @@ interface.host_zoom.controles_virtuais=0
 Durante a partida, a opção oculta os controles virtuais e desativa suas áreas de toque. Teclado e controle físico continuam disponíveis; os botões de navegação dos menus permanecem. A escala do HUD e o zoom do cenário não mudam nesta primeira etapa. Restaurar padrões volta a mostrar os controles e preserva `save_dir`.
 
 Implementação nativa verificada com a biblioteca Android 1.0.6 conhecida. Uma biblioteca incompatível é rejeitada ao solicitar ocultação, em vez de aplicar interceptações desconhecidas. Verificações automáticas locais não substituem o teste visual e de campanha no Windows. A versão web publicada também oferece o botão **Ocultar botões do jogo**, com painel externo de toque preservado e preferência própria do navegador. Não compartilha configuração nem saves com Windows. Compilação e configurador PowerShell passaram na [CI Windows](https://github.com/sugyua/destinia/actions/runs/39933223943); campanha e inspeção visual no PC seguem pendentes.
+
+
+## Em preparação para 0.8 — modos de jogo
+
+Em **7 — Modo de jogo**, escolha clássico ou expandido. O clássico continua na pasta de save já configurada e mantém seu progresso. O expandido usa uma pasta irmã com sufixo `_expandido`, separada entre modos e compartilhada entre instalações/hosts compatíveis. Ambos ainda usam o conteúdo e os limites originais nesta versão; a separação prepara expansões futuras.
+
+A opção **Copiar a partida clássica agora?** só copia após você responder **S**. Exige destino novo, recusa uma partida expandida já existente e não substitui arquivos clássicos. Depois da cópia, os progressos passam a divergir. Feche os jogos antes de importar. Cópia recusada não muda o modo selecionado. Para começar expandido do zero, responda **N**.
+
+```ini
+jogo.modo=classico
+```
+
+Valores aceitos: `classico` e `expandido`. O perfil de comandos (`controle_perfil`) é independente do modo de jogo. Restaurar padrões volta ao clássico e mantém as duas pastas de progresso. O marcador `.destinia-mode` impede carregar um save identificado como pertencente ao outro modo. Não apague esse marcador nem aponte versões antigas à pasta expandida. `--save` continua escolhendo a pasta exata de diagnóstico, com validação do modo; `--import-classic` é a ação explícita de cópia para a pasta expandida global.
+
+Na web, o seletor **Modo** encerra a sessão atual mediante confirmação e abre uma partida vazia em memória. A seleção é lembrada, mas o progresso não é salvo no navegador nem importado do PC.

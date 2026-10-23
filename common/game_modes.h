@@ -6,7 +6,8 @@ namespace destinia {
 inline bool validGameMode(const std::string& mode){return mode=="classico"||mode=="expandido";}
 inline fs::path modeSaveDir(const fs::path& classic,const std::string& mode){
  if(!validGameMode(mode))throw std::runtime_error("Modo de jogo invalido; use classico ou expandido.");
- return mode=="classico"?classic:classic.parent_path()/(classic.filename().string()+"_expandido");
+ auto base=classic.lexically_normal();while(base!=base.root_path()&&base.filename().empty())base=base.parent_path();
+ return mode=="classico"?base:base.parent_path()/(base.filename().string()+"_expandido");
 }
 inline bool modeProgressFile(const fs::path& path){const auto n=path.filename().string();return n=="msave.dat"||std::regex_match(n,std::regex("save[0-9]+\\.dat"));}
 inline void verifySaveMode(const fs::path& root,const std::string& mode){
@@ -25,11 +26,11 @@ inline void verifySaveMode(const fs::path& root,const std::string& mode){
 }
 // Only explicit user action calls this. Destination must be absent; never overwrite.
 inline void importClassicSave(const fs::path& source,const fs::path& target){
- const auto from=fs::absolute(source).lexically_normal(),to=fs::absolute(target).lexically_normal();
+ const auto from=modeSaveDir(fs::absolute(source),"classico"),to=modeSaveDir(fs::absolute(target),"classico");
  if(from==to||isLink(from)||!fs::is_directory(from)||fs::exists(to)||isLink(to)||to==to.root_path())throw std::runtime_error("Importacao exige origem classica e destino novo, sem links.");
  FileLock sourceLock;if(!sourceLock.acquire(from/".destinia.lock"))throw std::runtime_error("Feche o jogo antes de copiar o save.");
  if(fs::exists(from.parent_path()/(from.filename().string()+".transaction")))throw std::runtime_error("Save tem recuperacao pendente; abra/feche no classico antes de importar.");
- if(fs::exists(from/".destinia-mode")){if(isLink(from/".destinia-mode"))throw std::runtime_error("Identificacao de origem invalida.");std::ifstream in(from/".destinia-mode",std::ios::binary);std::string text((std::istreambuf_iterator<char>(in)),{});if(text!="DESTINIA_MODE_1\nclassico\n")throw std::runtime_error("Origem nao e classica.");}
+ if(fs::exists(from/".destinia-mode")){if(isLink(from/".destinia-mode")||!fs::is_regular_file(from/".destinia-mode")||fs::file_size(from/".destinia-mode")>64)throw std::runtime_error("Identificacao de origem invalida.");std::ifstream in(from/".destinia-mode",std::ios::binary);std::string text((std::istreambuf_iterator<char>(in)),{});if(text!="DESTINIA_MODE_1\nclassico\n")throw std::runtime_error("Origem nao e classica.");}
  const auto tmp=to.parent_path()/(to.filename().string()+".import-"+uniqueId());fs::create_directories(to.parent_path());if(!fs::create_directory(tmp))throw std::runtime_error("Falha ao criar copia temporaria.");
  try{
   bool progress=false;

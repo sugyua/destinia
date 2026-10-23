@@ -1,9 +1,9 @@
-name: Verificar Codex no menu do jogo
+name: Verificar hosts e pacotes do Destinia
 on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [.github/workflows/verify-codex-menu.yml, common/codex*.h, host/main.cpp, host_zoom/main.cpp, tests/codex*, tests/test_codex*.py, tests/test_zoom_camera.py, tests/zoom_native_smoke.cpp]
+    paths: [.github/workflows/verify-codex-menu.yml, common/**, host/**, host_zoom/**, tests/**, scripts/**, VERSION, release/manifest.json]
 permissions:
   contents: read
 concurrency:
@@ -35,11 +35,11 @@ jobs:
         run: |
           set -eu
           echo "DESTINIA_MSYS2_ROOT=$(cygpath -w /)" >> "$GITHUB_ENV"
-          test "$(tr -d '\r\n' < VERSION)" = 0.7
+          version=$(tr -d '\r\n' < VERSION)
           for target in host host_zoom; do
             cmake -S "$target" -B "$target/build" -G Ninja -DCMAKE_BUILD_TYPE=Release
             cmake --build "$target/build"
-            "$target/build/destinia_host.exe" --version
+            test "$("$target/build/destinia_host.exe" --version | tr -d '\r\n')" = "Destinia $version Beta"
             grep -q 'SDL2_MIXER_FOUND:INTERNAL=1' "$target/build/CMakeCache.txt"
           done
       - name: Testar ARM estabilidade preferencias Codex e empacotamento

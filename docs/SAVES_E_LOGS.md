@@ -83,3 +83,12 @@ Não há despejo de cada quadro por padrão. O resumo de estado é amostrado a c
 O diretório pode ser escolhido com `--reports PASTA`. O diagnóstico aponta esse argumento para `logs_do_jogo` dentro da própria sessão, sempre com um `--save` isolado. Falha na criação/escrita do log gera aviso no console e não altera o save nem impede jogar; falha de backup do progresso existente impede iniciar para preservar a partida.
 
 Os TXT podem conter caminhos locais e informações da partida. Logs, configurações e backups não acompanham o ZIP de distribuição. Ao relatar um problema, envie o TXT da sessão e o relatório do diagnóstico; não é necessário enviar seus saves.
+
+
+## Candidata 0.8 — gravação recuperável e modos
+
+As escritas e exclusões feitas numa chamada ARM do host são preparadas em temporários. O jogo verifica fechamento e sincronização dos arquivos antes de substituir os ativos; se o processo for interrompido durante as substituições, a próxima abertura recupera o lote anterior antes de carregar a partida. O journal fica numa pasta irmã terminada em `.transaction`. Não apague essa pasta para tentar corrigir uma falha: um journal desconhecido/corrompido é preservado para análise. Os backups rotativos continuam complementando essa proteção.
+
+A proteção foi testada com falhas injetadas e encerramento de subprocesso. Ela não é garantia comprovada contra falha física do disco ou queda de energia, nem transforma ações que atravessam vários quadros numa transação única.
+
+O modo clássico mantém a pasta atual. O expandido usa a pasta irmã `_expandido`, com identificação, trava, journal e backups próprios. A cópia de progresso entre eles exige uma ação explícita no configurador e um destino ainda inexistente; não há conversão silenciosa nem alteração do formato binário. Veja [preferências](PREFERENCIAS.md). O diagnóstico respeita o modo selecionado, mas continua usando cópias descartáveis.
