@@ -126,6 +126,7 @@ static u32 fnLogoPress = 0, fnMenuPress = 0, fnMenuRelease = 0, fnGamePress = 0,
 static u32 fnGetCash = 0, fnSetCash = 0;
 static bool pendingBuyCash = false, audioReady = false, fastForward = false;
 static u32 pendingCashAmount = 0;
+static bool portugueseTextTest = false;
 static int currentBgTrack = -1, analogDir = 0, rightStickKey = 0;
 #ifdef HAS_SDL_MIXER
 static std::map<int, Mix_Chunk*> sfxCache;
@@ -290,6 +291,12 @@ static bool readFile(const std::string& path, std::vector<uint8_t>& out) {
   return true;
 }
 
+#include "../common/portuguese_text.h"
+using destinia::isPortugueseAsset;
+static bool applyPortugueseText(const std::string& name, std::vector<uint8_t>& data) {
+  return destinia::applyPortugueseText(portugueseTextTest, name, data, note);
+}
+
 // ---------------------------------------------------------------- JNI falso
 static std::map<u32, std::vector<uint8_t>> arrays;  // jbyteArray -> bytes
 static u32 nextArr = 0x1000, nextCls = 0x100;
@@ -429,7 +436,18 @@ static void setupStubs() {
   J(129, "CallStaticIntMethod", [] {
     u32 mid = R(2);
     if (mid == 3) {
-      std::string nm = arrText(R(3)); std::error_code ec; auto sz = fs::file_size(assetsDir + "/" + nm, ec);
+      std::string nm = arrText(R(3)); std::error_code ec; uintmax_t sz = 0;
+      if (portugueseTextTest && isPortugueseAsset(nm)) {
+        std::vector<uint8_t> data;
+        if (readFile(assetsDir + "/" + nm, data)) {
+          applyPortugueseText(nm, data);
+          sz = data.size();
+        } else {
+          ec = std::make_error_code(std::errc::no_such_file_or_directory);
+        }
+      } else {
+        sz = fs::file_size(assetsDir + "/" + nm, ec);
+      }
       note("getAssetResSize " + nm + " -> " + (ec ? "0 (nao existe)" : std::to_string(sz)));
       W(0, ec ? 0 : (u32)sz);
     } else { note("CallStaticIntMethod metodo desconhecido " + std::to_string(mid)); W(0, 0); }
@@ -440,6 +458,8 @@ static void setupStubs() {
     if (mid == 4) {
       std::string nm = arrText(R(3)); std::vector<uint8_t> data;
       if (!readFile(assetsDir + "/" + nm, data)) { note("getAssetRes " + nm + " -> NAO EXISTE"); W(0, 0); return; }
+      bool translated = applyPortugueseText(nm, data);
+      if (translated) hostReport("[host] textos PT aplicados em %s\n", nm.c_str());
       destinia::sessionLog.write("ASSET carregado: "+nm+" bytes="+std::to_string(data.size()));
       u32 h = nextArr++; arrays[h] = std::move(data); W(0, h);
     } else { note("CallStaticObjectMethod metodo desconhecido " + std::to_string(mid)); W(0, 0); }
@@ -773,10 +793,11 @@ static int runHost(int argc, char** argv) {
     else if (a == "--out") outDir = next(); else if (a == "-v") verbose = true;
     else if (a == "--probe") probe = true;
     else if (a == "--mute") muteAudio = true;
+    else if (a == "--lang" && next() == "pt") portugueseTextTest = true;
     else if (a == "--profile") profile = true;
     else if (a == "--autotap") { if (sscanf(next().c_str(), "%d,%d,%d", &autoFrame, &autoX, &autoY) != 3) { printf("--autotap precisa de QUADRO,X,Y\n"); return 0; } }
     else if (a == "--autotap2") { if (sscanf(next().c_str(), "%d,%d,%d", &autoFrame2, &autoX2, &autoY2) != 3) { printf("--autotap2 precisa de QUADRO,X,Y\n"); return 0; } }
-    else { printf("Uso: destinia_host [--game PASTA] [--so ARQUIVO] [--save PASTA] [--reports PASTA] [--settings ARQUIVO] [--no-save-preferences] [--windowed|--fullscreen] [--scale N] [--headless QUADROS --out PASTA] [-v] [--probe] [--mute] [--profile] [--autotap QUADRO,X,Y] [--autotap2 QUADRO,X,Y]\n"); return 0; }
+    else { printf("Uso: destinia_host [--game PASTA] [--so ARQUIVO] [--save PASTA] [--reports PASTA] [--settings ARQUIVO] [--no-save-preferences] [--windowed|--fullscreen] [--scale N] [--lang pt] [--headless QUADROS --out PASTA] [-v] [--probe] [--mute] [--profile] [--autotap QUADRO,X,Y] [--autotap2 QUADRO,X,Y]\n"); return 0; }
   }
   preferences=destinia::Preferences::load(settingsPath,"host");
   bool fullscreen=fullscreenOverride<0?preferences.fullscreen:fullscreenOverride!=0;
@@ -1008,7 +1029,7 @@ static int runHost(int argc, char** argv) {
             hostReport("[sonda] SDL %s botao=%d janela_px=(%d,%d) tamanho_janela=%dx%d saida_render=%dx%d -> jogo=(%d,%d) dentro=%d\n",
                        ev.type==SDL_MOUSEBUTTONDOWN?"BAIXO":"CIMA",(int)ev.button.button,wx,wy,ww,wh,ow,oh,x,y,(int)inside);
           }
-          if(ev.type==SDL_MOUSEBUTTONDOWN && ev.button.button==SDL_BUTTON_LEFT && inside) { mouseDown=true; touch(x,y,0); }
+          if(ev.type==SDL_MOUSEBUTTONDOWN && ev.button.button==SDL_BUTTON_LEFT && inside) { controls.event(ev); mouseDown=true; touch(x,y,0); }
           else if(ev.type==SDL_MOUSEBUTTONUP && ev.button.button==SDL_BUTTON_LEFT && mouseDown) { mouseDown=false; touch(x,y,1); }
           else if(ev.type==SDL_MOUSEMOTION && mouseDown) touch(x,y,2);
         } else {
