@@ -26,6 +26,12 @@ Da mais recente para a mais antiga. Os pacotes mais novos da `main` indicados ac
 
 [Ver todas as releases no GitHub](https://github.com/sugyua/destinia/releases)
 
+## Prévia da 0.8 — controles virtuais opcionais
+
+A `main` já permite mostrar/ocultar os controles virtuais por host em **Configurar Destinia → 6 — Controles virtuais**. Compilação e testes Windows: [execução aprovada](https://github.com/sugyua/destinia/actions/runs/39933223943), com [pacotes de teste para download](https://github.com/sugyua/destinia/actions/runs/39933223943/artifacts/12492846293). Os EXEs ainda identificam a versão base 0.7; esta é uma prévia da 0.8, não uma release completa.
+
+O [protótipo web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site) também oferece **Ocultar botões do jogo**, mantendo o painel externo de toque para jogar pelo celular. A preferência é lembrada no navegador; progresso e Códex continuam temporários. A escala independente da UI permanece pendente. Veja [preferências](docs/PREFERENCIAS.md).
+
 ## Arquitetura
 
 O host em C++17 executa a biblioteca ARM original do Destinia Android com Unicorn. SDL2 apresenta o framebuffer RGB565 e recebe entradas; SDL2_mixer habilita áudio opcional. A lógica original continua na biblioteca ARM.

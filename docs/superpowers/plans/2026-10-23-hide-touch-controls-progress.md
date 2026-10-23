@@ -17,3 +17,7 @@ Revisão independente: sem achados altos/médios; observou que além do desenho 
 Diff check passou; arquivo pendente do checkout original preservado.
 Pendente: configurador PowerShell real, visual/campanha Windows, publicação e atualização web. Escala independente da UI é a próxima etapa, não implementada aqui.
 Nenhum commit/push/release do produto nesta etapa; somente coordenação privada atualizada.
+
+
+Publicação autorizada em nova mensagem do autor: fonte funcional publicada na main50aa602cc65b8a7c0e1b06d054922aea037f65e8. CI39933223943 concluiu success, incluindo compilação com áudio, testes nativos existentes, configurador PowerShell atualizado e empacotamento. Artefato12492846293. Teste novo específico de ocultação foi executado localmente; o workflow existente não o seleciona.
+Web: fonte143110b686c1d38dc7dda2d634c03cecffa0e65b,39 testes Node aprovados; Chromium móvel aprovou menus, toggle, painel externo, pausa, rotação, preferência após reload e liberação de gesto ativo. Publicação Sites appgdep_6adb2c19fb2c81919648a8b8a9723318 succeeded na URL privada existente. Sem release completa0.8 ou alteração de audiência. Safari físico/campanha Windows ainda pendentes.

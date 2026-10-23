@@ -9,7 +9,7 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 - Adicionada preferência independente por host para ocultar os controles virtuais durante a partida e desativar suas áreas de toque. Por padrão continuam visíveis; comandos físicos e navegação de menus são preservados.
 - Configurador oferece a opção 6 — Controles virtuais. Restaurar padrões volta a exibi-los sem alterar o caminho de saves.
 - Interceptações pontuais verificam a biblioteca ARM conhecida antes da ativação. A escala da UI independente do zoom permanece pendente para a etapa seguinte.
-- Testes automatizados usam as rotinas ARM reais com estados e saves temporários; validação visual/campanha Windows pendente. Sem publicação ou atualização da web nesta etapa.
+- Testes automatizados usam as rotinas ARM reais com estados e saves temporários; validação visual/campanha Windows pendente. Publicada na `main` como prévia; compilação/testes Windows aprovados e protótipo web atualizado com a mesma opção. A release 0.8 completa continua pendente.
 
 ## Organização das releases — 22/10/2026
 
