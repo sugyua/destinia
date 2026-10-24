@@ -330,6 +330,14 @@ As associações **Necromante → foice** e **Granadeiro → granadas** já esta
 
 **Próxima etapa:** solicitar ao Codex uma triagem destas ideias, separando viabilidade técnica, dependências, riscos, sobreposições e esforço estimado. **Só depois** decidir quais entram no roadmap e em que versão; o registro aqui não autoriza implementação nem publicação de release.
 
+## Política de atualização e distribuição
+
+Quando uma correção ou funcionalidade do Destinia estiver **implementada e validada**, ela deverá ser comunicada no README e no CHANGELOG, registrada na [central das IAs](https://github.com/sugyua/ai-progress-shared/issues/4) e publicada como **nova versão em [GitHub Releases](https://github.com/sugyua/destinia/releases)**, com arquivos Windows pertinentes, fontes e checksums. Código experimental em branch ou PR **não é** uma versão jogável publicada. As Releases anteriores permanecem disponíveis; testes automatizados e testes reais são identificados separadamente.
+
+**Versão web:** [abrir o Destinia no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/) (acesso privado). Último deployment **confirmado** nesta atualização documental: base web da **0.9.1 Beta**, fonte `5d05a13`, com Códex nativo na décima aba, filtros de equipamentos e escala web somente **100%**. O progresso do personagem na web ainda não é persistente após recarregar/fechar. A cada mudança futura na web, atualizar aqui a revisão/deployment e as novidades **somente depois da publicação confirmada**; se a versão web estiver pendente, informar explicitamente.
+
+**Correção visual em preparação:** a prévia da décima aba e a mão apontadora do menu estão em [PR #3 (rascunho)](https://github.com/sugyua/destinia/pull/3), **não incluído na 0.9.1 Beta publicada** e não implantado na web. Precisa de testes e release própria antes de ser anunciado como corrigido.
+
 ## Publicação
 
 Pacotes oficiais e histórico detalhado ficam em [Releases](https://github.com/sugyua/destinia/releases). A `main` contém os lotes de desenvolvimento indicados acima; a versão0.9 tem o escopo das notas de release e os complementos foram transferidos à 0.9.1 por decisão do autor. O autor confirmou testes da base no PC/iPhone; isso não comprova campanha completa ou validação manual de cada mudança nova.
