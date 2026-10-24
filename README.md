@@ -129,7 +129,7 @@ Consulte o [roadmap detalhado](docs/ROADMAP.md) para dependências, critérios d
 Reduzir tarefas repetitivas e tornar os equipamentos mais fáceis de entender e proteger.
 
 - [ ] **13. Comparador claro de equipamentos:** Exibir diferenças de atributos entre o item selecionado e o equipado, com sinais e cores legíveis; verificar primeiro o comparador original para aprimorá-lo.
-- [ ] **FC — Força de Combate:** indicador numérico nos status do personagem. O comparador deve mostrar FC atual, FC estimado após equipar e diferença positiva/negativa. Fórmula e pesos ainda serão definidos e validados; não implementado e não altera atributos ou combate por si só.
+- [ ] **FC — Força de Combate:** indicador numérico nos status do personagem. O comparador deve mostrar FC atual, FC estimado após equipar e diferença positiva/negativa. Buffs temporários ativos entram no FC e sua expiração atualiza o valor. A comparação mantém os mesmos buffs nos dois equipamentos; perder ou recuperar vida atual não altera o FC por si só. Fórmula e pesos ainda serão definidos e validados; não implementado e não altera atributos ou combate por si só.
 - [ ] **14. Organização e filtros do inventário:** Ordenar e filtrar por tipo, rank, nível e preço, sem perder a seleção atual; confirmar o que já existe no jogo.
 - [ ] **15. Favoritar e proteger itens:** Marcar equipamentos para evitar venda/desmanche acidentais; pedir confirmação quando apropriado.
 - [ ] **16. Filtro de itens no chão:** Escolher quais categorias ou ranks destacar e quais esconder visualmente; não apagar os itens filtrados.
