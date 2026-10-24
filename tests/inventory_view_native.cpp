@@ -60,5 +60,79 @@ int main(int argc,char**argv){
  assert(rd32(ui+0x7c)==0x20000002u && rd16(ui+0x56)==chosen.slot);
  for(int slot=0;slot<3;slot++)assert(rd16(g+0x433e + 6*slot+2)==ids[slot]);
  assert(callFn(exportsMap.at("getMyGold"),{},&gold));assert(gold==20000);
+ // Equipment is a separate original tab. Include identical swords to catch
+ // accidental selection by attributes or display position instead of pool.
+ u32 duplicate=0;assert(callFn(exportsMap.at("GameUI_getNewEquipByIdx"),{2},&duplicate));
+ std::array<uint8_t,20> twin{};assert(rd(g+0x2ed6+20*ids[0],twin.data(),twin.size()));assert(wr(g+0x2ed6+20*duplicate,twin.data(),twin.size()));
+ uint16_t count=4,record[3]={0,uint16_t(duplicate),1};wr(g+0x433c,&count,2);wr(g+0x433e + 18,record,6);
+ assert(callFn(exportsMap.at("openMainmenu"),{0}));wr(ui+0x76,&anim,2);
+ for(int key:{7,9,6}){assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{u32(key)}));printf("EQUIP_NAV key=%d state=%08x\n",key,rd32(ui+0x7c));}
+ printf("EQUIP_LIST count=%u pools=%u,%u,%u indices=%u,%u,%u cursor=%u\n",rd16(ui+0x324),rd16(ui+0x2e8),rd16(ui+0x2ea),rd16(ui+0x2ec),rd16(ui+0x52),rd16(ui+0x54),rd16(ui+0x56),rd16(ui+0x70));
+ assert(rd32(ui+0x7c)==0x10000002u);
+ int target=-1;for(int i=0;i<rd16(ui+0x324);i++)if(rd16(ui+0x2e8+2*i)==duplicate)target=i;assert(target>=0);
+ for(int step=0;step<target;step++)assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{7}));
+ assert(rd16(ui+0x56)==target);fcBeginFrame();
+ assert(callFn(exportsMap.at("GameUI_drawMainMenu"),{rd32(exportsMap.at("Grp")+4)}));
+ auto expected=g+0x2ed6+20*duplicate;
+ assert(std::find(fcCandidates.begin(),fcCandidates.begin()+fcCandidateCount,expected)!=fcCandidates.begin()+fcCandidateCount);
+ // Preview cancellation must restore the original unarmed slot.
+ assert(rd32(ui+0x2148)==0);
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{27}));assert(rd32(ui+0x7c)==0x10000001u);assert(rd32(g+0x4584)==0);
+ assert(callFn(exportsMap.at("getMyGold"),{},&gold));assert(gold==20000);
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{6}));assert(rd16(ui+0x56)==0);
+ for(int step=0;step<target;step++)assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{7}));
+ assert(callFn(exportsMap.at("GameUI_drawMainMenu"),{rd32(exportsMap.at("Grp")+4)}));
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{6}));
+ printf("EQUIP_CONFIRMED state=%08x live=%08x backup=%08x expected=%08x\n",rd32(ui+0x7c),rd32(g+0x4584),rd32(ui+0x2148),expected);
+ assert(rd32(ui+0x2148)==expected);
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{27}));assert(rd32(g+0x4584)==expected);
+ assert(callFn(exportsMap.at("getMyGold"),{},&gold));assert(gold==20000);
+ for(int slot=0;slot<3;slot++)assert(rd16(g+0x433e + 6*slot+2)==ids[slot]);
+ assert(rd16(g+0x433e + 20)==duplicate);
+ // Controlled local vendor entry; no NPC/network interaction or real save.
+ assert(callFn(exportsMap.at("openMainmenu"),{0x91000001u}));wr(ui+0x76,&anim,2);
+ for(int key:{9,6,9}){assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{u32(key)}));printf("SELL_NAV key=%d state=%08x\n",key,rd32(ui+0x7c));}
+ printf("SELL_FOCUS indices=%u,%u,%u,%u\n",rd16(ui+0x54),rd16(ui+0x56),rd16(ui+0x58),rd16(ui+0x5a));
+ assert(rd32(ui+0x7c)==0x91040004u);
+ // Displayed price-order index2 points back to original slot0, not slot2.
+ auto projected=destinia::inventorySelection(records,view,int(ids[0]));assert(projected && *projected==2);
+ const auto sale=records[view[*projected]];assert(sale.slot==0 && sale.pool==int(ids[0]));
+ assert(rd16(ui+0x5a)==sale.slot);
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{6}));
+ printf("SELL_CONFIRM state=%08x record=%08x expected=%08x\n",rd32(ui+0x7c),rd32(ui+0x2e0),g+0x433e + 6*sale.slot);
+ assert(rd32(ui+0x2e0)==g+0x433e + 6*sale.slot);
+ assert(callFn(exportsMap.at("getMyGold"),{},&gold));assert(gold==20000);assert(rd16(g+0x433c)==4);
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{27}));
+ assert(callFn(exportsMap.at("getMyGold"),{},&gold));assert(gold==20000);assert(rd16(g+0x433c)==4);
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{6}));
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{6}));
+ assert(callFn(exportsMap.at("getMyGold"),{},&gold));
+ printf("SOLD gold=%u count=%u flag=%u twin=%u gear=%08x\n",gold,rd16(g+0x433c),uint8_t(rd16(g+0x2e0c+sale.pool)&255),uint8_t(rd16(g+0x2e0c+duplicate)&255),rd32(g+0x4584));
+ assert(gold==20000+u32(sale.price/5));assert(rd16(g+0x433e + 6*sale.slot+4)==0);
+ std::vector<destinia::InventoryItem> remaining;
+ for(int slot=0;slot<rd16(g+0x433c);slot++)if(rd16(g+0x433e + 6*slot+4)){
+  int pool=rd16(g+0x433e + 6*slot+2);u32 price=0;assert(callFn(exportsMap.at("GameUI_getItemPrice"),{0,u32(pool)},&price));
+  auto header=rd16(g+0x2ed6+20*pool);u32 level=0;assert(callFn(exportsMap.at("GameUI_getEquipMinLv"),{header,1},&level));
+  remaining.push_back({0,slot,pool,int((header>>5)&7),int((header>>8)&7),int(level),int(price)});
+ }
+ assert(remaining.size()==3);auto nextView=destinia::inventoryView(remaining,query);
+ assert(!destinia::inventorySelection(remaining,nextView,sale.pool));
+ assert(destinia::inventorySelection(remaining,nextView,duplicate));
+ assert(uint8_t(rd16(g+0x2e0c+sale.pool)&255)==0 && uint8_t(rd16(g+0x2e0c+duplicate)&255)!=0);
+ assert(rd32(g+0x4584)==expected);
+ std::array<uint8_t,20> retained{};assert(rd(expected,retained.data(),retained.size()));assert(retained==twin);
+ // Acknowledge the completed sale; resolve the twin again in the current
+ // original bag, since the native menu may compact zero-quantity records.
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{6}));
+ printf("SELL_ACK state=%08x gold=%u\n",rd32(ui+0x7c),gold);
+ assert(rd32(ui+0x7c)==0x91040004u);
+ int equippedSlot=-1;for(int slot=0;slot<rd16(g+0x433c);slot++)if(rd16(g+0x433e + 6*slot+4)&&rd16(g+0x433e + 6*slot+2)==duplicate)equippedSlot=slot;assert(equippedSlot>=0);
+ for(int moves=0;rd16(ui+0x5a)!=equippedSlot && moves<24;moves++)assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{7}));
+ assert(rd16(ui+0x5a)==equippedSlot);
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{6}));
+ printf("EQUIPPED_SALE_GUARD state=%08x\n",rd32(ui+0x7c));
+ assert(rd32(ui+0x7c)==0x91040106u);
+ u32 guardedGold=0;assert(callFn(exportsMap.at("getMyGold"),{},&guardedGold));assert(guardedGold==gold);
+ assert(rd32(g+0x4584)==expected && uint8_t(rd16(g+0x2e0c+duplicate)&255)!=0);
  puts("INVENTORY_SELECTION_ARM_OK");
 }
