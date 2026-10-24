@@ -2,6 +2,9 @@
 #include <cassert>
 static uc_err keepEngine(uc_engine*){return UC_ERR_OK;}
 #define uc_close keepEngine
+#ifdef main
+#undef main
+#endif
 #define main originalMain
 #ifdef DESTINIA_TEST_ZOOM
 #include "../host_zoom/main.cpp"
@@ -25,7 +28,7 @@ int main(int argc,char** argv){
  wr(game+0x4890,coordinates,4);u32 check=0;assert(callFn(exportsMap.at("_checkItemNearby"),{0},&check));assert(check==1);wr(pixels,background.data(),FB_BYTES);assert(callFn(exportsMap.at("drawDropItemName"),{}));rd(pixels,expected.data(),FB_BYTES);assert(expected!=background);
  wr(game+0x4890,hero,4);rd(game,before.data(),before.size());dropNamesRenderer.enabled=true;wr(pixels,background.data(),FB_BYTES);assert(callFn(exportsMap.at("drawDropItemName"),{}));assert(dropNamesRenderer.error.empty());rd(pixels,actual.data(),FB_BYTES);assert(actual==expected);rd(game,after.data(),after.size());assert(before==after);
  // A caller outside drawing must retain the real collection-distance result.
- u32 near=1;assert(callFn(exportsMap.at("_checkItemNearby"),{0},&near));assert(near==0);
+ u32 nearbyResult=1;assert(callFn(exportsMap.at("_checkItemNearby"),{0},&nearbyResult));assert(nearbyResult==0);
  for(bool inactive:{true,false}){if(inactive){flags[0]=0;wr(game+0x3e76,flags,20);}else{flags[0]=1;wr(game+0x3e76,flags,20);coordinates[0]=uint16_t(SCREEN_W+40);wr(game+0x3eb8,coordinates,4);}wr(pixels,background.data(),FB_BYTES);assert(callFn(exportsMap.at("drawDropItemName"),{}));rd(pixels,actual.data(),FB_BYTES);assert(actual==background);}
  puts("DROP_NAMES_ARM_OK");return 0;
 }
