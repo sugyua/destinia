@@ -24,12 +24,15 @@
 - **PC no ZIP atualizado:** L3 + R3 mostra/oculta controles virtuais e suas áreas de clique durante gameplay, nos dois hosts. Solte ambos para alternar novamente; HUD, menus e entradas físicas permanecem. Reutiliza a opção6 de **Configurar Destinia**, salva separadamente por host e não muda a web. Remapeamentos isolados de L3/R3 disparam ao soltar, para evitar conflito com a combinação. `--no-save-preferences` mantém a alteração só na sessão.
 - Baixe o ZIP **windows-x64** da Release corretiva para jogar sem compilar. A Release0.9 original permanece preservada. Filtros e demais pendências continuam em preparação para0.9.1.
 
+**[Prévia técnica da 0.9.1 — fontes e testes](https://github.com/sugyua/destinia/releases/tag/v0.9.1-dev1)**: checkpoint de desenvolvimento, sem novos EXEs ou interface dos filtros. Para jogar no PC, use a correção0.9 acima.
+
 ## Releases em ordem de lançamento
 
 Da mais recente para a mais antiga. As releases anteriores e seus downloads são preservados.
 
 | Release | Lançamento (Brasília) |
 | --- | --- |
+| [0.9.1 dev1 — prévia técnica, somente fontes](https://github.com/sugyua/destinia/releases/tag/v0.9.1-dev1) | 24/10/2026 |
 | [0.9 Beta — controles PC, fix1](https://github.com/sugyua/destinia/releases/tag/v0.9-controles-fix1) | 24/10/2026 |
 | [0.9 Beta — FC e comparador](https://github.com/sugyua/destinia/releases/tag/v0.9-beta) | 24/10/2026 |
 | [0.8 Beta — interface e saves](https://github.com/sugyua/destinia/releases/tag/v0.8-beta) | 24/10/2026 |
