@@ -1,4 +1,4 @@
-# Destinia para Windows — 0.8 Beta
+# Destinia para Windows — 0.8 Beta · desenvolvimento da 0.9
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
@@ -14,6 +14,8 @@
 - [x] **Limpeza:** removidos ZIPs auxiliares antigos e cópias WIP já integradas. Saves, dados necessários, ferramentas ativas e testes preservados.
 - [x] **Nomes de drops por comando:** segure **V** no PC (remapeável como `nomes_drops`; não ocupa V se já estiver remapeado). Na web, use V ou o botão **Nomes dos itens**. Mostra itens ativos visíveis com as cores originais de raridade, sem ampliar alcance de coleta.
 - [ ] Inventário, filtros/favoritos, coleta/poções opcionais e redistribuição offline: próximos lotes, ainda não entregues. A versão distribuída permanece **0.8 Beta** até validar a0.9.
+
+**Prévia para PC:** [baixar pacotes de teste com EXEs e fontes](https://github.com/sugyua/destinia/actions/runs/40105710879/artifacts/12565080835), com [CI Windows aprovada](https://github.com/sugyua/destinia/actions/runs/40105710879). Pode exigir login no GitHub. A prévia ainda identifica a base **0.8**; não é a release0.9 completa. Para usar o código da `main`, execute **Compilar Destinia.bat** com o jogo fechado.
 
 ## Releases em ordem de lançamento
 
@@ -309,7 +311,7 @@ As associações **Necromante → foice** e **Granadeiro → granadas** já esta
 
 ## Publicação
 
-Versão **v0.8-beta**, com publicação autorizada pelo autor. O workflow só cria a release após compilar e testar os dois hosts no Windows. A validação manual no Windows continua pendente; testes automatizados e de inicialização não comprovam uma campanha completa. A versão permanece **Beta**. As releases anteriores continuam disponíveis.
+Pacotes oficiais e histórico detalhado ficam em [Releases](https://github.com/sugyua/destinia/releases). A `main` contém os lotes de desenvolvimento indicados acima; a release0.9 aguarda os itens restantes e sua validação. O autor confirmou testes da base no PC/iPhone; isso não comprova campanha completa ou validação manual de cada mudança nova.
 
 O ZIP curado não inclui biblioteca original, APK, DEX, assets, áudio, saves ou DLLs de terceiros. Consulte [THIRD_PARTY.md](THIRD_PARTY.md). Não foi definida uma licença para o código do host nesta etapa.
 
