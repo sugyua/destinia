@@ -6,7 +6,7 @@ class TextLabelsTests(unittest.TestCase):
   # MinGW SDL pkg-config renames main for GUI apps; these are console fixtures.
   flags=[flag for flag in shlex.split(subprocess.check_output(['pkg-config','--cflags','--libs','sdl2'],text=True)) if flag!='-Dmain=SDL_main']
   with tempfile.TemporaryDirectory(prefix='destinia labels ') as folder:
-   for name in ('skill_labels_cases','overlay_font_cases','portuguese_text_cases'):
+   for name in ('skill_labels_cases','controller_chord_cases','overlay_font_cases','portuguese_text_cases'):
     binary=pathlib.Path(folder)/name
     build=subprocess.run(['g++','-std=c++17',str(ROOT/'tests'/f'{name}.cpp'),'-o',str(binary)]+flags,capture_output=True,text=True)
     self.assertEqual(build.returncode,0,build.stderr)

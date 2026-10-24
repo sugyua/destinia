@@ -16,6 +16,12 @@
 
 [Notas completas e instalação](docs/RELEASE_0.9.md). As funcionalidades ainda não concluídas estão na **0.9.1**, abaixo; não acompanham a 0.9.
 
+## Em preparação — 0.9.1: controles
+
+- **Web já disponível:** controle reconhecido pela Gamepad API com mapeamento padrão; diagnóstico no rodapé. Direcional/analógico esquerdo move, A ação, B voltar, X extra, Y menu, ombros/gatilhos ou analógico direito habilidades, Start/Options pausa. Solte os comandos ao reconectar/voltar à aba. Teclado e touch preservados. **USB no iPhone depende do controle/adaptador/Safari e ainda exige teste físico.**
+- **PC nos fontes atuais:** L3 + R3 mostra/oculta controles virtuais e suas áreas de clique durante gameplay, nos dois hosts. Solte ambos para alternar novamente; HUD, menus e entradas físicas permanecem. Reutiliza a opção6 de **Configurar Destinia**, salva separadamente por host e não muda a web. Remapeamentos isolados de L3/R3 disparam ao soltar, para evitar conflito com a combinação. `--no-save-preferences` mantém a alteração só na sessão.
+- Estes ajustes PC **não alteram os ZIPs da Release0.9**; compile os fontes atuais. Filtros de inventário são a próxima tarefa; demais pendências permanecem abaixo.
+
 ## Releases em ordem de lançamento
 
 Da mais recente para a mais antiga. As releases anteriores e seus downloads são preservados.

@@ -4,6 +4,11 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.9.1 — em preparação
+
+- Web: Gamepad API padrão com diagnóstico de detecção, ações/menu/pausa, liberação na desconexão e perda de foco; exigir neutro ao retornar. USB/Safari no iPhone físico ainda não validado.
+- PC: L3+R3 alterna a opção existente dos controles virtuais e hitboxes durante gameplay em ambos hosts, uma vez até soltar ambos. Preferência por host preserva demais configurações; cliques isolados remapeados disparam ao soltar. HUD/menus/comandos físicos e opção web independentes.
+
 ## 0.9 Beta — 24/10/2026
 
 - Português brasileiro passa a ser o padrão nos dois hosts e no navegador; inglês explícito é preservado. CLI aceita `--lang pt|en` sem gravar uma preferência implicitamente.

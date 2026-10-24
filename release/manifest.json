@@ -129,6 +129,7 @@
     "tests/test_combat_power.py",
     "docs/FC.md",
     "docs/RELEASE_0.9.md",
-    "release/NOTAS_0.9.md"
+    "release/NOTAS_0.9.md",
+    "tests/controller_chord_cases.cpp"
   ]
 }

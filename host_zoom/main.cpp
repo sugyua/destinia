@@ -1392,6 +1392,12 @@ static int runHost(int argc, char** argv) {
 
   destinia::PlayerControls controls(preferences,controller,gameKey,[&](){touch(0,0,3);},[&](){
     if(mouseDown) { touch(lastTouchX,lastTouchY,1); mouseDown=false; }
+  },[&](){
+    preferences.virtualControls=!preferences.virtualControls;
+    destinia::setVirtualControlsVisible(preferences.virtualControls);
+    hostReport("[host] L3+R3: controles virtuais %s.\n",preferences.virtualControls?"visiveis":"ocultos");
+    if(savePreferences)try{destinia::saveVirtualControlsPreference(settingsPath,"host_zoom",preferences.virtualControls);}
+    catch(const std::exception& error){hostReport("[host] Visibilidade aplicada somente nesta sessao: %s\n",error.what());}
   });
   bool wasPaused=false;
   bool running = true; long frame = 0;
@@ -1405,7 +1411,9 @@ static int runHost(int argc, char** argv) {
     double runMs = 0.0, renderMs = 0.0, sleepMeasuredMs = 0.0;
     if (!headlessFrames) {
       SDL_Event ev;
+      controls.pollShortcuts();
       while (SDL_PollEvent(&ev)) {
+        if(controls.touchShortcut(ev))continue;
         if(codexOpen && (ev.type==SDL_CONTROLLERBUTTONDOWN || ev.type==SDL_CONTROLLERBUTTONUP || ev.type==SDL_CONTROLLERAXISMOTION)) {
           if(ev.type==SDL_CONTROLLERBUTTONDOWN && ev.cbutton.which==controls.controllerId()) {
             auto binding=preferences.buttons.find((SDL_GameControllerButton)ev.cbutton.button);

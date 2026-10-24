@@ -141,15 +141,12 @@ struct Preferences {
   }
 };
 
-inline void saveWindowPreferences(const fs::path& file,const std::string& host,int width,int height,bool fullscreen) {
+inline void updatePreferences(const fs::path& file,const PreferenceValues& updates) {
   if(file.empty()) return;
   fs::create_directories(file.parent_path());
   FileLock lock;
-  if(!lock.acquire(file.parent_path()/"config.lock")) throw std::runtime_error("Preferencias em uso; tamanho da janela nao foi salvo.");
-  auto values=readPreferencesFile(file); const std::string prefix="video."+host+".";
-  values[prefix+"largura"]=std::to_string(std::clamp(width,400,7680));
-  values[prefix+"altura"]=std::to_string(std::clamp(height,240,4320));
-  values[prefix+"tela_cheia"]=fullscreen?"1":"0";
+  if(!lock.acquire(file.parent_path()/"config.lock")) throw std::runtime_error("Preferencias em uso; alteracao nao foi salva.");
+  auto values=readPreferencesFile(file);for(const auto& entry:updates)values[entry.first]=entry.second;
   const fs::path temporary=file.string()+"."+uniqueId()+".tmp";
   try {
     std::ofstream out(temporary,std::ios::binary);
@@ -161,5 +158,12 @@ inline void saveWindowPreferences(const fs::path& file,const std::string& host,i
     fs::rename(temporary,file);
 #endif
   } catch(...) { std::error_code ignored; fs::remove(temporary,ignored); throw; }
+}
+inline void saveVirtualControlsPreference(const fs::path& file,const std::string& host,bool visible) {
+  updatePreferences(file,{{"interface."+host+".controles_virtuais",visible?"1":"0"}});
+}
+inline void saveWindowPreferences(const fs::path& file,const std::string& host,int width,int height,bool fullscreen) {
+  const std::string prefix="video."+host+".";
+  updatePreferences(file,{{prefix+"largura",std::to_string(std::clamp(width,400,7680))},{prefix+"altura",std::to_string(std::clamp(height,240,4320))},{prefix+"tela_cheia",fullscreen?"1":"0"}});
 }
 } // namespace destinia

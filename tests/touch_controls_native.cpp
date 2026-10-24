@@ -29,6 +29,8 @@ int main(int argc,char**argv){
  // Set every original touch rectangle to an isolated location, independent of
  // whether the title screen has already prepared the gameplay button layout.
  for(int key=0;key<14;++key){int16_t rectangle[]={int16_t(10+key*20),10,16,16};wr(main+0xea+8*key,rectangle,sizeof rectangle);}
+ for(bool currentHidden:{hidden,!hidden,hidden}){
+ destinia::setVirtualControlsVisible(!currentHidden);
  for(int gameState:{0,-1,16,17}){
   uint16_t state=static_cast<uint16_t>(gameState==17?16:gameState);wr(game+0x4854,&state,2);wr32(ui+0x7c,gameState==17?0x20000001:0);
   u32 touchState=0;assert(callFn(exportsMap.at("_getTouchState"),{},&touchState));
@@ -37,12 +39,13 @@ int main(int argc,char**argv){
   // key 5 (index 4) belongs to both gameplay and menu touch routing.
   wr32(point,gameState==17?254:94);wr32(point+4,14);u32 key=0;
   assert(callFn(exportsMap.at("getKeyPadIdx"),{point},&key));
-  if(hidden && gameplay) assert(key==0); else assert(key==(gameState==17?13u:5u));
+  if(currentHidden && gameplay) assert(key==0); else assert(key==(gameState==17?13u:5u));
   imageCalls=0;
   assert(callFn(exportsMap.at("MMain_drawTouchButton"),{0}));
-  if(hidden && gameplay) assert(imageCalls==0); else assert(imageCalls>0);
+  if(currentHidden && gameplay) assert(imageCalls==0); else assert(imageCalls>0);
   // Keep the original state-write epilogue, even while drawing is suppressed.
   assert(rd16(main+0xd0)==touchState);
+ }
  }
  // Physical input bypasses touch hit testing; observe entry into the original
  // GameCanvas callbacks, not a replacement input implementation.

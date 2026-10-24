@@ -49,6 +49,16 @@ int main(int argc,char** argv) {
   assert(raw.at("save_dir")=="C:\\partida antiga");
   assert(raw.at("audio.musica")=="35");
   assert(destinia::Preferences::load(config,"host_zoom").fullscreen);
+  destinia::saveVirtualControlsPreference(config,"host",false);
+  destinia::saveVirtualControlsPreference(config,"host_zoom",true);
+  assert(!destinia::Preferences::load(config,"host").virtualControls);
+  assert(destinia::Preferences::load(config,"host_zoom").virtualControls);
+  auto changed=destinia::readPreferencesFile(config);
+  assert(changed.at("save_dir")==raw.at("save_dir") && changed.at("audio.musica")=="35");
+  assert(changed.at("perfil.alternativo.botao.ataque")==raw.at("perfil.alternativo.botao.ataque"));
+  {destinia::FileLock lock;assert(lock.acquire(config.parent_path()/"config.lock"));bool rejected=false;
+   try{destinia::saveVirtualControlsPreference(config,"host",true);}catch(...){rejected=true;}
+   assert(rejected && destinia::readPreferencesFile(config)==changed);}
   std::cerr<<"PREF: configuracao preservada\n";
   for(auto bad:{"interface.host.controles_virtuais=2\n","audio.musica=101\n","video.host.largura=0\n","perfil.padrao.tecla.cima=TeclaInexistente\n",
                 "perfil.padrao.tecla.cima=F11\n","perfil.padrao.tecla.cima=A\n"}) {

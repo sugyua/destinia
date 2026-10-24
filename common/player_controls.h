@@ -10,7 +10,9 @@ class PlayerControls {
   InputState inputs;
   SDL_GameController*& controller;
   std::function<void(int,bool)> key;
-  std::function<void()> save, releaseTouch;
+  std::function<void()> save, releaseTouch,toggleTouch;
+  bool clickDown[2]={false,false},clickPending[2]={false,false},chordUsed=false,chordNeutral=true;
+  void resetChord(){clickDown[0]=clickDown[1]=clickPending[0]=clickPending[1]=false;chordUsed=false;chordNeutral=true;}
   InputDevice lastDevice=InputDevice::Keyboard;
   Action previousLeft=Action::None,previousRight=Action::None;
   bool manualPause=false, disconnectedPause=false, neutralRequired=false;
@@ -41,7 +43,7 @@ class PlayerControls {
 public:
   bool focused=true,accelerating=false,dropNamesHeld=false;
   PlayerControls(const Preferences& p,SDL_GameController*& pad,std::function<void(int,bool)> k,
-                 std::function<void()> s,std::function<void()> touch):preferences(p),controller(pad),key(k),save(s),releaseTouch(touch) {}
+                 std::function<void()> s,std::function<void()> touch,std::function<void()> toggle={}):preferences(p),controller(pad),key(k),save(s),releaseTouch(touch),toggleTouch(toggle) {}
   InputDevice lastInputDevice() const { return lastDevice; }
   bool paused() const { return manualPause || disconnectedPause || (!focused && preferences.pauseUnfocused); }
   SDL_JoystickID controllerId() const { return controller?SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller)):-1; }
@@ -49,9 +51,39 @@ public:
     inputs.releaseAll([&](Action a,bool down){emit(a,down);});
     releaseTouch(); neutralRequired=true;
   }
+  void pollShortcuts() {
+    if(!controller || !focused || !chordNeutral)return;
+    if(!SDL_GameControllerGetButton(controller,SDL_CONTROLLER_BUTTON_LEFTSTICK) && !SDL_GameControllerGetButton(controller,SDL_CONTROLLER_BUTTON_RIGHTSTICK)) {
+      resetChord();chordNeutral=false;
+    }
+  }
+  // Called before Codex routing too. Defer remapped single clicks until release
+  // so their individual action cannot escape before the second click arrives.
+  bool touchShortcut(const SDL_Event& ev) {
+    if((ev.type!=SDL_CONTROLLERBUTTONDOWN && ev.type!=SDL_CONTROLLERBUTTONUP) || !controller || ev.cbutton.which!=controllerId())return false;
+    const int side=ev.cbutton.button==SDL_CONTROLLER_BUTTON_LEFTSTICK?0:ev.cbutton.button==SDL_CONTROLLER_BUTTON_RIGHTSTICK?1:-1;
+    if(side<0)return false;
+    if(!focused){resetChord();return true;}
+    if(chordNeutral){pollShortcuts();return true;}
+    const bool down=ev.type==SDL_CONTROLLERBUTTONDOWN;
+    if(down) {
+      if(clickDown[side])return true;
+      clickDown[side]=clickPending[side]=true;
+      if(clickDown[0] && clickDown[1] && !chordUsed){chordUsed=true;clickPending[0]=clickPending[1]=false;releaseTouch();if(toggleTouch)toggleTouch();}
+    } else {
+      if(clickPending[side] && !chordUsed && !paused()) {
+        auto binding=preferences.buttons.find((SDL_GameControllerButton)ev.cbutton.button);
+        if(binding!=preferences.buttons.end()){input(source(2,ev.cbutton.button),binding->second,true);input(source(2,ev.cbutton.button),binding->second,false);}
+      }
+      clickDown[side]=clickPending[side]=false;
+      if(!clickDown[0] && !clickDown[1])chordUsed=false;
+    }
+    return true;
+  }
   void event(const SDL_Event& ev) {
+    if(touchShortcut(ev))return;
     if(ev.type==SDL_WINDOWEVENT) {
-      if(ev.window.event==SDL_WINDOWEVENT_FOCUS_LOST) { focused=false; release(); }
+      if(ev.window.event==SDL_WINDOWEVENT_FOCUS_LOST) { focused=false; release();resetChord(); }
       else if(ev.window.event==SDL_WINDOWEVENT_FOCUS_GAINED) focused=true;
     } else if(ev.type==SDL_MOUSEBUTTONDOWN || ev.type==SDL_FINGERDOWN) {
       if(focused && !paused())lastDevice=InputDevice::Touch;
@@ -64,9 +96,9 @@ public:
       }
     } else if(ev.type==SDL_CONTROLLERDEVICEADDED && !controller) {
       controller=SDL_GameControllerOpen(ev.cdevice.which);
-      if(controller) { disconnectedPause=false; neutralRequired=true; hostReport("[host] Controle conectado: %s\n",SDL_GameControllerName(controller)); }
+      if(controller) { disconnectedPause=false; neutralRequired=true;resetChord(); hostReport("[host] Controle conectado: %s\n",SDL_GameControllerName(controller)); }
     } else if(ev.type==SDL_CONTROLLERDEVICEREMOVED && controller && ev.cdevice.which==controllerId()) {
-      release(); SDL_GameControllerClose(controller); controller=nullptr;
+      release();resetChord(); SDL_GameControllerClose(controller); controller=nullptr;
       disconnectedPause=preferences.pauseDisconnected;
       hostReport("[host] Controle desconectado; comandos liberados.\n");
     } else if((ev.type==SDL_CONTROLLERBUTTONDOWN || ev.type==SDL_CONTROLLERBUTTONUP) && controller && ev.cbutton.which==controllerId()) {
@@ -78,6 +110,7 @@ public:
     }
   }
   void pollSticks() {
+    pollShortcuts();
     if(!controller || !focused || paused()) return;
     auto left=axis(SDL_GameControllerGetAxis(controller,SDL_CONTROLLER_AXIS_LEFTX),SDL_GameControllerGetAxis(controller,SDL_CONTROLLER_AXIS_LEFTY),false);
     auto right=axis(SDL_GameControllerGetAxis(controller,SDL_CONTROLLER_AXIS_RIGHTX),SDL_GameControllerGetAxis(controller,SDL_CONTROLLER_AXIS_RIGHTY),true);
