@@ -13,7 +13,7 @@
 
 Painel **dentro do jogo**, na aba de equipamentos, mochila e venda do vendedor local. Abra **FILTROS**, **F7** livre ou **X/ação extra** do controle. Filtre por tipo/rank/faixas de nível e preço; ordene por tipo/rank/nível/preço, crescente ou decrescente. Toque ou navegue com as setas; escolha **VOLTAR AO ITEM SELECIONADO** e confirme equipar/vender na tela original. A visualização não reordena os itens e não escolhe outro automaticamente se o selecionado desaparecer.
 
-**Escopo deste lote: equipamentos do contexto/bolsa atual.** Consumíveis e itens de missão permanecem na interface original. No PC, compile os fontes atuais; os ZIPs oficiais0.9 são preservados e não incluem os filtros. [Uso, controles e limites](docs/INVENTARIO_0.9.1.md). A atualização0.9.1 completa ainda não foi lançada.
+**Escopo deste lote: equipamentos do contexto/bolsa atual.** Consumíveis e itens de missão permanecem na interface original. No PC, compile os fontes atuais ou baixe o **artefato de teste** na [CI Windows aprovada](https://github.com/sugyua/destinia/actions/runs/40135459146) (requer login no GitHub; não é uma release nova); os ZIPs oficiais0.9 são preservados e não incluem os filtros. [Uso, controles e limites](docs/INVENTARIO_0.9.1.md). A atualização0.9.1 completa ainda não foi lançada.
 
 ## Novidades da 0.9
 
