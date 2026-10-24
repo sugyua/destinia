@@ -1,9 +1,11 @@
 name: Verificar hosts e pacotes do Destinia
 on:
   workflow_dispatch:
+  pull_request:
+    paths: [.github/workflows/verify-codex-menu.yml, launcher/**, scripts/**, tests/**, host/**, host_zoom/**, common/**, VERSION, release/**]
   push:
     branches: [main]
-    paths: [.github/workflows/verify-codex-menu.yml, common/**, host/**, host_zoom/**, tests/**, scripts/**, VERSION, release/manifest.json]
+    paths: [.github/workflows/verify-codex-menu.yml, common/**, host/**, host_zoom/**, launcher/**, tests/**, scripts/**, VERSION, release/manifest.json]
 permissions:
   contents: read
 concurrency:
@@ -16,6 +18,20 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.2'
+      - name: Compilar inicializadores Windows GUI para a raiz do pacote
+        shell: pwsh
+        run: |
+          $env:GOOS = 'windows'
+          $env:GOARCH = 'amd64'
+          $env:CGO_ENABLED = '0'
+          go build -trimpath -buildvcs=false -ldflags="-s -w -H=windowsgui -X main.hostSubdir=host" -o Destinia.exe ./launcher/main.go
+          if ($LASTEXITCODE -ne 0) { throw "Falha ao compilar Destinia.exe" }
+          go build -trimpath -buildvcs=false -ldflags="-s -w -H=windowsgui -X main.hostSubdir=host_zoom" -o 'Destinia Zoom.exe' ./launcher/main.go
+          if ($LASTEXITCODE -ne 0) { throw "Falha ao compilar Destinia Zoom.exe" }
+          if (!(Test-Path 'Destinia.exe') -or !(Test-Path 'Destinia Zoom.exe')) { throw "Inicializadores ausentes" }
       - uses: msys2/setup-msys2@v2
         with:
           msystem: UCRT64
@@ -67,7 +83,7 @@ jobs:
         run: |
           set -eu
           python scripts/package_release.py --out dist
-          python scripts/package_windows.py --out dist --normal host/build/destinia_host.exe --zoom host_zoom/build/destinia_host.exe
+          python scripts/package_windows.py --out dist --normal host/build/destinia_host.exe --zoom host_zoom/build/destinia_host.exe --launcher-normal Destinia.exe --launcher-zoom 'Destinia Zoom.exe'
       - uses: actions/upload-artifact@v4
         with:
           name: destinia-codex-no-menu-pacotes-de-teste
