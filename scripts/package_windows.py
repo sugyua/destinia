@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pacote Windows x64: somente dois EXEs do port, inicializadores e documentacao."""
+"""Pacote Windows x64: dois launchers GUI na raiz, dois hosts e documentacao."""
 import argparse
 import hashlib
 import os
@@ -23,7 +23,7 @@ def pe64(path):
         raise ValueError('O pacote exige PE Windows x64 (AMD64)')
     return data
 
-def package(root,output,normal,zoom):
+def package(root,output,normal,zoom,launcher_normal=None,launcher_zoom=None):
     root,output=Path(root).resolve(),Path(output).resolve()
     version=(root/'VERSION').read_text().strip()
     if not re.fullmatch(r'\d+\.\d+(?:\.\d+)?',version):raise ValueError('Versao invalida')
@@ -32,6 +32,8 @@ def package(root,output,normal,zoom):
     inputs={name:(root/name).read_bytes() for name in FILES}
     inputs['host/build/destinia_host.exe']=pe64(normal)
     inputs['host_zoom/build/destinia_host.exe']=pe64(zoom)
+    inputs['Destinia.exe']=pe64(launcher_normal or root/'Destinia.exe')
+    inputs['Destinia Zoom.exe']=pe64(launcher_zoom or root/'Destinia Zoom.exe')
     commit=os.environ.get('GITHUB_SHA','compilacao-local')
     if commit!='compilacao-local' and not re.fullmatch(r'[0-9a-f]{40}',commit):raise ValueError('Commit de build invalido')
     inputs['BUILD_INFO.txt']=('Repositorio: https://github.com/sugyua/destinia\nVersao: '+version+' Beta\nCommit de compilacao: '+commit+'\nPlataforma: Windows x64 / MSYS2 UCRT64\nDependencias externas: consulte README.md e INSTALL.md.\n').encode('utf-8')
@@ -40,7 +42,7 @@ def package(root,output,normal,zoom):
         'Instale as dependencias externas listadas em README.md / INSTALL.md.\n'
         'Este pacote nao contem DLLs, instaladores, APK extraido ou saves pessoais.\n'
         'Coloque seus dados originais em game/lib/armeabi/libdestinia_jni.so, game/assets e game/res/raw.\n'
-        'Abra Abrir Destinia.bat ou Abrir Destinia Zoom 800x480.bat. Nao precisa compilar este pacote.\n'
+        'Abra Destinia.exe ou Destinia Zoom.exe na raiz (sem BAT). BATs ficam para diagnostico. Nao precisa compilar.\n'
         'Configurar Destinia.bat ajusta video, audio, pausas e comandos.\n'
         'Progresso compartilhado: LOCALAPPDATA/Destinia/save ou a pasta global configurada.\n'
     ).encode('utf-8')
@@ -59,7 +61,9 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root',type=Path,default=Path(__file__).resolve().parents[1]);parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--normal',type=Path,required=True);parser.add_argument('--zoom',type=Path,required=True)
+    parser.add_argument('--launcher-normal',type=Path,help='Inicializador Destinia.exe compilado')
+    parser.add_argument('--launcher-zoom',type=Path,help='Inicializador Destinia Zoom.exe compilado')
     args=parser.parse_args()
-    try:print(package(args.root,args.out,args.normal,args.zoom))
+    try:print(package(args.root,args.out,args.normal,args.zoom,args.launcher_normal,args.launcher_zoom))
     except (ValueError,OSError) as error:parser.exit(1,str(error)+'\n')
 if __name__=='__main__':main()
