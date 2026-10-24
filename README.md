@@ -270,9 +270,64 @@ Cada classe deve funcionar no modo solo e oferecer sinergias no cooperativo. Dif
 
 Os recursos opcionais terão configurações próprias. Mudanças permanentes de progressão/conteúdo dependem de perfis e saves identificados para os modos clássico e expandido, sem conversão silenciosa. Antes de ampliar o jogo, será verificado o que já existe para melhorar os sistemas atuais. A publicação de cada nova release continuará dependendo da revisão das verificações e da aprovação do autor.
 
+## Complementos ao planejamento — propostas de versões futuras
+
+> Registro do relatório de continuidade de 23/10/2026. **Tudo abaixo é planejamento, não implementação.** Preserva o escopo aprovado da 0.8–0.12. As versões sugeridas dependem de avaliação técnica e não representam datas ou entregas garantidas.
+
+### Códex organizado — complemento sugerido para a 0.9
+
+- [ ] Separar **Monstros comuns** e **Chefes / Bosses**, mantendo cada chefe em uma entrada própria e preservando imagens, descobertas, contador de mortes e informações existentes.
+- [ ] Confirmar nos dados originais a classificação de monstros, minibosses e chefes, com IDs e referências; não classificar somente por nome ou aparência.
+- [ ] Mostrar informações verificadas: região/mapa, combate, variantes e drops. Associar armas exclusivas às entradas correspondentes quando forem implementadas.
+- [ ] Preservar navegação por teclado, mouse e controles virtuais nos dois hosts. A categorização do Códex não altera o comportamento dos monstros.
+
+### Uma arma exclusiva para cada boss — complemento sugerido para a 0.10
+
+- [ ] Planejar **pelo menos uma arma exclusiva para cada chefe confirmado**, com identidade própria, sem substituir equipamentos existentes.
+- [ ] Especificar boss/ID, nome e tipo da arma, classes permitidas, aparência, atributos, efeitos, raridade, obtenção e chance de drop a definir no balanceamento.
+- [ ] Investigar limites de IDs, sprites, atributos, classes e persistência antes de criar itens; não presumir bosses, efeitos ou animações inexistentes.
+- [ ] Exibir a arma e suas condições entre as recompensas possíveis do boss no Códex; avaliar integração posterior com Boss Rush e conquistas.
+- [ ] Priorizar o modo expandido, preservando o clássico e saves antigos. Testar drop, inventário, equipamento e salvar/carregar nos dois hosts.
+
+### Prioridade específica da web — progresso persistente no iPhone
+
+- [ ] Investigar salvamento e carregamento persistentes, usando IndexedDB ou solução apropriada, incluindo progresso do personagem e Códex.
+- [ ] Oferecer exportação/importação de saves e verificar recuperação após fechar/reabrir o Safari, com testes em iPhone físico.
+- [ ] Tratar como trabalho próprio da web, sem aguardar expansões de conteúdo e sem versão fixa atribuída. **Hoje o progresso publicado continua temporário; lembrar preferências não equivale a salvar a partida.**
+
+### Sequência adicional proposta — 0.13 a 0.30
+
+A tabela organiza as sugestões do relatório; **a viabilidade e as versões ainda não estão confirmadas**. Não cancela metas anteriores nem aumenta o escopo da 0.8 em andamento.
+
+| Versão sugerida | Atualização futura |
+| --- | --- |
+| 0.13 | Conquistas e troféus, incluindo possíveis objetivos relacionados a bosses |
+| 0.14 | Painel de diagnóstico F12 e testes avançados do host/Unicorn |
+| 0.15 | Ficha de atributos secundários verificáveis |
+| 0.16 | Desmontagem em massa e Auto-Salvage com proteção de itens |
+| 0.17 | Loadouts de equipamentos e habilidades |
+| 0.18 | Segredos e easter eggs |
+| 0.19 | Mercador viajante |
+| 0.20 | Eventos de emboscada |
+| 0.21 | Altares de sacrifício e oferendas |
+| 0.22 | Encantamentos elementais e efeitos compatíveis |
+| 0.23 | Modificadores de masmorra |
+| 0.24 | Defesa de ponto contra ondas de inimigos |
+| 0.25 | Modo Hardcore opcional e isolado |
+| 0.26 | Sistema de Legado / talentos de conta |
+| 0.27 | Paladino e investigação do Berserker |
+| 0.28 | Mago |
+| 0.29 | Monge |
+| 0.30 | Consolidação da preparação para o cooperativo |
+| 1.0 | Cooperativo pela internet e LAN, já previsto no planejamento principal |
+
+A pesquisa do cooperativo deve começar **antes da 0.30**. A linha 0.27 é uma proposta posterior de entrega de classes; não elimina a possibilidade de uma prévia condicional do Paladino na 0.10 já registrada acima. Berserker exige distinguir sua evolução original de uma nova classe-base independente.
+
+**Após a 1.0, provisoriamente:** Necromante, Druida, Engenheiro, Granadeiro e possível Berserker como classe-base independente. Permanecem as definições do autor: Necromante com foice e Granadeiro com granadas. Não há nova classe entregue ou mudança de saves por este registro.
+
 ## Novas ideias propostas pelo autor — avaliação técnica pendente
 
-> **Banco de propostas (23/10/2026).** As ideias abaixo foram registradas pelo autor, mas **ainda não passaram pela análise técnica e pelo planejamento de versões do Codex**. Não são funcionalidades implementadas, não integram a contagem das melhorias já aprovadas e **não estão atribuídas às versões 0.8, 0.9, 0.10, 0.11, 0.12 ou 1.0**. Exemplos de atributos, porcentagens e recompensas são ilustrativos, não decisões de balanceamento. Antes de marcar qualquer item como viável, verificar recursos originais, possíveis conflitos com o roadmap, compatibilidade com o modo clássico e saves, custo técnico e testes necessários.
+> **Banco de propostas (23/10/2026).** As ideias abaixo foram registradas pelo autor, mas **ainda não passaram pela análise técnica e pelo planejamento de versões do Codex**. Não são funcionalidades implementadas, não integram a contagem das melhorias já aprovadas e **não possuem versão de entrega confirmada**; a sequência adicional acima é apenas uma proposta. Exemplos de atributos, porcentagens e recompensas são ilustrativos, não decisões de balanceamento. Antes de marcar qualquer item como viável, verificar recursos originais, possíveis conflitos com o roadmap, compatibilidade com o modo clássico e saves, custo técnico e testes necessários.
 
 ### Engenharia, diagnóstico e desempenho
 
