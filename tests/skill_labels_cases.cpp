@@ -35,7 +35,7 @@ int main() {
  event={};event.type=SDL_KEYDOWN;event.key.keysym.sym=SDLK_F1;controls.event(event);
  assert(controls.lastInputDevice()==InputDevice::Touch);
  // Exercise SDL's virtual controller, including the actual right-stick route.
- assert(SDL_Init(SDL_INIT_GAMECONTROLLER)==0);
+ SDL_SetMainReady();assert(SDL_Init(SDL_INIT_GAMECONTROLLER)==0);
  const int index=SDL_JoystickAttachVirtual(SDL_JOYSTICK_TYPE_GAMECONTROLLER,6,16,0);
  assert(index>=0);pad=SDL_GameControllerOpen(index);assert(pad);
  event={};event.type=SDL_CONTROLLERBUTTONDOWN;event.cbutton.which=controls.controllerId();event.cbutton.button=SDL_CONTROLLER_BUTTON_LEFTSHOULDER;

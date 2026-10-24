@@ -3,7 +3,8 @@ import os,pathlib,shlex,subprocess,tempfile,unittest
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 class TextLabelsTests(unittest.TestCase):
  def test_binding_labels_and_accent_pixels(self):
-  flags=shlex.split(subprocess.check_output(['pkg-config','--cflags','--libs','sdl2'],text=True))
+  # MinGW SDL pkg-config renames main for GUI apps; these are console fixtures.
+  flags=[flag for flag in shlex.split(subprocess.check_output(['pkg-config','--cflags','--libs','sdl2'],text=True)) if flag!='-Dmain=SDL_main']
   with tempfile.TemporaryDirectory(prefix='destinia labels ') as folder:
    for name in ('skill_labels_cases','overlay_font_cases','portuguese_text_cases'):
     binary=pathlib.Path(folder)/name
