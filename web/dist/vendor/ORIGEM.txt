@@ -1,0 +1,4 @@
+Unicorn.js ARM 2.1.4, WASM original; ponte JS modificada conforme BRIDGE-PATCH.txt.
+Pacote: https://registry.npmjs.org/@alexaltea/unicorn-js/-/unicorn-js-2.1.4.tgz
+Fontes e compilacao: https://github.com/AlexAltea/unicorn.js
+Licenca: GPL-2.0, UNICORN-LICENSE.txt.

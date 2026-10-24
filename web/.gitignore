@@ -1,0 +1,5 @@
+dist/game/
+node_modules/
+__pycache__/
+*.pyc
+reports/

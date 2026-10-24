@@ -1,0 +1,55 @@
+name: Publicar Destinia 0.9.1 Beta
+on:
+  workflow_dispatch:
+    inputs:
+      verified_run:
+        description: Run Windows aprovado para este mesmo commit
+        required: true
+        type: string
+permissions:
+  actions: read
+  contents: write
+concurrency:
+  group: release-091
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exigir CI aprovada na revisao exata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERIFIED_RUN: ${{ inputs.verified_run }}
+        run: |
+          set -eu
+          test "$(gh api repos/$GITHUB_REPOSITORY/actions/runs/$VERIFIED_RUN --jq '.conclusion')" = success
+          test "$(gh api repos/$GITHUB_REPOSITORY/actions/runs/$VERIFIED_RUN --jq '.head_sha')" = "$GITHUB_SHA"
+          test "$(gh api repos/$GITHUB_REPOSITORY/actions/runs/$VERIFIED_RUN --jq '.path')" = .github/workflows/verify-codex-menu.yml
+      - uses: actions/download-artifact@v4
+        with:
+          name: destinia-codex-no-menu-pacotes-de-teste
+          run-id: ${{ inputs.verified_run }}
+          github-token: ${{ github.token }}
+          path: verified
+      - name: Verificar ZIPs checksums e origem dos EXEs
+        run: |
+          python - <<'PY'
+          import hashlib,os,pathlib,zipfile
+          root=pathlib.Path('verified');archives=sorted(root.glob('*.zip'));assert len(archives)==2
+          for archive in archives:
+              assert archive.name.startswith('destinia-0.9.1-beta-')
+              assert hashlib.sha256(archive.read_bytes()).hexdigest()==pathlib.Path(str(archive)+'.sha256').read_text().split()[0]
+              with zipfile.ZipFile(archive) as z:
+                  assert z.testzip() is None
+                  assert not any('/game/' in n or n.lower().endswith('.dll') for n in z.namelist())
+                  if 'windows-x64' in archive.name:
+                      assert os.environ['GITHUB_SHA'] in z.read('destinia-0.9.1-beta/BUILD_INFO.txt').decode()
+                      for host in ('host','host_zoom'):
+                          assert z.read(f'destinia-0.9.1-beta/{host}/build/destinia_host.exe')[:2]==b'MZ'
+          assert len(list(root.iterdir()))==4
+          PY
+      - name: Publicar lote autorizado preservando releases anteriores
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create v0.9.1-beta verified/* --target "$GITHUB_SHA" --title 'Destinia 0.9.1 Beta — Codex integrado e filtros' --notes-file release/NOTAS_0.9.1.md --prerelease

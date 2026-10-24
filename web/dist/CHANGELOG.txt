@@ -1,0 +1,86 @@
+AVISO: jogo em versão Beta, sujeito a bugs e funcionalidades incompletas.
+
+0.9.1 Beta — Códex nativo e inventário — 24/10/2026:
+- Códex na décima aba da barra, preservando nove abas originais, com moldura/fonte/ícones ARM.
+- Grade de monstros, retratos frontais completos, contador e detalhes separados por categoria preservados.
+- Toque, teclado e gamepad; SAIR/INFO e navegação entre abas. Cache evita redesenho ARM parado.
+- Web somente100%, sem seletor75/125 e sem reaplicar preferência antiga de escala.
+- Filtros de equipamentos: tipo/rank/faixas nível/preço, ordenação e seleção nativa revalidada.
+- Sem novas armas, classes, persistência web ou otimização térmica nesta atualização.
+
+Prévia da 0.8 — controles opcionais — 23/10/2026:
+- Mostrar/ocultar botões dentro da imagem; hitboxes desativadas na partida.
+- Menus, teclado e painel externo de toque preservados.
+- Preferência lembrada no navegador; saves e Códex continuam temporários.
+- Zoom, escala do HUD e ritmo originais mantidos. 0.8 completa ainda em preparação.
+
+Categorias separadas nos detalhes do Códex — 22/10/2026:
+- Página 1: Drops; página 2: Locais de spawn; página 3: Variantes. Cada página mostra somente sua categoria.
+- Listas longas têm subpáginas próprias, com SUBIR/DESCER ou cima/baixo. ANTERIOR/PROXIMA, esquerda/direita e AÇÃO mudam a categoria.
+- Retrato frontal, HP máximo, nível e contador permanecem no cabeçalho. Voltar conserva a seleção na grade.
+- Preservados contagem de mortes, dados originais, pausa e ocultação de monstros desconhecidos. Progresso segue temporário na sessão.
+
+Contagem de derrotas e detalhes do monstro — 22/10/2026:
+- Corrigidas mortes comuns não contadas: a rotina original avisa a derrota antes de marcar o estado 2. Contagem exige HP esgotado e mantém a proteção contra cadáveres repetidos.
+- Regressão com o mapa original Dungeon Prison -4 e dois Imperial Soldiers derrotados pelo fluxo ARM de procMonster, sem chamar o callback de contagem diretamente.
+- AÇÃO/ataque na seleção do Códex abre janela interna com figura frontal, HP máximo real observado, nível, locais e tipos de drops possíveis.
+- Paginação e retorno à mesma seleção; partida continua suspensa e desconhecidos mantêm os dados ocultos.
+- Leitura verificada de 172 mapas, 59 scripts e tabelas originais de monstros/itens. Mapas sem posicionamentos reais não são anunciados como locais da espécie.
+- HP varia por nível/dificuldade/elite; drops de missão são condicionais e chefes/elites respeitam seu ramo de equipamentos. Locais especiais não mapeados são indicados explicitamente.
+- Dados e encontros continuam somente na sessão. Mortes antigas não registradas não podem ser reconstruídas. Safari/iPhone físico permanece pendente.
+
+Códex em grade e otimização web — 22/10/2026:
+- Grade 8×4, 73 espécies em três páginas. Desconhecidos mostram ? sem revelar nome/imagem/status.
+- Seleção por toque/setas; abaixo: nome ou ??????, ENCONTRADO ou ??????? e contador MORTOS.
+- Poses frontais originais dos monstros comuns; chefes mantêm a pose original adequada. Corpo inteiro reduzido proporcionalmente.
+- Descobertas, contadores por personagem, pausa da consulta e menu Craft/Pets preservados.
+- Meta de 16 FPS com esperas nativas respeitadas e FPS medidos no rodapé.
+- Reduzida emulação dos laços de sprites, tiles, iluminação e preenchimento. ARM mantém lógica, clipping e efeitos não acelerados; verificações de opcodes e fallback para casos incompatíveis.
+- Leitura de memória em bloco pela ponte JS do Unicorn, com WASM original e licença preservados.
+- Testes de pixels contra as rotinas ARM originais, transparência/cores, recortes, efeitos e variáveis auxiliares.
+- Comparação na mesma cena ARM: mediana 267→58 ms/quadro e imagem final idêntica na primeira etapa da otimização. Teste de entrega no Chromium com os efeitos adicionais: aproximadamente 14 FPS na cena de introdução; a meta 16 ainda depende do dispositivo/cena.
+- Progresso continua só na sessão; sem áudio. Safari/iPhone físico e campanha completa permanecem pendentes.
+
+Correção das miniaturas após a 0.7 — 21/10/2026:
+- Corrigidos os deslocamentos das partes: corpo e arma permanecem unidos na figura do monstro, inclusive Imperial Soldier.
+- Corrigida a ordem RGB da paleta para preservar as cores originais.
+- Comparação pixel a pixel com drawAGDImageT da biblioteca ARM original para seis espécies e chefes; testes dos 73 IDs mantidos.
+- Registro de descobertas, contadores e progresso da sessão preservados. Safari/iPhone físico ainda pendente.
+
+Após a 0.7 — miniaturas no Códex:
+- Figura original do monstro ao lado do nome, estado e contador, dentro do jogo.
+- Montagem das partes dos sprites/poses originais, incluindo variantes e chefes, sem sombras/efeitos externos.
+- Quatro monstros por página; ANTERIOR/PROXIMA por toque.
+- Arquivos ausentes/incompatíveis mostram ?, preservando a consulta; dados de jogo e Códex continuam apenas na sessão.
+- Testes de arquivos originais, cores, transparência, paginação e preservação da memória ARM. Safari/iPhone físico pendente.
+
+Correção do acesso ao Códex após a 0.7 (21/10/2026)
+- Menu do jogo → livro CODEX junto aos ícones de Craft/Pets.
+- Painel e contadores dentro da imagem do jogo, com VOLTAR e paginação.
+- Removidos botão e diálogo externos do site; partida suspensa durante a consulta.
+- Progresso e Códex seguem somente na memória da sessão; não compartilha saves Windows.
+
+AVISO: Destinia está em versão Beta e pode apresentar diversos bugs.
+
+0.7 Web Beta — 21/10/2026
+- Corrigida pausa quando o Códex é aberto durante o carregamento; estado de pausa reiniciado corretamente.
+- Botão Códex no topo, acessível antes ou depois de iniciar.
+- Bestiário com nomes originais, espécies vistas/derrotadas e contador de mortes por espécie.
+- Observação das rotinas ARM de desenho e confirmação de derrota; proteção contra contagem repetida da mesma morte.
+- Pausa durante a consulta, retomada respeitando a pausa anterior e layout para retrato/paisagem.
+- Sem histórico retroativo. Jogo e Códex continuam na memória da sessão; recarregar ou fechar apaga os registros. Sem áudio ou recursos online.
+- Testes Node e Chromium com fixture ARM; Safari/iPhone físico e campanha completa ainda pendentes.
+
+AVISO: teste Web experimental em Beta; pode apresentar bugs ou lentidao.
+
+21/10/2026 - primeiro prototipo para navegador
+- Biblioteca ARM original executada no cliente com Unicorn.js / WebAssembly.
+- Imagem original 400x240, com pagina adaptada a retrato e horizontal.
+- Toque na imagem, teclado e controles multitoque fora da area do jogo.
+- Toques rapidos mantidos por pelo menos um quadro para o jogo recebe-los.
+- Pausa/retomada e liberacao de comandos ao perder o foco.
+- Save somente na memoria da aba; reiniciar/recarregar/fechar descarta progresso.
+- Sem audio nesta primeira versao; compras e rede nao suportadas.
+- Projeto e hospedagem privados, separados do port Windows 0.6.
+- Testes ARM, arquivos temporarios, controles e navegador Chromium realizados.
+  Safari no iPhone real ainda precisa de confirmacao do autor.

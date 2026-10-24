@@ -1,6 +1,7 @@
 // Included by both hosts after their ARM helpers and ELF exports are declared.
 #include "codex.h"
 #include "codex_ui.h"
+#include "codex_native_layout.h"
 static destinia::Codex codex;
 static bool codexAvailable=false,codexWritable=true,codexOpen=false;
 static size_t codexPage=0,codexSelection=0;
@@ -131,28 +132,27 @@ static bool codexMenuKey(int key,bool down) {
  return false;
 }
 static bool codexMenuTouch(int x,int y,int phase) {
- const auto point=destinia::codexTransform(SCREEN_W,SCREEN_H,preferences.uiScale,codexOpen).inverse(x,y);x=point.first;y=point.second;
+ const auto point=destinia::nativeCodexTransform(SCREEN_W,SCREEN_H,preferences.uiScale).inverse(x,y);x=point.first;y=point.second;
  if(codexTouchCaptured && phase!=0){if(phase==1)codexTouchCaptured=false;return true;}
+ if(phase==0 && (codexOpen || codexMenuVisible())) {const int tab=destinia::nativeCodexTab(x,y,SCREEN_W,SCREEN_H);if(tab>=0){codexTouchCaptured=true;if(tab==9)codexEnterMenu();else{codexOpen=codexDetailsOpen=codexTabSelected=false;codexFlush();auto ui=exportsMap.at("GameUI");for(int n=0;int(rd32(ui+0x7c)>>28)!=tab&&n<9;++n)if(!callFn(exportsMap.at("MainMenu_mKeyPressed"),{7}))break;}return true;}}
  if(codexOpen) {
   if(phase==0) {
    codexTouchCaptured=true;
    if(codexDetailsOpen){
-    if(destinia::codexBack(SCREEN_W,SCREEN_H).contains(x,y))codexDetailsOpen=false;
-    else if(destinia::codexPrevious(SCREEN_W,SCREEN_H).contains(x,y))codexChangeDetailPage(-1);
-    else if(destinia::codexNext(SCREEN_W,SCREEN_H).contains(x,y))codexChangeDetailPage(1);
-    else if(destinia::codexDetailUp(SCREEN_W,SCREEN_H).contains(x,y))codexScrollDetails(-1);
-    else if(destinia::codexDetailDown(SCREEN_W,SCREEN_H).contains(x,y))codexScrollDetails(1);
+    if(destinia::nativeCodexBack(SCREEN_W,SCREEN_H).contains(x,y))codexDetailsOpen=false;
+    else if(destinia::nativeCodexPrevious(SCREEN_W,SCREEN_H).contains(x,y))codexChangeDetailPage(-1);
+    else if(destinia::nativeCodexNext(SCREEN_W,SCREEN_H).contains(x,y))codexChangeDetailPage(1);
+    else if(destinia::nativeCodexUp(SCREEN_W,SCREEN_H).contains(x,y))codexScrollDetails(-1);
+    else if(destinia::nativeCodexDown(SCREEN_W,SCREEN_H).contains(x,y))codexScrollDetails(1);
     return true;
    }
-   if(destinia::codexBack(SCREEN_W,SCREEN_H).contains(x,y)){codexOpen=false;codexTabSelected=true;codexFlush();}
-   else if(destinia::codexPrevious(SCREEN_W,SCREEN_H).contains(x,y))codexChangePage(-1);
-   else if(destinia::codexNext(SCREEN_W,SCREEN_H).contains(x,y))codexChangePage(1);
-   else {const int index=destinia::codexHitTest(x,y,codex.names.size(),codexPage,SCREEN_W,SCREEN_H);if(index>=0)codexSelection=size_t(index);}
+   if(destinia::nativeCodexBack(SCREEN_W,SCREEN_H).contains(x,y)){codexOpen=false;codexTabSelected=true;codexFlush();}
+   else if(destinia::nativeCodexPrevious(SCREEN_W,SCREEN_H).contains(x,y))codexChangePage(-1);
+   else if(destinia::nativeCodexNext(SCREEN_W,SCREEN_H).contains(x,y))codexChangePage(1);
+   else if(destinia::nativeCodexInfo(SCREEN_W,SCREEN_H).contains(x,y))codexEnterDetails();
+   else {const int index=destinia::nativeCodexHit(x,y,codex.names.size(),codexPage,SCREEN_W,SCREEN_H);if(index>=0)codexSelection=size_t(index);}
   }
   return true;
- }
- if(phase==0 && codexMenuVisible() && destinia::codexMenuButton(SCREEN_W,SCREEN_H).contains(x,y)) {
-  codexEnterMenu();codexTouchCaptured=true;return true;
  }
  if(phase==0){codexTabSelected=false;codexNativeTouchDown=true;}
  if(phase==1)codexNativeTouchDown=false;

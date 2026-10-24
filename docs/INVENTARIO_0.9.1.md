@@ -1,6 +1,6 @@
 # Filtros de equipamentos — desenvolvimento0.9.1
 
-Painel interno implementado nos dois hosts e no protótipo web. Os ZIPs da Release0.9 continuam preservados e não incluem este lote; no PC, compile os fontes atuais ou use o artefato da CI indicado no README. A0.9.1 completa ainda está em preparação.
+Painel interno implementado nos dois hosts e no protótipo web. Os ZIPs da Release0.9 continuam preservados e não incluem este lote; os filtros de equipamentos acompanham o ZIP Windows0.9.1. Demais pendências do roadmap continuam abertas.
 
 ## Uso
 

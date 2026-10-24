@@ -36,9 +36,9 @@ int main(int argc,char** argv) {
  if(!codexMenuKey(5,true) || !codexMenuKey(17,true) || !codexOpen)return 47;
  if(rd16(exportsMap.at("MMain")+0x390c))return 48;
  codexMenuTouch(200,100,1);codexMenuKey(10,true);codexMenuKey(7,true);
- const u32 state=rd32(ui+0x7c);auto button=destinia::codexMenuButton(SCREEN_W,SCREEN_H);
- if(!codexMenuTouch(button.x+30,button.y+12,0) || !codexOpen)return 33;
- if(!codexMenuTouch(button.x+30,button.y+12,1))return 34;
+ const u32 state=rd32(ui+0x7c);auto button=destinia::nativeCodexRect(285,0,23,24,SCREEN_W,SCREEN_H);
+ if(!codexMenuTouch(button.x+10,button.y+12,0) || !codexOpen)return 33;
+ if(!codexMenuTouch(button.x+10,button.y+12,1))return 34;
  if(!codexMenuKey(10,true) || codexOpen || !codexTabSelected || rd32(ui+0x7c)!=state)return 35;
  if(!codexMenuKey(7,true) || codexTabSelected)return 44;
  // The first/last native tabs link to the added book without any invalid ARM ID.
@@ -66,10 +66,10 @@ int main(int argc,char** argv) {
  codexPage=codexSelection=0;codexOpen=true;
  if(!codexMenuKey(7,true) || codexSelection!=1 || !codexMenuKey(9,true) || codexSelection!=9)return 58;
  if(!codexMenuKey(5,true) || codexSelection!=8 || !codexMenuKey(3,true) || codexSelection!=0)return 59;
- auto pick=destinia::codexCell(18,SCREEN_W,SCREEN_H);if(!codexMenuTouch(pick.x+10,pick.y+10,0) || codexSelection!=18 || !codexMenuTouch(pick.x+10,pick.y+10,1))return 60;
- auto next=destinia::codexNext(SCREEN_W,SCREEN_H);if(!codexMenuTouch(next.x+10,next.y+10,0) || codexPage!=1 || codexSelection!=50 || !codexMenuTouch(next.x+10,next.y+10,1))return 61;
+ auto pick=destinia::nativeCodexCell(18,SCREEN_W,SCREEN_H);if(!codexMenuTouch(pick.x+10,pick.y+10,0) || codexSelection!=18 || !codexMenuTouch(pick.x+10,pick.y+10,1))return 60;
+ auto next=destinia::nativeCodexNext(SCREEN_W,SCREEN_H);if(!codexMenuTouch(next.x+10,next.y+10,0) || codexPage!=1 || codexSelection!=50 || !codexMenuTouch(next.x+10,next.y+10,1))return 61;
  // The detail bar is not a pagination control and does not leak to original touch.
- auto details=destinia::codexDetails(SCREEN_W,SCREEN_H);if(!codexMenuTouch(details.x+10,details.y+10,0) || codexPage!=1 || codexSelection!=50 || !codexMenuTouch(details.x+10,details.y+10,1))return 62;
+ auto details=destinia::nativeCodexRect(92,160,140,40,SCREEN_W,SCREEN_H);if(!codexMenuTouch(details.x+10,details.y+10,0) || codexPage!=1 || codexSelection!=50 || !codexMenuTouch(details.x+10,details.y+10,1))return 62;
  rd(game,gameAfter.data(),gameAfter.size());if(gameBefore!=gameAfter || codex.entries[0].size()!=progress[0].size() || codex.entries[0][1].kills!=progress[0][1].kills)return 55;
  // Slot with only the last species opens its actual catalog page, not a compressed list.
  codex.select(2);codex.observe(12000,109,false);wr32(game+0x4886,2);codexEnterMenu();if(codexSelection!=72 || codexPage!=2)return 63;
@@ -88,12 +88,12 @@ int main(int argc,char** argv) {
  // The selected unknown species must remain undiscovered after opening info.
  codexSelection=20;codexMenuKey(6,true);if(!codexDetailsOpen || codex.entries[0].count(21))return 77;
  codexMenuKey(10,true);codexSelection=0;codexMenuKey(17,true);
- auto previous=destinia::codexPrevious(SCREEN_W,SCREEN_H);next=destinia::codexNext(SCREEN_W,SCREEN_H);
+ auto previous=destinia::nativeCodexPrevious(SCREEN_W,SCREEN_H);next=destinia::nativeCodexNext(SCREEN_W,SCREEN_H);
  auto tap=[&](destinia::CodexRect r){codexMenuTouch(r.x+5,r.y+5,0);codexMenuTouch(r.x+5,r.y+5,1);};
  tap(next);if(codexDetailPage!=1)return 78;tap(previous);if(codexDetailPage!=0)return 79;
- tap(destinia::codexDetailDown(SCREEN_W,SCREEN_H));if(codexDetailScroll!=1)return 80;
- tap(destinia::codexDetailUp(SCREEN_W,SCREEN_H));if(codexDetailScroll!=0)return 81;
- tap(destinia::codexBack(SCREEN_W,SCREEN_H));if(codexDetailsOpen || !codexOpen)return 82;
+ tap(destinia::nativeCodexDown(SCREEN_W,SCREEN_H));if(codexDetailScroll!=1)return 80;
+ tap(destinia::nativeCodexUp(SCREEN_W,SCREEN_H));if(codexDetailScroll!=0)return 81;
+ tap(destinia::nativeCodexBack(SCREEN_W,SCREEN_H));if(codexDetailsOpen || !codexOpen)return 82;
  if(codex.entries[0].at(1).kills!=beforeDetails)return 83;
  // Facts are read only when an actual monster is observed, separately per slot.
  codexOpen=false;codexTabSelected=false;shortAt(8,61);shortAt(0x10,2);shortAt(0x12,1);shortAt(0x1a,50);shortAt(0x1c,50);wr32(p+0x20,170);wr32(p+0x24,170);wr32(p+0x4c,0);wr32(game+0x4878,0);
@@ -103,5 +103,16 @@ int main(int argc,char** argv) {
  if(codexDetailInfo.hp.find("170")==std::string::npos || codexDetailInfo.hp.find("2")==std::string::npos)return 85;
  if(!codexFacts[0].count(61) || codexFacts[1].count(61))return 86;
  codexMenuKey(10,true);codexMenuKey(10,true);
+ // Real original skin/font rendering on both hosts, independent of pure legacy raster tests.
+ if(!callFn(exportsMap.at("GameCanvas_init"),{exportsMap.at("GameCanvas")}))return 90;
+ if(!callFn(exportsMap.at("openMainmenu"),{0}))return 91;
+ uint16_t nativeAnim=16;wr(ui+0x76,&nativeAnim,2);codexEnterMenu();
+ std::vector<std::pair<u32,size_t>> ranges={{game,32056},{ui,12088},{exportsMap.at("MMain"),14632},{exportsMap.at("Grp"),124},{exportsMap.at("frameBuffer"),20}};
+ std::vector<std::vector<uint8_t>> snapshots;for(auto item:ranges){snapshots.emplace_back(item.second);rd(item.first,snapshots.back().data(),item.second);}
+ std::vector<uint8_t> nativeFrame(FB_BYTES+16,0xab);nativeCodexPainter.paint(nativeFrame.data());if(const char* capture=std::getenv("DESTINIA_CODEX_CAPTURE"))writeBmp(std::string(capture)+std::to_string(SCREEN_W)+".bmp",nativeFrame.data());auto nativeFirst=nativeFrame;nativeCodexPainter.paint(nativeFrame.data());if(nativeFirst!=nativeFrame)return 92;
+ for(int scale:{75,100,125}){const int previousScale=preferences.uiScale;preferences.uiScale=scale;nativeCodexPainter.paint(nativeFrame.data());preferences.uiScale=previousScale;}codexEnterDetails();nativeCodexPainter.paint(nativeFrame.data());for(size_t i=0;i<ranges.size();i++){std::vector<uint8_t> check(ranges[i].second);rd(ranges[i].first,check.data(),check.size());if(check!=snapshots[i])return 93;}
+ for(auto i=nativeFrame.end()-16;i!=nativeFrame.end();++i)if(*i!=0xab)return 94;
+ for(int tab=0;tab<9;tab++){auto rect=destinia::nativeCodexRect(88+22*tab,12,1,1,SCREEN_W,SCREEN_H);codexMenuTouch(rect.x,rect.y,0);codexMenuTouch(rect.x,rect.y,1);if(rd32(ui+0x7c)>>28!=u32(tab))return 95;}
+ auto book=destinia::nativeCodexRect(297,12,1,1,SCREEN_W,SCREEN_H);codexMenuTouch(book.x,book.y,0);codexMenuTouch(book.x,book.y,1);if(!codexOpen)return 96;
  std::puts("CODEX_ARM_OK");uc_close(uc);uc=nullptr;return 0;
 }

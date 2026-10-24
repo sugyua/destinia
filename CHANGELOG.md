@@ -4,6 +4,14 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.9.1 Beta — Códex integrado e filtros — 24/10/2026
+
+- Códex como décima aba da barra original nos dois hosts PC e na web; moldura, fonte e ícones desenhados pelas rotinas ARM do jogo. Nove abas originais preservadas.
+- Grade8×4, retratos frontais, contador por espécie, INFO/ação e páginas de drops/locais/variantes preservados; toque, teclado e controle. Cache evita redesenhar o menu ARM quando nada mudou.
+- Web fixada em100%: seletor75/125 removido, preferência antiga ignorada sem apagar outros dados. Configuração PC independente.
+- Filtros de equipamentos do contexto/bolsa por tipo/rank/faixas nível/preço e ordenação; identidade revalidada, retorno nativo, sem confirmação automática de equipar/vender. Painel de filtros ainda tem seu visual próprio.
+- Não inclui armas/classes novas, favoritos/proteções/automações/reset, persistência web nem otimização térmica. Saves, modos, BAT pessoal e releases anteriores preservados. Teste físico Windows/iPhone permanece necessário.
+
 ## 0.9.1 — em desenvolvimento: equipamentos
 
 - Painel interno de filtros nos dois hosts/web, por tipo/rank/faixas de nível e preço; ordenação original/tipo/rank/nível/preço e direção.

@@ -1,0 +1,92 @@
+import {TouchVisibility,toggleFullscreen} from './display.mjs';
+import {WebGamepad} from './gamepad.mjs';
+import {preferredLanguage} from './language.mjs';
+import {mapPoint,InputSources} from './input.mjs';
+const $=id=>document.getElementById(id),canvas=$('game'),context=canvas.getContext('2d',{alpha:false}),image=context.createImageData(400,240);
+let worker=null,ready=false,paused=false,surfacePointer=null,lastPoint={x:0,y:0},lastFrame=0,loadTimer=null,fpsFrames=0,fpsStart=0;
+let language="pt";try{language=preferredLanguage(localStorage.getItem("destinia.language"));}catch{}$("language").value=language;
+const uiScale=100; // Web usa apenas a escala nativa; ignora preferencia antiga sem apagar outros dados.
+let gameMode="classico";try{if(localStorage.getItem("destinia.gameMode")==="expandido")gameMode="expandido";}catch{}
+$("game-mode").value=gameMode;
+let gamepad=null,pageFocused=document.hasFocus();
+let virtualControls=true,storeWasPaused=false,storeOpen=false;
+try{virtualControls=localStorage.getItem('destinia.virtualControls')!=='0';}catch{}
+const touchVisibility=new TouchVisibility(virtualControls);
+function updateVirtualControls(){const button=$('virtual-controls');button.textContent=virtualControls?'Ocultar botões do jogo':'Mostrar botões do jogo';button.setAttribute('aria-pressed',String(!virtualControls));}
+updateVirtualControls();
+const send=message=>{if(worker)worker.postMessage(message);};
+const sources=new InputSources((key,down)=>send({type:'key',key,down}));
+const dropSources=new Set();
+function dropSource(source,on){if(on)dropSources.add(source);else dropSources.delete(source);const enabled=dropSources.size>0;$('drop-names').setAttribute('aria-pressed',String(enabled));send({type:'dropNames',enabled});}
+$('drop-names').addEventListener('click',()=>{if(ready&&!paused)dropSource('button',!dropSources.has('button'));});
+window.addEventListener('keydown',event=>{if(ready&&!paused&&!event.repeat&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&event.key.toLowerCase()==='v'){event.preventDefault();dropSource('keyboard',true);}});
+window.addEventListener('keyup',event=>{if(event.key.toLowerCase()==='v')dropSource('keyboard',false);});
+function applyTouchVisibility(){
+ $('controls').hidden=!ready||!touchVisibility.siteVisible;
+ document.body.classList.toggle('controller-mode',touchVisibility.controller);
+ $('virtual-controls').disabled=!ready||touchVisibility.controller;
+ if(ready)send({type:'virtualControls',visible:touchVisibility.gameVisible,preserveKeys:true});
+}
+function autoHideTouch(){if(touchVisibility.controller)return;
+ for(const id of Array.from(sources.sources.keys()))if(id.startsWith('pointer:'))sources.release(id);
+ document.querySelectorAll('[data-key]').forEach(b=>b.classList.remove('active'));
+ if(surfacePointer!==null){send({type:'touch',...lastPoint,phase:1});surfacePointer=null;}
+ touchVisibility.useGamepad();applyTouchVisibility();
+}
+function release(){gamepad?.suspend();dropSources.clear();dropSource('keyboard',false);sources.clear();document.querySelectorAll('[data-key]').forEach(b=>b.classList.remove('active'));if(surfacePointer!==null){send({type:'touch',...lastPoint,phase:1});surfacePointer=null;}}
+function showError(message){ready=false;release();$('loading').hidden=true;$('error').hidden=false;$('error-text').textContent=message;$('status').textContent='O teste parou. Toque em Reiniciar para tentar novamente.';$('restart').disabled=false;$('pause').disabled=true;$('virtual-controls').disabled=true;$('drop-names').disabled=true;}
+function setPaused(value){if(!ready)return;release();paused=value;fpsFrames=0;fpsStart=performance.now();send({type:'pause',value});$('paused').hidden=!value||storeOpen;$('pause').textContent=value?'Continuar':'Pausar';$('status').textContent=value?'Pausado · progresso somente nesta aba':'Experimental · progresso temporário · sem som';}
+function boot(){
+ if(worker)worker.terminate();storeOpen=false;$('store-notice').hidden=true;release();ready=false;paused=false;surfacePointer=null;document.body.classList.add('running');$('welcome').hidden=true;$('error').hidden=true;$('paused').hidden=true;$('controls').hidden=true;$('loading').hidden=false;$('loading-text').textContent='Carregando o jogo…';$('pause').disabled=true;$('pause').setAttribute('aria-pressed','false');$('restart').disabled=true;$('virtual-controls').disabled=true;$('drop-names').disabled=true;
+ worker=new Worker('./worker.js');loadTimer=setTimeout(()=>{$('loading-text').textContent='Ainda carregando. Mantenha esta aba aberta…';$('restart').disabled=false;},20000);
+ worker.onerror=event=>{clearTimeout(loadTimer);showError(event.message||'O navegador não conseguiu iniciar este teste.');};
+ worker.onmessage=event=>{const data=event.data;
+  if(data.type==='ready'){clearTimeout(loadTimer);ready=true;$('virtual-controls').disabled=false;$('drop-names').disabled=false;lastFrame=performance.now();fpsStart=lastFrame;fpsFrames=0;$('loading').hidden=true;applyTouchVisibility();$('pause').disabled=false;$('restart').disabled=false;$('pause').textContent='Pausar';$('status').textContent='Experimental · progresso temporário · sem som';}
+  else if(data.type==='status')$('loading-text').textContent=data.message;
+  else if(data.type==='frame'){lastFrame=performance.now();const b=data.pixels;for(let i=0;i<96000;i++){const p=b[i*2]|b[i*2+1]<<8,at=i*4;image.data[at]=((p>>11)&31)*255/31;image.data[at+1]=((p>>5)&63)*255/63;image.data[at+2]=(p&31)*255/31;image.data[at+3]=255;}context.putImageData(image,0,0);canvas.dataset.frame=String(data.frame);if(!paused){fpsFrames++;if(lastFrame-fpsStart>=1000){const fps=(fpsFrames*1000/(lastFrame-fpsStart)).toFixed(1);canvas.dataset.fps=fps;$('status').textContent=fps+' FPS · meta 16 · progresso temporário · sem som';fpsStart=lastFrame;fpsFrames=0;}}}
+  else if(data.type==='storeNotice'){storeWasPaused=paused;storeOpen=true;setPaused(true);$('store-notice').hidden=false;$('close-store').focus();}
+  else if(data.type==='pauseState')$('pause').setAttribute('aria-pressed',data.value?'true':'false');
+  else if(data.type==='error'){clearTimeout(loadTimer);showError(data.message);}
+  else if(data.type==='ended'){$('status').textContent='O jogo encerrou. Use Reiniciar para outro teste.';ready=false;release();}
+ };
+ worker.postMessage({type:'start',virtualControls:touchVisibility.gameVisible,gameMode,uiScale,language});
+}
+$('virtual-controls').addEventListener('click',()=>{
+ if(!ready)return;release();virtualControls=!virtualControls;
+ try{localStorage.setItem('destinia.virtualControls',virtualControls?'1':'0');}catch{}
+ touchVisibility.preferred=virtualControls;updateVirtualControls();applyTouchVisibility();
+});
+$('language').addEventListener('change',()=>{const next=$('language').value;if(next===language)return;if(ready&&!confirm('Alterar idioma reinicia o teste e perde o progresso temporário. Continuar?')){$('language').value=language;return;}language=next;try{localStorage.setItem('destinia.language',language);}catch{}if(worker)boot();});
+$('game-mode').addEventListener('change',()=>{
+ const next=$('game-mode').value;if(next===gameMode)return;
+ if(ready&&!confirm('Trocar de modo encerra esta partida e perde o progresso temporário. Os modos não compartilham o save. Continuar?')){$('game-mode').value=gameMode;return;}
+ gameMode=next;try{localStorage.setItem('destinia.gameMode',gameMode);}catch{}
+ if(worker)boot();
+});
+$('start').addEventListener('click',boot);
+$('restart').addEventListener('click',()=>{if(!ready||confirm('Reiniciar perde o progresso desta sessão. Continuar?'))boot();});
+$('close-store').addEventListener('click',()=>{storeOpen=false;$('store-notice').hidden=true;setPaused(storeWasPaused);canvas.focus();});
+$('pause').addEventListener('click',()=>{if(!storeOpen)setPaused(!paused);});$('resume').addEventListener('click',()=>setPaused(false));
+for(const button of document.querySelectorAll('[data-key]')){
+ button.addEventListener('pointerdown',event=>{if(!ready||paused)return;event.preventDefault();button.setPointerCapture(event.pointerId);sources.press('pointer:'+event.pointerId,Number(button.dataset.key));button.classList.add('active');});
+ for(const type of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(type,event=>{sources.release('pointer:'+event.pointerId);button.classList.remove('active');});
+ button.addEventListener('contextmenu',event=>event.preventDefault());
+}
+canvas.addEventListener('pointerdown',event=>{if(!ready||paused||surfacePointer!==null)return;event.preventDefault();canvas.setPointerCapture(event.pointerId);surfacePointer=event.pointerId;lastPoint=mapPoint(event.clientX,event.clientY,canvas.getBoundingClientRect());send({type:'touch',...lastPoint,phase:0});});
+canvas.addEventListener('pointermove',event=>{if(event.pointerId!==surfacePointer)return;lastPoint=mapPoint(event.clientX,event.clientY,canvas.getBoundingClientRect());send({type:'touch',...lastPoint,phase:2});});
+for(const type of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(type,event=>{if(event.pointerId!==surfacePointer)return;send({type:'touch',...lastPoint,phase:1});surfacePointer=null;});
+canvas.addEventListener('contextmenu',event=>event.preventDefault());
+const keys={F7:10014,ArrowUp:3,w:3,ArrowDown:9,s:9,ArrowLeft:5,a:5,ArrowRight:7,d:7,Enter:17,' ':17,z:17,Escape:10,x:10,i:27,c:27,'1':2,'2':11,'3':4,'4':8};
+window.addEventListener('keydown',event=>{if(!ready||paused||event.repeat||event.ctrlKey||event.metaKey||event.altKey||!(event.key in keys))return;event.preventDefault();sources.press('key:'+event.code,keys[event.key]);});
+window.addEventListener('keyup',event=>sources.release('key:'+event.code));
+window.addEventListener('blur',()=>{pageFocused=false;release();});window.addEventListener('focus',()=>{pageFocused=true;gamepad.suspend();});document.addEventListener('visibilitychange',()=>{if(document.hidden){release();setPaused(true);}});
+gamepad=new WebGamepad({sources,onUse:autoHideTouch,onStatus:message=>{$('gamepad-status').textContent=message;},onPause:()=>{if(!storeOpen&&$('instructions').hidden)setPaused(!paused);},onDisconnect:()=>{touchVisibility.disconnect();applyTouchVisibility();if(ready)setPaused(true);}});
+function pollGamepad(){gamepad.tick({ready,focused:pageFocused&&!document.hidden,paused,blocked:storeOpen||!$('instructions').hidden});requestAnimationFrame(pollGamepad);}
+pollGamepad();
+$('help').addEventListener('click',()=>{$('instructions').hidden=false;$('help').setAttribute('aria-expanded','true');setPaused(true);$('close-help').focus();});
+$('close-help').addEventListener('click',()=>{$('instructions').hidden=true;$('help').setAttribute('aria-expanded','false');$('help').focus();});
+setInterval(()=>{if(ready&&!paused&&performance.now()-lastFrame>15000)$('status').textContent='Processando… se não avançar, tente Reiniciar.';},5000);
+
+function updateFullscreen(){const full=!!document.fullscreenElement,expanded=document.body.classList.contains('expanded');$('fullscreen').textContent=full?'Sair da tela cheia':expanded?'Sair da tela ampliada':document.documentElement.requestFullscreen?'Tela cheia':'Ampliar tela';$('fullscreen').setAttribute('aria-pressed',String(full||expanded));}
+$('fullscreen').addEventListener('click',async()=>{try{const mode=await toggleFullscreen();if(mode==='expanded')$('display-status').textContent='Tela cheia indisponível neste navegador; modo ampliado ativado. As barras do Safari podem permanecer.';else $('display-status').textContent='';}catch{$('display-status').textContent='O navegador recusou a tela cheia. Tente novamente pelo botão.';}updateFullscreen();});
+document.addEventListener('fullscreenchange',updateFullscreen);updateFullscreen();

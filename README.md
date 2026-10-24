@@ -1,19 +1,21 @@
-# Destinia — desenvolvimento da 0.9.1
+# Destinia 0.9.1 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.9 Beta — controles PC, fix1](https://github.com/sugyua/destinia/releases/tag/v0.9-controles-fix1)** — ZIP Windows com os dois EXEs e inicializadores, ZIP de fontes e checksums. Dependências e dados originais do jogo são instalados separadamente; consulte a seção **Dependências**.
+**[Baixar Destinia 0.9.1 Beta — Códex integrado e filtros](https://github.com/sugyua/destinia/releases/tag/v0.9.1-beta)** — ZIP Windows com os dois EXEs e inicializadores, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
 
 **[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
 
-## Desenvolvimento0.9.1 — filtros de equipamentos
+## 0.9.1 — Códex no menu e filtros de equipamentos
+
+O **Códex ocupa a décima aba da barra original**, usando a moldura, fonte e ícones do jogo, nos dois hosts e na web. Abra Menu e toque no último ícone dourado (pergaminho); selecione um monstro e use **INFO/ação**. SAIR/Voltar retorna à grade/menu, e as outras nove abas continuam disponíveis. Descobertas, retratos frontais, mortes e detalhes por categoria preservados. **Na web, somente100%**, sem seletor75/125 ou reaplicar essa preferência antiga; escalas do PC permanecem independentes. [Uso e limites](docs/CODEX_NATIVO_0.9.1.md).
 
 Painel **dentro do jogo**, na aba de equipamentos, mochila e venda do vendedor local. Abra **FILTROS**, **F7** livre ou **X/ação extra** do controle. Filtre por tipo/rank/faixas de nível e preço; ordene por tipo/rank/nível/preço, crescente ou decrescente. Toque ou navegue com as setas; escolha **VOLTAR AO ITEM SELECIONADO** e confirme equipar/vender na tela original. A visualização não reordena os itens e não escolhe outro automaticamente se o selecionado desaparecer.
 
-**Escopo deste lote: equipamentos do contexto/bolsa atual.** Consumíveis e itens de missão permanecem na interface original. No PC, compile os fontes atuais ou baixe o **artefato de teste** na [CI Windows aprovada](https://github.com/sugyua/destinia/actions/runs/40135459146) (requer login no GitHub; não é uma release nova); os ZIPs oficiais0.9 são preservados e não incluem os filtros. [Uso, controles e limites](docs/INVENTARIO_0.9.1.md). A atualização0.9.1 completa ainda não foi lançada.
+**Escopo dos filtros: equipamentos do contexto/bolsa atual.** Consumíveis e itens de missão permanecem na interface original. O ZIP0.9.1 inclui os filtros, que ainda usam seu painel próprio; esta revisão visual muda o Códex. [Uso, controles e limites](docs/INVENTARIO_0.9.1.md). Favoritos, proteções, assistência e reset continuam pendentes; esta release não os declara entregues.
 
 ## Novidades da 0.9
 
@@ -28,9 +30,9 @@ Painel **dentro do jogo**, na aba de equipamentos, mochila e venda do vendedor l
 
 - **Web já disponível:** ao usar gamepad reconhecido, oculta automaticamente os botões dentro do jogo e o painel touch do site; ao desconectar, restaura o painel e a preferência anterior, mantendo HUD/menus e teclado. Botão **Tela cheia**; em navegadores sem suporte, **Ampliar tela**, com possíveis barras do Safari. Controle reconhecido pela Gamepad API com mapeamento padrão; diagnóstico no rodapé. Direcional/analógico esquerdo move, A ação, B voltar, X extra, Y menu, ombros/gatilhos ou analógico direito habilidades, Start/Options pausa. Solte os comandos ao reconectar/voltar à aba. Teclado e touch preservados. **USB no iPhone depende do controle/adaptador/Safari e ainda exige teste físico.**
 - **PC no ZIP atualizado:** L3 + R3 mostra/oculta controles virtuais e suas áreas de clique durante gameplay, nos dois hosts. Solte ambos para alternar novamente; HUD, menus e entradas físicas permanecem. Reutiliza a opção6 de **Configurar Destinia**, salva separadamente por host e não muda a web. Remapeamentos isolados de L3/R3 disparam ao soltar, para evitar conflito com a combinação. `--no-save-preferences` mantém a alteração só na sessão.
-- Baixe o ZIP **windows-x64** da Release corretiva para jogar sem compilar. A Release0.9 original permanece preservada. Filtros e demais pendências continuam em preparação para0.9.1.
+- Baixe o ZIP **windows-x64** da Release corretiva para jogar sem compilar. A Release0.9 original permanece preservada. Histórico da correção preservado; filtros de equipamentos chegam na0.9.1.
 
-**[Prévia técnica da 0.9.1 — fontes e testes](https://github.com/sugyua/destinia/releases/tag/v0.9.1-dev1)**: checkpoint de desenvolvimento, sem novos EXEs ou interface dos filtros. Para jogar no PC, use a correção0.9 acima.
+**[Prévia técnica da 0.9.1 — fontes e testes](https://github.com/sugyua/destinia/releases/tag/v0.9.1-dev1)**: checkpoint de desenvolvimento, sem novos EXEs ou interface dos filtros. Para jogar no PC, use o ZIP0.9.1 Windows indicado no início.
 
 ## Releases em ordem de lançamento
 
@@ -38,6 +40,7 @@ Da mais recente para a mais antiga. As releases anteriores e seus downloads são
 
 | Release | Lançamento (Brasília) |
 | --- | --- |
+| [0.9.1 Beta — Códex integrado e filtros](https://github.com/sugyua/destinia/releases/tag/v0.9.1-beta) | 24/10/2026 |
 | [0.9.1 dev1 — prévia técnica, somente fontes](https://github.com/sugyua/destinia/releases/tag/v0.9.1-dev1) | 24/10/2026 |
 | [0.9 Beta — controles PC, fix1](https://github.com/sugyua/destinia/releases/tag/v0.9-controles-fix1) | 24/10/2026 |
 | [0.9 Beta — FC e comparador](https://github.com/sugyua/destinia/releases/tag/v0.9-beta) | 24/10/2026 |
@@ -142,7 +145,7 @@ Consulte o [roadmap detalhado](docs/ROADMAP.md) para dependências, critérios d
 
 **Próximos pedidos do Códex:** Drops exclusivos continuam como meta da **0.10**, e a ampliação do Códex com armas e armaduras fica na **0.11**. Não existe reconstrução automática do histórico antigo.
 
-### Meta 0.9.1 — complementos de inventário, coleta e assistência opcional
+### Pendências após este lote da 0.9.1 — complementos de inventário, coleta e assistência opcional
 
 Reduzir tarefas repetitivas e tornar os equipamentos mais fáceis de entender e proteger.
 

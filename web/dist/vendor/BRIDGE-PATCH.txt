@@ -1,0 +1,8 @@
+Origem: @alexaltea/unicorn-js 2.1.4, https://github.com/AlexAltea/unicorn.js
+Licenca GPL-2.0 preservada em UNICORN-LICENSE.txt.
+O WebAssembly embutido permanece inalterado. Alteracao unica no fonte JS distribuido:
+Apos Module["writeArrayToMemory"]=writeArrayToMemory; foi acrescentado:
+Module["readArrayFromMemory"]=(pointer,length)=>HEAPU8.slice(pointer,pointer+length);
+A funcao usa a vista atual do heap apos crescimento de memoria e retorna uma copia.
+engine.mjs continua conferindo o retorno de uc_mem_read e liberando o buffer em finally.
+Sem alteracao das APIs existentes; fallback para mem_read original disponivel.
