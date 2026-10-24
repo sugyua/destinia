@@ -1,0 +1,83 @@
+name: Publicar Destinia 0.9 Beta
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: release-0.9
+  cancel-in-progress: false
+jobs:
+  windows:
+    runs-on: windows-2022
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-python
+            mingw-w64-ucrt-x86_64-SDL2
+            mingw-w64-ucrt-x86_64-SDL2_mixer
+            mingw-w64-ucrt-x86_64-unicorn
+            mingw-w64-ucrt-x86_64-zlib
+      - name: Compilar os dois hosts com audio
+        shell: msys2 {0}
+        run: |
+          set -eu
+          echo "DESTINIA_MSYS2_ROOT=$(cygpath -w /)" >> "$GITHUB_ENV"
+          version=$(tr -d '\r\n' < VERSION)
+          for target in host host_zoom; do
+            cmake -S "$target" -B "$target/build" -G Ninja -DCMAKE_BUILD_TYPE=Release
+            cmake --build "$target/build"
+            test "$("$target/build/destinia_host.exe" --version | tr -d '\r\n')" = "Destinia $version Beta"
+            grep -q 'SDL2_MIXER_FOUND:INTERNAL=1' "$target/build/CMakeCache.txt"
+          done
+      - name: Testar ARM estabilidade preferencias Codex e empacotamento
+        shell: msys2 {0}
+        env:
+          DESTINIA_NATIVE_TESTS: '1'
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: |
+          set -eu
+          for pattern in test_combat_power.py test_drop_names.py test_runtime.py test_preferences.py test_preferences_host.py test_codex.py test_codex_native.py test_codex_details.py test_codex_details_ui.py test_codex_portraits.py test_zoom_camera.py test_safe_save.py test_offline_store.py test_save_modes.py test_touch_controls.py test_ui_transform.py test_text_labels.py test_package_release.py test_package_windows.py; do
+            python -m unittest discover -s tests -p "$pattern" -v
+          done
+          DESTINIA_ZOOM_EXE="$PWD/host_zoom/build/destinia_host.exe" python -m unittest discover -s tests -p test_zoom_render.py -v
+      - name: Verificar configuradores e diagnostico PowerShell
+        shell: powershell
+        run: |
+          $ErrorActionPreference='Stop'
+          foreach($name in @('test_diagnostic.ps1','test_camera_mode.ps1','test_save_configuration.ps1','test_game_preferences.ps1','test_configurator_native.ps1','test_launchers.ps1','test_prompt.ps1')) {
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path 'tests' $name)
+            if($LASTEXITCODE -ne 0) {throw "Falhou: $name"}
+          }
+      - name: Empacotar fontes EXEs e checksums sem dependencias externas
+        shell: msys2 {0}
+        run: |
+          set -eu
+          python scripts/package_release.py --out dist
+          python scripts/package_windows.py --out dist --normal host/build/destinia_host.exe --zoom host_zoom/build/destinia_host.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: destinia-0.9-beta-pacotes
+          path: dist/*
+          if-no-files-found: error
+      - name: Publicar release Beta autorizada
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference='Stop'
+          if((Get-Content VERSION -Raw).Trim() -ne '0.9') {throw 'Versao inesperada'}
+          $assets=@(Get-ChildItem dist -File | ForEach-Object { $_.FullName })
+          if($assets.Count -ne 4) {throw 'Esperados dois ZIPs e dois checksums'}
+          & gh release create v0.9-beta @assets --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title 'Destinia 0.9 Beta - FC e comparador' --notes-file release/NOTAS_0.9.md --prerelease
+          if($LASTEXITCODE -ne 0) {throw 'Falha ao publicar; pacotes preservados nos artifacts'}

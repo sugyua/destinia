@@ -1,21 +1,20 @@
-# Destinia para Windows — 0.8 Beta · desenvolvimento da 0.9
+# Destinia para Windows — 0.9 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.8 Beta](https://github.com/sugyua/destinia/releases/tag/v0.8-beta)** — ZIP Windows com os dois EXEs e inicializadores, ZIP de fontes e checksums. Dependências e dados originais do jogo são instalados separadamente; consulte a seção **Dependências**.
+**[Baixar Destinia 0.9 Beta](https://github.com/sugyua/destinia/releases/tag/v0.9-beta)** — ZIP Windows com os dois EXEs e inicializadores, ZIP de fontes e checksums. Dependências e dados originais do jogo são instalados separadamente; consulte a seção **Dependências**.
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
 
-## Desenvolvimento da 0.9
+## Novidades da 0.9
 
-- [x] **PT-BR como idioma padrão** no PC e na web quando não há preferência salva. Inglês continua disponível em **Configurar Destinia → 9 — Idioma**, no seletor web ou `--lang en`. Tradução ainda parcial; a escolha explícita é preservada.
-- [x] **README simplificado:** histórico das versões anteriores nas [Releases](https://github.com/sugyua/destinia/releases).
-- [x] **Limpeza:** removidos ZIPs auxiliares antigos e cópias WIP já integradas. Saves, dados necessários, ferramentas ativas e testes preservados.
-- [x] **Nomes de drops por comando:** segure **V** no PC (remapeável como `nomes_drops`; não ocupa V se já estiver remapeado). Na web, use V ou o botão **Nomes dos itens**. Mostra itens ativos visíveis com as cores originais de raridade, sem ampliar alcance de coleta.
-- [ ] Inventário, filtros/favoritos, coleta/poções opcionais e redistribuição offline: próximos lotes, ainda não entregues. A versão distribuída permanece **0.8 Beta** até validar a0.9.
+- **FC nos status** e comparador de equipamentos próprios no inventário: atual → previsto, ganho/perda e diferenças de ATK/DEF/PV/PM máximos/crítico. Inclui buffs ativos; não diminui ao perder vida atual. [Fórmula e limites](docs/FC.md).
+- **PT-BR padrão**; inglês em **Configurar Destinia → 9 — Idioma**, no seletor web ou `--lang en`. Tradução parcial, escolha explícita preservada.
+- **Nomes de drops:** segureV (remapeável como `nomes_drops`); web também tem botão. Não altera alcance de coleta ou os itens.
+- README enxuto e redundâncias removidas, preservando saves, dados necessários, testes e releases anteriores.
 
-**Prévia para PC:** [baixar pacotes de teste com EXEs e fontes](https://github.com/sugyua/destinia/actions/runs/40105710879/artifacts/12565080835), com [CI Windows aprovada](https://github.com/sugyua/destinia/actions/runs/40105710879). Pode exigir login no GitHub. A prévia ainda identifica a base **0.8**; não é a release0.9 completa. Para usar o código da `main`, execute **Compilar Destinia.bat** com o jogo fechado.
+[Notas completas e instalação](docs/RELEASE_0.9.md). As funcionalidades ainda não concluídas estão na **0.9.1**, abaixo; não acompanham a 0.9.
 
 ## Releases em ordem de lançamento
 
@@ -23,6 +22,7 @@ Da mais recente para a mais antiga. As releases anteriores e seus downloads são
 
 | Release | Lançamento (Brasília) |
 | --- | --- |
+| [0.9 Beta — FC e comparador](https://github.com/sugyua/destinia/releases/tag/v0.9-beta) | 24/10/2026 |
 | [0.8 Beta — interface e saves](https://github.com/sugyua/destinia/releases/tag/v0.8-beta) | 24/10/2026 |
 | [0.7 Beta — imagens e câmera, fix2](https://github.com/sugyua/destinia/releases/tag/v0.7-codex-imagens-fix2) | 22/10/2026 05:54 |
 | [0.7 Beta — correção de abertura, fix1](https://github.com/sugyua/destinia/releases/tag/v0.7-codex-imagens-fix1) | 21/10/2026 18:42 |
@@ -95,7 +95,7 @@ Para testar uma instalação existente, execute **[Testar Destinia.bat](Testar%2
 
 O relatório é salvo ao longo da sessão e informa quando está parcial. Após cada execução, o diagnóstico também destaca compras observadas, alterações de cash e a rede aguardando resposta; esses avisos não significam que o problema da loja foi corrigido.
 
-Para esta versão, use o diagnóstico incluído no pacote completo de fontes 0.8, com EXEs da mesma versão. Não sobreponha os auxiliares antigos da main: eles podem não incluir as proteções de preferências da 0.6.
+Para esta versão, use o diagnóstico incluído no pacote completo de fontes 0.9, com EXEs da mesma versão. Não sobreponha os auxiliares antigos da main: eles podem não incluir as proteções de preferências da 0.6.
 
 Consulte [INSTALL.md](INSTALL.md) para compilar e executar com dados próprios compatíveis. Os launchers existentes continuam voltados ao ambiente de desenvolvimento MSYS2 em `C:\msys64\ucrt64\bin`; não são launchers portáteis.
 
@@ -103,12 +103,12 @@ Para verificar o empacotador, com Python 3.10 ou superior:
 
 ```sh
 python -m unittest discover -s tests -v
-python scripts/package_release.py --out dist/release-0.8
+python scripts/package_release.py --out dist/release-0.9
 ```
 
 No Linux, o comando pode ser `python3`. O empacotador cria ZIP e SHA-256, não compila executáveis. Não sobrescreve artefatos existentes. A reprodução byte a byte foi verificada com a mesma versão de Python/zlib; outras versões podem mudar a compressão.
 
-O [manifesto](release/manifest.json) identifica a base e os arquivos da 0.8. O workflow Windows compila/testa os EXEs e gera um pacote separado; o empacotador de fontes não compila executáveis. Consulte o [roadmap](docs/ROADMAP.md) para as etapas seguintes.
+O [manifesto](release/manifest.json) identifica a base e os arquivos da 0.9. O workflow Windows compila/testa os EXEs e gera um pacote separado; o empacotador de fontes não compila executáveis. Consulte o [roadmap](docs/ROADMAP.md) para as etapas seguintes.
 
 ## Atualizações futuras
 
@@ -124,19 +124,18 @@ Consulte o [roadmap detalhado](docs/ROADMAP.md) para dependências, critérios d
 
 **Próximos pedidos do Códex:** Drops exclusivos continuam como meta da **0.10**, e a ampliação do Códex com armas e armaduras fica na **0.11**. Não existe reconstrução automática do histórico antigo.
 
-### Meta 0.9 — Inventário, coleta e assistência opcional
+### Meta 0.9.1 — complementos de inventário, coleta e assistência opcional
 
 Reduzir tarefas repetitivas e tornar os equipamentos mais fáceis de entender e proteger.
 
-- [ ] **13. Comparador claro de equipamentos:** Exibir diferenças de atributos entre o item selecionado e o equipado, com sinais e cores legíveis; verificar primeiro o comparador original para aprimorá-lo.
-- [ ] **FC — Força de Combate:** indicador numérico nos status do personagem. O comparador deve mostrar FC atual, FC estimado após equipar e diferença positiva/negativa. Buffs temporários ativos entram no FC e sua expiração atualiza o valor. A comparação mantém os mesmos buffs nos dois equipamentos; perder ou recuperar vida atual não altera o FC por si só. Fórmula e pesos ainda serão definidos e validados; não implementado e não altera atributos ou combate por si só.
+- [ ] **13. Complementar o comparador:** a 0.9 entrega FC/ATK/DEF/PV/PM máximos/crítico; ampliar o detalhamento dos outros atributos e contextos de itens.
 - [ ] **14. Organização e filtros do inventário:** Ordenar e filtrar por tipo, rank, nível e preço, sem perder a seleção atual; confirmar o que já existe no jogo.
 - [ ] **15. Favoritar e proteger itens:** Marcar equipamentos para evitar venda/desmanche acidentais; pedir confirmação quando apropriado.
 - [ ] **16. Filtro de itens no chão:** Escolher quais categorias ou ranks destacar e quais esconder visualmente; não apagar os itens filtrados.
 - [ ] **17. Coleta automática opcional:** Coletar ouro e materiais próximos segundo regras configuráveis, preservando a opção de coleta manual.
 - [ ] **21. Poções automáticas opcionais:** Usar poções opcionalmente por limites de vida/mana configurados, respeitando estoque e recarga; a assistência deve ser ativada pelo jogador.
-**Item22 implementado no desenvolvimento da0.9:** comando para nomes/cores dos drops; veja o uso acima.
-- [ ] **29. Redistribuição de pontos acessível offline:** Verificar o reset existente e oferecer uma forma clara de redistribuir atributos/habilidades offline, com custo interno a definir e sem compra real.
+
+- [ ] **29. Redistribuição de pontos acessível offline:** Verificar o reset existente e oferecer uma forma clara de redistribuir atributos/habilidades offline, consumindo o pergaminho original, vendido por 10.000 gold no vendedor de poções, sem compra real.
 
 ### Meta 0.10 — Progressão expandida, equipamentos e títulos
 
@@ -207,7 +206,7 @@ Os recursos opcionais terão configurações próprias. Mudanças permanentes de
 
 > Registro do relatório de continuidade de 23/10/2026. **Tudo abaixo é planejamento, não implementação.** Preserva o escopo aprovado da 0.8–0.12. As versões sugeridas dependem de avaliação técnica e não representam datas ou entregas garantidas.
 
-### Códex organizado — complemento sugerido para a 0.9
+### Códex organizado — complemento para a 0.9.1
 
 - [ ] Separar **Monstros comuns** e **Chefes / Bosses**, mantendo cada chefe em uma entrada própria e preservando imagens, descobertas, contador de mortes e informações existentes.
 - [ ] Confirmar nos dados originais a classificação de monstros, minibosses e chefes, com IDs e referências; não classificar somente por nome ou aparência.
@@ -312,7 +311,7 @@ As associações **Necromante → foice** e **Granadeiro → granadas** já esta
 
 ## Publicação
 
-Pacotes oficiais e histórico detalhado ficam em [Releases](https://github.com/sugyua/destinia/releases). A `main` contém os lotes de desenvolvimento indicados acima; a release0.9 aguarda os itens restantes e sua validação. O autor confirmou testes da base no PC/iPhone; isso não comprova campanha completa ou validação manual de cada mudança nova.
+Pacotes oficiais e histórico detalhado ficam em [Releases](https://github.com/sugyua/destinia/releases). A `main` contém os lotes de desenvolvimento indicados acima; a versão0.9 tem o escopo das notas de release e os complementos foram transferidos à 0.9.1 por decisão do autor. O autor confirmou testes da base no PC/iPhone; isso não comprova campanha completa ou validação manual de cada mudança nova.
 
 O ZIP curado não inclui biblioteca original, APK, DEX, assets, áudio, saves ou DLLs de terceiros. Consulte [THIRD_PARTY.md](THIRD_PARTY.md). Não foi definida uma licença para o código do host nesta etapa.
 

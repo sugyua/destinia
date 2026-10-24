@@ -1,6 +1,6 @@
 {
-  "version": "0.8",
-  "base_commit": "f6865e38e3e2b65d0bae76cd03fade2953e926ea",
+  "version": "0.9",
+  "base_commit": "b1a68a3d0831b6c5b82cb7546fc1d30453e9390a",
   "files": [
     ".gitignore",
     "AGENTS.md",
@@ -122,6 +122,13 @@
     "tests/ui_transform_cases.cpp",
     "common/drop_names.h",
     "tests/test_drop_names.py",
-    "tests/drop_names_native.cpp"
+    "tests/drop_names_native.cpp",
+    "common/combat_power.h",
+    "common/combat_power_host.h",
+    "tests/combat_power_native.cpp",
+    "tests/test_combat_power.py",
+    "docs/FC.md",
+    "docs/RELEASE_0.9.md",
+    "release/NOTAS_0.9.md"
   ]
 }

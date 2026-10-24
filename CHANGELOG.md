@@ -4,13 +4,14 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
-## Em desenvolvimento — 0.9 Beta
+## 0.9 Beta — 24/10/2026
 
 - Português brasileiro passa a ser o padrão nos dois hosts e no navegador; inglês explícito é preservado. CLI aceita `--lang pt|en` sem gravar uma preferência implicitamente.
 - README concentra instalação, estado atual e planejamento; histórico detalhado nas Releases.
 - Removidos pacotes auxiliares de compilação/testes antigos; scripts ativos permanecem nos fontes e pacotes atuais. Web elimina cópias WIP já integradas.
 - Comando remapeável `nomes_drops` (V quando livre) e botão web exibem nomes de drops ativos/visíveis nas cores originais, sem alterar distância de coleta, inventário ou chance de drop.
-- Demais funcionalidades de inventário/assistência da0.9 ainda em preparação; não constituem uma release0.9 publicada.
+- FC nos status e comparador inicial com atributos nativos, projeção, buffs iguais e restauração do estado em memória; fórmula documentada emdocs/FC.md.
+- Por decisão do autor, o restante do escopo migra para0.9.1: filtros, favoritos, automações, Códex organizado e reset por pergaminho vendido por10.000gold. Não implementados na0.9.
 
 ## 0.8 Beta — 24/10/2026
 

@@ -60,7 +60,7 @@ As versões abaixo são **metas provisórias**, sem calendário garantido. Uma e
 
 A 0.8 entregou os itens03,04,08,09,19 e36; a revisão integral da tradução24 permanece pendente. [Escopo e limites](RELEASE_0.8.md).
 
-### Meta 0.9 — Inventário, coleta e assistência opcional
+### Meta 0.9.1 — complementos de inventário e assistência
 
 Reduzir tarefas repetitivas e tornar os equipamentos mais fáceis de entender e proteger.
 
@@ -201,3 +201,7 @@ O port Vita documenta outra versão do APK; endereços e patches não podem ser 
 ## Entrega 0.8
 
 Itens03,04,08,09,19 e36 implementados; tradução24 ampliada parcialmente, revisão integral ainda pendente. Consulte [RELEASE_0.8.md](RELEASE_0.8.md). Próxima entrega funcional: metas0.9 do README; propostas posteriores preservadas.
+
+## Entrega 0.9 e continuação0.9.1
+
+Por decisão do autor,0.9 reúne PT-BR padrão, nomes de drops, FC e comparador inicial verificados; demais complementos foram transferidos para0.9.1, incluindo filtros/favoritos, automações e Códex organizado. Reset consumirá pergaminhos originais, vendidos no vendedor de poções por10.000gold cada, ainda não implementado. Veja README e RELEASE_0.9.md.
