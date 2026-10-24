@@ -101,3 +101,14 @@ Orientacao atual — publicacao 0.6 (21/10/2026)
 * Autor autorizou publicar a 0.6 apos apresentacao dos testes e limitacoes; nao solicitar a mesma aprovacao novamente.
 * Registrar todas as mudancas desde a 0.5 em portugues, marcar os oito itens entregues e deixar nas atualizacoes futuras somente a 0.7 em diante.
 * Manter pendencias manuais explicitas; sucesso de implementacao/testes automatizados nao comprova toda a campanha no Windows.
+
+
+Diretriz permanente de atualizações completas do jogo — 24/10/2026
+
+* Esta é a orientação vigente e explícita do proprietário para correções e recursos solicitados no Destinia, complementando instruções históricas de versões anteriores.
+* Quando o pedido modificar arquivos do jogo, não encerrar o trabalho somente com código, PR ou teste. **Atualizar também README.md**, CHANGELOG.md e VERSION/manifesto quando aplicável, registrar progresso e resultado na central `sugyua/ai-progress-shared` (Issue #4 e `projects/destinia/HANDOFF.md`).
+* **Entregar uma nova versão em GitHub Releases** depois da validação: tag/versão coerentes, dois EXEs do PC quando aplicável, ZIP de fontes, checksums, notas de Beta, dependências, links e conferência dos downloads. O autor indicou expressamente que publicar a versão corrigida ou ampliada faz parte do pedido de implementação; não tratar PR como release.
+* Para mudanças que também afetem a web: atualizar o código web, executar testes e publicar no site já utilizado **quando houver acesso real à ferramenta de deployment**, sem alterar sua audiência. Sempre informar no README **URL, versão/revisão da web e se o deployment foi realmente concluído**. Se a web não foi publicada ou não sofreu alterações, deixar isso explícito.
+* **Nunca declarar publicação sem confirmação**. Se faltar CI, compilação, ferramenta, acesso, integridade dos pacotes ou validação exigida para o risco, registrar bloqueio e checkpoint. Não incluir saves, bibliotecas/ativos originais de terceiros, dados pessoais ou BAT pessoal na release. Preservar as releases anteriores e distinguir testes automatizados dos físicos.
+* Se a mudança exigir ampliação de escopo, operação destrutiva ou risco não autorizado, pedir a aprovação específica aplicável. A instrução atual não autoriza publicar conteúdo não verificado nem altera regras para projetos diferentes.
+* Comunicação final curta: código/commit, testes, README, Release com link, web com link/status, central com link. Ver protocolo detalhado em https://github.com/sugyua/ai-progress-shared/blob/main/AGENT_OPERATING_GUIDE.md.
