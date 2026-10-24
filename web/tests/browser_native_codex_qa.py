@@ -34,7 +34,7 @@ async def run(url):
    await tap(290,35,scale);assert await worker.evaluate('!engine.codexOpen')
    # Click all original tabs and confirm real native state, including craft/pets.
    for tab in range(9):
-    await tap(88+22*tab,12,scale)
+    await tap(88+23*tab,12,scale)
     await page.wait_for_timeout(160)
     actual=await worker.evaluate("engine.get32(engine.exports.get('GameUI')+0x7c)>>>28");assert actual==tab,(scale,tab,actual)
    await tap(297,12,scale)
