@@ -112,7 +112,18 @@ int main(int argc,char** argv) {
  std::vector<uint8_t> nativeFrame(FB_BYTES+16,0xab);nativeCodexPainter.paint(nativeFrame.data());if(const char* capture=std::getenv("DESTINIA_CODEX_CAPTURE"))writeBmp(std::string(capture)+std::to_string(SCREEN_W)+".bmp",nativeFrame.data());auto nativeFirst=nativeFrame;nativeCodexPainter.paint(nativeFrame.data());if(nativeFirst!=nativeFrame)return 92;
  for(int scale:{75,100,125}){const int previousScale=preferences.uiScale;preferences.uiScale=scale;nativeCodexPainter.paint(nativeFrame.data());preferences.uiScale=previousScale;}codexEnterDetails();nativeCodexPainter.paint(nativeFrame.data());for(size_t i=0;i<ranges.size();i++){std::vector<uint8_t> check(ranges[i].second);rd(ranges[i].first,check.data(),check.size());if(check!=snapshots[i])return 93;}
  for(auto i=nativeFrame.end()-16;i!=nativeFrame.end();++i)if(*i!=0xab)return 94;
- for(int tab=0;tab<9;tab++){auto rect=destinia::nativeCodexRect(88+22*tab,12,1,1,SCREEN_W,SCREEN_H);codexMenuTouch(rect.x,rect.y,0);codexMenuTouch(rect.x,rect.y,1);if(rd32(ui+0x7c)>>28!=u32(tab))return 95;}
+ for(int tab=0;tab<9;tab++){auto rect=destinia::nativeCodexRect(88+23*tab,12,1,1,SCREEN_W,SCREEN_H);codexMenuTouch(rect.x,rect.y,0);codexMenuTouch(rect.x,rect.y,1);if(rd32(ui+0x7c)>>28!=u32(tab))return 95;}
  auto book=destinia::nativeCodexRect(297,12,1,1,SCREEN_W,SCREEN_H);codexMenuTouch(book.x,book.y,0);codexMenuTouch(book.x,book.y,1);if(!codexOpen)return 96;
+ // Preview the highlighted Codex tab before confirmation; preserve native
+ // pixels including the pointing-hand cursor on both Windows host variants.
+ codexOpen=false;codexTabSelected=false;codexDetailsOpen=false;wr32(ui+0x7c,0);
+ if(!codexMenuVisible())return 97;
+ auto pixel=[&](int x,int y){return (size_t((SCREEN_H-240)/2+y)*SCREEN_W+size_t((SCREEN_W-400)/2+x))*2;};
+ std::vector<uint8_t> nativeTabs(FB_BYTES,0x35);nativeCodexPainter.paint(nativeTabs.data());
+ if(nativeTabs[pixel(110,12)]!=0x35||nativeTabs[pixel(110,12)+1]!=0x35)return 98;
+ codexTabSelected=true;
+ std::vector<uint8_t> previewFrame(FB_BYTES,0x35);nativeCodexPainter.paint(previewFrame.data());
+ if(previewFrame[pixel(91,50)]==0x35&&previewFrame[pixel(91,50)+1]==0x35)return 99;
+ if(nativeTabs[pixel(110,12)]!=previewFrame[pixel(110,12)])return 100;
  std::puts("CODEX_ARM_OK");uc_close(uc);uc=nullptr;return 0;
 }
