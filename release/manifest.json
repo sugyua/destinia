@@ -197,6 +197,7 @@
     "web/tests/ui-transform.test.mjs",
     "web/tools/pack_game.py",
     "launcher/main.go",
-    "release/NOTAS_0.9.2.md"
+    "release/NOTAS_0.9.2.md",
+    "tests/test_root_executables.ps1"
   ]
 }
