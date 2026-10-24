@@ -1,6 +1,4 @@
-# Destinia — preparação técnica da 0.9.1
-
-**[Prévia técnica 0.9.1 — fontes e testes](https://github.com/sugyua/destinia/releases/tag/v0.9.1-dev1)**. Ainda sem interface dos filtros. O jogo executável desta base permanece na0.9; para jogar, use a [Release PC controles fix1](https://github.com/sugyua/destinia/releases/tag/v0.9-controles-fix1).
+# Destinia — desenvolvimento da 0.9.1
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
@@ -10,6 +8,12 @@
 
 
 **[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
+
+## Desenvolvimento0.9.1 — filtros de equipamentos
+
+Painel **dentro do jogo**, na aba de equipamentos, mochila e venda do vendedor local. Abra **FILTROS**, **F7** livre ou **X/ação extra** do controle. Filtre por tipo/rank/faixas de nível e preço; ordene por tipo/rank/nível/preço, crescente ou decrescente. Toque ou navegue com as setas; escolha **VOLTAR AO ITEM SELECIONADO** e confirme equipar/vender na tela original. A visualização não reordena os itens e não escolhe outro automaticamente se o selecionado desaparecer.
+
+**Escopo deste lote: equipamentos do contexto/bolsa atual.** Consumíveis e itens de missão permanecem na interface original. No PC, compile os fontes atuais; os ZIPs oficiais0.9 são preservados e não incluem os filtros. [Uso, controles e limites](docs/INVENTARIO_0.9.1.md). A atualização0.9.1 completa ainda não foi lançada.
 
 ## Novidades da 0.9
 
@@ -143,7 +147,7 @@ Consulte o [roadmap detalhado](docs/ROADMAP.md) para dependências, critérios d
 Reduzir tarefas repetitivas e tornar os equipamentos mais fáceis de entender e proteger.
 
 - [ ] **13. Complementar o comparador:** a 0.9 entrega FC/ATK/DEF/PV/PM máximos/crítico; ampliar o detalhamento dos outros atributos e contextos de itens.
-- [ ] **14. Organização e filtros do inventário:** em desenvolvimento. Base de visualização separada dos itens, filtros/ordenação e seleção original testados em ARM nos dois hosts. Confirmação nativa de equipamento/venda, cancelamento e proteção da cópia equipada validados com itens idênticos em cenários controlados. **Interface e integração dos filtros ainda não disponíveis.** [Lote e verificações](https://github.com/sugyua/destinia/blob/feature/091-inventory-projection/docs/INVENTARIO_0.9.1.md).
+- [ ] **14. Organização e filtros do inventário:** primeiro lote de equipamentos implementado em PC/web, com filtros/ordenação, navegação nativa e proteção da seleção. Outros tipos continuam na interface original; validação física pendente. [Uso e limites](docs/INVENTARIO_0.9.1.md).
 - [ ] **15. Favoritar e proteger itens:** Marcar equipamentos para evitar venda/desmanche acidentais; pedir confirmação quando apropriado.
 - [ ] **16. Filtro de itens no chão:** Escolher quais categorias ou ranks destacar e quais esconder visualmente; não apagar os itens filtrados.
 - [ ] **17. Coleta automática opcional:** Coletar ouro e materiais próximos segundo regras configuráveis, preservando a opção de coleta manual.

@@ -16,7 +16,7 @@ static bool inventoryRead(destinia::InventoryPanel& panel,std::vector<std::array
   auto record=g+0x433e + b*0x92+6*slot;if(!rd16(record+4)||rd16(record)!=0)continue;int pool=rd16(record+2);if(pool>=200||uint8_t(rd16(g+0x2e0c+pool)&255)==0)return false;if(bag<0&&!equipmentList.count(pool))continue;
   std::array<uint8_t,20> fingerprint{};if(!rd(g+0x2ed6+20*pool,fingerprint.data(),fingerprint.size()))return false;int header=rd16(g+0x2ed6+20*pool),rank=(header>>8)&7;if(rank>4)return false;u32 level=0,price=0;
   if(!callFn(exportsMap.at("GameUI_getEquipMinLv"),{u32(header),1},&level)||!callFn(exportsMap.at("GameUI_getItemPrice"),{0,u32(pool)},&price)||!callFn(exportsMap.at("GameUI_getEquipName"),{inventoryNameBuffer,g+0x2ed6+20*pool}))return false;
-  int nativeIndex=bag<0?equipmentList.at(pool):slot;panel.items.push_back({b,slot,pool,(header>>5)&7,rank,int(level),int(price)});panel.names.push_back(cstr(inventoryNameBuffer,512));fingerprints.push_back(fingerprint);indices.push_back(nativeIndex);if(nativeIndex==cursor)selected=pool;
+  int nativeIndex=bag<0?equipmentList.at(pool):slot;panel.items.push_back({b,slot,pool,(header>>5)&7,rank,int(level),int(state==0x91040004u?price/5:price)});panel.names.push_back(cstr(inventoryNameBuffer,512));fingerprints.push_back(fingerprint);indices.push_back(nativeIndex);if(nativeIndex==cursor)selected=pool;
  }}
  panel.rebuild();return true;
 }

@@ -101,7 +101,7 @@ int main(int argc,char**argv){
  for(int key:{9,6,9}){assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{u32(key)}));printf("SELL_NAV key=%d state=%08x\n",key,rd32(ui+0x7c));}
  printf("SELL_FOCUS indices=%u,%u,%u,%u\n",rd16(ui+0x54),rd16(ui+0x56),rd16(ui+0x58),rd16(ui+0x5a));
  assert(rd32(ui+0x7c)==0x91040004u);
- assert(inventoryEnter());inventoryPanel.reset();inventoryPanel.selectedPool=duplicate;assert(inventoryChoose()&&!inventoryOpen);assert(rd16(ui+0x5a)==3);assert(inventoryEnter());inventoryPanel.query.sort=destinia::InventorySort::Price;inventoryPanel.rebuild();inventoryPanel.selectedPool=ids[0];assert(inventoryChoose()&&!inventoryOpen);
+ assert(inventoryEnter());assert(inventoryPanel.items[0].price==records[0].price/5);inventoryPanel.reset();inventoryPanel.selectedPool=duplicate;assert(inventoryChoose()&&!inventoryOpen);assert(rd16(ui+0x5a)==3);assert(inventoryEnter());inventoryPanel.query.sort=destinia::InventorySort::Price;inventoryPanel.rebuild();inventoryPanel.selectedPool=ids[0];assert(inventoryChoose()&&!inventoryOpen);
  // Displayed price-order index2 points back to original slot0, not slot2.
  auto projected=destinia::inventorySelection(records,view,int(ids[0]));assert(projected && *projected==2);
  const auto sale=records[view[*projected]];assert(sale.slot==0 && sale.pool==int(ids[0]));

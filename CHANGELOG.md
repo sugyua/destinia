@@ -4,6 +4,13 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.9.1 — em desenvolvimento: equipamentos
+
+- Painel interno de filtros nos dois hosts/web, por tipo/rank/faixas de nível e preço; ordenação original/tipo/rank/nível/preço e direção.
+- Seleção por pool e conteúdo revalidado; visualização sem reordenar itens/saves. Retorno ao alvo via navegação e prévia nativas, sem equipar/vender automaticamente.
+- Interface por toque/teclado/controle,75/100/125, listas vazias e paginação; não confirmar item fora da página nem substituir item removido por vizinho.
+- Escopo: equipamentos do contexto/bolsa atual. Demais itens e confirmações usam a interface original. Release0.9 preservada; não conclui toda a0.9.1.
+
 ## Web — melhoria dos controles e tela cheia — 24/10/2026
 
 - Uso de gamepad padrão oculta temporariamente botões do jogo e painel touch do site, preservando preferências, HUD/menus e teclado; desconexão restaura a interface touch.

@@ -1,12 +1,22 @@
-# Inventário 0.9.1 — lote de desenvolvimento
+# Filtros de equipamentos — desenvolvimento0.9.1
 
-**Ainda não há filtro novo disponível para o jogador.** A Release PC e a web atuais permanecem preservadas.
+Painel interno implementado nos dois hosts e no protótipo web. Os ZIPs da Release0.9 continuam preservados e não incluem este lote; no PC, compile os fontes atuais ou use o artefato da CI indicado no README. A0.9.1 completa ainda está em preparação.
 
-## Base preparada
+## Uso
 
-Projeção somente de equipamentos, separada dos dados ARM: filtrar por tipo/rank/faixa de nível e ordenar por tipo/rank/nível/preço, com desempate estável. Seleção por pool de equipamento da sessão; item filtrado ou ausente não seleciona outro automaticamente. Duplicidade de pool/posição é rejeitada. Não usar esse índice para favoritos persistentes nem dispensar a revalidação do equipamento antes de uma ação.
+Na aba de equipamento, na lista da mochila ou na venda do vendedor local, abra **FILTROS**, **F7** (quando livre no PC) ou **X/ação extra** do controle. A lista corresponde aos equipamentos do contexto nativo: slot corporal atual na aba de equipamento, bolsa atual na mochila/venda. Consumíveis e itens de missão continuam na interface original.
 
-Testes puros verificam ordenação, filtros, seleção estável e ausência de mutação. A fixture ARM dos dois hosts verifica preços nativos, estado original inalterado durante a projeção e associação entre linha ordenada e slot original desenhado por `_drawEquipDesc`.
+- Tipo e rank; faixas de nível (todos, utilizável pelo nível, grupos de10) e preço.
+- Ordenação original/tipo/rank/nível/preço, crescente ou decrescente; LIMPAR restaura os critérios. B/P identifica bolsa/posição originais. GOLD mostra o valor nativo; no vendedor mostra o que será recebido (valor original/5).
+- Toque nos campos/linhas. No teclado/controle: cima/baixo percorrem campos/lista; esquerda/direita alteram critérios ou avançam a seleção; ação confirma a escolha. VOLTAR cancela.
+- **VOLTAR AO ITEM SELECIONADO** destaca o alvo na tela original. Equipar/vender ainda exige a confirmação nativa seguinte. O painel nunca executa essas ações sozinho.
+- Filtrar um item, mudar de página ou remover o alvo não autoriza escolher um vizinho. Para confirmar, a seleção precisa estar na página visível.
+
+## Segurança e contratos
+
+A projeção não reordena nem escreve o inventário/save. Coleta preço, nível e nome das rotinas originais, guarda pool e20bytes do equipamento e revalida estado/propriedade/conteúdo antes de navegar. Referências desatualizadas ou dados/ranks não verificados não viram ações. São reconhecidos ranks0–4 já tratados pelo contrato atual; a máscara ARM de3bits não é autorização para criar novos ranks.
+
+O JNI fica suspenso enquanto o painel está aberto, como no Códex. HUD/câmera/atributos não são recalculados pelos filtros; o retorno ao item usa a prévia nativa existente. Escalas75/100/125 têm desenho e hit test correspondentes. Teclas reservadas/remapeadas, foco, desconexão e releases de comandos são preservados.
 
 ## Fatos e limite da integração
 
@@ -23,13 +33,9 @@ Testes puros verificam ordenação, filtros, seleção estável e ausência de m
 - A cópia equipada permanece ativa e inalterada; tentativa de vendê-la produz aviso0x91040106 e não muda ouro/equipamento.
 - Após vender, quantidade/flag podem estar zeradas antes de compactar o contador da bolsa. Reconstruir a projeção com registros ativos/quantidade positiva; o pool removido deve perder a seleção, sem selecionar outro automaticamente.
 
-Testes direcionados: fixture ARM original dos dois hosts e projeção pura aprovadas. Saves e autosaves do cenário são somente temporários. Sem teste físico Windows, CI nova, interface filtrada ou deployment web neste lote.
 
-## Próximo lote
+## Validação e limites
 
-1. Integrar o mapeamento comprovado de equipamento/venda com revalidação do pool e prévia nativa; não aplicar índices visuais diretamente.
-2. Integrar uma interface dentro do jogo com navegação por teclado/controle/toque, sem escrita da projeção no inventário/save.
-3. Portar a apresentação para web; validar filtros vazios, atualização após ação e seleção preservada.
-4. Executar integração e CI Windows antes de declarar o item14 entregue. Atualizar manifesto de distribuição quando a integração estiver pronta.
+Testes puros de projeção, filtros/preço, seleção/páginas e raster protegido; ARM dos dois hosts com itens idênticos, escolha nativa, cancelamento, venda e proteção da equipada; Node/Chromium com toque75, imagem125 e gamepad emulado. Resultado final da CIWindows e revisões estão no HANDOFF da central. Testes automáticos não comprovam campanha/Windows/iPhone físicos.
 
-Não adicionar favoritos ou automações a este lote.
+Filtros de consumíveis, favoritos, automações e reset não são implementados por este lote.
