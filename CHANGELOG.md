@@ -4,6 +4,11 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## Web — melhoria dos controles e tela cheia — 24/10/2026
+
+- Uso de gamepad padrão oculta temporariamente botões do jogo e painel touch do site, preservando preferências, HUD/menus e teclado; desconexão restaura a interface touch.
+- Botão Tela cheia com saída e tratamento de recusa; Ampliar tela quando a API não existe, sem prometer esconder barras do Safari. Sem alteração dos EXEs PC.
+
 ## 0.9 Beta — controles PC, fix1 — 24/10/2026
 
 - Web: Gamepad API padrão com diagnóstico de detecção, ações/menu/pausa, liberação na desconexão e perda de foco; exigir neutro ao retornar. USB/Safari no iPhone físico ainda não validado.
