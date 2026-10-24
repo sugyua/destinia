@@ -2,10 +2,12 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.9 Beta](https://github.com/sugyua/destinia/releases/tag/v0.9-beta)** — ZIP Windows com os dois EXEs e inicializadores, ZIP de fontes e checksums. Dependências e dados originais do jogo são instalados separadamente; consulte a seção **Dependências**.
+**[Baixar Destinia 0.9 Beta — controles PC, fix1](https://github.com/sugyua/destinia/releases/tag/v0.9-controles-fix1)** — ZIP Windows com os dois EXEs e inicializadores, ZIP de fontes e checksums. Dependências e dados originais do jogo são instalados separadamente; consulte a seção **Dependências**.
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
+
+**[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
 
 ## Novidades da 0.9
 
@@ -16,11 +18,11 @@
 
 [Notas completas e instalação](docs/RELEASE_0.9.md). As funcionalidades ainda não concluídas estão na **0.9.1**, abaixo; não acompanham a 0.9.
 
-## Em preparação — 0.9.1: controles
+## Correção 0.9 — controles PC (fix1)
 
 - **Web já disponível:** controle reconhecido pela Gamepad API com mapeamento padrão; diagnóstico no rodapé. Direcional/analógico esquerdo move, A ação, B voltar, X extra, Y menu, ombros/gatilhos ou analógico direito habilidades, Start/Options pausa. Solte os comandos ao reconectar/voltar à aba. Teclado e touch preservados. **USB no iPhone depende do controle/adaptador/Safari e ainda exige teste físico.**
-- **PC nos fontes atuais:** L3 + R3 mostra/oculta controles virtuais e suas áreas de clique durante gameplay, nos dois hosts. Solte ambos para alternar novamente; HUD, menus e entradas físicas permanecem. Reutiliza a opção6 de **Configurar Destinia**, salva separadamente por host e não muda a web. Remapeamentos isolados de L3/R3 disparam ao soltar, para evitar conflito com a combinação. `--no-save-preferences` mantém a alteração só na sessão.
-- Estes ajustes PC **não alteram os ZIPs da Release0.9**; compile os fontes atuais. Filtros de inventário são a próxima tarefa; demais pendências permanecem abaixo.
+- **PC no ZIP atualizado:** L3 + R3 mostra/oculta controles virtuais e suas áreas de clique durante gameplay, nos dois hosts. Solte ambos para alternar novamente; HUD, menus e entradas físicas permanecem. Reutiliza a opção6 de **Configurar Destinia**, salva separadamente por host e não muda a web. Remapeamentos isolados de L3/R3 disparam ao soltar, para evitar conflito com a combinação. `--no-save-preferences` mantém a alteração só na sessão.
+- Baixe o ZIP **windows-x64** da Release corretiva para jogar sem compilar. A Release0.9 original permanece preservada. Filtros e demais pendências continuam em preparação para0.9.1.
 
 ## Releases em ordem de lançamento
 
@@ -28,6 +30,7 @@ Da mais recente para a mais antiga. As releases anteriores e seus downloads são
 
 | Release | Lançamento (Brasília) |
 | --- | --- |
+| [0.9 Beta — controles PC, fix1](https://github.com/sugyua/destinia/releases/tag/v0.9-controles-fix1) | 24/10/2026 |
 | [0.9 Beta — FC e comparador](https://github.com/sugyua/destinia/releases/tag/v0.9-beta) | 24/10/2026 |
 | [0.8 Beta — interface e saves](https://github.com/sugyua/destinia/releases/tag/v0.8-beta) | 24/10/2026 |
 | [0.7 Beta — imagens e câmera, fix2](https://github.com/sugyua/destinia/releases/tag/v0.7-codex-imagens-fix2) | 22/10/2026 05:54 |

@@ -1,0 +1,55 @@
+name: Publicar correcao controles PC 0.9
+on:
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: write
+concurrency:
+  group: release-controls-fix1
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirmar build ja aprovado
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(gh api repos/$GITHUB_REPOSITORY/actions/runs/40114929492 --jq '.conclusion')" = success
+          test "$(gh api repos/$GITHUB_REPOSITORY/actions/runs/40114929492 --jq '.head_sha')" = ff840589b6cf98e161cfd33ccadf8013f1a87eb8
+      - uses: actions/download-artifact@v4
+        with:
+          name: destinia-codex-no-menu-pacotes-de-teste
+          run-id: 40114929492
+          github-token: ${{ github.token }}
+          path: verified
+      - name: Conferir integridade e reaproveitar apenas os EXEs aprovados
+        run: |
+          python - <<'PY'
+          import hashlib,pathlib,zipfile
+          root=pathlib.Path('verified')
+          archives=list(root.glob('*.zip'))
+          assert len(archives)==2
+          for archive in archives:
+              assert hashlib.sha256(archive.read_bytes()).hexdigest()==pathlib.Path(str(archive)+'.sha256').read_text().split()[0]
+              with zipfile.ZipFile(archive) as f:
+                  assert f.testzip() is None
+                  if 'windows-x64' in archive.name:
+                      for host in ('host','host_zoom'):
+                          data=f.read('destinia-0.9-beta/'+host+'/build/destinia_host.exe')
+                          out=pathlib.Path('verified-exes')/host/'destinia_host.exe'
+                          out.parent.mkdir(parents=True,exist_ok=True)
+                          out.write_bytes(data)
+          PY
+      - name: Testar e gerar os pacotes com documentacao atualizada
+        run: |
+          python -m unittest discover -s tests -p 'test_package*.py' -v
+          python scripts/package_release.py --out dist
+          GITHUB_SHA=ff840589b6cf98e161cfd33ccadf8013f1a87eb8 python scripts/package_windows.py --out dist --normal verified-exes/host/destinia_host.exe --zoom verified-exes/host_zoom/destinia_host.exe
+      - name: Publicar atualizacao autorizada
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(find dist -type f | wc -l)" -eq 4
+          gh release create v0.9-controles-fix1 dist/* --target "$GITHUB_SHA" --title 'Destinia 0.9 Beta - controles PC (fix1)' --notes-file release/NOTAS_0.9_CONTROLES_FIX1.md --prerelease

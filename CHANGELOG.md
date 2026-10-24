@@ -4,7 +4,7 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
-## 0.9.1 — em preparação
+## 0.9 Beta — controles PC, fix1 — 24/10/2026
 
 - Web: Gamepad API padrão com diagnóstico de detecção, ações/menu/pausa, liberação na desconexão e perda de foco; exigir neutro ao retornar. USB/Safari no iPhone físico ainda não validado.
 - PC: L3+R3 alterna a opção existente dos controles virtuais e hitboxes durante gameplay em ambos hosts, uma vez até soltar ambos. Preferência por host preserva demais configurações; cliques isolados remapeados disparam ao soltar. HUD/menus/comandos físicos e opção web independentes.
