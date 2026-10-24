@@ -7,6 +7,7 @@ int main(){using namespace destinia;
  auto view=inventoryView(items,q);assert(view.size()==3&&view[0]==1&&view[1]==2&&view[2]==0);assert(items==original);
  q.type=2;q.rank=1;view=inventoryView(items,q);assert((view==std::vector<size_t>{2,0}));
  assert(inventorySelection(items,view,7)==1);assert(!inventorySelection(items,view,2));
+ q.minPrice=101;q.maxPrice=299;assert(inventoryView(items,q).empty());q.minPrice=0;q.maxPrice=300;
  q.minLevel=9;assert(inventoryView(items,q).empty());assert(!inventorySelection(items,{},7));
  q={};q.sort=InventorySort::Level;q.descending=true;view=inventoryView(items,q);assert((view==std::vector<size_t>{0,2,1}));
  // Reordering the input must not silently select another equipment pool.

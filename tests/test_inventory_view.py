@@ -22,3 +22,10 @@ class InventoryViewTests(unittest.TestCase):
     env=dict(os.environ,SDL_VIDEODRIVER='dummy',SDL_AUDIODRIVER='dummy')
     run=subprocess.run([str(exe),'--game',str(ROOT/'game'),'--settings',str(case/'config.ini'),'--save',str(case/'save'),'--reports',str(case/'reports'),'--headless','1','--out',str(case/'frames'),'--mute','--no-save-preferences'],env=env,capture_output=True,text=True,timeout=60)
     self.assertEqual(run.returncode,0,run.stdout+run.stderr);self.assertIn('INVENTORY_SELECTION_ARM_OK',run.stdout)
+
+ def test_panel_filters_keys_and_scaled_hitboxes(self):
+  with tempfile.TemporaryDirectory(prefix='destinia inventory panel ') as folder:
+   exe=pathlib.Path(folder)/('panel.exe' if os.name=='nt' else 'panel')
+   built=subprocess.run(['g++','-std=c++17',str(ROOT/'tests/inventory_panel_cases.cpp'),'-o',str(exe)],capture_output=True,text=True)
+   self.assertEqual(built.returncode,0,built.stderr)
+   run=subprocess.run([str(exe)],capture_output=True,text=True,timeout=20);self.assertEqual(run.returncode,0,run.stdout+run.stderr)

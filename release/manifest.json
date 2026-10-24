@@ -135,6 +135,9 @@
     "tests/inventory_view_cases.cpp",
     "tests/inventory_view_native.cpp",
     "tests/test_inventory_view.py",
-    "docs/INVENTARIO_0.9.1.md"
+    "docs/INVENTARIO_0.9.1.md",
+    "common/inventory_panel.h",
+    "common/inventory_host.h",
+    "tests/inventory_panel_cases.cpp"
   ]
 }

@@ -41,6 +41,13 @@ int main(int argc,char**argv){
  for(int key:{7,7,9,6,9}){assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{u32(key)}));}
  printf("MENU state=%08x indices=%u,%u,%u\n",rd32(ui+0x7c),rd16(ui+0x52),rd16(ui+0x54),rd16(ui+0x56));
  assert(rd32(ui+0x7c)==0x20000002u);
+ // Integrated panel: opening/filtering/cancelling never changes Game.
+ rd(g,before.data(),before.size());assert(inventoryMenuKey(12,true));assert(inventoryOpen);
+ assert(inventoryPanel.items.size()==3 && inventoryPanel.names.size()==3 && !inventoryPanel.names[0].empty());
+ inventoryPanel.query.rank=4;inventoryPanel.rebuild();assert(inventoryPanel.view.empty());assert(!inventoryChoose());
+ rd(g,after.data(),after.size());assert(before==after);inventoryPanel.reset();inventoryPanel.selectedPool=ids[1];
+ assert(inventoryChoose() && !inventoryOpen && rd16(ui+0x56)==1);
+ assert(inventoryEnter());auto old=inventoryPanel.items[0];auto address=g+0x2ed6+20*old.pool;auto raw=inventoryFingerprints[0];auto changed=raw;changed[19]^=1;wr(address,changed.data(),changed.size());inventoryPanel.selectedPool=old.pool;assert(!inventoryChoose()&&inventoryOpen);wr(address,raw.data(),raw.size());inventoryEvent(destinia::InventoryEvent::Close);assert(!inventoryOpen);
  for(auto displayed:view){
   const auto& item=records[displayed];uint16_t bag=item.bag,slot=item.slot;
   wr(ui+0x54,&bag,2);wr(ui+0x56,&slot,2);fcBeginFrame();
@@ -70,7 +77,7 @@ int main(int argc,char**argv){
  printf("EQUIP_LIST count=%u pools=%u,%u,%u indices=%u,%u,%u cursor=%u\n",rd16(ui+0x324),rd16(ui+0x2e8),rd16(ui+0x2ea),rd16(ui+0x2ec),rd16(ui+0x52),rd16(ui+0x54),rd16(ui+0x56),rd16(ui+0x70));
  assert(rd32(ui+0x7c)==0x10000002u);
  int target=-1;for(int i=0;i<rd16(ui+0x324);i++)if(rd16(ui+0x2e8+2*i)==duplicate)target=i;assert(target>=0);
- for(int step=0;step<target;step++)assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{7}));
+ assert(inventoryEnter());inventoryPanel.query.sort=destinia::InventorySort::Price;inventoryPanel.rebuild();inventoryPanel.selectedPool=duplicate;assert(inventoryChoose());
  assert(rd16(ui+0x56)==target);fcBeginFrame();
  assert(callFn(exportsMap.at("GameUI_drawMainMenu"),{rd32(exportsMap.at("Grp")+4)}));
  auto expected=g+0x2ed6+20*duplicate;
@@ -94,6 +101,7 @@ int main(int argc,char**argv){
  for(int key:{9,6,9}){assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{u32(key)}));printf("SELL_NAV key=%d state=%08x\n",key,rd32(ui+0x7c));}
  printf("SELL_FOCUS indices=%u,%u,%u,%u\n",rd16(ui+0x54),rd16(ui+0x56),rd16(ui+0x58),rd16(ui+0x5a));
  assert(rd32(ui+0x7c)==0x91040004u);
+ assert(inventoryEnter());inventoryPanel.reset();inventoryPanel.selectedPool=duplicate;assert(inventoryChoose()&&!inventoryOpen);assert(rd16(ui+0x5a)==3);assert(inventoryEnter());inventoryPanel.query.sort=destinia::InventorySort::Price;inventoryPanel.rebuild();inventoryPanel.selectedPool=ids[0];assert(inventoryChoose()&&!inventoryOpen);
  // Displayed price-order index2 points back to original slot0, not slot2.
  auto projected=destinia::inventorySelection(records,view,int(ids[0]));assert(projected && *projected==2);
  const auto sale=records[view[*projected]];assert(sale.slot==0 && sale.pool==int(ids[0]));
@@ -126,6 +134,7 @@ int main(int argc,char**argv){
  assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{6}));
  printf("SELL_ACK state=%08x gold=%u\n",rd32(ui+0x7c),gold);
  assert(rd32(ui+0x7c)==0x91040004u);
+ assert(inventoryEnter());assert(inventoryPanel.selectedPool==-1);inventoryEvent(destinia::InventoryEvent::Close);
  int equippedSlot=-1;for(int slot=0;slot<rd16(g+0x433c);slot++)if(rd16(g+0x433e + 6*slot+4)&&rd16(g+0x433e + 6*slot+2)==duplicate)equippedSlot=slot;assert(equippedSlot>=0);
  for(int moves=0;rd16(ui+0x5a)!=equippedSlot && moves<24;moves++)assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{7}));
  assert(rd16(ui+0x5a)==equippedSlot);

@@ -244,8 +244,9 @@ static void sendKey(u32 pressFn, u32 releaseFn, int key, bool down) {
   callFn(fn, {(u32)key});
 }
 static bool codexMenuKey(int key,bool down);
+static bool inventoryMenuKey(int key,bool down);
 static void gameKey(int key, bool down) {
-  if(codexMenuKey(key,down)) return;
+  if(inventoryMenuKey(key,down) || codexMenuKey(key,down)) return;
   destinia::sessionLog.write("ENTRADA tecla="+std::to_string(key)+(down?" pressionada":" solta"));
   int st = menuState();
   if (st <= 0) { if (down && fnLogoPress) callFn(fnLogoPress, {(u32)key}); return; }
@@ -1140,6 +1141,7 @@ static void runtimeLogTick(long frame,double emulationMs) {
 // ---------------------------------------------------------------- principal
 #include "../common/offline_store_host.h"
 #include "../common/combat_power_host.h"
+#include "../common/inventory_host.h"
 
 static int runHost(int argc, char** argv) {
   std::string languageOverride;
@@ -1422,9 +1424,11 @@ static int runHost(int argc, char** argv) {
           continue;
         }
         if(ev.type==SDL_QUIT) running=false;
+        else if(ev.type==SDL_WINDOWEVENT && ev.window.event==SDL_WINDOWEVENT_FOCUS_LOST){inventoryTouchCaptured=false;controls.event(ev);}
         else if(ev.type==SDL_KEYDOWN || ev.type==SDL_KEYUP) {
           if(ev.key.repeat) continue;
           const bool down=ev.type==SDL_KEYDOWN;
+          if(ev.key.keysym.sym==SDLK_F7 && !preferences.keys.count(SDLK_F7) && (inventoryOpen || inventoryVisible())){if(down){controls.release();if(inventoryOpen)inventoryOpen=false;else inventoryEnter();}continue;}
           if(ev.key.keysym.sym==SDLK_F8 && (codexOpen || (codexMenuVisible() && !preferences.keys.count(SDLK_F8)))) {if(down){controls.release();if(codexOpen){codexOpen=false;codexDetailsOpen=false;codexTabSelected=true;codexFlush();}else codexEnterMenu();}continue;}
           if(codexOpen && ev.key.keysym.sym!=SDLK_F11) {
             if(down) {
@@ -1447,7 +1451,8 @@ static int runHost(int argc, char** argv) {
           int wx=ev.type==SDL_MOUSEMOTION?ev.motion.x:ev.button.x,wy=ev.type==SDL_MOUSEMOTION?ev.motion.y:ev.button.y;
           int x=0,y=0;
           bool inside=mapMouseToGame(wx,wy,x,y,mouseDown && ev.type!=SDL_MOUSEBUTTONDOWN);
-          if((inside || codexTouchCaptured) && (ev.type==SDL_MOUSEBUTTONDOWN || ev.type==SDL_MOUSEBUTTONUP) && ev.button.button==SDL_BUTTON_LEFT) {
+          if((inside || codexTouchCaptured || inventoryTouchCaptured) && (ev.type==SDL_MOUSEBUTTONDOWN || ev.type==SDL_MOUSEBUTTONUP) && ev.button.button==SDL_BUTTON_LEFT) {
+            if(inventoryMenuTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1)){controls.release();continue;}
             if(codexMenuTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1)){controls.release();continue;}
           }
           if(codexOpen) continue;
@@ -1467,6 +1472,7 @@ static int runHost(int argc, char** argv) {
             SDL_GetWindowSize(win,&windowWidth,&windowHeight);
         }
       }
+      if(inventoryOpen){controls.release();controls.pollSticks();updateAudioState(controls.focused,true);auto& panel=arrays[hScreen];inventoryPaint(panel.data());if(SDL_UpdateTexture(tex,nullptr,panel.data(),SCREEN_W*2)!=0){executionFailed=true;break;}SDL_Rect dst=gameViewport();SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);SDL_RenderCopy(ren,tex,nullptr,&dst);SDL_RenderPresent(ren);SDL_Delay(62);continue;}
       if(codexOpen) {
         controls.release();updateAudioState(controls.focused,true);
         auto panel=arrays[hScreen];destinia::codexPaint(panel.data(),SCREEN_W,SCREEN_H,codex,true,codexPage,codexAvailable,true,true,&codexPortraits,codexSelection,codexDetailsOpen,&codexDetailInfo,codexDetailPage,codexDetailScroll,preferences.uiScale);
@@ -1534,6 +1540,7 @@ static int runHost(int argc, char** argv) {
     }
     if(preferences.uiScale==100?hudScale!=0:uiRenderer.statusDrawn){std::array<destinia::SkillHintRect,4> hints{};for(size_t i=0;i<hints.size();++i){int16_t r[4]{};if(rd(exportsMap.at("MMain")+0x11a+u32(i)*8,r,8))hints[i]={r[0],r[1],r[2],r[3]};}destinia::paintSkillHints(frameBuffer.data(),SCREEN_W,SCREEN_H,preferences,controls.lastInputDevice(),hints,preferences.uiScale);}
     if(!codexOpen)fcPaint(frameBuffer.data(),preferences.uiScale);
+    inventoryPaint(frameBuffer.data());
     destinia::codexPaint(frameBuffer.data(),SCREEN_W,SCREEN_H,codex,false,codexPage,codexAvailable,codexMenuVisible(),codexTabSelected,nullptr,0,false,nullptr,0,0,preferences.uiScale);
     const uint8_t* fb = frameBuffer.data();
     if (headlessFrames) {
