@@ -1,0 +1,36 @@
+name: Publicar previa tecnica 0.9.1 dev1
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: release-091-dev1
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 1d88515fdd1a0cd8bbe932f69638e9cfd1bc66c7
+          path: preview
+      - name: Testar e empacotar somente fontes revisados
+        run: |
+          python -m unittest discover -s preview/tests -p 'test_package*.py' -v
+          python preview/scripts/package_release.py --out dist
+          python - <<'PY'
+          import pathlib,hashlib,zipfile
+          root=pathlib.Path('dist');old=root/'destinia-0.9-beta-source.zip';new=root/'destinia-0.9.1-dev1-source.zip'
+          old.rename(new);pathlib.Path(str(old)+'.sha256').unlink()
+          pathlib.Path(str(new)+'.sha256').write_text(hashlib.sha256(new.read_bytes()).hexdigest()+'  '+new.name+'\n')
+          with zipfile.ZipFile(new) as z:
+              assert z.testzip() is None
+              assert 'destinia-0.9-beta/tests/inventory_view_native.cpp' in z.namelist()
+              assert not any(n.endswith(('.exe','.dll','.so','.dat')) for n in z.namelist())
+          PY
+      - name: Publicar previa autorizada
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create v0.9.1-dev1 dist/* --target 1d88515fdd1a0cd8bbe932f69638e9cfd1bc66c7 --title 'Destinia 0.9.1 - previa tecnica dev1 (fontes)' --notes-file release/NOTAS_0.9.1_DEV1.md --prerelease
