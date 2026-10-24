@@ -1,13 +1,21 @@
-# Destinia 0.9.1 Beta
+# Destinia 0.9.2 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.9.1 Beta — Códex integrado e filtros](https://github.com/sugyua/destinia/releases/tag/v0.9.1-beta)** — ZIP Windows com os dois EXEs e inicializadores, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
+**[Baixar Destinia 0.9.2 Beta — Executáveis na raiz](https://github.com/sugyua/destinia/releases/tag/v0.9.2-beta)** — ZIP Windows com dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
 
 **[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
+
+## 0.9.2 — abra direto pelo .exe da raiz
+
+O pacote Windows passa a incluir **`Destinia.exe`** (normal) e **`Destinia Zoom.exe`** (zoom), ambos na **raiz da pasta extraída**, ao lado do `VERSION`. Dê duplo clique no executável desejado, sem abrir um `.bat`. Os dois inicializadores localizam os hosts existentes em `host/build/` e `host_zoom/build/`, configuram o caminho de DLLs MSYS2 UCRT64, conferem a versão instalada e iniciam no diretório correto. **Não mova os hosts** das subpastas. Os `.bat` continuam disponíveis para diagnóstico e configurações.
+
+O ZIP Windows da Release contém os quatro executáveis: os dois lançadores na raiz e os dois hosts nas respectivas subpastas. O ZIP de fontes contém `launcher/main.go` e os scripts de compilação, **não** os executáveis pré-compilados. Não são incluídos dados do jogo ou DLLs externas; veja [INSTALAÇÃO](INSTALL.md).
+
+**Web:** permanece na **0.9.1 Beta**, revisão `5d05a13`, [site privado](https://destinia-web-experimental.leafyheron257.chatgpt.site/). Esta atualização `0.9.2` altera apenas o modo de iniciar a versão Windows e **não foi implantada na web**. O progresso web continua temporário.
 
 ## 0.9.1 — Códex no menu e filtros de equipamentos
 
