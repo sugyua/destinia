@@ -4,6 +4,14 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.9.2 Beta — inicializadores Windows na raiz — 24/10/2026
+
+- Novo **Destinia.exe** e **Destinia Zoom.exe** na raiz da pasta Windows extraída, sem necessidade de executar BAT para jogar. Ambos são aplicativos GUI Windows x64 e abrem os hosts nas subpastas existentes.
+- Mantidos hosts originais, pasta game, saves/configurações e dependências MSYS2 UCRT64. Scripts BAT de suporte continuam disponíveis.
+- Empacotador, teste do ZIP e workflow Windows passam a exigir quatro arquivos EXE (dois launchers e dois hosts).
+- **Web não alterada**: segue a 0.9.1, revisão 5d05a13, com progresso não persistente. Bugs visuais de prévia do Códex/ponteiro continuam em PR separado, sem correção publicada nesta versão.
+- Testes físicos Windows/iPhone ainda necessários; resultados de CI são verificados separadamente.
+
 ## 0.9.1 Beta — Códex integrado e filtros — 24/10/2026
 
 - Códex como décima aba da barra original nos dois hosts PC e na web; moldura, fonte e ícones desenhados pelas rotinas ARM do jogo. Nove abas originais preservadas.
