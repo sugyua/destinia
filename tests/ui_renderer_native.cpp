@@ -11,7 +11,7 @@ static uc_err keepEngine(uc_engine*){return UC_ERR_OK;}
 #undef main
 #undef uc_close
 #include "../common/ui_renderer.h"
-namespace destinia {struct UiRendererFixture {static void panel(UiRenderer& ui,bool value){ui.kind=value?UiRenderer::Kind::Panel:UiRenderer::Kind::None;}};}
+namespace destinia {struct UiRendererFixture {static void panel(UiRenderer& ui,bool value){ui.kind=value?UiRenderer::Kind::Panel:UiRenderer::Kind::None;}static void alphaMultiply(UiRenderer& ui,uint32_t dst,uint32_t source,uint32_t palette){ui.realBase=dst;ui.matrix={ui.width,ui.height,100,UiAnchor::TopLeft};ui.indexed(UiRenderer::virtualBase+2*((UiRenderer::padding+36)*UiRenderer::virtualSide+UiRenderer::padding+40),source,palette,2,1,2,2,ui.width*2,4,ui.base+0x9468);}};}
 int main(int argc,char**argv){
  assert(argc>2);int percent=atoi(argv[1]);if(int result=originalMain(argc-1,argv+1))return result;
  auto grp=exportsMap.at("Grp"),handle=rd32(grp+4);u32 pixels=0;assert(callFn(exportsMap.at("MC_GRP_GET_FRAME_BUFFER_POINTER"),{handle},&pixels));
@@ -25,6 +25,11 @@ int main(int argc,char**argv){
   if(actual!=expected){fprintf(stderr,"UI_MISMATCH percent=%d alpha=%d x=%d error=%s\n",percent,alpha,x,ui.error.c_str());return 4;}
  }
  destinia::UiRendererFixture::panel(ui,false);
+ // Compare alpha-multiply against the original ARM primitive, including background.
+ const auto source=hmalloc(2),palette=hmalloc(512);uint8_t indices[2]={0,1};uint16_t colors[256]={0x5c39,0x7bef};wr(source,indices,2);wr(palette,colors,512);
+ assert(callFn(exportsMap.at("Grp_setDrawOpVal"),{1,7}));wr(pixels,background.data(),FB_BYTES);
+ assert(callFn(exportsMap.at("_Grp_drawAlpMultiply16"),{pixels+2*(36*SCREEN_W+40),source,palette,2,1,0,1,u32(SCREEN_W-2)}));rd(pixels,expected.data(),FB_BYTES);
+ wr(pixels,background.data(),FB_BYTES);destinia::UiRendererFixture::alphaMultiply(ui,pixels,source,palette);assert(ui.ok());rd(pixels,actual.data(),FB_BYTES);assert(actual==expected);
  const auto main=exportsMap.at("MMain"),game=exportsMap.at("Game"),gameUi=exportsMap.at("GameUI"),runner=rd32(SO_BASE+0x44240);wr32(runner,exportsMap.at("GameCanvas"));
  assert(callFn(exportsMap.at("GameCanvas_init"),{exportsMap.at("GameCanvas")}));
  const auto table=exportsMap.at("frameBuffer"),screenDescriptor=hmalloc(12),screenPixels=hmalloc(FB_BYTES);wr32(screenDescriptor,SCREEN_W);wr32(screenDescriptor+4,SCREEN_H);wr32(screenDescriptor+8,screenPixels);wr32(table,screenDescriptor);wr(screenPixels,background.data(),FB_BYTES);

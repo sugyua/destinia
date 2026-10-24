@@ -1,3 +1,4 @@
+#define SDL_MAIN_HANDLED
 #include "../common/player_controls.h"
 #include "../common/skill_labels.h"
 #include <cassert>
@@ -10,6 +11,9 @@ int main() {
  assert(quickSlotAction(3)==Action::SkillUp);
  assert(quickSlotAction(4)==Action::None);
  Preferences p;
+ std::vector<uint8_t> hint(400*240*2);std::array<SkillHintRect,4> boxes{{{100,100,32,32},{0,0,0,0},{0,0,0,0},{0,0,0,0}}};
+ paintSkillHints(hint.data(),400,240,p,InputDevice::Touch,boxes,75);assert(std::all_of(hint.begin(),hint.end(),[](auto b){return b==0;}));
+ p.keys[SDLK_q]=Action::SkillLeft;paintSkillHints(hint.data(),400,240,p,InputDevice::Keyboard,boxes,75);assert(std::any_of(hint.begin(),hint.end(),[](auto b){return b!=0;}));
  p.keys[SDLK_q]=Action::SkillLeft;
  p.keys[SDLK_2]=Action::SkillRight;
  p.buttons[SDL_CONTROLLER_BUTTON_LEFTSHOULDER]=Action::SkillUp;

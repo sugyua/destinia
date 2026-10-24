@@ -62,7 +62,7 @@ class UiRenderer {
  void pixel(U dst,int offset,uint16_t color,int effect=0,U weight=0){
   int64_t address=int64_t(dst)+offset-virtualBase;if(address<0||address>=int64_t(virtualSide)*virtualSide*2||address%2)throw std::runtime_error("UI: destino virtual invalido");
   int n=int(address/2),x=n%virtualSide-padding,y=n/virtualSide-padding;auto area=matrix.rect(x,y,1,1);
-  for(int yy=std::max(0,area.y);yy<std::min(height,area.y+area.h);++yy)for(int xx=std::max(0,area.x);xx<std::min(width,area.x+area.w);++xx){auto& old=canvas[size_t(yy)*width+xx];if(effect==1)old=alpha(old,color,weight);else if(effect==2)old=uint16_t(std::min((old&0xf800)+(color&0xf800),0xf800)|std::min((old&0x7e0)+(color&0x7e0),0x7e0)|std::min((old&31)+(color&31),31));else if(effect==3)old=uint16_t((((old>>11)*(color>>11))>>5)<<11|((((old>>5&63)*(color>>5&63))>>6)<<5)|((old&31)*(color&31)>>5));else old=color;}
+  for(int yy=std::max(0,area.y);yy<std::min(height,area.y+area.h);++yy)for(int xx=std::max(0,area.x);xx<std::min(width,area.x+area.w);++xx){auto& old=canvas[size_t(yy)*width+xx];if(effect==1)old=alpha(old,color,weight);else if(effect==2)old=uint16_t(std::min((old&0xf800)+(color&0xf800),0xf800)|std::min((old&0x7e0)+(color&0x7e0),0x7e0)|std::min((old&31)+(color&31),31));else if(effect==3||effect==4){auto multiplied=uint16_t((((old>>11)*(color>>11))>>5)<<11|((((old>>5&63)*(color>>5&63))>>6)<<5)|((old&31)*(color&31)>>5));old=effect==4?alpha(old,multiplied,weight):multiplied;}else old=color;}
  }
  void indexed(U dst,U source,U palette,int w,int h,int sourceStride,int step,int stride,int effect,U next){
   if(w<=0||h<=0){set(15,next|1);return;}if(w>2048||h>2048||sourceStride<w)throw std::runtime_error("UI: dimensoes de imagem invalidas");
@@ -98,7 +98,7 @@ class UiRenderer {
    case 0xbd60:{int w=stack(0x78),step=int32_t(stack(0x34))*2;indexed(reg(5),reg(6),reg(8),w,stack(0x7c),w+int32_t(stack(0x3c)),step,w*step+int32_t(stack(0x38))*2,0,base+0xbc8c);return;}
    case 0xc120:{int w=stack(0x78),step=int32_t(stack(0x34))*2;indexed(reg(5),reg(6),reg(8),w,stack(0x7c),w+int32_t(stack(0x3c)),step,w*step+int32_t(stack(0x38))*2,1,base+0xbc8c);return;}
    case 0xb5e2:{int w=reg(4);indexed(reg(0),reg(1),reg(2),w,stack(0x64),w+int32_t(stack(0x24)),2,w*2+int32_t(stack(0x28))*2,0,base+0xb546);return;}
-   case 0x9e18:case 0x9244:case 0x953c:case 0x93e0:{int w=reg(3),step=int32_t(arg(6))*2;indexed(reg(0),reg(1),reg(2),w,arg(4),w+int32_t(arg(5)),step,w*step+int32_t(arg(7))*2,off==0x9244?1:off==0x953c?2:off==0x93e0?3:0,reg(14));return;}
+   case 0x9e18:case 0x9244:case 0x953c:case 0x93e0:case 0x9480:{int w=reg(3),step=int32_t(arg(6))*2;indexed(reg(0),reg(1),reg(2),w,arg(4),w+int32_t(arg(5)),step,w*step+int32_t(arg(7))*2,off==0x9244?1:off==0x953c?2:off==0x93e0?3:off==0x9480?4:0,reg(14));return;}
    default:return;
   }
  }
@@ -108,7 +108,7 @@ public:
  void install(uc_engine* engine,U soBase,const std::map<std::string,U>& exports,int w,int h,int scale,bool detectUnsupported=false,const std::string& library=""){e=engine;base=soBase;symbols=exports;width=w;height=h;percent=scale;grp=symbol("Grp");fb=symbol("frameBuffer");if(percent==100)return;
   if(!library.empty()){std::ifstream file(library,std::ios::binary);uint64_t hash=14695981039346656037ull;char byte;while(file.get(byte))hash=(hash^static_cast<unsigned char>(byte))*1099511628211ull;if(!file.eof()||hash!=0x74b2547839b88777ull)throw std::runtime_error("UI: biblioteca ARM incompativel");}
   if(uc_mem_map(e,virtualBase,0x800000,UC_PROT_NONE)!=UC_ERR_OK||uc_mem_map(e,returnPc,0x1000,UC_PROT_READ|UC_PROT_EXEC)!=UC_ERR_OK)throw std::runtime_error("UI: viewport virtual indisponivel");
-  for(U off:{0x34684,0x341d4,0xff30,0x34454,0x21440,0x215ec,0x216a8,0x21854,0x31df8,0x15bec,0x1689c,0x16824,0x29000,0x29344,0x2943c,0xbb90,0xb4bc,0xb148,0xafc0,0xb8d4,0xae34,0xab40,0xa27c,0xaad4,0xab34,0xb0d6,0xbb16,0xb32a,0xac34,0xa346,0xbd60,0xc120,0xb5e2,0x9e18,0x9244,0x953c,0x93e0})hook(base+off);hook(returnPc);
+  for(U off:{0x34684,0x341d4,0xff30,0x34454,0x21440,0x215ec,0x216a8,0x21854,0x31df8,0x15bec,0x1689c,0x16824,0x29000,0x29344,0x2943c,0xbb90,0xb4bc,0xb148,0xafc0,0xb8d4,0xae34,0xab40,0xa27c,0xaad4,0xab34,0xb0d6,0xbb16,0xb32a,0xac34,0xa346,0xbd60,0xc120,0xb5e2,0x9e18,0x9244,0x953c,0x93e0,0x9480})hook(base+off);hook(returnPc);
   if(detectUnsupported){uc_hook detector;if(uc_hook_add(e,&detector,UC_HOOK_MEM_WRITE,(void*)unhandled,this,virtualBase,returnPc-1)!=UC_ERR_OK)throw std::runtime_error("UI: detector indisponivel");hooks.push_back(detector);}
  }
  std::pair<int,int> touchPoint(int x,int y,int state)const {

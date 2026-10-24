@@ -2,7 +2,7 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs. Faça backup dos saves antes de atualizar.**
 
-Planejamento autorizado pelo autor em **21/10/2026**: **44 melhorias aprovadas**, das quais **8 concluídas** na 0.5/0.6 e **36 ainda não concluídas**, incluindo o Códex entregue parcialmente, da 0.8 em diante. A publicação da **0.6 Beta** foi aprovada pelo autor. Testes automáticos passaram; campanha e inspeção manual no Windows continuam pendentes.
+Planejamento autorizado pelo autor em **21/10/2026**: **44 melhorias aprovadas**, das quais **14 concluídas** na 0.5–0.8 e **30 ainda não concluídas**, incluindo o Códex entregue parcialmente, da 0.8 em diante. A publicação da **0.6 Beta** foi aprovada pelo autor. Testes automáticos passaram; campanha e inspeção manual no Windows continuam pendentes.
 
 ## Melhorias concluídas com sucesso
 
@@ -27,7 +27,7 @@ Testes automatizados cobrem registro, morte única, reaparecimento, slots, persi
 
 **O item 42 completo continua desmarcado:** armas, armaduras e integração com drops exclusivos permanecem na 0.11. Os outros quatro ajustes de interface antes previstos para a 0.7 foram mantidos como pendências da 0.8.
 
-## Atualizações futuras — 0.8 em diante
+## Atualizações futuras — 0.9 em diante
 
 ## Ordem e critérios
 
@@ -58,30 +58,7 @@ As versões abaixo são **metas provisórias**, sem calendário garantido. Uma e
 
 ## Etapas futuras aprovadas
 
-### Meta 0.8 — Interface e acessibilidade
-
-Separar o tamanho da UI do zoom e melhorar a apresentação para teclado, controle e português. Estes ajustes não entraram na 0.7 e continuam pendentes para a 0.8.
-
-**Dependências:** Depende das configurações da 0.6 e da identificação de como a UI nativa é desenhada e recebe cliques.
-
-- [ ] **08. Escala de UI independente do zoom:** Escolher tamanho da interface e do texto sem mudar a quantidade de cenário visível; alinhar as regiões clicáveis.
-- [ ] **09. Ocultar botões virtuais:** Opção de esconder direcional e botões de toque ao jogar por teclado/controle, mantendo os comandos físicos. Implementação nativa em preparação na branch `feature/08-hide-touch-controls`, com preferência por host; falta validação visual/campanha Windows antes de marcar como entregue.
-- [ ] **19. Atalhos visíveis nas habilidades:** Mostrar a tecla ou botão configurado junto às habilidades e adaptar os símbolos ao controle usado.
-- [ ] **24. Português mais completo e legível:** Completar diálogos e descrições ainda em inglês e investigar suporte a acentos/fontes, preservando espaço e quebras de linha.
-
-**Verificação necessária antes da entrega:** Conferir texto, acentos, símbolos dos comandos e regiões clicáveis; testar janela, DPI e tela cheia 3440×1440 com imagem proporcional 2400×1440.
-
-### Meta 0.8 — Saves, compatibilidade e loja offline
-
-Preparar a base para alterar inventário e progressão sem misturar a experiência clássica com a expandida.
-
-**Dependências:** Mapear formatos de dados/saves e o fluxo de escrita; preservar cópias originais antes das mudanças permanentes.
-
-- [ ] **03. Gravação segura de saves:** Investigar gravação temporária, validação e substituição atômica ao concluir, preservando o save anterior se houver falha.
-- [ ] **04. Loja offline sem espera nem crédito indevido:** Retornar ao jogo com aviso quando compras reais estiverem indisponíveis, sem espera pendente nem novo crédito indevido; preservar o saldo existente.
-- [ ] **36. Modo clássico e expandido:** Separar as alterações de progressão/conteúdo da experiência original, com perfis e saves identificados para evitar conversões silenciosas.
-
-**Verificação necessária antes da entrega:** Interromper uma gravação em cópia descartável e recuperar o save anterior; conferir separação de perfis e retorno da loja sem espera pendente nem alteração indevida de saldo.
+A 0.8 entregou os itens03,04,08,09,19 e36; a revisão integral da tradução24 permanece pendente. [Escopo e limites](RELEASE_0.8.md).
 
 ### Meta 0.9 — Inventário, coleta e assistência opcional
 
@@ -220,3 +197,7 @@ Fontes primárias consultadas em **21/10/2026**. São referências de experiênc
 - **[Flare 1.15 — anúncio oficial](https://flarerpg.org/2026/05/03/flare-1-15/)**: Publicação documenta gráficos para 1080p/1440p, ordenação opcional de inventário/baú, auto-loot configurável, mapas e itens procedurais, masmorra adicional e revisão de habilidades. Novas mecânicas de Destinia abaixo são propostas próprias inspiradas nisso, não funcionalidades prontas para importar.
 
 O port Vita documenta outra versão do APK; endereços e patches não podem ser presumidos compatíveis. Sua solução de crédito local para a loja não é a proposta aprovada aqui: o item 04 deve preservar o saldo e retornar ao jogo sem novo crédito indevido.
+
+## Entrega 0.8
+
+Itens03,04,08,09,19 e36 implementados; tradução24 ampliada parcialmente, revisão integral ainda pendente. Consulte [RELEASE_0.8.md](RELEASE_0.8.md). Próxima entrega funcional: metas0.9 do README; propostas posteriores preservadas.

@@ -50,7 +50,7 @@ jobs:
           SDL_AUDIODRIVER: dummy
         run: |
           set -eu
-          for pattern in test_runtime.py test_preferences.py test_preferences_host.py test_codex.py test_codex_native.py test_codex_details.py test_codex_details_ui.py test_codex_portraits.py test_zoom_camera.py test_safe_save.py test_offline_store.py test_save_modes.py test_touch_controls.py test_package_release.py test_package_windows.py; do
+          for pattern in test_runtime.py test_preferences.py test_preferences_host.py test_codex.py test_codex_native.py test_codex_details.py test_codex_details_ui.py test_codex_portraits.py test_zoom_camera.py test_safe_save.py test_offline_store.py test_save_modes.py test_touch_controls.py test_ui_transform.py test_text_labels.py test_package_release.py test_package_windows.py; do
             python -m unittest discover -s tests -p "$pattern" -v
           done
           DESTINIA_ZOOM_EXE="$PWD/host_zoom/build/destinia_host.exe" python -m unittest discover -s tests -p test_zoom_render.py -v

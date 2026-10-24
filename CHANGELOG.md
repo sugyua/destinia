@@ -4,12 +4,19 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
-## Em preparação — 0.8 Beta (ainda não publicada)
+## 0.8 Beta — 24/10/2026
 
-- Adicionada preferência independente por host para ocultar os controles virtuais durante a partida e desativar suas áreas de toque. Por padrão continuam visíveis; comandos físicos e navegação de menus são preservados.
-- Configurador oferece a opção 6 — Controles virtuais. Restaurar padrões volta a exibi-los sem alterar o caminho de saves.
-- Interceptações pontuais verificam a biblioteca ARM conhecida antes da ativação. A escala da UI independente do zoom permanece pendente para a etapa seguinte.
-- Testes automatizados usam as rotinas ARM reais com estados e saves temporários; validação visual/campanha Windows pendente. Publicada na `main` como prévia; compilação/testes Windows aprovados e protótipo web atualizado com a mesma opção. A release 0.8 completa continua pendente.
+- Escala independente da interface em **75%, 100% ou 125%**, sem alterar o zoom do cenário; hitboxes transformadas junto da UI e contador XP preservado.
+- Controles virtuais opcionais por host, com suas áreas de toque desativadas quando ocultos. Teclado, controle e menus continuam disponíveis.
+- Atalhos das habilidades exibem as teclas configuradas ou os botões/stick do controle utilizado no Windows.
+- Ampliação **parcial** dos textos em português nos dois hosts e na web; fontes dos painéis do port suportam acentos. Textos sem espaço seguro mantêm o original.
+- Saves ARM gravados por lote em temporários, com journal e recuperação após interrupção; mantém backups e pasta compartilhada entre atualizações.
+- Loja offline cancela pedidos com aviso, libera o estado de rede e preserva o cash existente, sem conceder crédito.
+- Perfis **clássico/expandido** com pastas, locks e backups separados. Importação do clássico exige destino novo e ação explícita; não altera a origem.
+- Códex da main reúne a grade de retratos frontais, contador corrigido, informações e drops por categoria/raridade das correções posteriores à release original 0.7.
+- Protótipo web acompanha escala, controles, idioma e modos; partidas permanecem temporárias na memória.
+
+Verificações, instalação e limites: [RELEASE_0.8.md](docs/RELEASE_0.8.md).
 
 ## Organização das releases — 22/10/2026
 

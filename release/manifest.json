@@ -1,6 +1,6 @@
 {
-  "version": "0.7",
-  "base_commit": "a6330135d9005d54538efc1141b78a5ea71d820b",
+  "version": "0.8",
+  "base_commit": "f6865e38e3e2b65d0bae76cd03fade2953e926ea",
   "files": [
     ".gitignore",
     "AGENTS.md",
@@ -104,6 +104,21 @@
     "tests/safe_save_host_cases.cpp",
     "tests/test_safe_save.py",
     "tests/touch_controls_native.cpp",
-    "tests/test_touch_controls.py"
+    "tests/test_touch_controls.py",
+    "common/overlay_font.h",
+    "common/portuguese_text.h",
+    "common/skill_labels.h",
+    "common/ui_renderer.h",
+    "common/ui_transform.h",
+    "docs/RELEASE_0.8.md",
+    "release/NOTAS_0.8.md",
+    "tests/overlay_font_cases.cpp",
+    "tests/portuguese_text_cases.cpp",
+    "tests/skill_labels_cases.cpp",
+    "tests/skill_labels_native.cpp",
+    "tests/test_text_labels.py",
+    "tests/test_ui_transform.py",
+    "tests/ui_renderer_native.cpp",
+    "tests/ui_transform_cases.cpp"
   ]
 }

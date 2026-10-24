@@ -62,3 +62,7 @@ jogo.modo=classico
 Valores aceitos: `classico` e `expandido`. O perfil de comandos (`controle_perfil`) é independente do modo de jogo. Restaurar padrões volta ao clássico e mantém as duas pastas de progresso. O marcador `.destinia-mode` impede carregar um save identificado como pertencente ao outro modo. Não apague esse marcador nem aponte versões antigas à pasta expandida. `--save` continua escolhendo a pasta exata de diagnóstico, com validação do modo; `--import-classic` é a ação explícita de cópia para a pasta expandida global.
 
 Na web, o seletor **Modo** encerra a sessão atual mediante confirmação e abre uma partida vazia em memória. A seleção é lembrada, mas o progresso não é salvo no navegador nem importado do PC.
+
+## Opções da 0.8
+
+O configurador oferece 6 controles virtuais, 7 modo clássico/expandido, 8 escala UI75/100/125 e 9 idioma inglês/português parcial. A escala não muda o cenário nem o XP. O modo expandido prepara futuras alterações e usa save separado; importação explícita somente para destino novo. Idioma é global; UI/controles são por host. Restaurar padrões preserva o caminho de saves. Consulte [RELEASE_0.8.md](RELEASE_0.8.md).

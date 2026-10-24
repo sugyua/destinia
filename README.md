@@ -1,19 +1,19 @@
-# Destinia para Windows — 0.7 Beta
+# Destinia para Windows — 0.8 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**Atualização mais recente na `main`: Códex com informações de monstros nos dois hosts.** [Baixar pacotes atualizados de Windows e fontes](https://github.com/sugyua/destinia/actions/runs/39858876580/artifacts/12461226530) — compilação e verificações Windows [aprovadas](https://github.com/sugyua/destinia/actions/runs/39858876580). Abra o pacote baixado e extraia `destinia-0.7-beta-windows-x64.zip` para usar os EXEs prontos; o GitHub pode exigir login para baixar artefatos. [Baixar os fontes atuais em ZIP](https://github.com/sugyua/destinia/archive/refs/heads/main.zip), preservar a pasta `game` e executar **Compilar Destinia.bat** com o jogo fechado. AÇÃO/ataque na grade abre drops, locais e variantes. Veja [como usar e verificações](docs/CODEX_DETALHES.md). Os pacotes de teste com EXEs ficam em [GitHub Actions](https://github.com/sugyua/destinia/actions/workflows/verify-codex-menu.yml) após a compilação; os ZIPs antigos das releases permanecem inalterados.
+**[Baixar Destinia 0.8 Beta](https://github.com/sugyua/destinia/releases/tag/v0.8-beta)** — ZIP Windows com os dois EXEs e inicializadores, ZIP de fontes e checksums. Dependências e dados originais do jogo são instalados separadamente; consulte a seção **Dependências**.
 
-**[Baixar Destinia 0.7 Beta atualizada — Códex com imagens](https://github.com/sugyua/destinia/releases/tag/v0.7-codex-imagens-fix2)** — pacote Windows x64 com os dois EXEs prontos, inicializadores e changelog em português. A correção fix2 reúne as miniaturas completas com cores originais, a câmera mais leve no zoom e as correções anteriores de abertura/diagnóstico. Veja [verificações e limites](docs/CORRECOES_0.7_FIX2.md). A [release original da 0.7](https://github.com/sugyua/destinia/releases/tag/v0.7-beta) permanece disponível.
+Interface75/100/125%, controles virtuais opcionais, atalhos das habilidades, mais português, saves recuperáveis, loja offline e perfis clássico/expandido. [Instalação, verificações e limites](docs/RELEASE_0.8.md) · [Changelog](CHANGELOG.md) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
-A 0.6 adiciona configurações persistentes, comandos remapeáveis, volumes separados, pausa opcional e distribuição Windows x64 com os dois EXEs. Veja [instalação](INSTALL.md), [preferências](docs/PREFERENCIAS.md), [changelog](CHANGELOG.md) e [verificações](docs/RELEASE_0.6.md). Dependências externas e dados originais continuam separados.
 
 ## Releases em ordem de lançamento
 
-Da mais recente para a mais antiga. Os pacotes mais novos da `main` indicados acima são candidatos de teste; esta lista reúne as releases publicadas.
+Da mais recente para a mais antiga. As releases anteriores e seus downloads são preservados.
 
 | Release | Lançamento (Brasília) |
 | --- | --- |
+| [0.8 Beta — interface e saves](https://github.com/sugyua/destinia/releases/tag/v0.8-beta) | 24/10/2026 |
 | [0.7 Beta — imagens e câmera, fix2](https://github.com/sugyua/destinia/releases/tag/v0.7-codex-imagens-fix2) | 22/10/2026 05:54 |
 | [0.7 Beta — correção de abertura, fix1](https://github.com/sugyua/destinia/releases/tag/v0.7-codex-imagens-fix1) | 21/10/2026 18:42 |
 | [0.7 Beta — Códex com imagens](https://github.com/sugyua/destinia/releases/tag/v0.7-codex-imagens) | 21/10/2026 18:20 |
@@ -26,11 +26,11 @@ Da mais recente para a mais antiga. Os pacotes mais novos da `main` indicados ac
 
 [Ver todas as releases no GitHub](https://github.com/sugyua/destinia/releases)
 
-## Prévia da 0.8 — controles virtuais opcionais
+## Novidades da 0.8
 
-A `main` já permite mostrar/ocultar os controles virtuais por host em **Configurar Destinia → 6 — Controles virtuais**. Compilação e testes Windows: [execução aprovada](https://github.com/sugyua/destinia/actions/runs/39933223943), com [pacotes de teste para download](https://github.com/sugyua/destinia/actions/runs/39933223943/artifacts/12492846293). Os EXEs ainda identificam a versão base 0.7; esta é uma prévia da 0.8, não uma release completa.
+Em **Configurar Destinia.bat**: **6** mostrar/ocultar controles; **7** clássico/expandido; **8** interface75/100/125%; **9** idioma. O zoom do mapa e o tamanho do XP são preservados. Atalhos acompanham o remapeamento e o dispositivo físico no Windows. Tradução ampliada **parcialmente**, com acentos nos painéis do port.
 
-O [protótipo web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site) também oferece **Ocultar botões do jogo**, mantendo o painel externo de toque para jogar pelo celular. A preferência é lembrada no navegador; progresso e Códex continuam temporários. A escala independente da UI permanece pendente. Veja [preferências](docs/PREFERENCIAS.md).
+Saves compartilham a pasta configurada entre versões; modo expandido usa pasta irmã separada e importação explícita para destino novo. Loja offline não concede cash e cancela a espera. Web possui as mesmas opções de apresentação/idioma/modo, mas **progresso temporário e sem áudio**. [Detalhes e limites](docs/RELEASE_0.8.md).
 
 ## Arquitetura
 
@@ -114,7 +114,7 @@ Para testar uma instalação existente, execute **[Testar Destinia.bat](Testar%2
 
 O relatório é salvo ao longo da sessão e informa quando está parcial. Após cada execução, o diagnóstico também destaca compras observadas, alterações de cash e a rede aguardando resposta; esses avisos não significam que o problema da loja foi corrigido.
 
-Para esta versão, use o diagnóstico incluído no pacote completo de fontes 0.7, com EXEs da mesma versão. Não sobreponha os auxiliares antigos da main: eles podem não incluir as proteções de preferências da 0.6.
+Para esta versão, use o diagnóstico incluído no pacote completo de fontes 0.8, com EXEs da mesma versão. Não sobreponha os auxiliares antigos da main: eles podem não incluir as proteções de preferências da 0.6.
 
 Consulte [INSTALL.md](INSTALL.md) para compilar e executar com dados próprios compatíveis. Os launchers existentes continuam voltados ao ambiente de desenvolvimento MSYS2 em `C:\msys64\ucrt64\bin`; não são launchers portáteis.
 
@@ -122,12 +122,12 @@ Para verificar o empacotador, com Python 3.10 ou superior:
 
 ```sh
 python -m unittest discover -s tests -v
-python scripts/package_release.py --out dist/release-0.7
+python scripts/package_release.py --out dist/release-0.8
 ```
 
 No Linux, o comando pode ser `python3`. O empacotador cria ZIP e SHA-256, não compila executáveis. Não sobrescreve artefatos existentes. A reprodução byte a byte foi verificada com a mesma versão de Python/zlib; outras versões podem mudar a compressão.
 
-O [manifesto](release/manifest.json) usa a 0.6 e seu planejamento como base da 0.7. O workflow Windows compila/testa os EXEs e gera um pacote separado; o empacotador de fontes não compila executáveis. Consulte o [roadmap](docs/ROADMAP.md) para as etapas seguintes.
+O [manifesto](release/manifest.json) identifica a base e os arquivos da 0.8. O workflow Windows compila/testa os EXEs e gera um pacote separado; o empacotador de fontes não compila executáveis. Consulte o [roadmap](docs/ROADMAP.md) para as etapas seguintes.
 
 ## Melhorias concluídas com sucesso
 
@@ -159,11 +159,21 @@ Os registros ficam em **codex-v1.txt**, na pasta compartilhada de saves, separad
 
 Testes automatizados cobrem registro, morte única, reaparecimento, slots, persistência e callbacks originais ARM com estruturas controladas, além de desenho dos painéis. Campanha completa e inspeção visual no Windows continuam pendentes. Veja [como usar o Códex](docs/CODEX.md) e [verificações da 0.7](docs/RELEASE_0.7.md).
 
-**O item 42 completo continua desmarcado:** armas, armaduras e integração com drops exclusivos permanecem na 0.11. Os outros quatro ajustes de interface antes previstos para a 0.7 foram mantidos como pendências da 0.8.
+**O item 42 completo continua desmarcado:** armas, armaduras e integração com drops exclusivos permanecem na 0.11. Os ajustes de interface foram incorporados à 0.8; revisão integral da tradução continua pendente.
+
+### Entregues na 0.8
+
+- [x] **03. Gravação recuperável de saves:** temporários, journal e recuperação por lote ARM; backups preservados. Não é garantia contra toda falha física.
+- [x] **04. Loja offline:** cancelamento com aviso e saldo preservado, sem crédito indevido.
+- [x] **08. Escala de UI independente do zoom:**75/100/125%, transformação de toque e XP preservado.
+- [x] **09. Ocultar botões virtuais:** preferência por host, preservando comandos físicos e menus.
+- [x] **19. Atalhos nas habilidades:** teclas/botões configurados e stick do controle no Windows.
+- [x] **36. Clássico/expandido:** pastas e backups isolados; importação explícita, sem conteúdo novo ainda.
+- [ ] **24. Português completo:** tradução ampliada e fontes de painéis com acentos entregues; revisão integral de diálogos/descrições continua futura.
 
 ## Atualizações futuras
 
-Das **44 melhorias aprovadas**, **8 foram concluídas** nas versões 0.5 e 0.6; **36 ainda não estão concluídas**, incluindo o Códex entregue parcialmente, somente da **0.8 em diante**. As versões abaixo são metas provisórias, sem datas garantidas, e dependem de investigação e testes.
+Das **44 melhorias aprovadas**, **14 foram concluídas** nas versões 0.5–0.8; **30 ainda não estão concluídas**, incluindo o Códex entregue parcialmente, somente da **0.8 em diante**. As versões abaixo são metas provisórias, sem datas garantidas, e dependem de investigação e testes.
 
 **A expansão continua incluindo aumento do nível máximo, novos ranks de armas, armaduras e acessórios, itens únicos, conjuntos com bônus, novos títulos, novos pets, drops exclusivos por monstro e um Códex de equipamentos e monstros.** Limites, nomes e valores serão definidos após verificar dados originais e balanceamento.
 
@@ -174,23 +184,6 @@ Consulte o [roadmap detalhado](docs/ROADMAP.md) para dependências, critérios d
 **Novo objetivo para a 1.0:** cooperativo pela internet e LAN, registrado como item 43 e ainda não implementado.
 
 **Novos pedidos:** o Códex inicial de monstros e seu contador foram implementados na **0.7**, sujeitos às limitações de verificação acima. Drops exclusivos continuam como meta da **0.10**, e a ampliação do Códex com armas e armaduras fica na **0.11**. Não existe reconstrução automática do histórico antigo.
-
-### Meta 0.8 — Interface e acessibilidade
-
-Separar o tamanho da UI do zoom e melhorar a apresentação para teclado, controle e português. Estes ajustes não entraram na 0.7 e continuam pendentes para a 0.8.
-
-- [ ] **08. Escala de UI independente do zoom:** Escolher tamanho da interface e do texto sem mudar a quantidade de cenário visível; alinhar as regiões clicáveis.
-- [ ] **09. Ocultar botões virtuais:** Opção de esconder direcional e botões de toque ao jogar por teclado/controle, mantendo os comandos físicos.
-- [ ] **19. Atalhos visíveis nas habilidades:** Mostrar a tecla ou botão configurado junto às habilidades e adaptar os símbolos ao controle usado.
-- [ ] **24. Português mais completo e legível:** Completar diálogos e descrições ainda em inglês e investigar suporte a acentos/fontes, preservando espaço e quebras de linha.
-
-### Meta 0.8 — Saves, compatibilidade e loja offline
-
-Preparar a base para alterar inventário e progressão sem misturar a experiência clássica com a expandida.
-
-- [ ] **03. Gravação segura de saves:** Investigar gravação temporária, validação e substituição atômica ao concluir, preservando o save anterior se houver falha.
-- [ ] **04. Loja offline sem espera nem crédito indevido:** Retornar ao jogo com aviso quando compras reais estiverem indisponíveis, sem espera pendente nem novo crédito indevido; preservar o saldo existente.
-- [ ] **36. Modo clássico e expandido:** Separar as alterações de progressão/conteúdo da experiência original, com perfis e saves identificados para evitar conversões silenciosas.
 
 ### Meta 0.9 — Inventário, coleta e assistência opcional
 
@@ -379,7 +372,7 @@ As associações **Necromante → foice** e **Granadeiro → granadas** já esta
 
 ## Publicação
 
-Versão **v0.7-beta**, com publicação autorizada pelo autor em 21/10/2026. O workflow só cria a release após compilar e testar os dois hosts no Windows. A validação manual no Windows continua pendente; testes automatizados e de inicialização não comprovam uma campanha completa. A versão permanece **Beta**. As releases anteriores continuam disponíveis.
+Versão **v0.8-beta**, com publicação autorizada pelo autor. O workflow só cria a release após compilar e testar os dois hosts no Windows. A validação manual no Windows continua pendente; testes automatizados e de inicialização não comprovam uma campanha completa. A versão permanece **Beta**. As releases anteriores continuam disponíveis.
 
 O ZIP curado não inclui biblioteca original, APK, DEX, assets, áudio, saves ou DLLs de terceiros. Consulte [THIRD_PARTY.md](THIRD_PARTY.md). Não foi definida uma licença para o código do host nesta etapa.
 

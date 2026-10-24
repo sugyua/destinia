@@ -82,11 +82,13 @@ struct Preferences {
   bool virtualControls=true;int uiScale=100;
   bool fullscreen=false,muteUnfocused=false,pauseUnfocused=false,pauseDisconnected=false;
   int width=1200,height=720,music=100,effects=100;
-  std::string profile="padrao",gameMode="classico";
+  std::string profile="padrao",gameMode="classico",language="en";
   std::map<SDL_Keycode,Action> keys;
   std::map<SDL_GameControllerButton,Action> buttons;
   static Preferences load(const fs::path& file,const std::string& host) {
     Preferences p; const auto values=readPreferencesFile(file); const bool zoom=host=="host_zoom";
+    if(values.count("idioma"))p.language=values.at("idioma");
+    if(p.language!="en"&&p.language!="pt")throw std::runtime_error("Idioma deve ser en ou pt.");
     if(values.count("jogo.modo"))p.gameMode=values.at("jogo.modo");
     if(!validGameMode(p.gameMode))throw std::runtime_error("Modo de jogo invalido.");
     const std::string video="video."+host+".";

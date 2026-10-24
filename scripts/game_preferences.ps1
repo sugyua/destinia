@@ -24,7 +24,7 @@ function Set-DestiniaPreferences([string]$Config,[hashtable]$Changes,[scriptbloc
         $values=Read-DestiniaPreferences $Config
         if($Reset) {
             foreach($key in @($values.Keys)) {
-                if($key -cmatch '^(jogo\.modo|video\.(host|host_zoom)\.(largura|altura|tela_cheia)|audio\.(musica|efeitos|silenciar_sem_foco)|pausa\.(sem_foco|sem_controle)|interface\.(host|host_zoom)\.(controles_virtuais|escala)|controle_perfil|perfil\..*\.(tecla|botao)\..*)$') {$values.Remove($key)}
+                if($key -cmatch '^(idioma|jogo\.modo|video\.(host|host_zoom)\.(largura|altura|tela_cheia)|audio\.(musica|efeitos|silenciar_sem_foco)|pausa\.(sem_foco|sem_controle)|interface\.(host|host_zoom)\.(controles_virtuais|escala)|controle_perfil|perfil\..*\.(tecla|botao)\..*)$') {$values.Remove($key)}
             }
         }
         foreach($key in $Changes.Keys) {
