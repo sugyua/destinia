@@ -24,8 +24,10 @@ def package(root, output, manifest):
         if (not name or "\\" in name or ":" in name or path.is_absolute()
                 or path.as_posix() != name or ".." in path.parts
                 or any(part.startswith(".") and part != ".gitignore" for part in path.parts)
-                or any(part in {"game", "save", "saves", "dist", "build", "relatorios", "Claude"}
+                or any(part in {"game", "save", "saves", "build", "relatorios", "Claude"}
                        or part.startswith(("save_", "build_")) for part in path.parts)
+                or any(part == "dist" and not (index == 1 and path.parts[0] == "web")
+                       for index, part in enumerate(path.parts))
                 or path.suffix.lower() in {".exe", ".dll", ".so", ".dex", ".log", ".dat"}
                 or ".bak" in path.name or name in inputs or name == "SOURCE_BASE.txt"):
             raise ValueError("Arquivo nao permitido: " + name)

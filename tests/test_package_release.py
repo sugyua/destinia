@@ -44,6 +44,13 @@ class PackageTests(unittest.TestCase):
             with self.subTest(name=name), self.assertRaises(ValueError):
                 self.module.package(self.root, self.out, self.manifest([name]))
 
+    def test_web_sources_allow_only_reviewed_dist_and_keep_game_secrets_blocked(self):
+        script=self.root/'web/dist/codex-native.mjs';script.parent.mkdir(parents=True);script.write_text('export const test=1;')
+        archive=self.module.package(self.root,self.out,self.manifest(['VERSION','web/dist/codex-native.mjs']))
+        with zipfile.ZipFile(archive) as zipped:self.assertIn('destinia-0.2-beta/web/dist/codex-native.mjs',zipped.namelist())
+        for name in ['dist/source.js','web/dist/game/library.so','web/dist/.env','web/dist/build/tool.exe','web/dist/nested/dist/file.js']:
+            with self.subTest(name=name),self.assertRaises(ValueError):self.module.package(self.root,self.out,self.manifest([name]))
+
     def test_rejects_symlink_to_outside(self):
         outside = self.root.parent / "private.txt"
         outside.write_text("private")
