@@ -270,6 +270,113 @@ Cada classe deve funcionar no modo solo e oferecer sinergias no cooperativo. Dif
 
 Os recursos opcionais terão configurações próprias. Mudanças permanentes de progressão/conteúdo dependem de perfis e saves identificados para os modos clássico e expandido, sem conversão silenciosa. Antes de ampliar o jogo, será verificado o que já existe para melhorar os sistemas atuais. A publicação de cada nova release continuará dependendo da revisão das verificações e da aprovação do autor.
 
+## Complementos ao planejamento — propostas de versões futuras
+
+> Registro do relatório de continuidade de 23/10/2026. **Tudo abaixo é planejamento, não implementação.** Preserva o escopo aprovado da 0.8–0.12. As versões sugeridas dependem de avaliação técnica e não representam datas ou entregas garantidas.
+
+### Códex organizado — complemento sugerido para a 0.9
+
+- [ ] Separar **Monstros comuns** e **Chefes / Bosses**, mantendo cada chefe em uma entrada própria e preservando imagens, descobertas, contador de mortes e informações existentes.
+- [ ] Confirmar nos dados originais a classificação de monstros, minibosses e chefes, com IDs e referências; não classificar somente por nome ou aparência.
+- [ ] Mostrar informações verificadas: região/mapa, combate, variantes e drops. Associar armas exclusivas às entradas correspondentes quando forem implementadas.
+- [ ] Preservar navegação por teclado, mouse e controles virtuais nos dois hosts. A categorização do Códex não altera o comportamento dos monstros.
+
+### Uma arma exclusiva para cada boss — complemento sugerido para a 0.10
+
+- [ ] Planejar **pelo menos uma arma exclusiva para cada chefe confirmado**, com identidade própria, sem substituir equipamentos existentes.
+- [ ] Especificar boss/ID, nome e tipo da arma, classes permitidas, aparência, atributos, efeitos, raridade, obtenção e chance de drop a definir no balanceamento.
+- [ ] Investigar limites de IDs, sprites, atributos, classes e persistência antes de criar itens; não presumir bosses, efeitos ou animações inexistentes.
+- [ ] Exibir a arma e suas condições entre as recompensas possíveis do boss no Códex; avaliar integração posterior com Boss Rush e conquistas.
+- [ ] Priorizar o modo expandido, preservando o clássico e saves antigos. Testar drop, inventário, equipamento e salvar/carregar nos dois hosts.
+
+### Prioridade específica da web — progresso persistente no iPhone
+
+- [ ] Investigar salvamento e carregamento persistentes, usando IndexedDB ou solução apropriada, incluindo progresso do personagem e Códex.
+- [ ] Oferecer exportação/importação de saves e verificar recuperação após fechar/reabrir o Safari, com testes em iPhone físico.
+- [ ] Tratar como trabalho próprio da web, sem aguardar expansões de conteúdo e sem versão fixa atribuída. **Hoje o progresso publicado continua temporário; lembrar preferências não equivale a salvar a partida.**
+
+### Sequência adicional proposta — 0.13 a 0.30
+
+A tabela organiza as sugestões do relatório; **a viabilidade e as versões ainda não estão confirmadas**. Não cancela metas anteriores nem aumenta o escopo da 0.8 em andamento.
+
+| Versão sugerida | Atualização futura |
+| --- | --- |
+| 0.13 | Conquistas e troféus, incluindo possíveis objetivos relacionados a bosses |
+| 0.14 | Painel de diagnóstico F12 e testes avançados do host/Unicorn |
+| 0.15 | Ficha de atributos secundários verificáveis |
+| 0.16 | Desmontagem em massa e Auto-Salvage com proteção de itens |
+| 0.17 | Loadouts de equipamentos e habilidades |
+| 0.18 | Segredos e easter eggs |
+| 0.19 | Mercador viajante |
+| 0.20 | Eventos de emboscada |
+| 0.21 | Altares de sacrifício e oferendas |
+| 0.22 | Encantamentos elementais e efeitos compatíveis |
+| 0.23 | Modificadores de masmorra |
+| 0.24 | Defesa de ponto contra ondas de inimigos |
+| 0.25 | Modo Hardcore opcional e isolado |
+| 0.26 | Sistema de Legado / talentos de conta |
+| 0.27 | Paladino e investigação do Berserker |
+| 0.28 | Mago |
+| 0.29 | Monge |
+| 0.30 | Consolidação da preparação para o cooperativo |
+| 1.0 | Cooperativo pela internet e LAN, já previsto no planejamento principal |
+
+A pesquisa do cooperativo deve começar **antes da 0.30**. A linha 0.27 é uma proposta posterior de entrega de classes; não elimina a possibilidade de uma prévia condicional do Paladino na 0.10 já registrada acima. Berserker exige distinguir sua evolução original de uma nova classe-base independente.
+
+**Após a 1.0, provisoriamente:** Necromante, Druida, Engenheiro, Granadeiro e possível Berserker como classe-base independente. Permanecem as definições do autor: Necromante com foice e Granadeiro com granadas. Não há nova classe entregue ou mudança de saves por este registro.
+
+## Novas ideias propostas pelo autor — avaliação técnica pendente
+
+> **Banco de propostas (23/10/2026).** As ideias abaixo foram registradas pelo autor, mas **ainda não passaram pela análise técnica e pelo planejamento de versões do Codex**. Não são funcionalidades implementadas, não integram a contagem das melhorias já aprovadas e **não possuem versão de entrega confirmada**; a sequência adicional acima é apenas uma proposta. Exemplos de atributos, porcentagens e recompensas são ilustrativos, não decisões de balanceamento. Antes de marcar qualquer item como viável, verificar recursos originais, possíveis conflitos com o roadmap, compatibilidade com o modo clássico e saves, custo técnico e testes necessários.
+
+### Engenharia, diagnóstico e desempenho
+
+- [ ] **Testes automatizados de falhas do host (Unicorn):** Expandir os testes Python (unittest) para simular erros de alocação, ponteiros corrompidos e estouro de pilha na camada ARM, com tratamento seguro das falhas.
+- [ ] **Cache LRU para miniaturas do Códex (zlib/sprites):** Investigar cache em memória com reciclagem dos sprites descomprimidos para reduzir recarregamentos e picos de RAM durante a navegação.
+- [ ] **Desacoplamento de entrada (IInputProvider):** Estudar uma interface entre comandos SDL2 e a emulação Unicorn, pensando em remapeamento, testes e eventual cooperativo, sem mudar o comportamento atual.
+- [ ] **Painel de diagnóstico no jogo (F12 Developer Overlay):** Propor exibição opcional de FPS real, memória, custo da emulação e estados relevantes para depuração, condicionada à disponibilidade e precisão das medições.
+
+**Ideia já coberta pelo planejamento existente:** a proposta de *abstração dos saves e escrita atômica* do arquivo de ideias se relaciona ao **item 03 — Gravação segura de saves**, já previsto para a 0.8 e em desenvolvimento. Não foi cadastrada como uma nova melhoria nem como garantia de proteção comprovada contra falta de energia.
+
+### Segredos e descobertas
+
+- [ ] **Sistema de segredos e easter eggs:** Recompensar ações pouco óbvias, como acender tochas em uma ordem, descobrir paredes falsas, vencer chefes com restrições ou usar habilidades em locais aparentemente sem saída. Possíveis recompensas: títulos secretos, aparências, equipamentos de homenagem e salas de bônus. Confirmar se a estrutura dos mapas e eventos permite essas interações.
+
+### Inventário e qualidade de vida
+
+- [ ] **Desmontagem em massa e Auto-Salvage:** Selecionar vários equipamentos para desmontar em materiais de craft; estudar também regras opcionais de desmontagem automática ao coletar, com proteções contra perda de itens valiosos.
+- [ ] **Ficha avançada de atributos secundários:** Mostrar, quando realmente existirem ou puderem ser calculados corretamente, roubo de vida, evasão, dano crítico, espinhos/retaliação e velocidade de movimento.
+- [ ] **Loadouts rápidos locais:** Configurar perfis de equipamento e habilidades, com troca em cidade/área segura (por exemplo, build de dano e build de sobrevivência); verificar restrições de inventário, pontos e persistência.
+
+### Progressão, combate e eventos
+
+- [ ] **Conquistas locais (Achievements):** Criar painel de troféus integrado ao Códex ou menu principal, com metas e possíveis recompensas.
+- [ ] **Modificadores de masmorra (Mutators / desafios diários):** Estudar portais ou masmorras especiais com regras variáveis para o pós-jogo, como aumento simultâneo de XP e dano inimigo ou alterações em recargas e poções. Os valores citados são exemplos.
+- [ ] **Altares de sacrifício e oferendas:** Trocar ouro ou parte temporária da vida máxima por bônus por tempo limitado ou recompensas especiais, avaliando riscos e equilíbrio.
+- [ ] **Encantamentos elementais visuais (Elemental Imbues):** Investigar armas com fogo, gelo, veneno ou eletricidade, consumíveis/habilidades, alteração visual dos golpes e possíveis efeitos de status. Exige verificar animações e regras de combate originais.
+- [ ] **Mini-eventos de emboscada:** Encontrar hordas surpresa ou situações em que portas se fecham, com desafio curto de sobrevivência e recompensa; duração e condições ainda não definidas.
+- [ ] **Mercador viajante aleatório (Smuggler):** NPC ocasional com estoque temporário de itens raros, materiais incomuns ou consumíveis próprios, sujeito às limitações de NPC, mapas e economia do jogo.
+- [ ] **Legado / talentos de conta (Account Prestige):** Progresso compartilhado capaz de conceder pequenas vantagens a novos personagens, como bônus iniciais de XP e ouro; investigar separação entre personagens, saves e modos clássico/expandido.
+- [ ] **Defesa de ponto (Horda PvE):** Missões de proteger um NPC aliado ou artefato contra ondas de monstros, verificando se IA, spawn e colisões suportam o formato.
+- [ ] **Modo Hardcore opcional (Ironman):** Criar personagem com regra de morte permanente, apagando ou bloqueando o progresso daquela tentativa, mediante desenho de salvamento isolado e proteções explícitas contra perda acidental.
+
+### Sugestões de armas para as classes já planejadas
+
+O planejamento existente das **oito novas classes (item 44)** e de **armas exclusivas (item 45)** permanece inalterado. A tabela abaixo registra **sugestões ainda não avaliadas**, não definições aprovadas nem confirmação de compatibilidade com animações, dados ARM ou equipamentos.
+
+| Classe | Sugestão nova de arma | Situação |
+| --- | --- | --- |
+| Mago | Cajado mágico | Sugestão não avaliada |
+| Berserker | Machado de duas mãos | Sugestão não avaliada |
+| Paladino | Maça e escudo | Sugestão não avaliada |
+| Monge | Manoplas de combate | Sugestão não avaliada |
+| Druida | Cetro natural / totem | Sugestão não avaliada |
+| Engenheiro | Chave mecânica de combate | Sugestão não avaliada |
+
+As associações **Necromante → foice** e **Granadeiro → granadas** já estavam definidas pelo autor no planejamento anterior e não são novas propostas.
+
+**Próxima etapa:** solicitar ao Codex uma triagem destas ideias, separando viabilidade técnica, dependências, riscos, sobreposições e esforço estimado. **Só depois** decidir quais entram no roadmap e em que versão; o registro aqui não autoriza implementação nem publicação de release.
+
 ## Publicação
 
 Versão **v0.7-beta**, com publicação autorizada pelo autor em 21/10/2026. O workflow só cria a release após compilar e testar os dois hosts no Windows. A validação manual no Windows continua pendente; testes automatizados e de inicialização não comprovam uma campanha completa. A versão permanece **Beta**. As releases anteriores continuam disponíveis.
