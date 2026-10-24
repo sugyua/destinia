@@ -1,6 +1,8 @@
 #include "../common/safe_save.h"
 #include "../common/virtual_controls.h"
 #include "../common/ui_renderer.h"
+#include "../common/drop_names.h"
+static destinia::DropNamesRenderer dropNamesRenderer;
 static destinia::UiRenderer uiRenderer;
 // destinia_host - executa a libdestinia_jni.so ORIGINAL (ARM 32 bits) no PC.
 //
@@ -777,6 +779,7 @@ static void runtimeLogTick(long frame,double emulationMs) {
 #include "../common/offline_store_host.h"
 
 static int runHost(int argc, char** argv) {
+  std::string languageOverride;
   int fullscreenOverride=-1; bool explicitScale=false,savePreferences=true;
   fs::path settingsPath=destinia::preferencesFile();
   int scale = 3, headlessFrames = 0; std::string outDir = "frames", reportsDir;
@@ -793,14 +796,14 @@ static int runHost(int argc, char** argv) {
     else if (a == "--out") outDir = next(); else if (a == "-v") verbose = true;
     else if (a == "--probe") probe = true;
     else if (a == "--mute") muteAudio = true;
-    else if (a == "--lang" && next() == "pt") portugueseTextTest = true;
+    else if (a == "--lang") {languageOverride=next();if(languageOverride!="pt"&&languageOverride!="en")throw std::runtime_error("Idioma deve ser pt ou en.");}
     else if (a == "--profile") profile = true;
     else if (a == "--autotap") { if (sscanf(next().c_str(), "%d,%d,%d", &autoFrame, &autoX, &autoY) != 3) { printf("--autotap precisa de QUADRO,X,Y\n"); return 0; } }
     else if (a == "--autotap2") { if (sscanf(next().c_str(), "%d,%d,%d", &autoFrame2, &autoX2, &autoY2) != 3) { printf("--autotap2 precisa de QUADRO,X,Y\n"); return 0; } }
-    else { printf("Uso: destinia_host [--game PASTA] [--so ARQUIVO] [--save PASTA] [--reports PASTA] [--settings ARQUIVO] [--no-save-preferences] [--windowed|--fullscreen] [--scale N] [--lang pt] [--headless QUADROS --out PASTA] [-v] [--probe] [--mute] [--profile] [--autotap QUADRO,X,Y] [--autotap2 QUADRO,X,Y]\n"); return 0; }
+    else { printf("Uso: destinia_host [--game PASTA] [--so ARQUIVO] [--save PASTA] [--reports PASTA] [--settings ARQUIVO] [--no-save-preferences] [--windowed|--fullscreen] [--scale N] [--lang pt|en] [--headless QUADROS --out PASTA] [-v] [--probe] [--mute] [--profile] [--autotap QUADRO,X,Y] [--autotap2 QUADRO,X,Y]\n"); return 0; }
   }
   preferences=destinia::Preferences::load(settingsPath,"host");
-  portugueseTextTest=portugueseTextTest||preferences.language=="pt";
+  portugueseTextTest=(languageOverride.empty()?preferences.language:languageOverride)=="pt";
   bool fullscreen=fullscreenOverride<0?preferences.fullscreen:fullscreenOverride!=0;
   int windowWidth=preferences.width,windowHeight=preferences.height;
   if(explicitScale) { scale=std::clamp(scale,1,10); windowWidth=400*scale; windowHeight=240*scale; }
@@ -863,6 +866,7 @@ static int runHost(int argc, char** argv) {
   u32 fnInit = exportsMap["Java_game_destiniaeng_GameThread_initGame"];
   uiRenderer.statusBaseScale=2;
   uiRenderer.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,preferences.uiScale,false,soPath);
+  dropNamesRenderer.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,soPath);
   u32 fnRun = exportsMap["Java_game_destiniaeng_GameThread_jniRun"];
   u32 fnTouch = exportsMap["Java_game_destiniaeng_GameThread_jniTouch"];
   auto grab = [&](const char* n) { auto it = exportsMap.find(n); return it == exportsMap.end() ? 0u : it->second; };
@@ -1067,6 +1071,7 @@ static int runHost(int argc, char** argv) {
     // [OK] jniRun(env,obj, byte[] framebuffer, int contador) -> ms ate o proximo quadro (0 = sair)
     u32 wait = 0;
     auto tEmul0 = std::chrono::steady_clock::now();
+    dropNamesRenderer.enabled=controls.dropNamesHeld;
     uiRenderer.beginFrame();
     if (!callFn(fnRun, {ENV_OBJ, 0x10, hScreen, (u32)frame}, &wait)) break;
     double emulMs = (double)std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - tEmul0).count() / 1000.0;

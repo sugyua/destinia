@@ -5,7 +5,7 @@
 #include <map>
 
 namespace destinia {
-enum class Action { None=-1,Up,Down,Left,Right,Attack,Back,Menu,Start,SkillLeft,SkillRight,SkillUp,SkillDown,Extra,Save,FastForward,Pause,Count };
+enum class Action { None=-1,Up,Down,Left,Right,Attack,Back,Menu,Start,SkillLeft,SkillRight,SkillUp,SkillDown,Extra,Save,FastForward,Pause,DropNames,Count };
 
 // Conta fontes fisicas por acao: W + seta, ou teclado + controle, nao se anulam.
 class InputState {

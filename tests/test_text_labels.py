@@ -37,4 +37,13 @@ class TextLabelsTests(unittest.TestCase):
     result=subprocess.run([str(binary),'--game',str(ROOT/'game'),'--save',str(case/'save'),'--settings',str(case/'config.ini'),'--reports',str(case/'reports'),'--lang','pt','--headless','1','--out',str(case/'frames'),'--mute','--no-save-preferences'],env=env,capture_output=True,text=True,timeout=60)
     self.assertEqual(result.returncode,0,result.stdout+result.stderr)
     self.assertIn('textos PT aplicados',result.stdout+result.stderr,result.stdout+result.stderr)
+    # Reuse the built binary to exercise default PT, persisted EN and CLI override.
+    config=case/'language.ini'
+    for label,setting,override,expected_pt in [('default','',[],True),('saved-en','idioma=en\n',[],False),('cli-en','',['--lang','en'],False)]:
+     config.write_text(setting)
+     command=[str(binary),'--game',str(ROOT/'game'),'--save',str(case/label),'--settings',str(config),'--reports',str(case/'reports'),'--headless','1','--out',str(case/'frames'),'--mute','--no-save-preferences']+override
+     run=subprocess.run(command,env=env,capture_output=True,text=True,timeout=60)
+     self.assertEqual(run.returncode,0,run.stdout+run.stderr)
+     self.assertEqual('textos PT aplicados' in run.stdout+run.stderr,expected_pt,label+run.stdout+run.stderr)
+
 if __name__=='__main__':unittest.main()

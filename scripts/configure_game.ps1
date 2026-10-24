@@ -47,10 +47,10 @@ try {
                     if($profile -cnotmatch '^[A-Za-z0-9_-]{1,32}$') {throw 'Nome de perfil invalido.'}
                     $changes['controle_perfil']=$profile
                     Write-Host 'Enter na acao apenas seleciona o perfil. Cada perfil novo herda os comandos padrao.'
-                    Write-Host 'Acoes: cima, baixo, esquerda, direita, ataque, voltar, inventario, iniciar, habilidade_esquerda, habilidade_direita, habilidade_cima, habilidade_baixo, acao_extra, salvar, acelerar, pausar.'
+                    Write-Host 'Acoes: cima, baixo, esquerda, direita, ataque, voltar, inventario, iniciar, habilidade_esquerda, habilidade_direita, habilidade_cima, habilidade_baixo, acao_extra, salvar, acelerar, pausar, nomes_drops.'
                     $action=Read-Host 'Acao a remapear'
                     if($action) {
-                        if($action -cnotmatch '^(cima|baixo|esquerda|direita|ataque|voltar|inventario|iniciar|habilidade_(esquerda|direita|cima|baixo)|acao_extra|salvar|acelerar|pausar)$') {throw 'Acao desconhecida.'}
+                        if($action -cnotmatch '^(cima|baixo|esquerda|direita|ataque|voltar|inventario|iniciar|habilidade_(esquerda|direita|cima|baixo)|acao_extra|salvar|acelerar|pausar|nomes_drops)$') {throw 'Acao desconhecida.'}
                         $device=Read-Host 'Dispositivo: tecla ou botao'
                         if($device -cnotmatch '^(tecla|botao)$') {throw 'Escolha tecla ou botao.'}
                         Write-Host 'Teclas SDL em ingles: Return, Space, Z, W, Up, F5, F10, Left Shift. F9/F11 reservados.'

@@ -20,6 +20,7 @@ class PlayerControls {
     const int index=static_cast<int>(action);
     if(index>=0 && index<13) key(codes[index],down);
     else if(action==Action::Save && down) save();
+    else if(action==Action::DropNames) dropNamesHeld=down;
     else if(action==Action::FastForward) accelerating=down;
     else if(action==Action::Pause && down) {
       if(disconnectedPause) { disconnectedPause=false; manualPause=false; }
@@ -38,7 +39,7 @@ class PlayerControls {
     return y<0?(skill?Action::SkillUp:Action::Up):(skill?Action::SkillDown:Action::Down);
   }
 public:
-  bool focused=true,accelerating=false;
+  bool focused=true,accelerating=false,dropNamesHeld=false;
   PlayerControls(const Preferences& p,SDL_GameController*& pad,std::function<void(int,bool)> k,
                  std::function<void()> s,std::function<void()> touch):preferences(p),controller(pad),key(k),save(s),releaseTouch(touch) {}
   InputDevice lastInputDevice() const { return lastDevice; }

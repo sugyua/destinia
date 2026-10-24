@@ -26,6 +26,8 @@ int main() {
  SDL_GameController* pad=nullptr;
  PlayerControls controls(p,pad,[](int,bool){},[]{},[]{});
  assert(controls.lastInputDevice()==InputDevice::Keyboard);
+ p.keys[SDLK_v]=Action::DropNames;
+ SDL_Event toggle{};toggle.type=SDL_KEYDOWN;toggle.key.keysym.sym=SDLK_v;controls.event(toggle);assert(controls.dropNamesHeld);controls.release();assert(!controls.dropNamesHeld);
  SDL_Event event{};event.type=SDL_MOUSEBUTTONDOWN;event.button.button=SDL_BUTTON_LEFT;
  controls.event(event);assert(controls.lastInputDevice()==InputDevice::Touch);
  event={};event.type=SDL_KEYDOWN;event.key.keysym.sym=SDLK_q;

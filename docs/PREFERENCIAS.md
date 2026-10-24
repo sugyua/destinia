@@ -66,3 +66,7 @@ Na web, o seletor **Modo** encerra a sessão atual mediante confirmação e abre
 ## Opções da 0.8
 
 O configurador oferece 6 controles virtuais, 7 modo clássico/expandido, 8 escala UI75/100/125 e 9 idioma inglês/português parcial. A escala não muda o cenário nem o XP. O modo expandido prepara futuras alterações e usa save separado; importação explícita somente para destino novo. Idioma é global; UI/controles são por host. Restaurar padrões preserva o caminho de saves. Consulte [RELEASE_0.8.md](RELEASE_0.8.md).
+
+## Desenvolvimento0.9
+
+PT-BR é o padrão quando não há idioma configurado; inglês explícito é preservado. Para inglês use opção9/`idioma=en` ou `--lang en` (somente a sessão). `nomes_drops` permite mostrar os nomes/cores originais dos drops visíveis segurandoV; se V já estiver remapeado, esse padrão não ocupa a tecla. Configure outra tecla/botão na opção4. Perda de foco/pausa libera o comando; a coleta mantém seu alcance original. No navegador há botão de alternância e V para segurar.

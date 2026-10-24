@@ -14,7 +14,8 @@ int main(int argc,char** argv) {
   {
     auto p=destinia::Preferences::load(config,"host_zoom");
     assert(p.fullscreen && p.width==800 && p.height==480);
-    assert(p.virtualControls);assert(p.uiScale==100);assert(p.language=="en");
+    assert(p.virtualControls);assert(p.uiScale==100);assert(p.language=="pt");
+    std::ofstream(config)<<"idioma=en\n";assert(destinia::Preferences::load(config,"host_zoom").language=="en");
     std::ofstream(config)<<"idioma=pt\n";assert(destinia::Preferences::load(config,"host_zoom").language=="pt");
     std::ofstream(config)<<"idioma=invalid\n";bool invalidLanguage=false;try{destinia::Preferences::load(config,"host_zoom");}catch(...){invalidLanguage=true;}assert(invalidLanguage);fs::remove(config);
     std::ofstream(config)<<"interface.host_zoom.escala=75\n";assert(destinia::Preferences::load(config,"host_zoom").uiScale==75);
@@ -25,6 +26,8 @@ int main(int argc,char** argv) {
     assert(p.keys.at(SDLK_w)==destinia::Action::Up);
     assert(p.buttons.at(SDL_CONTROLLER_BUTTON_A)==destinia::Action::Attack);
   }
+  std::ofstream(config)<<"perfil.padrao.tecla.ataque=V\n";auto reused=destinia::Preferences::load(config,"host");assert(reused.keys.at(SDLK_v)==destinia::Action::Attack);
+  std::ofstream(config)<<"perfil.padrao.tecla.ataque=V\nperfil.padrao.tecla.nomes_drops=V\n";bool dropConflict=false;try{destinia::Preferences::load(config,"host");}catch(...){dropConflict=true;}assert(dropConflict);
   std::ofstream(config)<<"interface.host_zoom.controles_virtuais=0\ninterface.host.controles_virtuais=1\n";
   assert(!destinia::Preferences::load(config,"host_zoom").virtualControls);
   assert(destinia::Preferences::load(config,"host").virtualControls);

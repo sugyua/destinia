@@ -119,6 +119,9 @@
     "tests/test_text_labels.py",
     "tests/test_ui_transform.py",
     "tests/ui_renderer_native.cpp",
-    "tests/ui_transform_cases.cpp"
+    "tests/ui_transform_cases.cpp",
+    "common/drop_names.h",
+    "tests/test_drop_names.py",
+    "tests/drop_names_native.cpp"
   ]
 }

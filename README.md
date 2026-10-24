@@ -4,8 +4,16 @@
 
 **[Baixar Destinia 0.8 Beta](https://github.com/sugyua/destinia/releases/tag/v0.8-beta)** — ZIP Windows com os dois EXEs e inicializadores, ZIP de fontes e checksums. Dependências e dados originais do jogo são instalados separadamente; consulte a seção **Dependências**.
 
-Interface75/100/125%, controles virtuais opcionais, atalhos das habilidades, mais português, saves recuperáveis, loja offline e perfis clássico/expandido. [Instalação, verificações e limites](docs/RELEASE_0.8.md) · [Changelog](CHANGELOG.md) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
+[Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
+
+## Desenvolvimento da 0.9
+
+- [x] **PT-BR como idioma padrão** no PC e na web quando não há preferência salva. Inglês continua disponível em **Configurar Destinia → 9 — Idioma**, no seletor web ou `--lang en`. Tradução ainda parcial; a escolha explícita é preservada.
+- [x] **README simplificado:** histórico das versões anteriores nas [Releases](https://github.com/sugyua/destinia/releases).
+- [x] **Limpeza:** removidos ZIPs auxiliares antigos e cópias WIP já integradas. Saves, dados necessários, ferramentas ativas e testes preservados.
+- [x] **Nomes de drops por comando:** segure **V** no PC (remapeável como `nomes_drops`; não ocupa V se já estiver remapeado). Na web, use V ou o botão **Nomes dos itens**. Mostra itens ativos visíveis com as cores originais de raridade, sem ampliar alcance de coleta.
+- [ ] Inventário, filtros/favoritos, coleta/poções opcionais e redistribuição offline: próximos lotes, ainda não entregues. A versão distribuída permanece **0.8 Beta** até validar a0.9.
 
 ## Releases em ordem de lançamento
 
@@ -26,12 +34,6 @@ Da mais recente para a mais antiga. As releases anteriores e seus downloads são
 
 [Ver todas as releases no GitHub](https://github.com/sugyua/destinia/releases)
 
-## Novidades da 0.8
-
-Em **Configurar Destinia.bat**: **6** mostrar/ocultar controles; **7** clássico/expandido; **8** interface75/100/125%; **9** idioma. O zoom do mapa e o tamanho do XP são preservados. Atalhos acompanham o remapeamento e o dispositivo físico no Windows. Tradução ampliada **parcialmente**, com acentos nos painéis do port.
-
-Saves compartilham a pasta configurada entre versões; modo expandido usa pasta irmã separada e importação explícita para destino novo. Loja offline não concede cash e cancela a espera. Web possui as mesmas opções de apresentação/idioma/modo, mas **progresso temporário e sem áudio**. [Detalhes e limites](docs/RELEASE_0.8.md).
-
 ## Arquitetura
 
 O host em C++17 executa a biblioteca ARM original do Destinia Android com Unicorn. SDL2 apresenta o framebuffer RGB565 e recebe entradas; SDL2_mixer habilita áudio opcional. A lógica original continua na biblioteca ARM.
@@ -42,7 +44,6 @@ O host em C++17 executa a biblioteca ARM original do Destinia Android com Unicor
 | `common` | Logs, backups, configuração compartilhada e validação ELF usados pelos dois hosts |
 | `host_zoom` | Zoom out 800×480, mapas pequenos centralizados com fundo cinza, tela cheia proporcional com F11, tradução PT e trace de viewport |
 | `game` | APK original do Destinia Android extraído; recursos necessários em execução, não incluídos no ZIP curado de fontes |
-| `Claude` | Especificação do host e ferramentas de análise para desenvolvimento |
 | `docs` | Decisões e histórico técnico; documentos antigos podem estar desatualizados |
 | `release` | Manifesto e notas das versões |
 | `scripts` | Compilação, configuração de saves e empacotamento dos fontes revisados |
@@ -56,33 +57,11 @@ O repositório atual não inclui saves pessoais, logs de partidas, relatórios l
 - Saves redirecionados; no Windows, o padrão é `%LOCALAPPDATA%\Destinia\save`.
 - Música e efeitos quando compilado com SDL2_mixer.
 - HUD de experiência, modo sem janela e capturas BMP.
-- Tradução opcional `--lang pt` e trace F9 com `--trace-viewport`, apenas em `host_zoom`.
+- Português brasileiro por padrão nos dois hosts, inglês opcional e trace F9 no `host_zoom`.
+- Códex dentro do menu do jogo, com retratos, descobertas, contagem de mortes e detalhes de monstros.
+- Configuração de UI/controles, áudio, comandos, save compartilhado e modos clássico/expandido.
 
-A presença no código não equivale a validação completa de gameplay. O host_zoom usa framebuffer 800×480 para zoom out, mapas pequenos centralizados, fundo cinza fora dos limites do mapa e UI nativa proporcionalmente menor. Oferece tela cheia com `--fullscreen` e alternância por F11. Em 3440×1440, o jogo ocupa 2400×1440 com barras laterais de 520 pixels. A correção ainda precisa de confirmação visual nas passagens do Windows; compras e rede continuam com limitações documentadas.
-
-## Novidades da 0.7
-
-- Códex de monstros acessível pelo livro **CODEX** no menu original do jogo, junto aos ícones de Craft e Pets, com estados de descoberta e contador de mortes por espécie.
-- Registro auxiliar separado por personagem na mesma pasta de save dos dois hosts; preserva o progresso entre instalações/updates sem alterar o save nativo.
-- Observação das rotinas ARM originais de desenho e confirmação de derrota; proteção contra contagem duplicada e IDs incompatíveis.
-- Interface de consulta com paginação e pausa da partida; importação de histórico antigo não está disponível.
-- **Na `main` e no site:** grade de 8×4 quadrados por página, com 73 espécies. Encontrados mostram a figura frontal original; desconhecidos mostram `?`. Ao selecionar, a faixa inferior mostra nome ou `??????`, **ENCONTRADO** ou `???????` e contador de mortes. [Pacotes de teste Windows em Actions](https://github.com/sugyua/destinia/actions/workflows/verify-codex-menu.yml); os ZIPs originais da release 0.7 permanecem inalterados.
-- O [protótipo web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site) usa o mesmo acesso **dentro do menu do jogo**, sem botão Códex na interface do site. Na web, o progresso e o Códex continuam apenas na memória da sessão, sem áudio. **Nos dois hosts atuais da `main` e na web**, AÇÃO/ataque sobre o monstro selecionado abre uma janela interna com HP máximo do último encontro da sessão e nível, locais conhecidos e tipos de drops. Categorias separadas: **1 Drops, 2 Locais de spawn, 3 Variantes**; listas grandes usam SUBIR/DESCER. Drops mostram um item por linha, com subpáginas por categoria e raridade. Equipamentos e receitas usam as cores originais: Comum branco, Mágico verde, Raro azul, Épico roxo e Lendário laranja, limitados pelo nível do encontro. VOLTAR retorna à grade. No Windows, as descobertas e mortes são persistentes; HP/nível/variante observados são temporários e recebem nova leitura ao encontrar o monstro novamente.
-- **Correção atual da `main`:** mortes comuns de Imperial Soldier e outros monstros são registradas mesmo quando o aviso original ocorre antes de marcar o estado morto. Mantida a proteção contra contagem repetida. Mortes antigas não registradas não são recuperadas automaticamente.
-
-Leia [CODEX.md](docs/CODEX.md), [CHANGELOG.md](CHANGELOG.md) e [RELEASE_0.7.md](docs/RELEASE_0.7.md). Não inclui novos equipamentos, novos monstros nem alterações de combate.
-
-## Novidades da 0.6
-
-- **Configurar Destinia.bat** guarda vídeo por host, áudio, pausa e perfis em `%LOCALAPPDATA%\Destinia\config.ini`, preservando a pasta compartilhada de save entre updates.
-- Tamanho da janela e modo tela cheia/janela são lembrados ao fechar; F11 funciona nos dois hosts, com imagem proporcional e mouse alinhado à área central.
-- Teclas e botões por ação, perfis nomeados e validação de conflitos. Entradas simultâneas deixam de se anular; perder foco/desconectar libera comandos presos.
-- Música/efeitos de 0 a 100%, combinados com o volume original. Silêncio ao perder foco e pausa automática são opcionais; F10 pausa/retoma por padrão.
-- Compilação e testes Windows automatizados, pacote x64 com dois EXEs próprios e checksum; DLLs, ferramentas, instaladores, APK e saves permanecem fora do ZIP.
-
-A 0.5 já publicada mantém log TXT, backups verificados, trava de save e seleção global da pasta de progresso. **O BAT de testes usa cópias: o progresso jogado nele não substitui o save principal.** Veja [saves, restauração e logs](docs/SAVES_E_LOGS.md).
-
-A 0.6 preserva zoom out, fundo cinza, câmera, UI nativa, ritmo e conteúdo. Testes automáticos não equivalem a confirmação manual da campanha, visual, áudio ou controle físico no Windows. Resultados em [RELEASE_0.6.md](docs/RELEASE_0.6.md).
+A presença no código não equivale a validação completa de gameplay. O host_zoom usa framebuffer 800×480 para zoom out, mapas pequenos centralizados, fundo cinza fora dos limites do mapa e UI nativa proporcionalmente menor. Oferece tela cheia com `--fullscreen` e alternância por F11. Em 3440×1440, o jogo ocupa 2400×1440 com barras laterais de 520 pixels. O autor confirmou teste no PC e iPhone; isso não comprova campanha completa. Compras reais e recursos online continuam indisponíveis.
 
 ## Dependências
 
@@ -106,7 +85,7 @@ A pasta `game` é o APK Android extraído, conforme informado pelo autor. Não �
 
 Abra **Compilar Destinia.bat** para compilar os dois hosts. Depois use **Abrir Destinia.bat** para o normal ou **Abrir Destinia Zoom 800x480.bat** para o zoom. Mantenha o BAT e `scripts/compile_windows.sh` na pasta do projeto. O compilador usa o MSYS2 UCRT64 já instalado em `C:\msys64`; não instala nem baixa dependências. Feche o jogo antes de compilar. As ferramentas necessárias estão na seção Dependências e em INSTALL.md.
 
-[Baixar somente os arquivos do compilador](https://raw.githubusercontent.com/sugyua/destinia/main/diagnostico/pacotes/compilar-destinia.zip) para extrair na raiz do projeto existente. Esse auxiliar foi adicionado após a publicação da 0.3; os ZIPs já publicados da 0.2 e 0.3 permanecem inalterados.
+O compilador e seus scripts atuais acompanham o [pacote de fontes da release](https://github.com/sugyua/destinia/releases); use sempre os arquivos da mesma versão.
 
 ## Desenvolvimento e distribuição
 
@@ -129,51 +108,9 @@ No Linux, o comando pode ser `python3`. O empacotador cria ZIP e SHA-256, não c
 
 O [manifesto](release/manifest.json) identifica a base e os arquivos da 0.8. O workflow Windows compila/testa os EXEs e gera um pacote separado; o empacotador de fontes não compila executáveis. Consulte o [roadmap](docs/ROADMAP.md) para as etapas seguintes.
 
-## Melhorias concluídas com sucesso
-
-Os oito itens abaixo foram implementados e tiveram as verificações automatizadas aprovadas. A 0.6 foi aprovada para publicação pelo autor. Isso não substitui a campanha e a inspeção manual no Windows, que permanecem pendentes; veja [verificações](docs/RELEASE_0.6.md).
-
-### Entregues na 0.5
-
-- [x] **01. Log TXT do jogo:** eventos, erros e desempenho em relatórios com rotação e limite de tamanho.
-- [x] **02. Backups rotativos de saves:** cópias verificadas antes de carregar o progresso, com retenção limitada.
-- [x] **05. Erros tratados e testes de estabilidade:** operações de arquivo, limites ELF, recursos SDL e propagação de falhas emuladas.
-
-A pasta global de save compartilhada entre hosts e atualizações também foi entregue na 0.5 e preservada na 0.6.
-
-### Entregues na 0.6
-
-- [x] **06. EXEs Windows nas releases:** os dois hosts compilados e verificados no Windows, em ZIP próprio com checksum e dependências instaladas separadamente.
-- [x] **07. Configurações persistentes:** vídeo por host, preferências globais e restauração dos padrões preservando a pasta de saves.
-- [x] **10. Remapeamento de teclado e controle:** teclas e botões por ação, perfis nomeados e validação de conflitos.
-- [x] **11. Volumes separados e persistentes:** música e efeitos independentes e silêncio opcional sem foco.
-- [x] **12. Pausa e liberação de comandos:** pausa manual/opcional por foco ou controle, com liberação de entradas e retomada do áudio.
-
-## Entrega parcial da 0.7 — Códex de monstros
-
-**Correção após a publicação da 0.7:** o acesso descrito abaixo está na branch `main` e no site. Os ZIPs da tag `v0.7-beta` preservam a versão originalmente publicada. Para testar no Windows, use o código atual com **Compilar Destinia.bat** ou os pacotes de teste do workflow **Verificar Codex no menu do jogo** em [Actions](https://github.com/sugyua/destinia/actions/workflows/verify-codex-menu.yml); não são uma nova release.
-
-O bestiário inicial do **item 42** está implementado nos dois hosts: livro **CODEX**, à direita da barra de ícones do **menu do próprio jogo**, junto de Craft e Pets. Abra o menu durante a partida e toque/clique no livro; **VOLTAR** retorna ao mesmo menu. Setas e confirmar também permitem selecionar o livro; **F8** é um atalho somente com esse menu aberto, quando a tecla não estiver remapeada. Mostra todas as espécies em uma grade de **8 colunas × 4 linhas**, com três páginas. Desconhecidos permanecem ocultos com `?`; encontrados exibem a figura frontal completa. Toque/clique num quadrado ou use as setas para selecionar; abaixo aparecem nome ou `??????`, estado **ENCONTRADO** ou `???????` e contador **MORTOS**. ANTERIOR/PROXIMA mudam a página. A partida pausa durante a consulta. Nomes de monstros permanecem em inglês nesta primeira etapa.
-
-Os registros ficam em **codex-v1.txt**, na pasta compartilhada de saves, separados pelo slot de personagem e gravados por substituição de arquivo temporário. Não altera o formato dos saves ARM nem recupera mortes antigas. A contagem começa na 0.7; o slot reutilizado após exclusão pelo jogo tem seus registros reiniciados. Trocar apenas de pasta de instalação preserva o Códex quando a pasta de save é a mesma.
-
-Testes automatizados cobrem registro, morte única, reaparecimento, slots, persistência e callbacks originais ARM com estruturas controladas, além de desenho dos painéis. Campanha completa e inspeção visual no Windows continuam pendentes. Veja [como usar o Códex](docs/CODEX.md) e [verificações da 0.7](docs/RELEASE_0.7.md).
-
-**O item 42 completo continua desmarcado:** armas, armaduras e integração com drops exclusivos permanecem na 0.11. Os ajustes de interface foram incorporados à 0.8; revisão integral da tradução continua pendente.
-
-### Entregues na 0.8
-
-- [x] **03. Gravação recuperável de saves:** temporários, journal e recuperação por lote ARM; backups preservados. Não é garantia contra toda falha física.
-- [x] **04. Loja offline:** cancelamento com aviso e saldo preservado, sem crédito indevido.
-- [x] **08. Escala de UI independente do zoom:**75/100/125%, transformação de toque e XP preservado.
-- [x] **09. Ocultar botões virtuais:** preferência por host, preservando comandos físicos e menus.
-- [x] **19. Atalhos nas habilidades:** teclas/botões configurados e stick do controle no Windows.
-- [x] **36. Clássico/expandido:** pastas e backups isolados; importação explícita, sem conteúdo novo ainda.
-- [ ] **24. Português completo:** tradução ampliada e fontes de painéis com acentos entregues; revisão integral de diálogos/descrições continua futura.
-
 ## Atualizações futuras
 
-Das **44 melhorias aprovadas**, **14 foram concluídas** nas versões 0.5–0.8; **30 ainda não estão concluídas**, incluindo o Códex entregue parcialmente, somente da **0.8 em diante**. As versões abaixo são metas provisórias, sem datas garantidas, e dependem de investigação e testes.
+Das melhorias aprovadas, **29 ainda não estão concluídas**, incluindo o Códex entregue parcialmente, nas próximas versões. As versões abaixo são metas provisórias, sem datas garantidas, e dependem de investigação e testes.
 
 **A expansão continua incluindo aumento do nível máximo, novos ranks de armas, armaduras e acessórios, itens únicos, conjuntos com bônus, novos títulos, novos pets, drops exclusivos por monstro e um Códex de equipamentos e monstros.** Limites, nomes e valores serão definidos após verificar dados originais e balanceamento.
 
@@ -183,7 +120,7 @@ Consulte o [roadmap detalhado](docs/ROADMAP.md) para dependências, critérios d
 
 **Novo objetivo para a 1.0:** cooperativo pela internet e LAN, registrado como item 43 e ainda não implementado.
 
-**Novos pedidos:** o Códex inicial de monstros e seu contador foram implementados na **0.7**, sujeitos às limitações de verificação acima. Drops exclusivos continuam como meta da **0.10**, e a ampliação do Códex com armas e armaduras fica na **0.11**. Não existe reconstrução automática do histórico antigo.
+**Próximos pedidos do Códex:** Drops exclusivos continuam como meta da **0.10**, e a ampliação do Códex com armas e armaduras fica na **0.11**. Não existe reconstrução automática do histórico antigo.
 
 ### Meta 0.9 — Inventário, coleta e assistência opcional
 
@@ -195,7 +132,7 @@ Reduzir tarefas repetitivas e tornar os equipamentos mais fáceis de entender e 
 - [ ] **16. Filtro de itens no chão:** Escolher quais categorias ou ranks destacar e quais esconder visualmente; não apagar os itens filtrados.
 - [ ] **17. Coleta automática opcional:** Coletar ouro e materiais próximos segundo regras configuráveis, preservando a opção de coleta manual.
 - [ ] **21. Poções automáticas opcionais:** Usar poções opcionalmente por limites de vida/mana configurados, respeitando estoque e recarga; a assistência deve ser ativada pelo jogador.
-- [ ] **22. Nomes e ranks dos drops por tecla:** Exibir nomes e raridades dos itens no chão ao segurar ou alternar uma tecla, com contraste adequado.
+**Item22 implementado no desenvolvimento da0.9:** comando para nomes/cores dos drops; veja o uso acima.
 - [ ] **29. Redistribuição de pontos acessível offline:** Verificar o reset existente e oferecer uma forma clara de redistribuir atributos/habilidades offline, com custo interno a definir e sem compra real.
 
 ### Meta 0.10 — Progressão expandida, equipamentos e títulos
@@ -329,7 +266,7 @@ A pesquisa do cooperativo deve começar **antes da 0.30**. A linha 0.27 é uma p
 - [ ] **Desacoplamento de entrada (IInputProvider):** Estudar uma interface entre comandos SDL2 e a emulação Unicorn, pensando em remapeamento, testes e eventual cooperativo, sem mudar o comportamento atual.
 - [ ] **Painel de diagnóstico no jogo (F12 Developer Overlay):** Propor exibição opcional de FPS real, memória, custo da emulação e estados relevantes para depuração, condicionada à disponibilidade e precisão das medições.
 
-**Ideia já coberta pelo planejamento existente:** a proposta de *abstração dos saves e escrita atômica* do arquivo de ideias se relaciona ao **item 03 — Gravação segura de saves**, já previsto para a 0.8 e em desenvolvimento. Não foi cadastrada como uma nova melhoria nem como garantia de proteção comprovada contra falta de energia.
+**Ideia já coberta pelo planejamento existente:** a proposta de *abstração dos saves e escrita atômica* do arquivo de ideias se relaciona ao **item 03 — Gravação segura de saves**, já implementado; veja os limites nas Releases. Não foi cadastrada como uma nova melhoria nem como garantia de proteção comprovada contra falta de energia.
 
 ### Segredos e descobertas
 

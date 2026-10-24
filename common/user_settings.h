@@ -60,7 +60,8 @@ inline const std::vector<ActionDefaults>& actionDefaults() {
     {Action::Extra,"acao_extra",{},{SDL_CONTROLLER_BUTTON_X,SDL_CONTROLLER_BUTTON_RIGHTSHOULDER}},
     {Action::Save,"salvar",{SDLK_F5},{SDL_CONTROLLER_BUTTON_BACK}},
     {Action::FastForward,"acelerar",{SDLK_LSHIFT},{SDL_CONTROLLER_BUTTON_LEFTSHOULDER}},
-    {Action::Pause,"pausar",{SDLK_F10},{}}
+    {Action::Pause,"pausar",{SDLK_F10},{}},
+    {Action::DropNames,"nomes_drops",{SDLK_v},{}}
   };
   return data;
 }
@@ -82,7 +83,7 @@ struct Preferences {
   bool virtualControls=true;int uiScale=100;
   bool fullscreen=false,muteUnfocused=false,pauseUnfocused=false,pauseDisconnected=false;
   int width=1200,height=720,music=100,effects=100;
-  std::string profile="padrao",gameMode="classico",language="en";
+  std::string profile="padrao",gameMode="classico",language="pt";
   std::map<SDL_Keycode,Action> keys;
   std::map<SDL_GameControllerButton,Action> buttons;
   static Preferences load(const fs::path& file,const std::string& host) {
@@ -126,6 +127,7 @@ struct Preferences {
         }
       }
       for(auto key:keys) {
+        if(action.action==Action::DropNames && keyboard==values.end() && p.keys.count(key))continue;
         if(key==SDLK_F9 || key==SDLK_F11) throw std::runtime_error("F9 e F11 sao reservados para trace e tela cheia.");
         if(p.keys.count(key) && p.keys[key]!=action.action) throw std::runtime_error("Tecla em conflito: "+std::string(SDL_GetKeyName(key)));
         p.keys[key]=action.action;
