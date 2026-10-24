@@ -1,4 +1,6 @@
-# Destinia para Windows — 0.9 Beta
+# Destinia — preparação técnica da 0.9.1
+
+**[Prévia técnica 0.9.1 — fontes e testes](https://github.com/sugyua/destinia/releases/tag/v0.9.1-dev1)**. Ainda sem interface dos filtros. O jogo executável desta base permanece na0.9; para jogar, use a [Release PC controles fix1](https://github.com/sugyua/destinia/releases/tag/v0.9-controles-fix1).
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
