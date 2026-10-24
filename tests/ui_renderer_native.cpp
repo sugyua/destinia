@@ -35,6 +35,24 @@ int main(int argc,char**argv){
  assert(callFn(exportsMap.at("Java_game_destiniaeng_GameThread_jniRun"),{ENV_OBJ,0x10,screenArray,100},&wait));assert(ui.ok());
 
  const auto pointBuffer=hmalloc(8);int16_t empty[4]={-1000,-1000,0,0};for(int i=0;i<15;++i)wr(main+0xea+i*8,empty,8);for(u32 at:{0xd2,0xda,0xe2})wr(main+at,empty,8);
- for(int state:{2,5,1}){uint16_t gameState=state==5?16:0;wr(game+0x4854,&gameState,2);wr32(gameUi+0x7c,state==5?0x20000001:0);if(state==1)wr32(runner,exportsMap.at("MenuCanvas"));else wr32(runner,exportsMap.at("GameCanvas"));int index=state==2?4:state==5?12:14;int16_t hit[4]={100,100,16,16};wr(main+0xea+index*8,hit,8);destinia::UiTransform t{SCREEN_W,SCREEN_H,percent,state==1?destinia::UiAnchor::Center:destinia::UiAnchor::TopLeft,state==1?232:0,state==1?240:0};auto p=t.point(105,105);auto native=ui.touchPoint(p.first,p.second,state);wr32(pointBuffer,u32(native.first));wr32(pointBuffer+4,u32(native.second));u32 key=0;assert(callFn(exportsMap.at("getKeyPadIdx"),{pointBuffer},&key));if(key!=u32(index+1)){u32 actualState=0;callFn(exportsMap.at("_getTouchState"),{},&actualState);fprintf(stderr,"UI_TOUCH_FAIL pct=%d state=%d actual_state=%u key=%u expected=%d px=%d py=%d nx=%d ny=%d\n",percent,state,actualState,key,index+1,p.first,p.second,native.first,native.second);return 8;}wr(main+0xea+index*8,empty,8);}
+ // _getTouchState returns1 for GameCanvas with game state>28. A fresh
+ // MenuCanvas instead returns0; selecting it does not prepare touch state1.
+ for(int state:{2,5,1}){
+  uint16_t gameState=state==5?16:state==1?29:0;
+  wr(game+0x4854,&gameState,2);
+  wr32(gameUi+0x7c,state==5?0x20000001:0);
+  wr32(runner,exportsMap.at("GameCanvas"));
+  u32 actualState=0;assert(callFn(exportsMap.at("_getTouchState"),{},&actualState));
+  assert(actualState==u32(state));
+  const int index=state==2?4:state==5?12:14;
+  int16_t hit[4]={100,100,16,16};wr(main+0xea+index*8,hit,8);
+  destinia::UiTransform t{SCREEN_W,SCREEN_H,percent,state==1?destinia::UiAnchor::Center:destinia::UiAnchor::TopLeft,state==1?232:0,state==1?240:0};
+  const auto p=t.point(105,105),native=ui.touchPoint(p.first,p.second,state);
+  wr32(pointBuffer,u32(native.first));wr32(pointBuffer+4,u32(native.second));
+  u32 key=0;assert(callFn(exportsMap.at("getKeyPadIdx"),{pointBuffer},&key));
+  if(key!=u32(index+1)){fprintf(stderr,"UI_TOUCH_FAIL pct=%d state=%d key=%u expected=%d\n",percent,state,key,index+1);return 8;}
+  wr(main+0xea+index*8,empty,8);
+ }
+
  printf("UI_RENDERER_FILL_CLIP_ALPHA_OK percent=%d draws=%llu\n",percent,(unsigned long long)ui.draws);return 0;
 }
