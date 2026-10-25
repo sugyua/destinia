@@ -21,16 +21,22 @@ A página do laboratório é **http://127.0.0.1:3000** no PC que roda `npm.cmd s
 
 ## Estado da integração
 
-- **Confirmado:** web0.9.7 executa a biblioteca ARM por emulação; `web/dist/engine.mjs` possui JNI e cancelamento offline de compra em `finishOfflinePurchase`. Na análise direcionada não foi encontrado transporte PvP/Leilão integrado ao protocolo deste mock.
+- **Confirmado:** web0.9.7 executa a biblioteca ARM por emulação; `web/dist/engine.mjs` possui JNI e cancelamento offline de compra em `finishOfflinePurchase`.
 - **Confirmado por engenharia reversa ARM:** protocolo binário `Comm_*` (Big-Endian), máquina de estados de `Menu_netProc` (`cmd = 0` Login → `cmd = 8` Mailbox → abertura de `Menu.state = 20` / `GameUI = 0xa0000001`) e proteção de save (`readAvail == 0` no `cmd = 0` evita chamar `GameCanvas_SaveGame`) mapeados em [CONTRATO_MULTI_MODE_ARM.md](CONTRATO_MULTI_MODE_ARM.md).
-- **Confirmado por testes anteriores:** `npm test` do mock e Chromium com duas páginas passaram (salas, ataque, lances, encerramento e isolamento/validações). Não são testes do Multi Mode original.
-- **Pendente:** implementar o adaptador opt-in entre `Comm_*` (`commCheck`/`procCommRead`/`procCommMsg`) e `tools/network-mock`, testar o túnel com o primo e validar execução física Windows/iPhone. Nenhuma conexão real entre dois jogadores da engine foi demonstrada.
+- **Confirmado por validação automatizada de 2 clientes ARM simultâneos (`tools/verify-pvp-auction-mock.mjs`):**
+  - Instanciação de dois motores ARM emulados (`libdestinia_jni.so`) representando Cliente 1 (Guerreiro) e Cliente 2 (Atirador).
+  - Ambos completam o handshake de rede (`cmd = 0` e `cmd = 8`), transitando para `Menu.state = 20` e `GameUI+124 = 0xa0000001` com `gameSaveCalls = 0` (zero escritas em saves em disco).
+  - Registro sincronizado dos dois clientes na sala do mock (`/api/onJoin`).
+  - Duelo PvP executado com sucesso (`/api/onPlayerAttack`: Guerreiro desfere ataque e HP do Atirador é reduzido para 75).
+  - Leilão executado com sucesso (`/api/onAuctionBid`: Atirador cobre o lance inicial de 100 gold ofertando 250 gold, validado no estado global da sala).
+- **Confirmado por testes do mock:** `node --test tools/network-mock/server.test.js` passa 100% (salas, ataque, lances, isolamento e validações).
+- **Pendente:** testar o túnel físico com o primo e validar execução física Windows/iPhone com latência real.
 
 ## Próximo trabalho recomendado
 
 1. ~~Rastrear seleção de personagem→solicitação JNI/Comm→callback que produz erro15, usando contratos ARM e testes existentes.~~ *(Concluído em [CONTRATO_MULTI_MODE_ARM.md](CONTRATO_MULTI_MODE_ARM.md))*
 2. ~~Documentar formato/estado da operação original antes de definir o adaptador.~~ *(Concluído em [CONTRATO_MULTI_MODE_ARM.md](CONTRATO_MULTI_MODE_ARM.md))*
-3. Integrar apenas um fluxo comprovado (`cmd = 0` + `cmd = 8` em modo sandbox sem gravar no save real) ao mock e testar falha, cancelamento, repetição, desconexão e preservação do save em cópias.
-4. Só então validar dois clientes reais via túnel. PvP completo, economia/leilão persistente e compatibilidade com servidor original não estão entregues.
+3. ~~Integrar fluxo comprovado (`cmd = 0` + `cmd = 8` em modo sandbox sem gravar no save real) e simular 2 clientes ARM com PvP e Leilão no mock.~~ *(Concluído em [verify-pvp-auction-mock.mjs](../tools/verify-pvp-auction-mock.mjs))*
+4. Validar dois clientes reais via túnel (localtunnel/ngrok) com UI web/desktop. Economia/leilão persistente e compatibilidade com servidor original Everple permanecem como tarefas futuras de longo prazo.
 
 Este registro e o laboratório não alteram a versão do jogo, a Release0.9.7 ou o site publicado.
