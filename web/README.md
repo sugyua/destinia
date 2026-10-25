@@ -1,6 +1,8 @@
-# Destinia 0.9.1 Beta — navegador
+# Destinia 0.9.3 Beta — navegador
 
 Teste privado: https://destinia-web-experimental.leafyheron257.chatgpt.site/
+
+Barra corrigida: espaçamento original de23px, área extra para o décimo ícone e mão nativa por cima do menu. Códex acessível pela aba também dentro do inventário/equipamento; prévia antes de confirmar e toque na prévia ativam a consulta, sem atalho F8.
 
 Códex integrado como décima aba na barra original, preservando as nove existentes. Usa moldura, fonte e ícones da biblioteca original; a aba adicional usa o ícone nativo de pergaminho destacado. Grade8×4, retratos frontais, descobertas, contador de mortes e detalhes por categoria (drops, locais, variantes). Toque no último ícone; selecione e toque INFO ou use AÇÃO. SAIR/Voltar retorna à grade/menu; as outras abas continuam acessíveis. Consulta congela a partida.
 

@@ -2,8 +2,8 @@
 #include "codex_ui.h"
 namespace destinia {
 inline CodexRect nativeCodexRect(int x,int y,int w,int h,int sw,int sh){return {x+(sw-400)/2,y+(sh-240)/2,w,h};}
-inline UiTransform nativeCodexTransform(int w,int h,int percent){return {w,h,percent,UiAnchor::Center,232,240};}
-inline int nativeCodexTab(int x,int y,int w,int h){x-=(w-400)/2;y-=(h-240)/2;return x>=86&&x<314&&y>=0&&y<24?std::min(9,(x-86)/22):-1;}
+inline UiTransform nativeCodexTransform(int w,int h,int percent){return {w,h,percent,UiAnchor::Center,255,240,(w-400)/2+84,(h-240)/2};}
+inline int nativeCodexTab(int x,int y,int w,int h){x-=(w-400)/2;y-=(h-240)/2;return x>=86&&x<339&&y>=0&&y<24?std::max(0,std::min(9,(x-102)/23)):-1;}
 inline CodexRect nativeCodexBack(int w,int h){return nativeCodexRect(272,29,34,18,w,h);}
 inline CodexRect nativeCodexPrevious(int w,int h){return nativeCodexRect(92,215,62,20,w,h);}
 inline CodexRect nativeCodexNext(int w,int h){return nativeCodexRect(249,215,58,20,w,h);}

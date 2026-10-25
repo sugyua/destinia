@@ -19,7 +19,7 @@ async def run(url):
    b=await page.locator('#game').bounding_box();await page.touchscreen.tap(b['x']+(x+.5)*b['width']/400,b['y']+(y+.5)*b['height']/240);await page.wait_for_timeout(100)
   for scale in [100]:
    assert await worker.evaluate('engine.uiScale')==100
-   await tap(297,12,scale);assert await worker.evaluate('engine.codexOpen')
+   await tap(320,12,scale);assert await worker.evaluate('engine.codexOpen')
    assert await worker.evaluate('engine.codex.catalog()[60].kills')==2
    snapshot=await worker.evaluate("Array.from(engine.read(engine.exports.get('Game'),32056)).join(',')")
    # Opening selected first discovered soldier (index60/page1).
@@ -34,15 +34,26 @@ async def run(url):
    await tap(290,35,scale);assert await worker.evaluate('!engine.codexOpen')
    # Click all original tabs and confirm real native state, including craft/pets.
    for tab in range(9):
-    await tap(88+22*tab,12,scale)
+    await tap(113+23*tab,12,scale)
     await page.wait_for_timeout(160)
     actual=await worker.evaluate("engine.get32(engine.exports.get('GameUI')+0x7c)>>>28");assert actual==tab,(scale,tab,actual)
-   await tap(297,12,scale)
+   await tap(320,12,scale)
    assert await worker.evaluate("engine.codex.catalog()[60].kills")==2
    await tap(290,35,scale)
+  # The entry remains clickable while browsing the ordinary inventory body.
+  await tap(159,12,100)
+  await worker.evaluate("engine.put32(engine.exports.get('GameUI')+0x7c,0x20000001)")
+  await tap(320,12,100);assert await worker.evaluate('engine.codexOpen')
+  await tap(290,35,100);assert await worker.evaluate("engine.get32(engine.exports.get('GameUI')+0x7c)===0x20000001")
+  await tap(297,12,100)
+  await worker.evaluate('engine.key(7,true);engine.key(7,false)')
+  assert await worker.evaluate('engine.codexTabSelected&&!engine.codexOpen')
+  await page.screenshot(path='/tmp/destinia093-codex-preview.png')
+  await tap(270,199,100);assert await worker.evaluate('engine.codexOpen&&engine.codexDetailsOpen')
+  await tap(290,35,100);await tap(290,35,100)
   # Actual site gamepad plumbing with a synthetic standard gamepad.
   await page.evaluate("window.padTest={index:0,id:'QA EMULADO',connected:true,mapping:'standard',axes:[0,0,0,0],buttons:Array.from({length:17},()=>({pressed:false,value:0}))}")
-  await tap(297,12,100)
+  await tap(320,12,100)
   async def button(index):
    await page.evaluate('(i)=>padTest.buttons[i].pressed=true',index);await page.wait_for_timeout(150);await page.evaluate('(i)=>padTest.buttons[i].pressed=false',index);await page.wait_for_timeout(150)
   await button(0);assert await worker.evaluate('engine.codexDetailsOpen')

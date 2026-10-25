@@ -1,5 +1,5 @@
 {
-  "version": "0.9.2",
+  "version": "0.9.3",
   "base_commit": "b1a68a3d0831b6c5b82cb7546fc1d30453e9390a",
   "files": [
     ".gitignore",
@@ -198,6 +198,7 @@
     "web/tools/pack_game.py",
     "launcher/main.go",
     "release/NOTAS_0.9.2.md",
-    "tests/test_root_executables.ps1"
+    "tests/test_root_executables.ps1",
+    "release/NOTAS_0.9.3.md"
   ]
 }

@@ -1,13 +1,19 @@
-# Destinia 0.9.2 Beta
+# Destinia 0.9.3 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.9.2 Beta — Executáveis na raiz](https://github.com/sugyua/destinia/releases/tag/v0.9.2-beta)** — ZIP Windows com dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
+**[Baixar Destinia 0.9.3 Beta — Barra e acesso ao Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.3-beta)** — ZIP Windows com dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
 
 **[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
+
+## 0.9.3 — barra e acesso ao Códex corrigidos
+
+A barra mantém o espaçamento original das nove abas e ganha uma posição para o Códex, sem comprimir ícones. A mão nativa aparece inteira por cima do menu. Clique na última aba para abrir o Códex, inclusive enquanto navega no inventário/equipamento. A seleção por teclado/controle mostra a prévia; clicar nela também funciona. **Sem atalho dedicado F8.** Contadores, seleção, atributos e saves preservados.
+
+**Web0.9.3 publicada**, revisão`0da736c`, no link acima, somente100% e com o mesmo acesso privado. [Notas e validação](release/NOTAS_0.9.3.md). O ZIP Windows preserva `Destinia.exe` e `Destinia Zoom.exe` na raiz. A versão0.9.2 e releases anteriores permanecem disponíveis.
 
 ## 0.9.2 — abra direto pelo .exe da raiz
 
@@ -15,7 +21,7 @@ O pacote Windows passa a incluir **`Destinia.exe`** (normal) e **`Destinia Zoom.
 
 O ZIP Windows da Release contém os quatro executáveis: os dois lançadores na raiz e os dois hosts nas respectivas subpastas. O ZIP de fontes contém `launcher/main.go` e os scripts de compilação, **não** os executáveis pré-compilados. Não são incluídos dados do jogo ou DLLs externas; veja [INSTALAÇÃO](INSTALL.md).
 
-**Web:** permanece na **0.9.1 Beta**, revisão `5d05a13`, [site privado](https://destinia-web-experimental.leafyheron257.chatgpt.site/). Esta atualização `0.9.2` altera apenas o modo de iniciar a versão Windows e **não foi implantada na web**. O progresso web continua temporário.
+**Web:** atualizada para **0.9.3 Beta**, revisão `0da736c`, [site privado](https://destinia-web-experimental.leafyheron257.chatgpt.site/). Esta atualização `0.9.2` altera apenas o modo de iniciar a versão Windows e **não foi implantada na web**. O progresso web continua temporário.
 
 ## 0.9.1 — Códex no menu e filtros de equipamentos
 
@@ -48,6 +54,7 @@ Da mais recente para a mais antiga. As releases anteriores e seus downloads são
 
 | Release | Lançamento (Brasília) |
 | --- | --- |
+| [0.9.3 Beta — barra do Códex corrigida](https://github.com/sugyua/destinia/releases/tag/v0.9.3-beta) | 24/10/2026 |
 | [0.9.1 Beta — Códex integrado e filtros](https://github.com/sugyua/destinia/releases/tag/v0.9.1-beta) | 24/10/2026 |
 | [0.9.1 dev1 — prévia técnica, somente fontes](https://github.com/sugyua/destinia/releases/tag/v0.9.1-dev1) | 24/10/2026 |
 | [0.9 Beta — controles PC, fix1](https://github.com/sugyua/destinia/releases/tag/v0.9-controles-fix1) | 24/10/2026 |
@@ -342,7 +349,7 @@ As associações **Necromante → foice** e **Granadeiro → granadas** já esta
 
 Quando uma correção ou funcionalidade do Destinia estiver **implementada e validada**, ela deverá ser comunicada no README e no CHANGELOG, registrada na [central das IAs](https://github.com/sugyua/ai-progress-shared/issues/4) e publicada como **nova versão em [GitHub Releases](https://github.com/sugyua/destinia/releases)**, com arquivos Windows pertinentes, fontes e checksums. Código experimental em branch ou PR **não é** uma versão jogável publicada. As Releases anteriores permanecem disponíveis; testes automatizados e testes reais são identificados separadamente.
 
-**Versão web:** [abrir o Destinia no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/) (acesso privado). Último deployment **confirmado** nesta atualização documental: base web da **0.9.1 Beta**, fonte `5d05a13`, com Códex nativo na décima aba, filtros de equipamentos e escala web somente **100%**. O progresso do personagem na web ainda não é persistente após recarregar/fechar. A cada mudança futura na web, atualizar aqui a revisão/deployment e as novidades **somente depois da publicação confirmada**; se a versão web estiver pendente, informar explicitamente.
+**Versão web:** [abrir o Destinia no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/) (acesso privado). Último deployment **confirmado** nesta atualização documental: base web da **0.9.1 Beta**, fonte `0da736c`, com Códex nativo na décima aba, filtros de equipamentos e escala web somente **100%**. O progresso do personagem na web ainda não é persistente após recarregar/fechar. A cada mudança futura na web, atualizar aqui a revisão/deployment e as novidades **somente depois da publicação confirmada**; se a versão web estiver pendente, informar explicitamente.
 
 **Correção visual em preparação:** a prévia da décima aba e a mão apontadora do menu estão em [PR #3 (rascunho)](https://github.com/sugyua/destinia/pull/3), **não incluído na 0.9.1 Beta publicada** e não implantado na web. Precisa de testes e release própria antes de ser anunciado como corrigido.
 

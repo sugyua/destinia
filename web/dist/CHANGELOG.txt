@@ -1,5 +1,11 @@
 AVISO: jogo em versão Beta, sujeito a bugs e funcionalidades incompletas.
 
+0.9.3 Beta — barra e acesso ao Códex — 24/10/2026:
+- Preserva posições e espaçamento originais das nove abas e amplia a barra para o Códex.
+- Mão nativa desenhada por último; ícone inteiro e região de clique alinhados.
+- Códex acessível pela aba dentro do inventário/equipamento; prévia visível antes de confirmar e interativa por toque.
+- Web permanece100%; memória do personagem, contadores e demais menus preservados.
+
 0.9.1 Beta — Códex nativo e inventário — 24/10/2026:
 - Códex na décima aba da barra, preservando nove abas originais, com moldura/fonte/ícones ARM.
 - Grade de monstros, retratos frontais completos, contador e detalhes separados por categoria preservados.

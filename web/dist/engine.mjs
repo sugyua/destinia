@@ -164,9 +164,10 @@ export class DestiniaWeb {
   codexScrollDetails(direction){const lists=detailListPages(this.codexDetailData()?.sections?.[this.codexDetailPage]).length;this.codexDetailScroll=Math.max(0,Math.min(lists-1,this.codexDetailScroll+direction));}
 
   framebuffer(){const pixels=this.arrays.get(this.screen).slice();if(!this.codexOpen)this.combatPower.paint(pixels);this.inventory.paint(pixels);this.nativeCodex.paint(pixels);return pixels;}
-  codexMenuVisible(){const game=this.exports.get('Game'),ui=this.exports.get('GameUI');if(!game||!ui)return false;const state=this.get32(ui+0x7c);return this.get16(game+0x4854)===16&&this.get16(ui+0x76)>=2&&(state&0x0fffffff)===0&&(state>>>28)<=8;}
+  codexMenuVisible(){const game=this.exports.get('Game'),ui=this.exports.get('GameUI');if(!game||!ui)return false;const state=this.get32(ui+0x7c);return this.get16(game+0x4854)===16&&this.get16(ui+0x76)>=2&&(state&0x0fffffff)<=1&&(state>>>28)<=8;}
   codexChangePage(direction){const count=this.codex.names.size,page=Math.max(0,Math.min(Math.max(0,Math.ceil(count/entriesPerPage)-1),this.codexPage+direction));this.codexSelection=Math.min(count-1,page*entriesPerPage+this.codexSelection%entriesPerPage);this.codexPage=page;}
   codexMoveSelection(delta){this.codexSelection=Math.max(0,Math.min(this.codex.names.size-1,this.codexSelection+delta));this.codexPage=Math.floor(this.codexSelection/entriesPerPage);}
+  codexSelectNativeTab(tab){const u=this.exports.get('GameUI');if((this.get32(u+0x7c)&0x0fffffff)===1)this.call(this.exports.get('MainMenu_mKeyPressed'),[27]);if((this.get32(u+0x7c)&0x0fffffff)!==0)return false;for(let n=0;this.get32(u+0x7c)>>>28!==tab&&n<9;n++)this.call(this.exports.get('MainMenu_mKeyPressed'),[7]);return this.get32(u+0x7c)>>>28===tab;}
   codexOpenMenu(){if(this.nativeTouchDown){const {x,y}=this.nativeTouchPoint;this.call(this.exports.get('Java_game_destiniaeng_GameThread_jniTouch'),[ENV,16,x,y,1]);this.nativeTouchDown=false;}const slot=this.get16(this.exports.get('Game')+0x4886);if(slot<=9)this.codex.select(slot);this.codexOpen=true;this.codexDetailsOpen=false;this.codexDetailPage=0;this.codexDetailScroll=0;this.codexTabSelected=true;const first=this.codex.catalog().findIndex(row=>row.found);this.codexSelection=Math.max(0,first);this.codexPage=Math.floor(this.codexSelection/entriesPerPage);}
   codexMenuKey(key,down){
    if(!down)return false;
@@ -178,16 +179,17 @@ export class DestiniaWeb {
    const ui=this.exports.get('GameUI'),state=this.get32(ui+0x7c);
    if(this.codexTabSelected){
     if([17,6,9].includes(key)){this.codexOpenMenu();return true;}
-    if(key===5||key===7){this.codexTabSelected=false;this.put32(ui+0x7c,key===5?0x80000000:0);return true;}
+    if(key===5||key===7){this.codexTabSelected=false;this.codexSelectNativeTab(key===5?8:0);return true;}
     if(key===10||key===27){this.codexTabSelected=false;return false;}return true;
    }
-   if(key===5&&state===0||key===7&&state===0x80000000){this.codexTabSelected=true;return true;}return false;
+   if(key===5&&state===0||key===7&&state===0x80000000){this.codexOpenMenu();this.codexOpen=false;return true;}return false;
   }
   codexBarTouch(x,y){const p=nativeTransform(this.uiScale).inverse(x,y);return this.codexMenuVisible()&&nativeTabHit(p.x,p.y)>=0;}
   codexMenuTouch(x,y,phase){
     const point=nativeTransform(this.uiScale).inverse(x,y);x=point.x;y=point.y;
    if(this.codexTouchCaptured&&phase!==0){if(phase===1)this.codexTouchCaptured=false;return true;}
-   if(phase===0&&(this.codexOpen||this.codexMenuVisible())){const tab=nativeTabHit(x,y);if(tab>=0){this.codexTouchCaptured=true;if(tab===9)this.codexOpenMenu();else{this.codexOpen=false;this.codexDetailsOpen=false;this.codexTabSelected=false;const ui=this.exports.get('GameUI');for(let n=0;(this.get32(ui+0x7c)>>>28)!==tab&&n<9;n++)this.call(this.exports.get('MainMenu_mKeyPressed'),[7]);}return true;}}
+   if(phase===0&&(this.codexOpen||this.codexMenuVisible())){const tab=nativeTabHit(x,y);if(tab>=0){this.codexTouchCaptured=true;if(tab===9)this.codexOpenMenu();else{this.codexOpen=false;this.codexDetailsOpen=false;this.codexTabSelected=false;this.codexSelectNativeTab(tab);}return true;}}
+   if(phase===0&&!this.codexOpen&&this.codexTabSelected&&this.codexMenuVisible()&&x>=84&&x<316&&y>=25&&y<240)this.codexOpen=true;
    if(this.codexOpen){if(phase===0){this.codexTouchCaptured=true;if(contains(codexBack(),x,y)){if(this.codexDetailsOpen)this.codexDetailsOpen=false;else{this.codexOpen=false;this.codexTabSelected=true;}}else if(!this.codexDetailsOpen&&contains(nativeDetailsButton(),x,y)){this.codexDetailsOpen=true;this.codexDetailPage=0;this.codexDetailScroll=0;}else if(contains(codexPrevious(),x,y)){if(this.codexDetailsOpen)this.codexDetailsPage(-1);else this.codexChangePage(-1);}else if(contains(codexNext(),x,y)){if(this.codexDetailsOpen)this.codexDetailsPage(1);else this.codexChangePage(1);}else if(this.codexDetailsOpen&&contains(codexDetailUp(),x,y))this.codexScrollDetails(-1);else if(this.codexDetailsOpen&&contains(codexDetailDown(),x,y))this.codexScrollDetails(1);else if(!this.codexDetailsOpen){const index=codexHitTest(x,y,this.codex.names.size,this.codexPage);if(index>=0)this.codexSelection=index;}}return true;}
 
    if(phase===0)this.codexTabSelected=false;return false;

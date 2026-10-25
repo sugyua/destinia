@@ -4,6 +4,14 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.9.3 Beta — barra e acesso ao Códex — 24/10/2026
+
+- Nove abas com espaçamento original de23px; barra ampliada para o décimo ícone inteiro, sem sobreposição de posições e hitboxes.
+- Mão original preservada nas nove abas e desenhada por último no Códex, sem ficar encoberta pela barra.
+- Acesso pela aba também ao navegar no inventário/equipamento; contexto original preservado ao voltar. Prévia antes de confirmar e clique/toque interativo nessa prévia.
+- Removido o atalho dedicado F8 conforme pedido; abertura pela barra, com teclado/controle/touch preservados.
+- Correção nos dois hosts e na web100%, que foi publicada. Saves/atributos/contadores, launchers na raiz e releases anteriores preservados. Testes físicos ainda necessários.
+
 ## 0.9.2 Beta — inicializadores Windows na raiz — 24/10/2026
 
 - Novo **Destinia.exe** e **Destinia Zoom.exe** na raiz da pasta Windows extraída, sem necessidade de executar BAT para jogar. Ambos são aplicativos GUI Windows x64 e abrem os hosts nas subpastas existentes.

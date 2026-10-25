@@ -89,7 +89,14 @@ static int codexNativeTouchX=0,codexNativeTouchY=0;
 static bool codexMenuVisible() {
  if(!codexAvailable || !exportsMap.count("Game") || !exportsMap.count("GameUI"))return false;
  const auto ui=exportsMap.at("GameUI");const auto state=rd32(ui+0x7c);
- return rd16(exportsMap.at("Game")+0x4854)==16 && rd16(ui+0x76)>=2 && (state&0x0fffffff)==0 && (state>>28)<=8;
+ return rd16(exportsMap.at("Game")+0x4854)==16 && rd16(ui+0x76)>=2 && (state&0x0fffffff)<=1 && (state>>28)<=8;
+}
+static bool codexSelectNativeTab(int tab){
+ const auto ui=exportsMap.at("GameUI");
+ if((rd32(ui+0x7c)&0x0fffffff)==1){if(!callFn(exportsMap.at("MainMenu_mKeyPressed"),{27}))return false;}
+ if((rd32(ui+0x7c)&0x0fffffff)!=0)return false;
+ for(int n=0;int(rd32(ui+0x7c)>>28)!=tab&&n<9;++n)if(!callFn(exportsMap.at("MainMenu_mKeyPressed"),{7}))return false;
+ return int(rd32(ui+0x7c)>>28)==tab;
 }
 static void codexEnterMenu() {
  if(codexNativeTouchDown) {
@@ -124,17 +131,18 @@ static bool codexMenuKey(int key,bool down) {
  auto ui=exportsMap.at("GameUI");const auto state=rd32(ui+0x7c);
  if(codexTabSelected) {
   if(key==17 || key==6 || key==9){codexEnterMenu();return true;}
-  if(key==5 || key==7){codexTabSelected=false;wr32(ui+0x7c,key==5?0x80000000u:0u);return true;}
+  if(key==5 || key==7){codexTabSelected=false;codexSelectNativeTab(key==5?8:0);return true;}
   if(key==10 || key==27){codexTabSelected=false;return false;}
   return true;
  }
- if((key==5 && state==0) || (key==7 && state==0x80000000u)){codexTabSelected=true;return true;}
+ if((key==5 && state==0) || (key==7 && state==0x80000000u)){codexEnterMenu();codexOpen=false;return true;}
  return false;
 }
 static bool codexMenuTouch(int x,int y,int phase) {
  const auto point=destinia::nativeCodexTransform(SCREEN_W,SCREEN_H,preferences.uiScale).inverse(x,y);x=point.first;y=point.second;
  if(codexTouchCaptured && phase!=0){if(phase==1)codexTouchCaptured=false;return true;}
- if(phase==0 && (codexOpen || codexMenuVisible())) {const int tab=destinia::nativeCodexTab(x,y,SCREEN_W,SCREEN_H);if(tab>=0){codexTouchCaptured=true;if(tab==9)codexEnterMenu();else{codexOpen=codexDetailsOpen=codexTabSelected=false;codexFlush();auto ui=exportsMap.at("GameUI");for(int n=0;int(rd32(ui+0x7c)>>28)!=tab&&n<9;++n)if(!callFn(exportsMap.at("MainMenu_mKeyPressed"),{7}))break;}return true;}}
+ if(phase==0 && (codexOpen || codexMenuVisible())) {const int tab=destinia::nativeCodexTab(x,y,SCREEN_W,SCREEN_H);if(tab>=0){codexTouchCaptured=true;if(tab==9)codexEnterMenu();else{codexOpen=codexDetailsOpen=codexTabSelected=false;codexFlush();codexSelectNativeTab(tab);}return true;}}
+ if(phase==0 && !codexOpen && codexTabSelected && codexMenuVisible() && destinia::nativeCodexRect(84,25,232,215,SCREEN_W,SCREEN_H).contains(x,y))codexOpen=true;
  if(codexOpen) {
   if(phase==0) {
    codexTouchCaptured=true;
@@ -197,6 +205,6 @@ static void installCodex() {
       uc_hook hook;auto at=exportsMap.at(symbols[i])&~1u;
       if(uc_hook_add(uc,&hook,UC_HOOK_CODE,reinterpret_cast<void*>(codexHook),reinterpret_cast<void*>(i),at,at)!=UC_ERR_OK) throw std::runtime_error("Falha ao observar monstros.");
     }
-    hostReport("[codex] Bestiario 0.7 ativo: CODEX no menu original (F8 no menu); arquivo codex-v1.txt.\n");
+    hostReport("[codex] Bestiario 0.7 ativo: CODEX na barra do menu original; arquivo codex-v1.txt.\n");
   }catch(const std::exception& e) {codexAvailable=false;hostReport("[codex] %s\n",e.what());}
 }

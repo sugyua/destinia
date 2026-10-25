@@ -4,7 +4,7 @@
 
 ## Como usar
 
-Abra Menu → CODEX e selecione um monstro. AÇÃO/ataque abre suas informações dentro do jogo. A página 1 contém Drops, a 2 Locais de spawn e a 3 Variantes. ANTERIOR/PRÓXIMA, esquerda/direita, Page Up/Page Down ou AÇÃO percorrem categorias. SUBIR/DESCER e cima/baixo percorrem as subpáginas da categoria. VOLTAR retorna à mesma seleção da grade; F8 fecha a consulta.
+Abra Menu → CODEX e selecione um monstro. AÇÃO/ataque abre suas informações dentro do jogo. A página 1 contém Drops, a 2 Locais de spawn e a 3 Variantes. ANTERIOR/PRÓXIMA, esquerda/direita, Page Up/Page Down ou AÇÃO percorrem categorias. SUBIR/DESCER e cima/baixo percorrem as subpáginas da categoria. VOLTAR retorna à mesma seleção da grade; use SAIR/Voltar para retornar.
 
 O cabeçalho mantém retrato frontal completo, HP máximo e nível do último encontro da sessão, além do contador acumulado de mortes. Desconhecidos mantêm os dados ocultos. A consulta mantém a partida pausada.
 
