@@ -136,8 +136,18 @@ try {
     const p0 = Buffer.from('000000010000000844455354494e4941000000024f4b00000000', 'hex');
     r.put32(B + 0x73b2c, 0); // Nao aceitar request anterior como cmd8 automatico.
     reply(0, p0);
+    assert.equal(r.get32(menu + 156), 20);
+    assert.equal(r.get32(gameUI + 124), 0xa0000000);
+    assert.equal(r.get32(B + 0x73b2c), 0);
+    assert.equal(r.get32(B + 0x45108), 0);
+    lines.push('Login ARM: Menu.state=20; GameUI+124=0xa0000000; nenhum cmd8 automatico. Dois int16 apos os textos: unreadMailCount e battleInfoCount.');
+    call('MainMenu_mKeyPressed', [17]);
+    assert.equal(r.get32(gameUI + 124), 0xa0000001);
+    lines.push('Confirmacao nativa MainMenu_mKeyPressed(17): GameUI+124=0xa0000001. Nenhuma escrita direta nesse campo.');
+    call('Comm_init', [8]);
+    call('Comm_flush');
     assert.equal(r.get32(B + 0x73b2c), 53);
-    dump('Request automatico cmd=8 (53 bytes)', 0x70bd0, 53);
+    dump('Request cmd=8 explicito da fixture (nao automatico)', 0x70bd0, 53);
 
     const p8 = Buffer.from('000000010000', 'hex');
     reply(8, p8);
@@ -163,5 +173,6 @@ try {
 } finally {
   r.close();
 }
+
 
 
