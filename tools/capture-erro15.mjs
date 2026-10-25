@@ -136,6 +136,7 @@ try {
     call('Comm_init', [0]);
     call('Comm_flush');
 
+    for(const name of ['Comm_read4Bytes','Comm_read2Bytes','Comm_readStr','Comm_flush','Menu_netProc']) {const address=r.exports.get(name)&~1;r.e.hook_add(uc.HOOK_CODE,()=>console.log(name,'pos',r.get32(B+0x6adc8),'len',r.get32(B+0x6adcc),'r0',r.r(0).toString(16),'r1',r.r(1)),null,address,address);}
     const p0 = Buffer.from('000000010000000844455354494e4941000000024f4b0000', 'hex');
     r.put32(B + 0x73b2c, 0);
     reply(0, p0);
@@ -167,6 +168,7 @@ try {
 } finally {
   r.close();
 }
+
 
 
 
