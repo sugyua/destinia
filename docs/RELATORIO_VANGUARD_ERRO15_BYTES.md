@@ -28,25 +28,13 @@ Mensagem capturada: "Ocorreu um erro de rede.\nCodigo de Erro = 15"
 4f 63 6f 72 72 65 75 20 75 6d 20 65 72 72 6f 20 64 65 20 72 65 64 65 2e 0a 43 6f 64 69 67 6f 20 64 65 20 45 72 72 6f 20 3d 20 31 35 00
 ```
 
-Cota de 5h: sem telemetria acessivel; 18% informado pelo usuario no inicio. Nenhuma afirmacao de percentual atual.
+Retomada apos reset de cota. Telemetria de percentual atual indisponivel.
 
-Resposta cmd=0: 00 00 00 1c 00 00 00 00 00 00 00 01 00 00 00 08 44 45 53 54 49 4e 49 41 00 00 00 02 4f 4b 00 00
-## Request automatico cmd=8 (offset 0x70bd0, 53 bytes)
-```text
-00 00 00 35 00 00 00 00 00 00 00 00 28 44 45 53 54 49 4e 49 41 2d 57 45 42 2d 54 45 53 54 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-```
-
-Resposta cmd=8: 00 00 00 0a 00 00 00 08 00 00 00 01 00 00
-Estado apos respostas: Menu=8; GameUI=0x0
-## inPacket inicio apos respostas (offset 0x6adc8, 64 bytes)
-```text
-04 00 00 00 18 00 00 00 00 00 00 00 00 00 00 0a 00 00 00 08 00 00 00 01 00 00 49 41 00 00 00 02 4f 4b 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-```
-
+Resposta cmd=0: 00 00 00 20 00 00 00 00 00 00 00 01 00 00 00 08 44 45 53 54 49 4e 49 41 00 00 00 02 4f 4b 00 00
 
 ## Resultado incompleto
 AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
 
-8 !== 20
+0 !== 53
 
 A transicao JNI cmd0/cmd8 NAO foi comprovada. pendingSendLen=53 isolado nao prova que cmd0 foi processado, pois a requisicao de preparacao ja tinha esse tamanho. O contrato estatico exige revisao: prefixo real 0x6f versus 0x6b previsto; layout outPacket nao confirmado. Confirmacao de personagem pelo handler tambem permanece pendente. Nenhuma alteracao em gameplay, saves no disco, release ou site.
