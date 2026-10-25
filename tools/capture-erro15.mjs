@@ -22,7 +22,7 @@ const menu=r.exports.get('Menu'),main=r.exports.get('MMain');
 r.put32(menu+156,1);r.write(menu+204,new Uint8Array([1,0]));
 call('MenuCanvas_mKeyPressed',[17]);assert.equal(r.get32(menu+156),8);
 r.write(menu+184,new Uint8Array([1,0]));r.write(menu+190,new Uint8Array([0,0]));
-call('MenuCanvas_mKeyReleased',[17]);call('MenuCanvas_mKeyPressed',[6]);
+r.e.hook_add(uc.HOOK_CODE,()=>console.log('ARM slot check',Array.from({length:8},(_,i)=>r.r(i).toString(16))),null,B+0x22a04,B+0x22a12);call('MenuCanvas_mKeyReleased',[17]);call('MenuCanvas_mKeyPressed',[6]);
 console.log('diagnostico',Object.fromEntries(['Menu','Comm','outPacket','netData','MMain'].map(n=>[n,(r.exports.get(n)-B).toString(16)])), 'state',r.get32(menu+156),'slot',r.get16(menu+190),'levels',hex(menu-B+184,8),'pending',r.get32(B+0x73b2c));assert.equal(r.get32(B+0x73b2c),111);
 dump('Comm.sendBuf cmd=0',0x70bd0,111);dump('outPacket: header LE + payload BE',0x6dcb4,66);dump('Comm.pendingSendLen LE',0x73b2c,4);
 lines.push(`Estado apos confirmacao: Menu=${r.get32(menu+156)}, netState=${r.get16(main+0x3920)}, timer=${r.get32(main+0x3924)}.`);
@@ -37,5 +37,6 @@ lines.push('Cota de 5h: sem telemetria acessivel; 18% informado pelo usuario no 
 fs.writeFileSync(new URL('../docs/RELATORIO_VANGUARD_ERRO15_BYTES.md',import.meta.url),lines.join('\n'));
 console.log(lines.join('\n'));
 } finally {r.close();}
+
 
 
