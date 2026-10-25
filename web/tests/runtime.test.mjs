@@ -356,3 +356,23 @@ test('Entradas na rotina ARM original incluem Codex no ciclo de abas',()=>{
   r.call(r.exports.get('MainMenu_mKeyPressed'),[5]);assert.equal(r.codexTabSelected,true);
  }finally{r.close();}
 });
+
+test('FC Status usa fonte ARM sem faixa azul e comparador fica na descricao nativa',()=>{
+ const r=make();try{
+  r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);const g=r.exports.get('Game'),u=r.exports.get('GameUI'),s=(at,v)=>r.write(at,new Uint8Array([v&255,v>>>8]));
+  for(let i=0;i<6;i++)r.put32(g+0x4584+4*i,0);[20,15,10,10].forEach((v,i)=>s(g+0x48ba+2*i,v));s(g+0x48fa,20);s(g+0x7574,65535);
+  const a=r.call(r.exports.get('GameUI_getNewEquipByIdx'),[1]),b=r.call(r.exports.get('GameUI_getNewEquipByIdx'),[2]),candidate=g+0x2ed6+20*b;r.put32(g+0x4584,g+0x2ed6+20*a);r.call(r.exports.get('GameUI_calcHeroStat'));r.call(r.exports.get('_backupHeroStat'));s(g+0x4854,16);s(u+0x76,16);
+  const handle=r.get32(r.exports.get('Grp')+4),ptr=r.call(r.exports.get('MC_GRP_GET_FRAME_BUFFER_POINTER'),[handle]);let fonts=0;const at=r.exports.get('Font_drawStringChar')&~1;r.e.hook_add(uc.HOOK_CODE,()=>fonts++,null,at,at);
+  r.combatPower.beginFrame();r.call(r.exports.get('_drawMenuStatus'),[handle,84,25,232]);const before=r.read(ptr,192000),after=before.slice(),fontBefore=fonts,game=r.read(g,32056);r.combatPower.paint(after);
+  assert.ok(fonts>fontBefore,'FC deve usar a fonte original');assert.deepEqual(after.slice((47*400+182)*2,(47*400+182)*2+2),before.slice((47*400+182)*2,(47*400+182)*2+2),'Sem faixa azul');assert.deepEqual(r.read(g,32056),game);
+  r.put32(u+0x7c,0x20000002);r.combatPower.beginFrame();r.call(r.exports.get('_drawEquipDesc'),[handle,91,157,candidate,0]);const item=r.read(ptr,192000),itemPage=item.slice();r.combatPower.paint(itemPage);
+  for(let y=0;y<225;y++)assert.deepEqual(itemPage.slice(y*800,(y+1)*800),item.slice(y*800,(y+1)*800),'Pagina Item preserva texto e grade originais');
+  const ui=r.read(u,12088);r.combatPower.key(11,true);const comparison=item.slice();r.combatPower.paint(comparison);assert.equal(r.combatPower.comparison,true);assert.notDeepEqual(comparison,itemPage);
+  for(let y=0;y<240;y++)for(let x=0;x<400;x++)if(x<91||x>=309||y<157||y>=239){const i=(y*400+x)*2;assert.equal(comparison[i],item[i]);assert.equal(comparison[i+1],item[i+1]);}
+  assert.deepEqual(r.read(g,32056),game);assert.deepEqual(r.read(u,12088),ui);r.combatPower.key(2,true);assert.equal(r.combatPower.comparison,false);
+  const grp=r.exports.get('Grp'),font=r.exports.get('Font'),graphics=r.read(grp,124),color=r.get32(font),slots=r.read(r.exports.get('frameBuffer'),20),nativeCall=r.call.bind(r);r.combatPower.nativeCache.clear();
+  r.call=(address,args)=>{if(address===r.exports.get('Font_drawStringChar'))throw Error('FC_RENDER_FAILURE');return nativeCall(address,args);};
+  assert.throws(()=>r.combatPower.paint(item.slice()),/FC_RENDER_FAILURE/);assert.deepEqual(r.read(grp,124),graphics);assert.equal(r.get32(font),color);assert.deepEqual(r.read(r.exports.get('frameBuffer'),20),slots);assert.deepEqual(r.read(g,32056),game);
+  r.call=nativeCall;const retry=item.slice();r.combatPower.paint(retry);assert.deepEqual(retry,itemPage);
+ }finally{r.close();}
+});

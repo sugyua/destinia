@@ -76,7 +76,7 @@ canvas.addEventListener('pointerdown',event=>{if(!ready||paused||surfacePointer!
 canvas.addEventListener('pointermove',event=>{if(event.pointerId!==surfacePointer)return;lastPoint=mapPoint(event.clientX,event.clientY,canvas.getBoundingClientRect());send({type:'touch',...lastPoint,phase:2});});
 for(const type of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(type,event=>{if(event.pointerId!==surfacePointer)return;send({type:'touch',...lastPoint,phase:1});surfacePointer=null;});
 canvas.addEventListener('contextmenu',event=>event.preventDefault());
-const keys={F7:10014,ArrowUp:3,w:3,ArrowDown:9,s:9,ArrowLeft:5,a:5,ArrowRight:7,d:7,Enter:17,' ':17,z:17,Escape:10,x:10,i:27,c:27,'1':2,'2':11,'3':4,'4':8};
+const keys={F6:10015,F7:10014,ArrowUp:3,w:3,ArrowDown:9,s:9,ArrowLeft:5,a:5,ArrowRight:7,d:7,Enter:17,' ':17,z:17,Escape:10,x:10,i:27,c:27,'1':2,'2':11,'3':4,'4':8};
 window.addEventListener('keydown',event=>{if(!ready||paused||event.repeat||event.ctrlKey||event.metaKey||event.altKey||!(event.key in keys))return;event.preventDefault();sources.press('key:'+event.code,keys[event.key]);});
 window.addEventListener('keyup',event=>sources.release('key:'+event.code));
 window.addEventListener('blur',()=>{pageFocused=false;release();});window.addEventListener('focus',()=>{pageFocused=true;gamepad.suspend();});document.addEventListener('visibilitychange',()=>{if(document.hidden){release();setPaused(true);}});

@@ -212,8 +212,8 @@ export class DestiniaWeb {
 
    if(phase===0&&!this.codexMenuVisible())this.codexTabSelected=false;return false;
   }
-  touch(x,y,type){if(this.inventory.touch(x,y,type))return;if(this.codexMenuTouch(x,y,type))return;if(type===0)this.nativeTouchDown=true;if(type===1)this.nativeTouchDown=false;if(type===0||type===2)this.nativeTouchPoint={x,y};if(this.uiScale!==100&&type!==3){const point=this.uiRenderer.touchPoint(x,y,this.call(this.exports.get('_getTouchState')));x=point.x;y=point.y;}this.call(this.exports.get('Java_game_destiniaeng_GameThread_jniTouch'),[ENV,16,x,y,type]);}
+  touch(x,y,type){if(this.inventory.touch(x,y,type))return;if(this.combatPower.touch(x,y,type))return;if(this.codexMenuTouch(x,y,type))return;if(type===0)this.nativeTouchDown=true;if(type===1)this.nativeTouchDown=false;if(type===0||type===2)this.nativeTouchPoint={x,y};if(this.uiScale!==100&&type!==3){const point=this.uiRenderer.touchPoint(x,y,this.call(this.exports.get('_getTouchState')));x=point.x;y=point.y;}this.call(this.exports.get('Java_game_destiniaeng_GameThread_jniTouch'),[ENV,16,x,y,type]);}
   menuState(){return this.gMenu?this.get32(this.gMenu+156):0;}
-  key(key,down){if(this.inventory.key(key,down))return;if(this.codexMenuKey(key,down))return;const state=this.menuState(),prefix=state<=0?'LogoCanvas':state===1?'MenuCanvas':'GameCanvas';if(state<=0&&!down)return;const fn=this.exports.get(prefix+(down?'_mKeyPressed':'_mKeyReleased'));if(fn)this.call(fn,[key]);}
+  key(key,down){if(this.inventory.key(key,down))return;if(this.combatPower.key(key,down))return;if(this.codexMenuKey(key,down))return;const state=this.menuState(),prefix=state<=0?'LogoCanvas':state===1?'MenuCanvas':'GameCanvas';if(state<=0&&!down)return;const fn=this.exports.get(prefix+(down?'_mKeyPressed':'_mKeyReleased'));if(fn)this.call(fn,[key]);}
   close(){this.e.close();this.saved.clear();this.files.clear();this.arrays.clear();}
 }

@@ -1,6 +1,6 @@
 {
-  "version": "0.9.6",
-  "base_commit": "7b6475af49876ee533ea626ab220bce360dd0396",
+  "version": "0.9.7",
+  "base_commit": "21360fc7967414896eca15c1b9709a781c342e72",
   "files": [
     ".gitignore",
     "AGENTS.md",
@@ -202,6 +202,7 @@
     "release/NOTAS_0.9.3.md",
     "release/NOTAS_0.9.4.md",
     "release/NOTAS_0.9.5.md",
-    "release/NOTAS_0.9.6.md"
+    "release/NOTAS_0.9.6.md",
+    "release/NOTAS_0.9.7.md"
   ]
 }

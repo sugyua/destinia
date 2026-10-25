@@ -1,19 +1,25 @@
-# Destinia 0.9.6 Beta
+# Destinia 0.9.7 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.9.6 Beta — Setas nativas do Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.6-beta)** — ZIP Windows com dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
+**[Baixar Destinia 0.9.7 Beta — FC e comparador nativos](https://github.com/sugyua/destinia/releases/tag/v0.9.7-beta)** — ZIP Windows com dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
 
 **[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
 
+## 0.9.7 — FC e comparador com a interface original
+
+O **FC na aba Status** usa a fonte nativa, sem a faixa azul. No inventário, **Item/Comparar alternam dentro da própria caixa de descrição**, reaproveitando moldura, fonte e cores do jogo. Item preserva a descrição original; Comparar mostra FC atual → previsto e diferenças de ATK/DEF/PV/PM/crítico. Toque nos rótulos, use **F6 livre** ou o **analógico direito** no contexto de equipamentos. Não equipa automaticamente nem altera a fórmula, itens, atributos, gold ou saves.
+
+**Web 0.9.7 publicada**, revisão `3c41f07`, no mesmo link privado e somente100%. Recarregar descarta o progresso temporário.73 testes Node, testes ARM dos dois hosts,7 testes de pacote e Chromium aprovados; validação física Windows/iPhone pendente. [Notas](release/NOTAS_0.9.7.md) · [Uso e limites](docs/FC.md).
+
 ## 0.9.6 — setas originais também selecionam o Códex
 
 Corrige o caminho das **setas desenhadas dentro do jogo**, que ainda voltava de Sistema para Status, pulando o livro. Agora elas selecionam a aba, abrem o Códex e navegam na grade; setas do site, teclado e controle continuam disponíveis. Soltar um toque depois de arrastá-lo para dentro da janela libera o comando. Moldura da 0.9.5, nove abas, itens, atributos, gold e saves preservados; sem F8.
 
-**Web0.9.6 publicada**, revisão `69e7a97`, no mesmo link privado/100%. Recarregar descarta o progresso temporário.72Node, ARM dos dois hosts,7pacotes e Chromium com setas internas/site/teclado/controle emulado aprovados; físico pendente. [Notas](release/NOTAS_0.9.6.md).
+**Web0.9.6 publicada anteriormente**, revisão `69e7a97`, no mesmo link privado/100%. Recarregar descarta o progresso temporário.72Node, ARM dos dois hosts,7pacotes e Chromium com setas internas/site/teclado/controle emulado aprovados; físico pendente. [Notas](release/NOTAS_0.9.6.md).
 
 ## 0.9.5 — livro inteiro dentro da barra
 
@@ -72,6 +78,7 @@ Da mais recente para a mais antiga. As releases anteriores e seus downloads são
 
 | Release | Lançamento (Brasília) |
 | --- | --- |
+| [0.9.7 Beta — FC e comparador nativos](https://github.com/sugyua/destinia/releases/tag/v0.9.7-beta) | 25/10/2026 |
 | [0.9.6 Beta — setas nativas do Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.6-beta) | 25/10/2026 |
 | [0.9.5 Beta — moldura integrada do Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.5-beta) | 25/10/2026 |
 | [0.9.4 Beta — navegação do Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.4-beta) | 25/10/2026 |

@@ -4,6 +4,15 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.9.7 Beta — 25/10/2026
+
+- FC na aba Status desenhado com a fonte original do jogo e fundo preservado, substituindo a faixa azul.
+- Comparador integrado à caixa nativa de descrição do equipamento, com páginas Item/Comparar, moldura e fonte originais e nome na cor de raridade. Item mantém a descrição original; Comparar mostra FC atual→previsto, ganho/perda e diferenças de ATK/DEF/PV/PM/CRI.
+- Alternância por clique/toque no rodapé, F6 (se não remapeado no PC) ou analógico direito. F7/filtros, seleção, comandos de equipamento e modo clássico preservados; página escolhida vale para a sessão.
+- Fórmula de FC, buffs, requisitos, atributos, inventário, gold e formato de saves permanecem iguais. Desenho usa cache e restaura estado gráfico/superfície emprestada mesmo após falha.
+- Validação automatizada de ARM, Node e Chromium; controle físico Windows/iPhone pendente. Não inclui correção térmica nem ampliação dos atributos comparados.
+
+
 ## 0.9.6 Beta — 25/10/2026
 
 - Setas geradas dentro do jogo passam pelo mesmo tratamento do Códex: corrige Sistema → Status pulando o livro. Compatibilidade com os códigos nativos do direcional, sem alterar comandos do gameplay.

@@ -1,6 +1,10 @@
 # FC — Força de Combate (índice v1)
 
-O FC aparece nos status do próprio jogo. No inventário, entre na mochila e selecione um equipamento: o painel lateral mostra FC atual, FC após a troca, diferença com sinal/cor e diferenças de ATK, DEF, PV máximos, PM máximos e crítico. Ganhos aparecem em verde, perdas em vermelho. Itens de outra classe, sem nível suficiente ou ainda não identificados não recebem uma previsão válida.
+O FC aparece na aba Status com a fonte original do jogo. No inventário e na seleção de equipamento próprio, o rodapé da caixa de descrição alterna entre **Item** (texto original) e **Comparar** (FC atual, FC previsto, diferença e ATK/DEF/PV/PM máximos/crítico). O nome usa a cor da raridade; ganhos são verdes, perdas vermelhas e valores iguais cinza.
+
+Use clique/toque nos rótulos, **F6** ou o analógico direito (esquerda=Item, direita=Comparar). No PC, F6 não substitui uma tecla já remapeada; nesse caso use o mouse/analógico. F7/filtros e os comandos originais de equipar continuam independentes. A página escolhida é mantida na sessão, sem alterar preferências ou o formato dos saves.
+
+A previsão não equipa o item. Itens de outra classe, sem nível suficiente ou não identificados exibem o motivo; ofertas/estruturas não reconhecidas não recebem estimativa inventada. A 0.9.7 muda a apresentação, mantendo os cálculos anteriores.
 
 ## Cálculo
 
@@ -18,4 +22,4 @@ A previsão captura o estado em memória, usa os vínculos de equipamento reais 
 
 Os testes verificam atributos nativos, aumento e redução, mesmos buffs/expiração, HP atual independente, incompatibilidades, ouro preservado, estado byte a byte, captura do desenho original e limites dos pixels nas escalas75/100/125, nos dois hosts. Há equivalentes Node e inspeção visual da UI web. Isso não equivale a uma campanha completa no Windows/iPhone.
 
-O detalhamento de todos os atributos, filtros e favoritos continua para0.9.1. O painel inicial de comparação trabalha com os equipamentos próprios da mochila; ofertas ou estruturas não reconhecidas não recebem uma estimativa inventada.
+O detalhamento dos demais atributos e contextos e as proteções/favoritos continuam no roteiro futuro; os filtros de equipamentos já têm uma entrega parcial independente. O painel inicial de comparação trabalha com os equipamentos próprios da mochila; ofertas ou estruturas não reconhecidas não recebem uma estimativa inventada.
