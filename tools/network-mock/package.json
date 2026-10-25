@@ -1,0 +1,9 @@
+{
+  "name": "destinia-mock-local",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Simulador isolado de comunicação PvP e leilão; não altera Destinia ou seus saves",
+  "engines": { "node": ">=22" },
+  "scripts": { "start": "node server.js", "test": "node --test server.test.js" },
+  "dependencies": {}
+}
