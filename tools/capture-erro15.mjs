@@ -137,9 +137,11 @@ try {
     call('Comm_flush');
 
     for(const name of ['Comm_read4Bytes','Comm_read2Bytes','Comm_readStr','Comm_flush','Menu_netProc']) {const address=r.exports.get(name)&~1;r.e.hook_add(uc.HOOK_CODE,()=>console.log(name,'pos',r.get32(B+0x6adc8),'len',r.get32(B+0x6adcc),'r0',r.r(0).toString(16),'r1',r.r(1)),null,address,address);}
+    const trace=[];r.e.hook_add(uc.HOOK_CODE,(_,a)=>{trace.push([(Number(a)-B).toString(16),hex(Number(a)-B,2),r.r(0).toString(16),r.r(1).toString(16),r.r(2).toString(16),r.r(3).toString(16)]);if(trace.length>50)trace.shift();},null,B+0x22d6c,B+0x23b10);
     const p0 = Buffer.from('000000010000000844455354494e4941000000024f4b00000000', 'hex');
     r.put32(B + 0x73b2c, 0);
     reply(0, p0);
+    console.log('trace',JSON.stringify(trace));
     assert.equal(r.get32(B + 0x73b2c), 53);
     assert.equal(Buffer.from(r.read(B + 0x70bd0, 8)).readUInt32BE(4), 8);
     assert.equal(r.get32(B + 0x45108), 0);
@@ -168,6 +170,7 @@ try {
 } finally {
   r.close();
 }
+
 
 
 
