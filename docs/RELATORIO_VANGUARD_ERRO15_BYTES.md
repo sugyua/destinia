@@ -28,7 +28,9 @@ Mensagem capturada: "Ocorreu um erro de rede.\nCodigo de Erro = 15"
 4f 63 6f 72 72 65 75 20 75 6d 20 65 72 72 6f 20 64 65 20 72 65 64 65 2e 0a 43 6f 64 69 67 6f 20 64 65 20 45 72 72 6f 20 3d 20 31 35 00
 ```
 
+Resposta injetada cmd=0 (totalLen=32): 00 00 00 20 00 00 00 00 00 00 00 01 00 00 00 08 44 45 53 54 49 4e 49 41 00 00 00 02 4f 4b 00 00
 
 ## Resultado incompleto
-Unicorn.js: Function uc_mem_write failed with code 7:
-Invalid memory write (UC_ERR_WRITE_UNMAPPED)
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+0 !== 53
