@@ -42,6 +42,7 @@ try {
   const main = r.exports.get('MMain');
   const gameUI = r.exports.get('GameUI');
   const loadGame = r.exports.get('GameCanvas_LoadGame');
+  r.put32(main, r.exports.get('MenuCanvas')); // Canvas ativo da fixture, sem avancar o logo.
 
   // Selecao de MULTI MODE via handler nativo (Menu.state: 1 -> 8)
   r.put32(menu + 156, 1);
@@ -125,7 +126,7 @@ try {
     };
 
     // O loop de logo da fixture pode substituir Comm.processCB; restaura o menu nativo.
-    call('MenuCanvas_init', [r.exports.get('MenuCanvas')]);
+    call('Comm_SetProcessCB', [r.exports.get('Menu_netProc')]);
     r.put32(B + 0x70bc0, 0);
     assert.equal(r.get32(B + 0x70b9c), r.exports.get('Menu_netProc'));
     // Reinicia estado de espera de rede a partir de Menu.state = 8
@@ -160,10 +161,11 @@ try {
 } catch (error) {
   lines.push('', '## Resultado incompleto', String(error));
   fs.writeFileSync(new URL('../docs/RELATORIO_VANGUARD_ERRO15_BYTES.md', import.meta.url), lines.join('\n'));
-  console.error(String(error));
+  console.error(error.stack || String(error));
   process.exitCode = 1;
 } finally {
   r.close();
 }
+
 
 
