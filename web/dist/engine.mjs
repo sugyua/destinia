@@ -19,7 +19,7 @@ export class DestiniaWeb {
   constructor(uc,assets,{onLog=()=>{},onSound=()=>{},fastGraphics=true,fastMemory=true,gameMode="classico",uiScale=100,language="pt"}={}) {
     if(!["en","pt"].includes(language))throw Error("Idioma inválido.");this.language=language;if(language==="pt")assets=translatedAssets(assets);
     if(!["classico","expandido"].includes(gameMode))throw Error("Modo de jogo inválido.");this.gameMode=gameMode;if(![75,100,125].includes(uiScale))throw Error("Escala de interface inválida.");this.uiScale=uiScale;
-    this.pendingPurchase=false;this.storeNotice=false;this.virtualControls=true;this.fastGraphics=fastGraphics;this.fastMemory=fastMemory;this.graphicsStats={draws:0,supported:false};this.portraits=new Map();this.codexOpen=false;this.codexTabSelected=false;this.codexTouchCaptured=false;this.codexPage=0;this.codexSelection=0;this.codexDetailsOpen=false;this.codexDetailPage=0;this.codexDetailScroll=0;this.monsterMetadata=null;this.nativeTouchDown=false;this.nativeTouchPoint={x:0,y:0};
+    this.pendingPurchase=false;this.storeNotice=false;this.virtualControls=true;this.fastGraphics=fastGraphics;this.fastMemory=fastMemory;this.graphicsStats={draws:0,supported:false};this.portraits=new Map();this.codexOpen=false;this.codexTabSelected=false;this.codexTouchCaptured=false;this.codexPage=0;this.codexSelection=0;this.codexDetailsOpen=false;this.codexDetailPage=0;this.codexDetailScroll=0;this.monsterMetadata=null;this.codexNativeMenuPending=-1;this.codexNativeMenuTarget=0;this.codexNativeMenuBypass=0;this.codexNativeMenuDraining=false;this.nativeTouchDown=false;this.nativeTouchPoint={x:0,y:0};
     this.codex=new Codex(monsterNames(assets.get('mon_data_en.gdt')));this.uc=uc;this.assets=assets;this.log=onLog;this.onSound=onSound;this.e=new uc.Unicorn(uc.ARCH_ARM,uc.MODE_ARM);
     this.regs=Array.from({length:13},(_,i)=>uc['ARM_REG_R'+i]);this.handlers=new Map();this.imports=new Map();this.exports=new Map();
     this.arrays=new Map();this.files=new Map();this.saved=new Map();this.nextArray=0x1000;this.nextFile=0x5000;this.nextClass=0x100;this.nextMissing=0xc00;
@@ -153,8 +153,23 @@ export class DestiniaWeb {
       const x=this.get16(p+0x1a,true)-this.get16(game+0x4878,true),y=this.get16(p+0x1c,true)-this.get16(game+0x487a,true);
       if(x>=0&&x<400&&y>=0&&y<240)this.codex.observe(p,id,false,this.monsterFacts(p));
     },null,at,at);});
+    for(const name of ['GameCanvas_mKeyPressed','MainMenu_mKeyPressed']){
+     const target=this.exports.get(name),menu=target&~1;
+     this.e.hook_add(this.uc.HOOK_CODE,()=>{try{
+      if(this.codexNativeMenuBypass||this.codexNativeMenuDraining||!this.codexMenuVisible())return;
+      const raw=this.r(0),key=raw>=13&&raw<=16?[3,9,5,7][raw-13]:raw,state=this.get32(this.exports.get('GameUI')+0x7c);
+      if(!(this.codexOpen||this.codexTabSelected||key===5&&state===0||key===7&&(state===0x80000000||state===0x80000001)))return;
+      if(this.codexNativeMenuPending<0){this.codexNativeMenuPending=raw;this.codexNativeMenuTarget=target;}
+      this.e.reg_write_i32(this.uc.ARM_REG_PC,this.e.reg_read_i32(this.uc.ARM_REG_LR));
+     }catch(error){this.error=error;this.e.emu_stop();}},null,menu,menu);
+    }
   }
-  call(address,args=[]){requireValue(address,'Função ARM ausente');let sp=(STACK+STACK_SIZE-256-Math.max(0,args.length-4)*4)&~7;for(let i=4;i<args.length;i++)this.put32(sp+(i-4)*4,args[i]);for(let i=0;i<4;i++)this.w(i,args[i]||0);this.e.reg_write_i32(this.uc.ARM_REG_SP,sp);this.e.reg_write_i32(this.uc.ARM_REG_LR,RETURN);this.error=null;try{this.e.emu_start(address,RETURN,0,0);}catch(error){const pc=this.e.reg_read_i32(this.uc.ARM_REG_PC)>>>0;throw Error(String(error)+" [ARM pc=0x"+(pc-BASE).toString(16)+", UI="+(this.uiRenderer?.kind||"none")+", entry="+(this.uiRenderer?.entry||0).toString(16)+"]");}if(this.error)throw this.error;requireValue((this.e.reg_read_i32(this.uc.ARM_REG_PC)&~1)===RETURN,'Execução ARM interrompida');return this.r(0);}
+  codexDrainNativeMenu(){
+    if(this.codexNativeMenuPending<0||this.codexNativeMenuDraining)return;
+    const key=this.codexNativeMenuPending,target=this.codexNativeMenuTarget;this.codexNativeMenuPending=-1;this.codexNativeMenuDraining=true;
+    try{if(!this.codexMenuKey(key,true)){this.codexNativeMenuBypass++;try{this.call(target,[key]);}finally{this.codexNativeMenuBypass--;}}}finally{this.codexNativeMenuDraining=false;}
+  }
+  call(address,args=[]){requireValue(address,'Função ARM ausente');let sp=(STACK+STACK_SIZE-256-Math.max(0,args.length-4)*4)&~7;for(let i=4;i<args.length;i++)this.put32(sp+(i-4)*4,args[i]);for(let i=0;i<4;i++)this.w(i,args[i]||0);this.e.reg_write_i32(this.uc.ARM_REG_SP,sp);this.e.reg_write_i32(this.uc.ARM_REG_LR,RETURN);this.error=null;try{this.e.emu_start(address,RETURN,0,0);}catch(error){const pc=this.e.reg_read_i32(this.uc.ARM_REG_PC)>>>0;throw Error(String(error)+" [ARM pc=0x"+(pc-BASE).toString(16)+", UI="+(this.uiRenderer?.kind||"none")+", entry="+(this.uiRenderer?.entry||0).toString(16)+"]");}if(this.error)throw this.error;requireValue((this.e.reg_read_i32(this.uc.ARM_REG_PC)&~1)===RETURN,'Execução ARM interrompida');const result=this.r(0);this.codexDrainNativeMenu();return result;}
   init(){const device=encoder.encode('DESTINIA-WEB-TEST'),model=encoder.encode('Browser');const id=this.array(device),m=this.array(model);this.screen=this.array(new Uint8Array(400*240*2));this.call(this.exports.get('Java_game_destiniaeng_GameThread_initGame'),[ENV,16,id,device.length,m,model.length,400,240,0]);this.log('initGame concluído.');}
   step(){this.finishOfflinePurchase();if(this.codexOpen){this.frame++;return 62;}if(this.inventory.open){this.frame++;return 62;}this.combatPower.beginFrame();const wait=this.call(this.exports.get('Java_game_destiniaeng_GameThread_jniRun'),[ENV,16,this.screen,this.frame++]);this.finishOfflinePurchase();return wait>=1000?100:wait;}
   monsterFacts(p){const game=this.exports.get('Game'),file=`m${this.get16(game+0x4870)}_${this.get16(game+0x4872)}.mpd`;return {maxHP:this.get32(p+0x24),level:this.get16(p+0x10),elite:!!this.get32(p+0x4c),location:{file,name:this.monsterMetadata?.maps.get(file)||file}};}
@@ -167,10 +182,11 @@ export class DestiniaWeb {
   codexMenuVisible(){const game=this.exports.get('Game'),ui=this.exports.get('GameUI');if(!game||!ui)return false;const state=this.get32(ui+0x7c);return this.get16(game+0x4854)===16&&this.get16(ui+0x76)>=2&&(state&0x0fffffff)<=1&&(state>>>28)<=8;}
   codexChangePage(direction){const count=this.codex.names.size,page=Math.max(0,Math.min(Math.max(0,Math.ceil(count/entriesPerPage)-1),this.codexPage+direction));this.codexSelection=Math.min(count-1,page*entriesPerPage+this.codexSelection%entriesPerPage);this.codexPage=page;}
   codexMoveSelection(delta){this.codexSelection=Math.max(0,Math.min(this.codex.names.size-1,this.codexSelection+delta));this.codexPage=Math.floor(this.codexSelection/entriesPerPage);}
-  codexSelectNativeTab(tab){const u=this.exports.get('GameUI');if((this.get32(u+0x7c)&0x0fffffff)===1)this.call(this.exports.get('MainMenu_mKeyPressed'),[27]);if((this.get32(u+0x7c)&0x0fffffff)!==0)return false;for(let n=0;this.get32(u+0x7c)>>>28!==tab&&n<9;n++)this.call(this.exports.get('MainMenu_mKeyPressed'),[7]);return this.get32(u+0x7c)>>>28===tab;}
+  codexSelectNativeTab(tab){this.codexNativeMenuBypass++;try{const u=this.exports.get('GameUI');if((this.get32(u+0x7c)&0x0fffffff)===1)this.call(this.exports.get('MainMenu_mKeyPressed'),[27]);if((this.get32(u+0x7c)&0x0fffffff)!==0)return false;for(let n=0;this.get32(u+0x7c)>>>28!==tab&&n<9;n++)this.call(this.exports.get('MainMenu_mKeyPressed'),[7]);return this.get32(u+0x7c)>>>28===tab;}finally{this.codexNativeMenuBypass--;}}
   codexOpenMenu(){if(this.nativeTouchDown){const {x,y}=this.nativeTouchPoint;this.call(this.exports.get('Java_game_destiniaeng_GameThread_jniTouch'),[ENV,16,x,y,1]);this.nativeTouchDown=false;}const slot=this.get16(this.exports.get('Game')+0x4886);if(slot<=9)this.codex.select(slot);this.codexOpen=true;this.codexDetailsOpen=false;this.codexDetailPage=0;this.codexDetailScroll=0;this.codexTabSelected=true;const first=this.codex.catalog().findIndex(row=>row.found);this.codexSelection=Math.max(0,first);this.codexPage=Math.floor(this.codexSelection/entriesPerPage);}
   codexMenuKey(key,down){
    if(!down)return false;
+   if(key>=13&&key<=16)key=[3,9,5,7][key-13];
    if(this.codexOpen){
     if(this.codexDetailsOpen){if(key===10||key===27){this.codexDetailsOpen=false;}else if(key===5)this.codexDetailsPage(-1);else if(key===7||key===17||key===6)this.codexDetailsPage(1);else if(key===3)this.codexScrollDetails(-1);else if(key===9)this.codexScrollDetails(1);return true;}
     if(key===17||key===6){this.codexDetailsOpen=true;this.codexDetailPage=0;this.codexDetailScroll=0;return true;}
@@ -188,11 +204,13 @@ export class DestiniaWeb {
   codexMenuTouch(x,y,phase){
     const point=nativeTransform(this.uiScale).inverse(x,y);x=point.x;y=point.y;
    if(this.codexTouchCaptured&&phase!==0){if(phase===1)this.codexTouchCaptured=false;return true;}
+   if(this.codexOpen&&this.nativeTouchDown&&phase!==0)return false;
    if(phase===0&&(this.codexOpen||this.codexMenuVisible())){const tab=nativeTabHit(x,y);if(tab>=0){this.codexTouchCaptured=true;if(tab===9)this.codexOpenMenu();else{this.codexOpen=false;this.codexDetailsOpen=false;this.codexTabSelected=false;this.codexSelectNativeTab(tab);}return true;}}
    if(phase===0&&!this.codexOpen&&this.codexTabSelected&&this.codexMenuVisible()&&x>=84&&x<316&&y>=25&&y<240)this.codexOpen=true;
+   if(this.codexOpen&&(x<84||x>=339||y<0||y>=240))return false;
    if(this.codexOpen){if(phase===0){this.codexTouchCaptured=true;if(contains(codexBack(),x,y)){if(this.codexDetailsOpen)this.codexDetailsOpen=false;else{this.codexOpen=false;this.codexTabSelected=true;}}else if(!this.codexDetailsOpen&&contains(nativeDetailsButton(),x,y)){this.codexDetailsOpen=true;this.codexDetailPage=0;this.codexDetailScroll=0;}else if(contains(codexPrevious(),x,y)){if(this.codexDetailsOpen)this.codexDetailsPage(-1);else this.codexChangePage(-1);}else if(contains(codexNext(),x,y)){if(this.codexDetailsOpen)this.codexDetailsPage(1);else this.codexChangePage(1);}else if(this.codexDetailsOpen&&contains(codexDetailUp(),x,y))this.codexScrollDetails(-1);else if(this.codexDetailsOpen&&contains(codexDetailDown(),x,y))this.codexScrollDetails(1);else if(!this.codexDetailsOpen){const index=codexHitTest(x,y,this.codex.names.size,this.codexPage);if(index>=0)this.codexSelection=index;}}return true;}
 
-   if(phase===0)this.codexTabSelected=false;return false;
+   if(phase===0&&!this.codexMenuVisible())this.codexTabSelected=false;return false;
   }
   touch(x,y,type){if(this.inventory.touch(x,y,type))return;if(this.codexMenuTouch(x,y,type))return;if(type===0)this.nativeTouchDown=true;if(type===1)this.nativeTouchDown=false;if(type===0||type===2)this.nativeTouchPoint={x,y};if(this.uiScale!==100&&type!==3){const point=this.uiRenderer.touchPoint(x,y,this.call(this.exports.get('_getTouchState')));x=point.x;y=point.y;}this.call(this.exports.get('Java_game_destiniaeng_GameThread_jniTouch'),[ENV,16,x,y,type]);}
   menuState(){return this.gMenu?this.get32(this.gMenu+156):0;}

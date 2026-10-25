@@ -48,6 +48,17 @@ int main(int argc,char** argv) {
  if(!codexMenuKey(7,true) || codexTabSelected || rd32(ui+0x7c)!=0)return 39;
  wr32(ui+0x7c,0x80000000);if(!codexMenuKey(7,true) || !codexTabSelected)return 40;
  if(!codexMenuKey(5,true) || codexTabSelected || rd32(ui+0x7c)!=0x80000000)return 41;
+ // Direct original ARM events must share the extension used by physical keys.
+ if(!callFn(exportsMap.at("MainMenu_mKeyPressed"),{7})||!codexTabSelected||rd32(ui+0x7c)!=0x80000000)return 112;
+ if(!callFn(exportsMap.at("MainMenu_mKeyPressed"),{17})||!codexOpen)return 113;
+ codexMenuKey(10,true);
+ if(!callFn(exportsMap.at("MainMenu_mKeyPressed"),{7})||codexTabSelected||rd32(ui+0x7c)!=0)return 114;
+ if(!callFn(exportsMap.at("MainMenu_mKeyPressed"),{5})||!codexTabSelected)return 115;
+ if(!callFn(exportsMap.at("MainMenu_mKeyPressed"),{5})||codexTabSelected||rd32(ui+0x7c)!=0x80000000)return 116;
+ if(!callFn(exportsMap.at("GameCanvas_mKeyPressed"),{16})||!codexTabSelected)return 117;
+ if(!callFn(exportsMap.at("GameCanvas_mKeyPressed"),{14})||!codexOpen)return 118;
+ codexMenuKey(10,true);
+ if(!callFn(exportsMap.at("GameCanvas_mKeyPressed"),{15})||codexTabSelected||rd32(ui+0x7c)!=0x80000000)return 119;
  // Real native System body -> added book, without entering settings submenu.
  if(!callFn(exportsMap.at("MainMenu_mKeyPressed"),{17}) || rd32(ui+0x7c)!=0x80000001)return 108;
  if(!codexMenuKey(7,true) || !codexTabSelected || codexOpen || rd32(ui+0x7c)!=0x80000000)return 109;

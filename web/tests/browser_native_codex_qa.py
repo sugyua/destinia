@@ -52,6 +52,27 @@ async def run(url):
   await page.screenshot(path='/tmp/destinia093-codex-preview.png')
   await tap(270,199,100);assert await worker.evaluate('engine.codexOpen&&engine.codexDetailsOpen')
   await tap(290,35,100);await tap(290,35,100)
+  # Original in-game direction buttons emit 13/14/15/16, not host 3/9/5/7.
+  await tap(297,12,100)
+  persistent="()=>{const r=engine,g=r.exports.get('Game');return [Array.from(r.read(g+0x2e0c,0x4584-0x2e0c)),Array.from(r.read(g+0x48ba,0x50)),Array.from(r.read(g+0x7574,4))]}"
+  native_items=await worker.evaluate(persistent)
+  await tap(75,190,100)
+  assert await worker.evaluate('engine.codexTabSelected&&!engine.codexOpen')
+  await tap(70,200,100)
+  assert await worker.evaluate('engine.codexOpen')
+  assert native_items==await worker.evaluate(persistent)
+  # Freeze starts when the Codex opens; original menu frames animate particles.
+  native_game=await worker.evaluate("Array.from(engine.read(engine.exports.get('Game'),32056)).join(',')")
+  choice=await worker.evaluate('engine.codexSelection')
+  await tap(75,190,100)
+  assert await worker.evaluate('engine.codexSelection')==choice+1
+  b=await page.locator('#game').bounding_box()
+  def screen(x,y):return (b['x']+(x+.5)*b['width']/400,b['y']+(y+.5)*b['height']/240)
+  await page.mouse.move(*screen(75,190));await page.mouse.down();await page.wait_for_timeout(100)
+  await page.mouse.move(*screen(150,150));await page.mouse.up();await page.wait_for_timeout(100)
+  assert await worker.evaluate('!engine.nativeTouchDown')
+  assert native_game==await worker.evaluate("Array.from(engine.read(engine.exports.get('Game'),32056)).join(',')")
+  await tap(290,35,100);await tap(297,12,100)
   # System body is entered by native Action, not by writing its state.
   async def system_body():
    await tap(297,12,100)

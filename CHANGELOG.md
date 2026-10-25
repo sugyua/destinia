@@ -4,6 +4,14 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.9.6 Beta — 25/10/2026
+
+- Setas geradas dentro do jogo passam pelo mesmo tratamento do Códex: corrige Sistema → Status pulando o livro. Compatibilidade com os códigos nativos do direcional, sem alterar comandos do gameplay.
+- Captura de entrada nos limites das rotinas ARM, com processamento depois da emulação e desvio explícito para chamadas internas de navegação; não cria um estado de página inválido.
+- Direcionais originais selecionam, abrem e navegam no Códex. Soltar após arrastar o toque para dentro da janela libera o comando. Moldura da 0.9.5, teclado, touch, controle, nove abas, atributos, itens e saves preservados.
+- Testes automatizados de ARM, Node e Chromium não substituem controle físico Windows/iPhone; sem mudança térmica.
+
+
 ## 0.9.5 Beta — 25/10/2026
 
 - Livro do Códex inteiro dentro de uma moldura contínua: reaproveita fundo e fechamento da barra original, deslocando a borda para incluir a décima aba. Remove o recorte de seis colunas e a divisória antiga.

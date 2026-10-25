@@ -344,3 +344,15 @@ test('Barra inclui livro inteiro e uma unica moldura nativa antes de selecionar 
   for(let x=307;x<325;x++){r.codexOpen=false;r.codexTabSelected=false;r.touch(x,12,0);r.touch(x,12,1);assert.equal(r.codexOpen,true,'Todo o livro visivel deve ser clicavel');}
  }finally{r.close();}
 });
+
+test('Entradas na rotina ARM original incluem Codex no ciclo de abas',()=>{
+ const r=make();try{
+  r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);r.call(r.exports.get('openMainmenu'),[0]);const ui=r.exports.get('GameUI'),g=r.exports.get('Game');r.write(ui+0x76,new Uint8Array([16,0]));
+  r.codexSelectNativeTab(8);const before=r.read(g,32056);
+  r.call(r.exports.get('MainMenu_mKeyPressed'),[16]);assert.equal(r.codexTabSelected,true,'Direita nativa nao deve pular o Codex');assert.equal(r.get32(ui+0x7c),0x80000000);assert.equal(r.codexOpen,false);
+  r.call(r.exports.get('MainMenu_mKeyPressed'),[17]);assert.equal(r.codexOpen,true);assert.deepEqual(r.read(g,32056),before);
+  r.codexSelection=16;for(const [key,expected] of [[13,8],[14,16],[15,15],[16,16]]){r.call(r.exports.get('GameCanvas_mKeyPressed'),[key]);assert.equal(r.codexSelection,expected);}assert.deepEqual(r.read(g,32056),before);
+  r.key(10,true);r.call(r.exports.get('MainMenu_mKeyPressed'),[7]);assert.equal(r.codexTabSelected,false);assert.equal(r.get32(ui+0x7c),0,'Navegacao interna deve chegar ao Status sem recaptura');
+  r.call(r.exports.get('MainMenu_mKeyPressed'),[5]);assert.equal(r.codexTabSelected,true);
+ }finally{r.close();}
+});

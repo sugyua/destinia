@@ -569,6 +569,7 @@ static void stubHook(uc_engine*, uint64_t address, uint32_t, void*) {
   } else { hostReport("[host] stub sem handler id=0x%x\n", id); fatal = true; uc_emu_stop(uc); }
 }
 
+static bool codexDrainNativeMenu();
 static bool callFn(u32 addr, std::initializer_list<u32> args, u32* ret) {
   destinia::SaveCall saveCall(saveTransaction);
   std::vector<u32> a(args);
@@ -588,7 +589,7 @@ static bool callFn(u32 addr, std::initializer_list<u32> args, u32* ret) {
   if (ret) *ret = R(0);
   try {saveCall.commit();for(const auto& path:saveTransaction.committedRemovals())codexFileRemoved(path.string());}
   catch(const std::exception& error) {hostReport("[host] Save nao publicado: %s\n",error.what());executionFailed=true;return false;}
-  return true;
+  return codexDrainNativeMenu();
 }
 
 // ---------------------------------------------------------------- BMP (para o modo sem janela)
@@ -813,7 +814,7 @@ static int runHost(int argc, char** argv) {
   if(explicitScale) { scale=std::clamp(scale,1,10); windowWidth=400*scale; windowHeight=240*scale; }
   const fs::path reports=reportsDir.empty()?destinia::defaultReportsDir():fs::path(reportsDir);
   if(destinia::sessionLog.start(reports,"host")) hostReport("[host] Log TXT: %s\n",(destinia::sessionLog.directory()/"log.txt").string().c_str());
-  hostReport("[host] Destinia 0.9.5 Beta - host\n");
+  hostReport("[host] Destinia 0.9.6 Beta - host\n");
   if(saveDir.empty()) saveDir=destinia::modeSaveDir(destinia::configuredSaveDir(),preferences.gameMode).string();
   saveDir=fs::absolute(saveDir).lexically_normal().string();
   hostReport("[host] Save compartilhado: %s\n",saveDir.c_str());
@@ -944,7 +945,7 @@ static int runHost(int argc, char** argv) {
 #endif
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  // pixels nitidos
-    win = SDL_CreateWindow("Destinia 0.9.5 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
+    win = SDL_CreateWindow("Destinia 0.9.6 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
     if(!win) { hostReport("SDL_CreateWindow: %s\n",SDL_GetError()); return 1; }
     if(fullscreen) setFullscreen(true);
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_PRESENTVSYNC);
@@ -1071,7 +1072,7 @@ static int runHost(int argc, char** argv) {
       const bool paused=controls.paused();
       if(paused!=wasPaused) {
         controls.release();
-        SDL_SetWindowTitle(win,paused?"Destinia 0.9.5 Beta - PAUSADO":"Destinia 0.9.5 Beta");
+        SDL_SetWindowTitle(win,paused?"Destinia 0.9.6 Beta - PAUSADO":"Destinia 0.9.6 Beta");
         hostReport("[host] %s.\n",paused?"Pausado":"Retomado"); wasPaused=paused;
       }
       updateAudioState(controls.focused,paused);
@@ -1162,7 +1163,7 @@ static int runHost(int argc, char** argv) {
 
 
 int main(int argc,char** argv) {
-  if(argc==2 && std::strcmp(argv[1],"--version")==0) { std::puts("Destinia 0.9.5 Beta"); return 0; }
+  if(argc==2 && std::strcmp(argv[1],"--version")==0) { std::puts("Destinia 0.9.6 Beta"); return 0; }
   int result=1;
   if(argc==2 && std::string(argv[1])=="--import-classic") {
     try {const auto base=destinia::configuredSaveDir();destinia::importClassicSave(base,destinia::modeSaveDir(base,"expandido"));printf("Copia criada no modo expandido; a partida classica foi preservada.\n");return 0;}
