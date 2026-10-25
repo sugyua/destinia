@@ -1,3 +1,22 @@
+﻿## Conclusão final e limites da prova
+
+**PASS:** Menu.state === 20 e GameUI+124 === 0xa0000001, com asserções estritas em execução Node/Unicorn. A sequência inclui confirmação nativa `MainMenu_mKeyPressed(17)` depois do login; cmd8 é uma operação explícita da fixture. Não houve escrita direta no campo GameUI para fabricar o resultado.
+
+Por que UI=0xa0000000: esse é o valor escrito pelo próprio caminho de sucesso do login deste ELF. A confirmação nativa abre UI=0xa0000001. Por que não houve cmd8 automático: o login já consome os dois int16, unreadMailCount e battleInfoCount, e entra diretamente no menu online. A descrição estática anterior estava incorreta.
+
+A premissa de resposta com tamanho total também foi refutada por comparação em instâncias independentes: o envio usa tamanho total; a recepção aceita 4+payload. Com 8+payload, o parser espera quatro bytes adicionais e não chama os leitores do callback. Ver `ERRO15_VERIFICACAO.json`.
+
+ELF SHA-256: `f12f1d20ab42646ef81df27516851acccb9fffe7be07a054db83890d992df7e9`.
+
+Comandos de reprodução no PowerShell:
+
+```powershell
+$env:DESTINIA_GAME_ROOT='D:\IA\Meus Aplicativos\destinia\game'
+node tools/capture-erro15.mjs --responses
+node tools/verify-erro15-protocol.mjs
+```
+
+Ambos executados com código de saída 0. A prova independente intercepta GameCanvas_SaveGame e registra zero chamadas. O carregamento de personagem é substituído em RAM; não valida um save persistido nem gameplay, servidor remoto ou conexão entre jogadores. Na prova de timeout, a fixture termina com Menu=0; portanto o frame151 comprova o temporizador e a mensagem, não toda a sequência visual sobre seleção de personagem. Nenhum save em disco, host, release ou site foi alterado.
 # Relatorio Vanguard: Erro 15 e bytes ARM
 
 Execucao Node/Unicorn com engine.mjs e ELF original libdestinia_jni.so. Fixture exclusivamente em RAM; nenhum save de usuario foi lido ou escrito no disco.

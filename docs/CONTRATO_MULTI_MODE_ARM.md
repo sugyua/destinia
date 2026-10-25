@@ -1,6 +1,31 @@
-# Contrato Técnico ARM — Multi Mode, Erro 15 e Adaptador de Rede (`libdestinia_jni.so`)
+﻿# Contrato Técnico ARM — Multi Mode, Erro 15 e Adaptador de Rede (`libdestinia_jni.so`)
 
-> **Status:** Mapeamento estático completo do binário original `game/lib/armeabi/libdestinia_jni.so` (somente leitura) confrontado com `host/main.cpp`, `host_zoom/main.cpp`, `web/dist/engine.mjs` e `tools/network-mock/server.js`.
+> **Correção dinâmica — 26/10/2026:** as conclusões abaixo prevalecem sobre o mapeamento estático histórico das seções seguintes. O contrato anterior de login `cmd0 -> cmd8 automático` não corresponde ao ELF executado. Offsets de branches e layouts não cobertos pela prova continuam provisórios.
+>
+> ELF SHA-256: `f12f1d20ab42646ef81df27516851acccb9fffe7be07a054db83890d992df7e9`.
+>
+> Provas reproduzíveis: `tools/capture-erro15.mjs --responses` e `tools/verify-erro15-protocol.mjs`, com `DESTINIA_GAME_ROOT` apontando para o APK extraído. Dumps em `RELATORIO_VANGUARD_ERRO15_BYTES.md` e medições em `ERRO15_VERIFICACAO.json`.
+
+## 0. Contrato comprovado por execução ARM
+
+| Etapa | Resultado medido |
+| :--- | :--- |
+| Request cmd0 | 111 bytes; prefixo BE `00 00 00 6f`: tamanho total do envio. |
+| Resposta cmd0 | Buffer de 34 bytes; prefixo BE `00 00 00 1e`: **4 + payload**, excluindo os próprios 4 bytes do comprimento. |
+| Payload cmd0 | resultCode int32; ID string com int32 de tamanho; aviso string; **unreadMailCount int16; battleInfoCount int16**. |
+| Login concluído | `Menu.state=20`, `GameUI+124=0xa0000000`, pendingSendLen=0. **Nenhum cmd8 automático.** |
+| Confirmação nativa | `MainMenu_mKeyPressed(17)` produz `GameUI+124=0xa0000001`, mantendo Menu=20. Sem escrita direta no campo GameUI. |
+| Request cmd8 | Solicitado explicitamente pela fixture; 53 bytes; prefixo `00 00 00 35`. Não é evidência de disparo automático. |
+| Resposta cmd8 | 14 bytes; prefixo `00 00 00 0a`; resultCode int32=1 e unreadMailCount int16=0. Estados finais continuam Menu=20 e UI=0xa0000001. |
+| Controle negativo | Resposta cmd0 com prefixo de tamanho total `00 00 00 22` deixa Menu=8 e não chama leitores do callback: faltam 4 bytes para o corpo que o parser espera. |
+
+Os dois int16 são consumidos nas posições 22 e 24 do payload de teste (26 bytes). O primeiro é armazenado em netData+370 (`0x172`); o segundo em netData+590 (`0x24e`). Na execução rastreada, esse caminho escreve UI=0xa0000000 e Menu=20 em `0x235fc` e `0x23606`. Os endereços de login previamente atribuídos a `0x23900..0x2395a` não sustentam o fluxo alegado para este ELF.
+
+A confirmação do slot exige a fixture de seleção pronta (`Menu+164=4`) e nível não zero. `GameCanvas_LoadGame` é interceptado para retornar sucesso em RAM: **não é validação de save real nem de personagem persistido**. A prova independente bloqueia `GameCanvas_SaveGame` e confirma zero chamadas. Os hosts, o binário ARM, os saves reais, a release e o site não foram alterados.
+
+---
+
+> **Status histórico (não equivale a validação dinâmica):** Mapeamento estático do binário original `game/lib/armeabi/libdestinia_jni.so` (somente leitura) confrontado com `host/main.cpp`, `host_zoom/main.cpp`, `web/dist/engine.mjs` e `tools/network-mock/server.js`.
 > **Escopo:** Documentar com precisão de instruções ARM/Thumb e offsets de memória a origem exata do `Codigo de Erro = 15`, o protocolo binário da camada `Comm_*`, a máquina de estados de `Menu_netProc` (`0x22d6d`) e a arquitetura de adaptador seguro para conectar o motor ARM ao servidor mock (`tools/network-mock`).
 
 ---
@@ -15,11 +40,7 @@
    - A cada frame, `MMain_run` (`0x1040c`) incrementa `MMain.netTimer` (`MMain + 0x3924`) em `0x10456`. Quando `MMain.netTimer` ultrapassa **150 frames** (`0x96`, ~5 a 7,5 segundos) para `Comm.conType == 0` (`0x10478..0x10486`), `MMain_run` executa `Comm_close()`, define `Comm.retryCount = 10` (`0x1049c`), carrega **`r0 = 15` (`0x104b6: movs r0, #15`)**, `r1 = 0` e invoca `Comm.processCB(15, 0)` -> **`Menu_netProc(15, 0)`** (`0x104b8`).
    - `Menu_netProc(15, 0)` (`0x22d6c`) detecta `r0 != 0` (`0x22dc4 -> 0x22ee6`), formata `sprintf(netData + 260, formatStr, 15)` (`0x22f0e`) com a string de `MMain + 0x824` (`"A network error has occurred.\nError Code = %d"`, traduzida por `common/portuguese_text.h` e `web/src/portuguese-text.mjs` para `"Ocorreu um erro de rede.\nCodigo de Erro = %d"`), zera a struct `Game` (`0x22f42`), chama `MMain_setNetState(2)` (`0x22f56`) e exibe o popup modal sobre a tela de seleção de personagem (`Menu.state == 8`).
 
-2. **Transição para o Menu Online do Multi Mode:**
-   - Para concluir o login sem erro e abrir o menu online (`Menu.state = 20`, `GameUI.state = 0xa0000001`), o motor ARM precisa receber:
-     1. A resposta do **`cmd = 0` (Login Multi Mode)** com `resultCode == 1` (`int32 BE`), seguida de `myNetId` (`string` prefixada por `int32 BE`), `noticeText` (`string` prefixada por `int32 BE`) e `battleInfoCount` (`int16 BE`).
-     2. Ao processar `cmd = 0` com `resultCode == 1`, `Menu_netProc` (`0x23900..0x2395a`) armazena `myNetId` em `Comm + 0x3188`, `noticeText` em `netData + 0`, `battleInfoCount` em `netData + 590` (`0x24e`), e **dispara imediatamente uma segunda requisição automática: `Comm_init(8)` (`cmd = 8`, contagem de mensagens na Mailbox)** seguida de `Comm_flush()` (`0x23946..0x2395a`).
-     3. Quando a resposta do **`cmd = 8`** chega com `resultCode == 1`, `Menu_netProc` (`0x2317a..0x231ac`) lê `unreadMailCount` (`int16 BE`) em `netData + 370` (`0x172`), define **`Menu.state = 20`** (`0x23194`), chama **`_makeNetMenu(0xa0000001)`** (`0x2319a`), grava **`0xa0000001` em `GameUI + 124`** (`0x231a2`) e chama **`MMain_setNetState(3)`** (`0x231ac`), abrindo o menu principal do Multi Mode com o aviso de rede (`GameUI_drawNetNotice`) e todas as opções online (`Notice`, `Battle Arena`, `Battle Info[N]`, `Hall of Honor`, `Honor Shop`, `Auction Hall`, `Mailbox[N]`, `Main Menu`).
+2. **Transição comprovada para o Menu Online:** a resposta cmd0 já traz unreadMailCount e battleInfoCount e produz Menu=20/UI=0xa0000000. A confirmação nativa abre UI=0xa0000001. cmd8 foi testado como operação explícita; não foi disparado automaticamente. Ver seção 0.
 
 ---
 
@@ -250,7 +271,7 @@ Para que o motor ARM processe qualquer resposta de rede no modo Multi Mode (`Com
    - Quando `pendingSendLen > 0`:
      - O quadro de saída está em `Comm.sendBuf` (`0x10070bd0`, tamanho `pendingSendLen` bytes).
      - Para `Comm.conType == 0`, os bytes do quadro de saída são:
-       - `sendBuf[0..3]`: `int32 BE` = `53 + payloadLen - 4` (`payloadLen + 49`).
+       - `sendBuf[0..3]`: `int32 BE` = `53 + payloadLen` (tamanho total do quadro de saída).
        - `sendBuf[4..7]`: `int32 BE` = `command` (mesmo valor de `Comm.lastCmd` em `0x10070bc8`).
        - `sendBuf[8..52]`: cabeçalho GV de 45 bytes (`0x00000A20`, `0x01`, `uniqueID[20]`, `modelName[20]`).
        - `sendBuf[53..pendingSendLen-1]`: payload do comando escrito por `Comm_write*`.
@@ -277,8 +298,8 @@ Quando `Comm_resultCB(3, 0, 0)` chama `Menu_netProc(0, &inPacket)`:
 
 | `cmd` | Nome / Tela | Requisição (`outPacket.data`) | Resposta Esperada (`inPacket.data`, Big-Endian) | Efeito em `Menu_netProc` |
 | :--- | :--- | :--- | :--- | :--- |
-| **`0`** | **Login Multi Mode** (`0x22c8a` -> `0x238fc`) | `int16 slot`, `int16 class`, `int16 level`, `int32 netUserId`, `24 x int16 cashHistory` (**58 B**) | `int32 resultCode` (`1` = OK)<br>`string myNetId` (`int32 len` + chars)<br>`string noticeText` (`int32 len` + chars)<br>`int16 battleInfoCount`<br>*(Opcional: `int32 newNetUserId` se `readAvail > 0`)* | Copia `myNetId` para `Comm+0x3188`, `noticeText` para `netData+0`, `battleInfoCount` para `netData+590`. **Se `readAvail > 0`, lê `newNetUserId` em `Game+0x49a0` e chama `GameCanvas_SaveGame` (`0x2393e`). Se `readAvail == 0`, NÃO grava no save!** Em seguida dispara automaticamente `Comm_init(8)` + `Comm_flush()` (`0x23946..0x2395a`). |
-| **`8`** | **Mailbox Unread Count / Inbox** (`0x23946` -> `0x2317a`) | Vazio (**0 B**) quando disparado após `cmd = 0`; ou filtros na tela de Mailbox | Quando `Menu.state == 8` (pós-login):<br>`int32 resultCode` (`1` = OK)<br>`int16 unreadMailCount` | Grava `unreadMailCount` em `netData+370` (`0x172`), define **`Menu.state = 20`**, chama **`_makeNetMenu(0xa0000001)`**, define **`GameUI+124 = 0xa0000001`** e chama **`MMain_setNetState(3)`** (abre o Menu Multi Mode!). |
+| **`0`** | **Login Multi Mode (validado)** | Payload de saída capturado na fixture (58 B) | `int32 resultCode=1`, string ID, string aviso, **int16 unreadMailCount**, **int16 battleInfoCount** | Menu=20/UI=0xa0000000. Confirmação nativa abre UI=0xa0000001; nenhum cmd8 automático. Campos opcionais não testados. |
+| **`8`** | **Mailbox (prova explícita)** | Payload vazio | `int32 resultCode=1`, `int16 unreadMailCount` | Resposta consumida por JNI, fila vazia, Menu=20/UI=0xa0000001 preservados na fixture. Não se conclui abertura automática por cmd8. |
 | **`1`** | **Battle Info (Histórico de Defesa)** (`0x39b88` -> `0x2375c`) | `int16 selectedSlot` (**2 B**) | `int32 resultCode` (`1` = OK)<br>`int16 count` (`0..10`)<br>Para cada item:<br>`string attackerId`, `int16 level`, `int16 class`, `int32 deltaHonor`, `int32 isWin` | Preenche a lista de `Battle Info` em `netData`, chama `_makeNetMenu(0xa3000001)`, define `GameUI+124 = 0xa3000001` e `MMain_setNetState(0)`. |
 | **`2`** | **Battle Arena: Busca por ID** (`0x379b4` -> `0x236a2`) | `string targetId`, `int16 flag` | `int32 resultCode` (`1` = OK)<br>Bloco de dados do oponente (`_setEnemyData`) | Carrega o oponente na tela VS (`0xa2000003`) e chama `MMain_setNetState(0)`. |
 | **`3`** | **Battle Arena: Busca Aleatória** (`0x37a3e` -> `0x236a2`) | `int16 0`, `int16 charSlot` (**4 B**) | `int32 resultCode` (`1` = OK)<br>Bloco de dados do oponente (`_setEnemyData`) | Carrega o oponente na tela VS (`0xa2000003`) e chama `MMain_setNetState(0)`. |
@@ -293,35 +314,26 @@ Quando `Comm_resultCB(3, 0, 0)` chama `Menu_netProc(0, &inPacket)`:
 
 ---
 
-## 6. Exemplo Exato dos Pacotes de Login (`cmd = 0` e `cmd = 8`)
+## 6. Bytes exatos de resposta comprovados
 
-Para completar o login no Multi Mode e abrir a tela principal online (`Menu.state = 20`, `GameUI.state = 0xa0000001`) **sem modificar o save em disco**:
+Resposta cmd0, 34 bytes físicos, comprimento declarado 30, payload de 26 bytes:
 
-### 6.1. Pacote 1: Resposta ao `cmd = 0` (Login Multi Mode)
-- **Importante (Proteção de Save):** Em `Menu_netProc` (`0x23928..0x23942`), após ler `resultCode`, `myNetId`, `noticeText` e `battleInfoCount`, o código executa `if (Comm_readAvail() > 0)` (`0x23928`). Somente se houver bytes extras no pacote ele lê `newNetUserId` e chama `GameCanvas_SaveGame` (`0x2393e`). Portanto, **basta enviar exatamente os campos até `battleInfoCount` (`readAvail == 0`) para que `GameCanvas_SaveGame` NÃO seja chamado durante o login!**
-- **Estrutura do Quadro de Entrada (`SOCKETBUFFER`):**
-  1. `totalLen` (`int32 BE`): `4 + payload.length`
-  2. `command` (`int32 BE`): `0x00000000` (`cmd = 0`)
-  3. `payload`:
-     - `resultCode` (`int32 BE`): `0x00000001` (`1` = sucesso)
-     - `myNetId.length` (`int32 BE`): ex. `8` (`0x00000008`)
-     - `myNetId.bytes`: ex. `"DESTINIA"` (`44 45 53 54 49 4e 49 41`)
-     - `noticeText.length` (`int32 BE`): ex. `29` (`0x0000001d`)
-     - `noticeText.bytes`: ex. `"Servidor Mock Multi Mode Ativo"`
-     - `battleInfoCount` (`int16 BE`): ex. `0x0000` (`0` batalhas)
+```text
+00 00 00 1e 00 00 00 00 00 00 00 01 00 00 00 08
+44 45 53 54 49 4e 49 41 00 00 00 02 4f 4b 00 00 00 00
+```
 
-### 6.2. Pacote 2: Resposta ao `cmd = 8` (Disparado Automaticamente por `cmd = 0`)
-- Assim que `Menu_netProc` termina de processar `cmd = 0`, ele próprio chama `Comm_init(8)` e `Comm_flush()` (`0x23946..0x2395a`), colocando um novo pacote de `53` bytes (`cmd = 8`, payload vazio) em `Comm.sendBuf` (`Comm.pendingSendLen = 53`).
-- **Estrutura do Quadro de Entrada (`SOCKETBUFFER`):**
-  1. `totalLen` (`int32 BE`): `10` (`0x0000000a` = `4` bytes de comando + `6` bytes de payload)
-  2. `command` (`int32 BE`): `0x00000008` (`cmd = 8`)
-  3. `payload` (`6` bytes):
-     - `resultCode` (`int32 BE`): `0x00000001` (`1` = sucesso)
-     - `unreadMailCount` (`int16 BE`): `0x0000` (`0` mensagens não lidas)
-- Ao receber esses 14 bytes, `Menu_netProc` (`0x2317a..0x231ac`) muda `Menu.state` de `8` para **`20`**, monta o menu com `_makeNetMenu(0xa0000001)`, define `GameUI + 124 = 0xa0000001` e chama `MMain_setNetState(3)`, exibindo o menu Multi Mode completo!
+Campos: sucesso=1, ID=`DESTINIA`, aviso=`OK`, unreadMailCount=0, battleInfoCount=0. Sem bytes extras e sem newNetUserId. A prova verifica que GameCanvas_SaveGame não é chamado.
+
+Resposta cmd8 explícito, 14 bytes físicos, comprimento declarado 10:
+
+```text
+00 00 00 0a 00 00 00 08 00 00 00 01 00 00
+```
+
+A regra de comprimento é **assimétrica**: requests capturados declaram o tamanho total; respostas aceitas pelo ARM declaram command+payload. Trocar a resposta para tamanho total foi testado e impediu o callback. O valor UI=0xa0000001 depende da confirmação nativa após o login, não de alterar os contadores int16 para valores artificiais.
 
 ---
-
 ## 7. Proposta de Arquitetura Segura do Adaptador (Host C++ / Motor Web <-> `tools/network-mock`)
 
 ```mermaid
@@ -370,3 +382,4 @@ flowchart LR
 | **`cmd = 4` (Hall of Honor)** | `GET /api/state` (`hallOfHonor[]`) | Converte o array `state.hallOfHonor` (`rank`, `name`, `honor`, `wins`) para o formato binário do `cmd = 4` (`count` + registros + comentário do 1º colocado). |
 | **`cmd = 5` (Listar Leilões)** | `GET /api/state` (`auctions[]`) | Converte `state.auctions` (`id`, `itemName`, `currentBid`, `highestBidder`) para a página binária do `cmd = 5`. |
 | **`cmd = 6` (Lance no Leilão)** | `POST /api/onAuctionBid` (`{ auctionId, bidderId, amount }`) | Envia o lance para `/api/onAuctionBid`; se `ok: true`, retorna `resultCode = 1` e `newPrice = amount`; se `ok: false`, retorna `resultCode = 0`. |
+
