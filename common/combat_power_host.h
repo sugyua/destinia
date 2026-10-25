@@ -23,7 +23,7 @@ static destinia::CombatPreview fcCompareEquipment(u32 candidate,bool menuBackup=
   if(!owned(candidate)){result.reason="NAO VERIFICADO";restore();return result;}
   const auto header=rd16(candidate);const int type=(header>>5)&7;u32 required=0,identified=0;
   if(!callFn(exportsMap.at("GameUI_getEquipMinLv"),{header,1},&required)||!callFn(exportsMap.at("GameUI_equipDistinguish"),{candidate},&identified))throw std::runtime_error("FC: requisitos indisponiveis");
-  if(type<3&&type!=int16_t(rd16(game+0x4886)))result.reason="OUTRA CLASSE";
+  if(type<3&&type!=destinia::weaponTypeForJob(int16_t(rd16(game+0x4886))))result.reason="OUTRA CLASSE";
   else if(required>rd16(game+0x48fa))result.reason="NIVEL BAIXO";
   else if(!identified)result.reason="IDENTIFIQUE";
   else if(((header>>8)&7)>4)result.reason="NAO VERIFICADO";

@@ -12,8 +12,8 @@ export class CombatPower {
   for(let i=0;i<6;i++){const p=r.get32((menu?ui+0x2148:game+0x4584)+4*i);if(p&&!owned(p)){info.reason='NAO VERIFICADO';return info;}r.put32(game+0x4584+4*i,p);}
   r.call(r.exports.get('GameUI_calcHeroStat'));info.before=stats();info.current=combatPower(info.before);info.after=info.before.slice();info.projected=info.current;
   if(!candidate){info.valid=true;return info;}if(!owned(candidate)){info.reason='NAO VERIFICADO';return info;}
-  const header=r.get16(candidate),type=header>>>5&7,required=r.call(r.exports.get('GameUI_getEquipMinLv'),[header,1]),identified=r.call(r.exports.get('GameUI_equipDistinguish'),[candidate]);
-  if(type<3&&type!==r.get16(game+0x4886,true))info.reason='OUTRA CLASSE';else if(required>r.get16(game+0x48fa))info.reason='NIVEL BAIXO';else if(!identified)info.reason='IDENTIFIQUE';else if((header>>>8&7)>4)info.reason='NAO VERIFICADO';
+  const header=r.get16(candidate),type=header>>>5&7,job=r.get16(game+0x4886,true),weaponType=job===0?0:job===1?2:job===2?1:-1,required=r.call(r.exports.get('GameUI_getEquipMinLv'),[header,1]),identified=r.call(r.exports.get('GameUI_equipDistinguish'),[candidate]);
+  if(type<3&&type!==weaponType)info.reason='OUTRA CLASSE';else if(required>r.get16(game+0x48fa))info.reason='NIVEL BAIXO';else if(!identified)info.reason='IDENTIFIQUE';else if((header>>>8&7)>4)info.reason='NAO VERIFICADO';
   if(info.reason)return info;r.put32(game+0x4584+4*(type<3?0:type-2),candidate);r.call(r.exports.get('GameUI_calcHeroStat'));info.after=stats();info.projected=combatPower(info.after);info.valid=true;return info;
  }finally{r.write(game,original);}}
  selection(){const r=this.r,u=r.exports.get('GameUI');for(let i=0;i<this.candidates.length;i++){const pointer=this.candidates[i],equipped=Array.from({length:6},(_,n)=>r.get32(u+0x2148+4*n)).includes(pointer);if(equipped&&i+1<this.candidates.length)continue;return {pointer,panel:this.panels[i]};}return null;}

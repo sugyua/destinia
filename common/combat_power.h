@@ -12,4 +12,5 @@ inline int64_t combatPower(const CombatStats& stats){auto s=[&](int i){return in
 struct CombatPreview {bool valid=false;CombatStats before{},after{};int64_t current=0,projected=0;std::string reason;int64_t delta()const{return projected-current;}};
 struct CombatPanel {int x=0,y=0,w=232;};
 inline std::string signedPower(int64_t n){return (n>0?"+":"")+std::to_string(n);}
+inline constexpr int weaponTypeForJob(int job){return job==0?0:job==1?2:job==2?1:-1;}
 }
