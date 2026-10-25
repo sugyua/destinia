@@ -116,13 +116,14 @@ try {
       // Quadro de entrada de Comm_netSocketRead: totalLen = 8 + payload.length
       const totalLen = 8 + payload.length;
       const b = Buffer.alloc(totalLen);
-      b.writeUInt32BE(totalLen, 0);
+      b.writeUInt32BE(process.argv.includes('--compare-legacy-length') ? totalLen - 4 : totalLen, 0);
       b.writeUInt32BE(cmd, 4);
       payload.copy(b, 8);
       lines.push(`Resposta injetada cmd=${cmd} (totalLen=${totalLen}): ` + b.toString('hex').match(/.{1,2}/g).join(' '));
       call('Java_game_destiniaeng_GameThread_procCommMsg', [0x40000000, 16, 1, 0]);
       call('Java_game_destiniaeng_GameThread_procCommRead', [0x40000000, 16, r.array(b), b.length]);
       for (let i = 0; i < 4; i++) call('Comm_mRun');
+      console.log('recepcao',cmd,'callback',r.get32(B+0x70b9c).toString(16),'socket',r.get32(B+0x45108),'inPacket',hex(0x6adc8,40));
     };
 
     // O loop de logo da fixture pode substituir Comm.processCB; restaura o menu nativo.
@@ -166,6 +167,7 @@ try {
 } finally {
   r.close();
 }
+
 
 
 
