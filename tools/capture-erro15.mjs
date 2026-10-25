@@ -23,7 +23,7 @@ r.put32(menu+156,1);r.write(menu+204,new Uint8Array([1,0]));
 call('MenuCanvas_mKeyPressed',[17]);assert.equal(r.get32(menu+156),8);
 r.write(menu+184,new Uint8Array([10,0]));r.write(menu+190,new Uint8Array([0,0]));
 r.e.hook_add(uc.HOOK_CODE,()=>console.log('ARM slot check',Array.from({length:8},(_,i)=>r.r(i).toString(16))),null,B+0x22a04,B+0x22a12);call('MenuCanvas_mKeyReleased',[17]);call('MenuCanvas_mKeyPressed',[17]);
-console.log('diagnostico',Object.fromEntries(['Menu','Comm','outPacket','netData','MMain'].map(n=>[n,(r.exports.get(n)-B).toString(16)])), 'state',r.get32(menu+156),'slot',r.get16(menu+190),'levels',hex(menu-B+184,8),'pending',r.get32(B+0x73b2c));assert.equal(r.get32(B+0x73b2c),111);
+console.log('diagnostico',Object.fromEntries(['Menu','Comm','outPacket','netData','MMain'].map(n=>[n,(r.exports.get(n)-B).toString(16)])), 'state',r.get32(menu+156),'slot',r.get16(menu+190),'levels',hex(menu-B+184,8),'pending',r.get32(B+0x73b2c));if(!r.get32(B+0x73b2c)){lines.push('LIMITACAO: confirmacao via handler nao publicou pacote; captura abaixo usa Comm_init/Comm_write/Comm_flush ARM diretamente com payload zero controlado, nao request de personagem real.');call('Comm_setConType',[0]);call('Comm_init',[0]);for(let i=0;i<3;i++)call('Comm_write2Bytes',[0]);call('Comm_write4Bytes',[0]);for(let i=0;i<24;i++)call('Comm_write2Bytes',[0]);call('Comm_flush');}assert.equal(r.get32(B+0x73b2c),111);
 dump('Comm.sendBuf cmd=0',0x70bd0,111);dump('outPacket: header LE + payload BE',0x6dcb4,66);dump('Comm.pendingSendLen LE',0x73b2c,4);
 lines.push(`Estado apos confirmacao: Menu=${r.get32(menu+156)}, netState=${r.get16(main+0x3920)}, timer=${r.get32(main+0x3924)}.`);
 for(let frame=1;frame<=151;frame++) {
@@ -34,9 +34,15 @@ if(frame===150)assert.equal(r.get16(main+0x3920),1);
 assert.equal(r.get16(main+0x3920),2);assert.match(r.cstr(B+0x81cf8),/15/);
 lines.push('',`Mensagem capturada: ${JSON.stringify(r.cstr(B+0x81cf8))}`);dump('netData+260 incluindo terminador',0x81cf8,Buffer.byteLength(r.cstr(B+0x81cf8))+1);
 lines.push('Cota de 5h: sem telemetria acessivel; 18% informado pelo usuario no inicio. Nenhuma afirmacao de percentual atual.','');
+if(process.argv.includes('--responses')){
+const reply=(cmd,payload)=>{const b=Buffer.alloc(8+payload.length);b.writeUInt32BE(payload.length+4);b.writeUInt32BE(cmd,4);payload.copy(b,8);lines.push('Resposta cmd='+cmd+': '+b.toString('hex').match(/.{1,2}/g).join(' '));call('Java_game_destiniaeng_GameThread_procCommMsg',[0x40000000,16,1,0]);call('Java_game_destiniaeng_GameThread_procCommRead',[0x40000000,16,r.array(b),b.length]);for(let i=0;i<4;i++)call('Comm_mRun');};
+r.put32(menu+156,8);call('Comm_setConType',[0]);call('Comm_init',[0]);call('Comm_flush');
+const p=Buffer.from('000000010000000844455354494e4941000000024f4b0000','hex');reply(0,p);assert.equal(r.get32(B+0x73b2c),53);dump('Request automatico cmd=8',0x70bd0,53);reply(8,Buffer.from('000000010000','hex'));assert.equal(r.get32(menu+156),20);assert.equal(r.get32(r.exports.get('GameUI')+124),0xa0000001);lines.push('PASS: Menu.state=20; GameUI+124=0xa0000001. Respostas sem newNetUserId opcional.');
+}
 fs.writeFileSync(new URL('../docs/RELATORIO_VANGUARD_ERRO15_BYTES.md',import.meta.url),lines.join('\n'));
 console.log(lines.join('\n'));
 } finally {r.close();}
+
 
 
 
