@@ -29,8 +29,18 @@ Mensagem capturada: "Ocorreu um erro de rede.\nCodigo de Erro = 15"
 ```
 
 Resposta injetada cmd=0 (totalLen=34): 00 00 00 1e 00 00 00 00 00 00 00 01 00 00 00 08 44 45 53 54 49 4e 49 41 00 00 00 02 4f 4b 00 00 00 00
+Login ARM: Menu.state=20; GameUI+124=0xa0000000; nenhum cmd8 automatico. Dois int16 apos os textos: unreadMailCount e battleInfoCount.
+Confirmacao nativa MainMenu_mKeyPressed(17): GameUI+124=0xa0000001. Nenhuma escrita direta nesse campo.
+## Request cmd=8 explicito da fixture (nao automatico) (offset 0x70bd0, 53 bytes)
+```text
+00 00 00 35 00 00 00 08 00 00 00 00 28 44 45 53 54 49 4e 49 41 2d 57 45 42 2d 54 45 53 54 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+```
 
-## Resultado incompleto
-AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+Resposta injetada cmd=8 (totalLen=14): 00 00 00 0a 00 00 00 08 00 00 00 01 00 00
+Estado apos respostas: Menu=20; GameUI+124=0xa0000001
+## inPacket inicio apos respostas (offset 0x6adc8, 64 bytes)
+```text
+06 00 00 00 06 00 00 00 08 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+```
 
-0 !== 53
+PASS: Menu.state=20; GameUI+124=0xa0000001. Respostas processadas com sucesso.
