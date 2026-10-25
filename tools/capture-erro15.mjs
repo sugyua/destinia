@@ -42,6 +42,7 @@ try {
   const main = r.exports.get('MMain');
   const gameUI = r.exports.get('GameUI');
   const loadGame = r.exports.get('GameCanvas_LoadGame');
+  r.put32(main, r.exports.get('MenuCanvas')); // Mantem o canvas nativo correto na fixture.
 
   // 1. Selecao de MULTI MODE via handler nativo (Menu.state: 1 -> 8)
   r.put32(menu + 156, 1);
@@ -109,13 +110,13 @@ try {
   lines.push('', `Mensagem capturada: ${JSON.stringify(r.cstr(B + 0x81cf8))}`);
   dump('netData+260 incluindo terminador', 0x81cf8, Buffer.byteLength(r.cstr(B + 0x81cf8)) + 1);
 
-  // 5. Injecao de respostas cmd=0 e cmd=8 com quadro corrigido (totalLen = 8 + payload.length)
+  // 5. Injecao JNI com tamanho de entrada comprovado no ELF desta prova.
   if (process.argv.includes('--responses')) {
     const reply = (cmd, payload) => {
-      // Quadro de entrada de Comm_netSocketRead: totalLen = 8 + payload.length
+      // Buffer fisico = 8+payload; campo no fio = 4+payload, comprovado por teste comparativo.
       const totalLen = 8 + payload.length;
       const b = Buffer.alloc(totalLen);
-      b.writeUInt32BE(totalLen, 0);
+      b.writeUInt32BE(totalLen - 4, 0); // Entrada ARM: command+payload; saida usa tamanho total.
       b.writeUInt32BE(cmd, 4);
       payload.copy(b, 8);
       lines.push(`Resposta injetada cmd=${cmd} (totalLen=${totalLen}): ` + b.toString('hex').match(/.{1,2}/g).join(' '));
@@ -124,7 +125,7 @@ try {
       for (let i = 0; i < 4; i++) call('Comm_mRun');
     };
 
-    // Restaura callback Menu_netProc (que foi alterado para MMain_netProc no timeout do frame 151)
+    // Registra explicitamente o callback da sessao de teste apos o caso de timeout.
     call('Comm_SetProcessCB', [r.exports.get('Menu_netProc')]);
     call('MMain_setNetState', [1]);
     r.put32(menu + 156, 8);
@@ -132,7 +133,8 @@ try {
     call('Comm_init', [0]);
     call('Comm_flush');
 
-    const p0 = Buffer.from('000000010000000844455354494e4941000000024f4b0000', 'hex');
+    const p0 = Buffer.from('000000010000000844455354494e4941000000024f4b00000000', 'hex');
+    r.put32(B + 0x73b2c, 0); // Nao aceitar request anterior como cmd8 automatico.
     reply(0, p0);
     assert.equal(r.get32(B + 0x73b2c), 53);
     dump('Request automatico cmd=8 (53 bytes)', 0x70bd0, 53);
@@ -146,12 +148,13 @@ try {
     dump('inPacket inicio apos respostas', 0x6adc8, 64);
 
     assert.equal(curMenu, 20);
-    assert.ok(curGameUI === 0xa0000000 || curGameUI === 0xa0000001, `GameUI+124 inesperado: 0x${curGameUI.toString(16)}`);
+    assert.equal(curGameUI, 0xa0000001);
+    assert.equal(r.get32(B + 0x45108), 0);
     lines.push(`PASS: Menu.state=20; GameUI+124=0x${curGameUI.toString(16)}. Respostas processadas com sucesso.`);
   }
 
   fs.writeFileSync(new URL('../docs/RELATORIO_VANGUARD_ERRO15_BYTES.md', import.meta.url), lines.join('\n'));
-  console.log(lines.join('\n'));
+  console.log(lines.filter(line=>line.length<500).join('\n'));
 } catch (error) {
   lines.push('', '## Resultado incompleto', String(error));
   fs.writeFileSync(new URL('../docs/RELATORIO_VANGUARD_ERRO15_BYTES.md', import.meta.url), lines.join('\n'));
@@ -160,4 +163,5 @@ try {
 } finally {
   r.close();
 }
+
 

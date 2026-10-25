@@ -33,15 +33,19 @@ for(const totalLength of [true,false]) {
  const reply=(cmd,payload)=>{const b=Buffer.alloc(payload.length+8);b.writeUInt32BE(payload.length+(totalLength?8:4));b.writeUInt32BE(cmd,4);payload.copy(b,8);log.replies.push(b.toString('hex'));call('Java_game_destiniaeng_GameThread_procCommMsg',[0x40000000,16,1,0]);call('Java_game_destiniaeng_GameThread_procCommRead',[0x40000000,16,r.array(b),b.length]);for(let i=0;i<4;i++)call('Comm_mRun');};
  reply(0,Buffer.from('000000010000000844455354494e4941000000024f4b00000000','hex'));
  log.afterLogin={menu:r.get32(menu+156),ui:r.get32(ui+124).toString(16),pending:r.get32(B+0x73b2c),socket:r.get32(B+0x45108),readPos:r.get32(B+0x6adc8),packetLen:r.get32(B+0x6adcc)};
+ if(totalLength){assert.equal(r.get32(menu+156),8);assert.equal(log.reads.length,0);}
  if(!totalLength){
  assert.equal(r.get32(menu+156),20);assert.equal(r.get32(ui+124),0xa0000000);
  call('MainMenu_mKeyPressed',[17]);log.afterConfirm={menu:r.get32(menu+156),ui:r.get32(ui+124).toString(16)};
+ assert.equal(r.get32(ui+124),0xa0000001);
  // cmd8 is an explicit probe, not an automatic request from login.
  call('Comm_init',[8]);call('Comm_flush');log.requests.push(hex(0x70bd0,r.get32(B+0x73b2c)));
- reply(8,Buffer.from('000000010000','hex'));log.afterCmd8={menu:r.get32(menu+156),ui:r.get32(ui+124).toString(16),socket:r.get32(B+0x45108)};
+ reply(8,Buffer.from('000000010000','hex'));log.afterCmd8={menu:r.get32(menu+156),ui:r.get32(ui+124).toString(16),socket:r.get32(B+0x45108)};assert.equal(r.get32(menu+156),20);assert.equal(r.get32(ui+124),0xa0000001);assert.equal(log.gameSaveCalls,0);
  }
  } catch(error){log.error=String(error);}
  finally{r.close();output.scenarios.push(log);}
 }
 fs.writeFileSync(new URL('../docs/ERRO15_VERIFICACAO.json',import.meta.url),JSON.stringify(output,null,2)+'\n');
 console.log(JSON.stringify(output,null,2));
+assert.ok(output.scenarios.every(s=>!s.error),'Falha na prova comparativa');
+
