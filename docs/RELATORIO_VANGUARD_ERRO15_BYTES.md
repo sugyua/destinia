@@ -28,9 +28,17 @@ Mensagem capturada: "Ocorreu um erro de rede.\nCodigo de Erro = 15"
 4f 63 6f 72 72 65 75 20 75 6d 20 65 72 72 6f 20 64 65 20 72 65 64 65 2e 0a 43 6f 64 69 67 6f 20 64 65 20 45 72 72 6f 20 3d 20 31 35 00
 ```
 
-Resposta injetada cmd=0 (totalLen=34): 00 00 00 1e 00 00 00 00 00 00 00 01 00 00 00 08 44 45 53 54 49 4e 49 41 00 00 00 02 4f 4b 00 00 00 00
+Resposta injetada cmd=0 (totalLen=32): 00 00 00 20 00 00 00 00 00 00 00 01 00 00 00 08 44 45 53 54 49 4e 49 41 00 00 00 02 4f 4b 00 00
+## Request automatico cmd=8 (53 bytes) (offset 0x70bd0, 53 bytes)
+```text
+00 00 00 35 00 00 00 00 00 00 00 00 28 44 45 53 54 49 4e 49 41 2d 57 45 42 2d 54 45 53 54 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+```
 
-## Resultado incompleto
-AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+Resposta injetada cmd=8 (totalLen=14): 00 00 00 0e 00 00 00 08 00 00 00 01 00 00
+Estado apos respostas: Menu=20; GameUI+124=0xa0000000
+## inPacket inicio apos respostas (offset 0x6adc8, 64 bytes)
+```text
+1a 00 00 00 1c 00 00 00 00 00 00 00 00 00 00 08 00 00 00 01 00 00 53 54 49 4e 49 41 00 00 00 02 4f 4b 00 00 00 00 00 0e 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+```
 
-0 !== 53
+PASS: Menu.state=20; GameUI+124=0xa0000000. Respostas processadas com sucesso.
