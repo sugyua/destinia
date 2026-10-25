@@ -4,6 +4,13 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.9.4 Beta — 25/10/2026
+
+- Corrigida a passagem da página Sistema para o Códex pela seta direita: o corpo da página retorna pelo cancelamento nativo antes de selecionar a aba do livro. Confirmar abre o Códex, sem entrar no submenu de configurações.
+- Correção compartilhada pelos dois hosts PC e pela web; mantém acesso por clique/toque, teclado e controle. Não muda submenus profundos, itens, atributos ou saves; sem atalho F8.
+- Testes ARM e navegador direcionados à navegação; controle emulado não comprova USB físico no iPhone. Não inclui correção térmica nem mudança de desempenho.
+
+
 ## 0.9.3 Beta — barra e acesso ao Códex — 24/10/2026
 
 - Nove abas com espaçamento original de23px; barra ampliada para o décimo ícone inteiro, sem sobreposição de posições e hitboxes.

@@ -182,7 +182,7 @@ export class DestiniaWeb {
     if(key===5||key===7){this.codexTabSelected=false;this.codexSelectNativeTab(key===5?8:0);return true;}
     if(key===10||key===27){this.codexTabSelected=false;return false;}return true;
    }
-   if(key===5&&state===0||key===7&&state===0x80000000){this.codexOpenMenu();this.codexOpen=false;return true;}return false;
+   if(key===5&&state===0||key===7&&(state===0x80000000||state===0x80000001)){if(state===0x80000001&&!this.codexSelectNativeTab(8))return false;this.codexOpenMenu();this.codexOpen=false;return true;}return false;
   }
   codexBarTouch(x,y){const p=nativeTransform(this.uiScale).inverse(x,y);return this.codexMenuVisible()&&nativeTabHit(p.x,p.y)>=0;}
   codexMenuTouch(x,y,phase){

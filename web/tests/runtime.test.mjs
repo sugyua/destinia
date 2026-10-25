@@ -315,3 +315,20 @@ test('moldura e fonte originais do Codex preservam Game UI graficos e descoberta
 test('Codex abre pela aba dentro do inventario e preserva contexto ao voltar',()=>{const r=make();try{r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);r.call(r.exports.get('openMainmenu'),[0]);const u=r.exports.get('GameUI');r.write(u+0x76,new Uint8Array([16,0]));for(const state of [0x10000001,0x20000001]){r.codexOpen=r.codexTabSelected=false;r.put32(u+0x7c,state);const before=r.read(r.exports.get('Game'),32056);r.touch(320,12,0);r.touch(320,12,1);assert.equal(r.codexOpen,true);r.framebuffer();assert.deepEqual(r.read(r.exports.get('Game'),32056),before);r.key(10,true);assert.equal(r.get32(u+0x7c),state);assert.equal(r.codexSelectNativeTab(0),true);assert.equal(r.get32(u+0x7c),0);}}finally{r.close();}});
 
 test('toque na previa do Codex ativa INFO sem atravessar para a aba nativa',()=>{const r=make();try{r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);r.call(r.exports.get('openMainmenu'),[0]);r.write(r.exports.get('GameUI')+0x76,new Uint8Array([16,0]));r.key(5,true);assert.equal(r.codexTabSelected,true);assert.equal(r.codexOpen,false);r.touch(270,199,0);r.touch(270,199,1);assert.equal(r.codexOpen,true);assert.equal(r.codexDetailsOpen,true);}finally{r.close();}});
+
+
+test('Seta direita no corpo de Sistema seleciona Codex sem abrir submenu original',()=>{
+ const r=make();try{
+  r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);
+  const ui=r.exports.get('GameUI'),game=r.exports.get('Game');r.call(r.exports.get('openMainmenu'),[0]);r.write(ui+0x76,new Uint8Array([16,0]));
+  r.codexSelectNativeTab(8);r.call(r.exports.get('MainMenu_mKeyPressed'),[17]);
+  assert.equal(r.get32(ui+0x7c),0x80000001,'Sistema aberto pelo comando original');
+  const before=r.read(game,32056);r.key(7,true);r.key(7,false);
+  assert.equal(r.codexTabSelected,true,'Direita deve selecionar a decima aba');assert.equal(r.codexOpen,false);
+  assert.equal(r.get32(ui+0x7c),0x80000000,'Corpo deve ser cancelado pelo fluxo original');
+  r.key(17,true);r.key(17,false);assert.equal(r.codexOpen,true);
+  assert.deepEqual(r.read(game,32056),before,'Navegacao nao altera personagem ou itens');
+  r.key(10,true);r.key(10,false);r.key(5,true);r.key(5,false);
+  assert.equal(r.codexTabSelected,false);assert.equal(r.get32(ui+0x7c),0x80000000);
+ }finally{r.close();}
+});

@@ -1,19 +1,25 @@
-# Destinia 0.9.3 Beta
+# Destinia 0.9.4 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.9.3 Beta — Barra e acesso ao Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.3-beta)** — ZIP Windows com dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
+**[Baixar Destinia 0.9.4 Beta — Navegação do Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.4-beta)** — ZIP Windows com dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
 
 **[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
 
+## 0.9.4 — selecionar o Códex pela página Sistema
+
+Com Sistema aberto, pressione **direita** para selecionar a aba do livro e **Ação/A/Enter** para abrir o Códex. Corrige o caminho que antes ficava no corpo de Sistema e entrava nas configurações ao confirmar. Aplicado aos dois hosts e à web; nove abas anteriores, clique/toque, itens, atributos e saves preservados. Sem F8 e sem mudança de desempenho.
+
+**Web 0.9.4 publicada**, revisão `e39b4ff`, mesmo link e acesso privado, somente100%. Recarregar perde o progresso temporário desta sessão. Testes:70Node, ARM dos dois hosts e Chromium com setas do site, teclado e controle emulado aprovados; controle físico Windows/iPhone pendente. [Notas](release/NOTAS_0.9.4.md).
+
 ## 0.9.3 — barra e acesso ao Códex corrigidos
 
 A barra mantém o espaçamento original das nove abas e ganha uma posição para o Códex, sem comprimir ícones. A mão nativa aparece inteira por cima do menu. Clique na última aba para abrir o Códex, inclusive enquanto navega no inventário/equipamento. A seleção por teclado/controle mostra a prévia; clicar nela também funciona. **Sem atalho dedicado F8.** Contadores, seleção, atributos e saves preservados.
 
-**Web0.9.3 publicada**, revisão`0da736c`, no link acima, somente100% e com o mesmo acesso privado. [Notas e validação](release/NOTAS_0.9.3.md). O ZIP Windows preserva `Destinia.exe` e `Destinia Zoom.exe` na raiz. A versão0.9.2 e releases anteriores permanecem disponíveis.
+**Web0.9.3 publicada anteriormente**, revisão`0da736c`, no link acima, somente100% e com o mesmo acesso privado. [Notas e validação](release/NOTAS_0.9.3.md). O ZIP Windows preserva `Destinia.exe` e `Destinia Zoom.exe` na raiz. A versão0.9.2 e releases anteriores permanecem disponíveis.
 
 ## 0.9.2 — abra direto pelo .exe da raiz
 
@@ -54,6 +60,7 @@ Da mais recente para a mais antiga. As releases anteriores e seus downloads são
 
 | Release | Lançamento (Brasília) |
 | --- | --- |
+| [0.9.4 Beta — navegação do Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.4-beta) | 25/10/2026 |
 | [0.9.3 Beta — barra do Códex corrigida](https://github.com/sugyua/destinia/releases/tag/v0.9.3-beta) | 24/10/2026 |
 | [0.9.1 Beta — Códex integrado e filtros](https://github.com/sugyua/destinia/releases/tag/v0.9.1-beta) | 24/10/2026 |
 | [0.9.1 dev1 — prévia técnica, somente fontes](https://github.com/sugyua/destinia/releases/tag/v0.9.1-dev1) | 24/10/2026 |

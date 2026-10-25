@@ -135,7 +135,12 @@ static bool codexMenuKey(int key,bool down) {
   if(key==10 || key==27){codexTabSelected=false;return false;}
   return true;
  }
- if((key==5 && state==0) || (key==7 && state==0x80000000u)){codexEnterMenu();codexOpen=false;return true;}
+ // System body has no horizontal choice: return through native Cancel before
+ // selecting the added tab. Never extend this to deeper settings/popups.
+ if((key==5 && state==0) || (key==7 && (state==0x80000000u || state==0x80000001u))){
+  if(state==0x80000001u && !codexSelectNativeTab(8))return false;
+  codexEnterMenu();codexOpen=false;return true;
+ }
  return false;
 }
 static bool codexMenuTouch(int x,int y,int phase) {

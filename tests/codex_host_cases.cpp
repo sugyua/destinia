@@ -48,6 +48,11 @@ int main(int argc,char** argv) {
  if(!codexMenuKey(7,true) || codexTabSelected || rd32(ui+0x7c)!=0)return 39;
  wr32(ui+0x7c,0x80000000);if(!codexMenuKey(7,true) || !codexTabSelected)return 40;
  if(!codexMenuKey(5,true) || codexTabSelected || rd32(ui+0x7c)!=0x80000000)return 41;
+ // Real native System body -> added book, without entering settings submenu.
+ if(!callFn(exportsMap.at("MainMenu_mKeyPressed"),{17}) || rd32(ui+0x7c)!=0x80000001)return 108;
+ if(!codexMenuKey(7,true) || !codexTabSelected || codexOpen || rd32(ui+0x7c)!=0x80000000)return 109;
+ if(!codexMenuKey(17,true) || !codexOpen)return 110;
+ codexMenuKey(10,true);codexMenuKey(5,true);
  wr32(ui+0x7c,0x50000002);if(codexMenuVisible() || codexMenuTouch(button.x,button.y,0))return 42;
  // Menu-only entry: nothing is painted over normal gameplay.
  auto original=std::vector<uint8_t>(FB_BYTES,0x35),closed=original;
