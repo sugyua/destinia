@@ -211,7 +211,7 @@ sequenceDiagram
    - `0x0ede4`: chama `MMain_setNetState(1)` -> define `MMain.netState = 1` e `MMain.netTimer = 0`.
    - `0x0edee..0x0edf6`: copia `outPacket.command` (`0`) para `Comm.lastCmd` (`Comm + 44`) e inicia `Comm.sendLen = 53` (`0x35`).
    - Como `Comm.conType == 0`, monta o cabeçalho binário Gamevil de **53 bytes** em `Comm.sendBuf` (`Comm + 52` = `0x70bd0`):
-     - `+0..+3` (`4` B): `totalPacketLen - 4` em **Big-Endian** (`58 + 53 - 4 = 107 = 0x0000006B`).
+     - `+0..+3` (`4` B): tamanho total do quadro em **Big-Endian** (`58 + 53 = 111 = 0x0000006F`).
      - `+4..+7` (`4` B): `outPacket.command` em **Big-Endian** (`0x00000000`).
      - `+8..+11` (`4` B): constante `2592` (`0x00000A20` em **Big-Endian**, game ID da Gamevil).
      - `+12` (`1` B): versão (`0x01`).
