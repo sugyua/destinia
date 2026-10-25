@@ -4,7 +4,14 @@
 
 Na versão web, o autor selecionou **MULTI MODE**, escolheu um personagem e confirmou. A tela exibiu carregamento e depois a mensagem **“Ocorreu um erro de rede. Codigo de Erro = 15”**, retornando à seleção. Capturas fornecidas na conversa confirmam essa sequência visual.
 
-Isso confirma a falha nesse caminho; **não identifica a causa interna do código15**. Não foi capturado o pedido de rede/callback correspondente, nem confirmada a disponibilidade do servidor original. Não atribuir o erro a firewall, túnel ou servidor desativado sem evidência.
+## Causa interna confirmada do `Codigo de Erro = 15`
+
+O rastreamento estático completo do binário `game/lib/armeabi/libdestinia_jni.so` está documentado em **[CONTRATO_MULTI_MODE_ARM.md](CONTRATO_MULTI_MODE_ARM.md)**:
+
+1. Ao confirmar um personagem em **MULTI MODE** (`Menu.state == 8`, `MenuCanvas_mKeyPressed` em `0x22c36`), o jogo carrega o save do slot escolhido, inicializa `Comm_setConType(0)` + `Comm_init(0)` (`cmd = 0`, Login Multi Mode), escreve 58 bytes de payload do herói e chama `Comm_flush()` (`0x0edd9`), que define `MMain.netState = 1` (`MMain + 0x3920`), zera `MMain.netTimer = 0` (`MMain + 0x3924`) e publica o pacote de 111 bytes em `Comm.pendingSendLen` (`Comm + 0x2f90`).
+2. Como os hosts C++ (`host/main.cpp`, `host_zoom/main.cpp`) e o motor Web (`web/dist/engine.mjs`) ainda não consomem `Java_game_destiniaeng_CommManager_commCheck` (`0x07bed`) nem injetam resposta via `procCommRead` (`0x07b4d`) / `procCommMsg` (`0x07c4d`), `MMain.netState` permanece em `1`.
+3. A cada quadro, `MMain_run` (`0x1040d`) incrementa `MMain.netTimer` (`0x10456`). Ao ultrapassar **150 quadros** (`0x10484: cmp r3, #150`), `MMain_run` chama `Comm_close()`, define `Comm.retryCount = 10` e invoca `Comm.processCB(15, 0)` → **`Menu_netProc(15, 0)`** (`0x104b6: movs r0, #15`).
+4. `Menu_netProc(15, 0)` (`0x22f0e`) formata `"Ocorreu um erro de rede.\nCodigo de Erro = 15"` em `netData + 260`, limpa `Game` em memória e muda para `MMain_setNetState(2)`, exibindo o popup sobre a seleção de personagem.
 
 ## O que está disponível
 
@@ -15,15 +22,15 @@ A página do laboratório é **http://127.0.0.1:3000** no PC que roda `npm.cmd s
 ## Estado da integração
 
 - **Confirmado:** web0.9.7 executa a biblioteca ARM por emulação; `web/dist/engine.mjs` possui JNI e cancelamento offline de compra em `finishOfflinePurchase`. Na análise direcionada não foi encontrado transporte PvP/Leilão integrado ao protocolo deste mock.
+- **Confirmado por engenharia reversa ARM:** protocolo binário `Comm_*` (Big-Endian), máquina de estados de `Menu_netProc` (`cmd = 0` Login → `cmd = 8` Mailbox → abertura de `Menu.state = 20` / `GameUI = 0xa0000001`) e proteção de save (`readAvail == 0` no `cmd = 0` evita chamar `GameCanvas_SaveGame`) mapeados em [CONTRATO_MULTI_MODE_ARM.md](CONTRATO_MULTI_MODE_ARM.md).
 - **Confirmado por testes anteriores:** `npm test` do mock e Chromium com duas páginas passaram (salas, ataque, lances, encerramento e isolamento/validações). Não são testes do Multi Mode original.
-- **Pendente:** teste do túnel com o primo, execução física Windows/iPhone e captura do fluxo nativo do Multi Mode. Nenhuma conexão real entre dois jogadores da engine foi demonstrada.
-- **Hipótese não comprovada:** a causa específica da mensagem15. A presença de menus/textos não comprova implementação online funcional.
+- **Pendente:** implementar o adaptador opt-in entre `Comm_*` (`commCheck`/`procCommRead`/`procCommMsg`) e `tools/network-mock`, testar o túnel com o primo e validar execução física Windows/iPhone. Nenhuma conexão real entre dois jogadores da engine foi demonstrada.
 
 ## Próximo trabalho recomendado
 
-1. Rastrear seleção de personagem→solicitação JNI/Comm→callback que produz erro15, usando contratos ARM e testes existentes.
-2. Documentar formato/estado da operação original antes de definir o adaptador. Não devolver sucesso artificial ou simular gold/itens no save real.
-3. Integrar apenas um fluxo comprovado ao mock e testar falha, cancelamento, repetição, desconexão e preservação do save em cópias.
+1. ~~Rastrear seleção de personagem→solicitação JNI/Comm→callback que produz erro15, usando contratos ARM e testes existentes.~~ *(Concluído em [CONTRATO_MULTI_MODE_ARM.md](CONTRATO_MULTI_MODE_ARM.md))*
+2. ~~Documentar formato/estado da operação original antes de definir o adaptador.~~ *(Concluído em [CONTRATO_MULTI_MODE_ARM.md](CONTRATO_MULTI_MODE_ARM.md))*
+3. Integrar apenas um fluxo comprovado (`cmd = 0` + `cmd = 8` em modo sandbox sem gravar no save real) ao mock e testar falha, cancelamento, repetição, desconexão e preservação do save em cópias.
 4. Só então validar dois clientes reais via túnel. PvP completo, economia/leilão persistente e compatibilidade com servidor original não estão entregues.
 
-Este registro e o laboratório não alteram a versão do jogo, a Release0.9.7 ou o site publicado. Não há correção de erro15 nesta entrega.
+Este registro e o laboratório não alteram a versão do jogo, a Release0.9.7 ou o site publicado.

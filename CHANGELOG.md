@@ -8,6 +8,7 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 
 - FC na aba Status desenhado com a fonte original do jogo e fundo preservado, substituindo a faixa azul.
 - Comparador integrado à caixa nativa de descrição do equipamento, com páginas Item/Comparar, moldura e fonte originais e nome na cor de raridade. Item mantém a descrição original; Comparar mostra FC atual→previsto, ganho/perda e diferenças de ATK/DEF/PV/PM/CRI.
+- Corrigido o mapeamento entre classe do personagem (`Game+0x4886`: `0=Guerreiro`, `1=Atirador`, `2=Ladrão`) e tipo de arma (`(header>>5)&7`: `0=Espada Grande`, `1=Espada/Adaga`, `2=Arma de Fogo`) no comparador de FC dos dois hosts C++ e da web, aplicando a tabela nativa `{0, 2, 1}` (`0x40f7c`).
 - Alternância por clique/toque no rodapé, F6 (se não remapeado no PC) ou analógico direito. F7/filtros, seleção, comandos de equipamento e modo clássico preservados; página escolhida vale para a sessão.
 - Fórmula de FC, buffs, requisitos, atributos, inventário, gold e formato de saves permanecem iguais. Desenho usa cache e restaura estado gráfico/superfície emprestada mesmo após falha.
 - Validação automatizada de ARM, Node e Chromium; controle físico Windows/iPhone pendente. Não inclui correção térmica nem ampliação dos atributos comparados.

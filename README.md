@@ -11,11 +11,11 @@
 
 ## Laboratório local de PvP e Leilão
 
-Disponível um [servidor de simulação gratuito e guia de túnel](tools/network-mock/GUIA_TESTE.md), separado do jogo. **Não habilita o Multi Mode original.** O fluxo web Multi Mode → personagem → carregamento → erro15 foi registrado; sua causa interna e a integração com o servidor continuam pendentes. [Estado técnico e próximos passos](docs/MULTI_MODE_REDE.md). Versão e releases do jogo preservadas.
+Disponível um [servidor de simulação gratuito e guia de túnel](tools/network-mock/GUIA_TESTE.md), separado do jogo. **Não habilita o Multi Mode original.** A causa interna do `Codigo de Erro = 15` no Multi Mode (`MMain_run` em `0x104b6` após timeout de 150 quadros em `Comm_flush(cmd=0)`) e o contrato binário `Comm_*` / `Menu_netProc` foram mapeados em [CONTRATO_MULTI_MODE_ARM.md](docs/CONTRATO_MULTI_MODE_ARM.md); a integração do adaptador com o servidor continua pendente. [Estado técnico e próximos passos](docs/MULTI_MODE_REDE.md). Versão e releases do jogo preservadas.
 
 ## 0.9.7 — FC e comparador com a interface original
 
-O **FC na aba Status** usa a fonte nativa, sem a faixa azul. No inventário, **Item/Comparar alternam dentro da própria caixa de descrição**, reaproveitando moldura, fonte e cores do jogo. Item preserva a descrição original; Comparar mostra FC atual → previsto e diferenças de ATK/DEF/PV/PM/crítico. Toque nos rótulos, use **F6 livre** ou o **analógico direito** no contexto de equipamentos. Não equipa automaticamente nem altera a fórmula, itens, atributos, gold ou saves.
+O **FC na aba Status** usa a fonte nativa, sem a faixa azul. No inventário, **Item/Comparar alternam dentro da própria caixa de descrição**, reaproveitando moldura, fonte e cores do jogo. Item preserva a descrição original; Comparar mostra FC atual → previsto e diferenças de ATK/DEF/PV/PM/crítico, com compatibilidade de armas por classe alinhada à tabela nativa `{0, 2, 1}` (`0x40f7c`). Toque nos rótulos, use **F6 livre** ou o **analógico direito** no contexto de equipamentos. Não equipa automaticamente nem altera a fórmula, itens, atributos, gold ou saves.
 
 **Web 0.9.7 publicada**, revisão `3c41f07`, no mesmo link privado e somente100%. Recarregar descarta o progresso temporário.73 testes Node, testes ARM dos dois hosts,7 testes de pacote e Chromium aprovados; validação física Windows/iPhone pendente. [Notas](release/NOTAS_0.9.7.md) · [Uso e limites](docs/FC.md).
 
