@@ -332,3 +332,15 @@ test('Seta direita no corpo de Sistema seleciona Codex sem abrir submenu origina
   assert.equal(r.codexTabSelected,false);assert.equal(r.get32(ui+0x7c),0x80000000);
  }finally{r.close();}
 });
+
+test('Barra inclui livro inteiro e uma unica moldura nativa antes de selecionar Codex',()=>{
+ const r=make();try{
+  r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);r.call(r.exports.get('openMainmenu'),[0]);r.write(r.exports.get('GameUI')+0x76,new Uint8Array([16,0]));
+  const handle=r.get32(r.exports.get('Grp')+4);r.call(r.exports.get('GameUI_drawMainMenu'),[handle]);const ptr=r.call(r.exports.get('MC_GRP_GET_FRAME_BUFFER_POINTER'),[handle]),before=r.read(ptr,192000),out=before.slice();r.nativeCodex.paint(out);
+  const raster=r.nativeCodex.cache.values().next().value,at=(x,y)=>(y*400+x)*2;
+  for(let y=2;y<19;y++)for(let x=307;x<325;x++)assert.deepEqual(out.slice(at(x,y),at(x,y)+2),raster.slice(at(x,y),at(x,y)+2),'Livro nao pode ser recortado pela borda antiga');
+  for(let y=0;y<25;y++)for(let x=332;x<339;x++)assert.deepEqual(out.slice(at(x,y),at(x,y)+2),r.nativeCodex.base.slice(at(x-23,y),at(x-23,y)+2),'Fechamento deve reutilizar a moldura original deslocada');
+  for(let y=0;y<19;y++)for(let x=84;x<304;x++)assert.deepEqual(out.slice(at(x,y),at(x,y)+2),before.slice(at(x,y),at(x,y)+2),'Nove icones nativos preservados');
+  for(let x=307;x<325;x++){r.codexOpen=false;r.codexTabSelected=false;r.touch(x,12,0);r.touch(x,12,1);assert.equal(r.codexOpen,true,'Todo o livro visivel deve ser clicavel');}
+ }finally{r.close();}
+});

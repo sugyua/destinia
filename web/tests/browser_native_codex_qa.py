@@ -19,6 +19,7 @@ async def run(url):
    b=await page.locator('#game').bounding_box();await page.touchscreen.tap(b['x']+(x+.5)*b['width']/400,b['y']+(y+.5)*b['height']/240);await page.wait_for_timeout(100)
   for scale in [100]:
    assert await worker.evaluate('engine.uiScale')==100
+   await tap(113,12,100);await page.screenshot(path='/tmp/destinia095-bar-status.png')
    await tap(320,12,scale);assert await worker.evaluate('engine.codexOpen')
    assert await worker.evaluate('engine.codex.catalog()[60].kills')==2
    snapshot=await worker.evaluate("Array.from(engine.read(engine.exports.get('Game'),32056)).join(',')")

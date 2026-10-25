@@ -1,19 +1,25 @@
-# Destinia 0.9.4 Beta
+# Destinia 0.9.5 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.9.4 Beta — Navegação do Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.4-beta)** — ZIP Windows com dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
+**[Baixar Destinia 0.9.5 Beta — Moldura integrada do Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.5-beta)** — ZIP Windows com dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
 
 **[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
 
+## 0.9.5 — livro inteiro dentro da barra
+
+O Códex agora usa a **mesma moldura contínua das nove abas**, reaproveitando o fundo e o fechamento originais. Corrige o corte da parte esquerda do livro e remove a borda que o separava do menu. Mantém posições dos nove ícones e a mão animada, com clique/toque cobrindo o livro inteiro. Setas/controle: Sistema → direita → Ação/A; sem F8. Não altera itens, atributos ou saves.
+
+**Web0.9.5 publicada**, revisão `c859306`, no mesmo link privado/100%. Recarregar descarta o progresso temporário. Testes de raster e hitbox,71Node, ARM dos dois hosts e Chromium com setas/controle emulado aprovados; teste físico pendente. [Notas](release/NOTAS_0.9.5.md).
+
 ## 0.9.4 — selecionar o Códex pela página Sistema
 
 Com Sistema aberto, pressione **direita** para selecionar a aba do livro e **Ação/A/Enter** para abrir o Códex. Corrige o caminho que antes ficava no corpo de Sistema e entrava nas configurações ao confirmar. Aplicado aos dois hosts e à web; nove abas anteriores, clique/toque, itens, atributos e saves preservados. Sem F8 e sem mudança de desempenho.
 
-**Web 0.9.4 publicada**, revisão `e39b4ff`, mesmo link e acesso privado, somente100%. Recarregar perde o progresso temporário desta sessão. Testes:70Node, ARM dos dois hosts e Chromium com setas do site, teclado e controle emulado aprovados; controle físico Windows/iPhone pendente. [Notas](release/NOTAS_0.9.4.md).
+**Web 0.9.4 publicada anteriormente**, revisão `e39b4ff`, mesmo link e acesso privado, somente100%. Recarregar perde o progresso temporário desta sessão. Testes:70Node, ARM dos dois hosts e Chromium com setas do site, teclado e controle emulado aprovados; controle físico Windows/iPhone pendente. [Notas](release/NOTAS_0.9.4.md).
 
 ## 0.9.3 — barra e acesso ao Códex corrigidos
 
@@ -60,6 +66,7 @@ Da mais recente para a mais antiga. As releases anteriores e seus downloads são
 
 | Release | Lançamento (Brasília) |
 | --- | --- |
+| [0.9.5 Beta — moldura integrada do Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.5-beta) | 25/10/2026 |
 | [0.9.4 Beta — navegação do Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.4-beta) | 25/10/2026 |
 | [0.9.3 Beta — barra do Códex corrigida](https://github.com/sugyua/destinia/releases/tag/v0.9.3-beta) | 24/10/2026 |
 | [0.9.1 Beta — Códex integrado e filtros](https://github.com/sugyua/destinia/releases/tag/v0.9.1-beta) | 24/10/2026 |

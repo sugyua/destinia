@@ -4,6 +4,13 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.9.5 Beta — 25/10/2026
+
+- Livro do Códex inteiro dentro de uma moldura contínua: reaproveita fundo e fechamento da barra original, deslocando a borda para incluir a décima aba. Remove o recorte de seis colunas e a divisória antiga.
+- Área clicável inclui toda a largura visível do livro. Preserva nove ícones/posições, navegação da 0.9.4 e pixels da mão animada original; não cria atalho F8 nem altera saves.
+- Correção visual aplicada aos dois hosts PC e à web. Testes automatizados não substituem Windows/iPhone físicos. Sem mudança de desempenho/térmica.
+
+
 ## 0.9.4 Beta — 25/10/2026
 
 - Corrigida a passagem da página Sistema para o Códex pela seta direita: o corpo da página retorna pelo cancelamento nativo antes de selecionar a aba do livro. Confirmar abre o Códex, sem entrar no submenu de configurações.

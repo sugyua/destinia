@@ -1,0 +1,74 @@
+name: Publicar Destinia 0.9.5 Beta
+on:
+  workflow_dispatch:
+    inputs:
+      verified_run:
+        description: CI Windows aprovada para o mesmo SHA
+        type: string
+        required: true
+permissions:
+  actions: read
+  contents: write
+concurrency:
+  group: release-095
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Confirmar origem da CI e versao exata sem substituir releases antigas
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERIFIED_RUN: ${{ inputs.verified_run }}
+          VERIFIED_SHA: ${{ github.sha }}
+        run: |
+          set -eu
+          test "$(cat VERSION | tr -d '\r\n')" = 0.9.5
+          test "$(git rev-parse HEAD)" = "$VERIFIED_SHA"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$VERIFIED_SHA"
+          test "$(gh api repos/$GITHUB_REPOSITORY/actions/runs/$VERIFIED_RUN --jq '.conclusion')" = success
+          test "$(gh api repos/$GITHUB_REPOSITORY/actions/runs/$VERIFIED_RUN --jq '.head_sha')" = "$VERIFIED_SHA"
+          test "$(gh api repos/$GITHUB_REPOSITORY/actions/runs/$VERIFIED_RUN --jq '.path')" = .github/workflows/verify-codex-menu.yml
+      - uses: actions/download-artifact@v4
+        with:
+          name: destinia-codex-no-menu-pacotes-de-teste
+          run-id: ${{ inputs.verified_run }}
+          github-token: ${{ github.token }}
+          path: verified
+      - name: Conferir os quatro EXEs do Windows e checksums dos dois ZIPs
+        env:
+          VERIFIED_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import hashlib,os,pathlib,zipfile,struct
+          root=pathlib.Path('verified'); archives=sorted(root.glob('*.zip'))
+          assert len(archives)==2 and len(list(root.iterdir()))==4
+          for archive in archives:
+              assert archive.name.startswith('destinia-0.9.5-beta-')
+              assert hashlib.sha256(archive.read_bytes()).hexdigest()==pathlib.Path(str(archive)+'.sha256').read_text().split()[0]
+              with zipfile.ZipFile(archive) as z:
+                  assert z.testzip() is None
+                  assert not any('/game/' in n or n.lower().endswith(('.dll','.dat')) for n in z.namelist())
+                  if 'windows-x64' in archive.name:
+                      prefix='destinia-0.9.5-beta/'
+                      assert os.environ['VERIFIED_SHA'] in z.read(prefix+'BUILD_INFO.txt').decode()
+                      for name in ['Destinia.exe','Destinia Zoom.exe','host/build/destinia_host.exe','host_zoom/build/destinia_host.exe']:
+                          b=z.read(prefix+name)
+                          assert b[:2]==b'MZ' and b[struct.unpack_from('<I',b,0x3c)[0]:][:4]==b'PE\0\0'
+                          assert struct.unpack_from('<H',b,struct.unpack_from('<I',b,0x3c)[0]+4)[0]==0x8664
+          PY
+      - name: Publicar nova Beta somente uma vez e preservar releases anteriores
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERIFIED_SHA: ${{ github.sha }}
+        run: |
+          set -eu
+          if gh release view v0.9.5-beta >/dev/null 2>&1; then
+            echo "Release v0.9.5-beta ja existe; nao sobrescrevendo."
+            exit 0
+          fi
+          gh release create v0.9.5-beta verified/* --target "$VERIFIED_SHA" --title 'Destinia 0.9.5 Beta — Moldura integrada do Codex' --notes-file release/NOTAS_0.9.5.md --prerelease
+          gh release view v0.9.5-beta --json tagName,assets --jq '.tagName, (.assets[].name)'
