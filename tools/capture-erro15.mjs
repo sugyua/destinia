@@ -124,6 +124,10 @@ try {
       for (let i = 0; i < 4; i++) call('Comm_mRun');
     };
 
+    // O loop de logo da fixture pode substituir Comm.processCB; restaura o menu nativo.
+    call('MenuCanvas_init', [r.exports.get('MenuCanvas')]);
+    r.put32(B + 0x70bc0, 0);
+    assert.equal(r.get32(B + 0x70b9c), r.exports.get('Menu_netProc'));
     // Reinicia estado de espera de rede a partir de Menu.state = 8
     r.put32(menu + 156, 8);
     call('Comm_setConType', [0]);
@@ -131,8 +135,11 @@ try {
     call('Comm_flush');
 
     const p0 = Buffer.from('000000010000000844455354494e4941000000024f4b0000', 'hex');
+    r.put32(B + 0x73b2c, 0);
     reply(0, p0);
     assert.equal(r.get32(B + 0x73b2c), 53);
+    assert.equal(Buffer.from(r.read(B + 0x70bd0, 8)).readUInt32BE(4), 8);
+    assert.equal(r.get32(B + 0x45108), 0);
     dump('Request automatico cmd=8 (53 bytes)', 0x70bd0, 53);
 
     const p8 = Buffer.from('000000010000', 'hex');
@@ -144,12 +151,12 @@ try {
     dump('inPacket inicio apos respostas', 0x6adc8, 64);
 
     assert.equal(curMenu, 20);
-    assert.ok(curGameUI === 0xa0000000 || curGameUI === 0xa0000001, `GameUI+124 inesperado: 0x${curGameUI.toString(16)}`);
+    assert.equal(curGameUI, 0xa0000001);
     lines.push(`PASS: Menu.state=20; GameUI+124=0x${curGameUI.toString(16)}. Respostas processadas com sucesso.`);
   }
 
   fs.writeFileSync(new URL('../docs/RELATORIO_VANGUARD_ERRO15_BYTES.md', import.meta.url), lines.join('\n'));
-  console.log(lines.join('\n'));
+  console.log(lines.filter(line => line.length < 500).join('\n'));
 } catch (error) {
   lines.push('', '## Resultado incompleto', String(error));
   fs.writeFileSync(new URL('../docs/RELATORIO_VANGUARD_ERRO15_BYTES.md', import.meta.url), lines.join('\n'));
@@ -158,4 +165,5 @@ try {
 } finally {
   r.close();
 }
+
 
