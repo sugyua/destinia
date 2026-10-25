@@ -9,6 +9,10 @@
 
 **[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
 
+## Laboratório local de PvP e Leilão
+
+Disponível um [servidor de simulação gratuito e guia de túnel](tools/network-mock/GUIA_TESTE.md), separado do jogo. **Não habilita o Multi Mode original.** O fluxo web Multi Mode → personagem → carregamento → erro15 foi registrado; sua causa interna e a integração com o servidor continuam pendentes. [Estado técnico e próximos passos](docs/MULTI_MODE_REDE.md). Versão e releases do jogo preservadas.
+
 ## 0.9.7 — FC e comparador com a interface original
 
 O **FC na aba Status** usa a fonte nativa, sem a faixa azul. No inventário, **Item/Comparar alternam dentro da própria caixa de descrição**, reaproveitando moldura, fonte e cores do jogo. Item preserva a descrição original; Comparar mostra FC atual → previsto e diferenças de ATK/DEF/PV/PM/crítico. Toque nos rótulos, use **F6 livre** ou o **analógico direito** no contexto de equipamentos. Não equipa automaticamente nem altera a fórmula, itens, atributos, gold ou saves.
