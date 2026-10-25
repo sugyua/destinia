@@ -33,15 +33,16 @@ if(frame===150)assert.equal(r.get16(main+0x3920),1);
 }
 assert.equal(r.get16(main+0x3920),2);assert.match(r.cstr(B+0x81cf8),/15/);
 lines.push('',`Mensagem capturada: ${JSON.stringify(r.cstr(B+0x81cf8))}`);dump('netData+260 incluindo terminador',0x81cf8,Buffer.byteLength(r.cstr(B+0x81cf8))+1);
-lines.push('Cota de 5h: sem telemetria acessivel; 18% informado pelo usuario no inicio. Nenhuma afirmacao de percentual atual.','');
+lines.push('Retomada apos reset de cota. Telemetria de percentual atual indisponivel.','');
 if(process.argv.includes('--responses')){
-const reply=(cmd,payload)=>{const b=Buffer.alloc(8+payload.length);b.writeUInt32BE(payload.length+4);b.writeUInt32BE(cmd,4);payload.copy(b,8);lines.push('Resposta cmd='+cmd+': '+b.toString('hex').match(/.{1,2}/g).join(' '));call('Java_game_destiniaeng_GameThread_procCommMsg',[0x40000000,16,1,0]);call('Java_game_destiniaeng_GameThread_procCommRead',[0x40000000,16,r.array(b),b.length]);for(let i=0;i<4;i++)call('Comm_mRun');};
+const reply=(cmd,payload)=>{const b=Buffer.alloc(8+payload.length);b.writeUInt32BE(b.length);b.writeUInt32BE(cmd,4);payload.copy(b,8);lines.push('Resposta cmd='+cmd+': '+b.toString('hex').match(/.{1,2}/g).join(' '));call('Java_game_destiniaeng_GameThread_procCommMsg',[0x40000000,16,1,0]);call('Java_game_destiniaeng_GameThread_procCommRead',[0x40000000,16,r.array(b),b.length]);for(let i=0;i<4;i++)call('Comm_mRun');};
 r.put32(menu+156,8);call('Comm_setConType',[0]);call('Comm_init',[0]);call('Comm_flush');
-const p=Buffer.from('000000010000000844455354494e4941000000024f4b0000','hex');reply(0,p);assert.equal(r.get32(B+0x73b2c),53);dump('Request automatico cmd=8',0x70bd0,53);reply(8,Buffer.from('000000010000','hex'));lines.push('Estado apos respostas: Menu='+r.get32(menu+156)+'; GameUI=0x'+r.get32(r.exports.get('GameUI')+124).toString(16));dump('inPacket inicio apos respostas',0x6adc8,64);assert.equal(r.get32(menu+156),20);assert.equal(r.get32(r.exports.get('GameUI')+124),0xa0000001);lines.push('PASS: Menu.state=20; GameUI+124=0xa0000001. Respostas sem newNetUserId opcional.');
+const p=Buffer.from('000000010000000844455354494e4941000000024f4b0000','hex');r.put32(B+0x73b2c,0);reply(0,p);assert.equal(r.get32(B+0x73b2c),53);assert.equal(Buffer.from(r.read(B+0x70bd0,8)).readUInt32BE(4),8);assert.equal(r.get32(B+0x45108),0);dump('Request automatico cmd=8',0x70bd0,53);reply(8,Buffer.from('000000010000','hex'));lines.push('Estado apos respostas: Menu='+r.get32(menu+156)+'; GameUI=0x'+r.get32(r.exports.get('GameUI')+124).toString(16));dump('inPacket inicio apos respostas',0x6adc8,64);assert.equal(r.get32(B+0x45108),0);assert.equal(r.get32(menu+156),20);assert.equal(r.get32(r.exports.get('GameUI')+124),0xa0000001);lines.push('PASS: Menu.state=20; GameUI+124=0xa0000001. Respostas sem newNetUserId opcional.');
 }
 fs.writeFileSync(new URL('../docs/RELATORIO_VANGUARD_ERRO15_BYTES.md',import.meta.url),lines.join('\n'));
-console.log(lines.join('\n'));
+console.log(lines.filter(line=>!line.startsWith('00 ')&&line.length<500).join('\n'));
 } catch(error) {lines.push('', '## Resultado incompleto', String(error), 'A transicao JNI cmd0/cmd8 NAO foi comprovada. pendingSendLen=53 isolado nao prova que cmd0 foi processado, pois a requisicao de preparacao ja tinha esse tamanho. O contrato estatico exige revisao: prefixo real 0x6f versus 0x6b previsto; layout outPacket nao confirmado. Confirmacao de personagem pelo handler tambem permanece pendente. Nenhuma alteracao em gameplay, saves no disco, release ou site.');fs.writeFileSync(new URL('../docs/RELATORIO_VANGUARD_ERRO15_BYTES.md',import.meta.url),lines.join('\n'));console.error(String(error));process.exitCode=1;} finally {r.close();}
+
 
 
 
