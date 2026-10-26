@@ -42,7 +42,7 @@ int main(int argc,char**argv){
  printf("MENU state=%08x indices=%u,%u,%u\n",rd32(ui+0x7c),rd16(ui+0x52),rd16(ui+0x54),rd16(ui+0x56));
  assert(rd32(ui+0x7c)==0x20000002u);
  // Integrated panel: opening/filtering/cancelling never changes Game.
- rd(g,before.data(),before.size());assert(inventoryMenuKey(12,true));assert(inventoryOpen);
+ rd(g,before.data(),before.size());assert(inventoryMenuKey(10016,true));assert(inventoryOpen);
  assert(inventoryPanel.items.size()==3 && inventoryPanel.names.size()==3 && !inventoryPanel.names[0].empty());
  inventoryPanel.query.rank=4;inventoryPanel.rebuild();assert(inventoryPanel.view.empty());assert(!inventoryChoose());
  rd(g,after.data(),after.size());assert(before==after);inventoryPanel.reset();inventoryPanel.selectedPool=ids[1];

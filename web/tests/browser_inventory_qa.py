@@ -14,7 +14,7 @@ async def run(url):
   await page.goto(url);assert await page.locator('#ui-scale').count()==0;await page.locator('#start').tap();await page.wait_for_function('!document.getElementById("pause").disabled',timeout=45000)
   worker=page.workers[0]
   await worker.evaluate("""()=>{paused=true;clearTimeout(timer);const r=engine,g=r.exports.get('Game'),u=r.exports.get('GameUI'),s=(at,...v)=>{const b=new Uint8Array(v.length*2),d=new DataView(b.buffer);v.forEach((n,i)=>d.setUint16(i*2,n,true));r.write(at,b);};self.invShort=s;r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);r.call(r.exports.get('Map_loadData'),[2,49,1]);for(let i=0;i<6;i++)r.put32(g+0x4584+4*i,0);s(g+0x48ba,20,15,10,10);s(g+0x48fa,20);s(g+0x7574,65535);r.call(r.exports.get('GameUI_calcHeroStat'));r.call(r.exports.get('setMyGold'),[20000]);self.invA=r.call(r.exports.get('GameUI_getNewEquipByIdx'),[2]);self.invB=r.call(r.exports.get('GameUI_getNewEquipByIdx'),[2]);r.write(g+0x2ed6+20*invB,r.read(g+0x2ed6+20*invA,20));for(let bag=0;bag<4;bag++)s(g+0x4338+bag*0x92,4,0,bag?0:2);s(g+0x433e,0,invA,1,0,invB,1);r.call(r.exports.get('openMainmenu'),[0]);s(u+0x76,16);for(const k of [7,9,6])r.call(r.exports.get('MainMenu_mKeyPressed'),[k]);r.put32(r.get32(0x10044240),r.exports.get('GameCanvas'));r.put32(r.gMenu+156,2);paused=false;tick();}""")
-  await page.keyboard.press('F7');await page.wait_for_function('true')
+  await page.keyboard.press('F6');await page.wait_for_function('true')
   assert await worker.evaluate('engine.inventory.open')
   before=await worker.evaluate('Array.from(engine.read(engine.exports.get("Game")+0x4338,4*0x92))')
   async def touch(x,y,scale=100):

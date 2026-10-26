@@ -2,6 +2,8 @@
 #include "../common/virtual_controls.h"
 #include "../common/ui_renderer.h"
 #include "../common/drop_names.h"
+#include "../common/loot_qol_runtime.h"
+static destinia::LootQolRuntime lootQol;
 static destinia::DropNamesRenderer dropNamesRenderer;
 static destinia::UiRenderer uiRenderer;
 // destinia_host - executa a libdestinia_jni.so ORIGINAL (ARM 32 bits) no PC.
@@ -1275,6 +1277,7 @@ static int runHost(int argc, char** argv) {
   uiRenderer.statusBaseScale=1;
   uiRenderer.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,preferences.uiScale,false,soPath);
   dropNamesRenderer.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,soPath);
+  {std::vector<uint8_t> table;if(!readFile(assetsDir+"/item_en.gdt",table))throw std::runtime_error("Tabela de loot ausente");lootQol.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,soPath,table);lootQol.options=preferences.loot;}
   fcInstall();
   u32 fnRun = exportsMap["Java_game_destiniaeng_GameThread_jniRun"];
   u32 fnTouch = exportsMap["Java_game_destiniaeng_GameThread_jniTouch"];
@@ -1432,8 +1435,8 @@ static int runHost(int argc, char** argv) {
         else if(ev.type==SDL_KEYDOWN || ev.type==SDL_KEYUP) {
           if(ev.key.repeat) continue;
           const bool down=ev.type==SDL_KEYDOWN;
-          if(ev.key.keysym.sym==SDLK_F6 && !preferences.keys.count(SDLK_F6) && !inventoryOpen && fcComparisonVisible()){if(down)fcMenuKey(10015,true);continue;}
-          if(ev.key.keysym.sym==SDLK_F7 && !preferences.keys.count(SDLK_F7) && (inventoryOpen || inventoryVisible())){if(down){controls.release();if(inventoryOpen)inventoryToggleProtection();else inventoryEnter();}continue;}
+          if(ev.key.keysym.sym==SDLK_F6 && !preferences.keys.count(SDLK_F6) && (inventoryOpen||inventoryVisible())){if(down){controls.release();inventoryMenuKey(10016,true);}continue;}
+          if(((ev.key.keysym.sym==SDLK_F7&&!preferences.keys.count(SDLK_F7))||(ev.key.keysym.sym==SDLK_p&&!preferences.keys.count(SDLK_p))) && (inventoryOpen||inventoryVisible())){if(down){controls.release();inventoryMenuKey(10014,true);}continue;}
           if(codexOpen && ev.key.keysym.sym!=SDLK_F11) {
             if(down) {
               if(ev.key.keysym.sym==SDLK_ESCAPE)codexMenuKey(10,true);
@@ -1506,6 +1509,8 @@ static int runHost(int argc, char** argv) {
     const auto runStart = std::chrono::steady_clock::now();
     traceViewportFrame = frame;
     dropNamesRenderer.enabled=controls.dropNamesHeld;
+    if(!lootQol.collect(uint64_t(frame),controls.focused,[&](u32 fn){return callFn(fn,{6});})){executionFailed=true;break;}
+    inventoryBeginFrame();
     fcBeginFrame();
     uiRenderer.beginFrame();
     const bool runSucceeded = callFn(fnRun, {ENV_OBJ, 0x10, hScreen, (u32)frame}, &wait);
@@ -1545,6 +1550,7 @@ static int runHost(int argc, char** argv) {
     }
     if(preferences.uiScale==100?hudScale!=0:uiRenderer.statusDrawn){std::array<destinia::SkillHintRect,4> hints{};for(size_t i=0;i<hints.size();++i){int16_t r[4]{};if(rd(exportsMap.at("MMain")+0x11a+u32(i)*8,r,8))hints[i]={r[0],r[1],r[2],r[3]};}destinia::paintSkillHints(frameBuffer.data(),SCREEN_W,SCREEN_H,preferences,controls.lastInputDevice(),hints,preferences.uiScale);}
     if(!codexOpen)fcPaint(frameBuffer.data(),preferences.uiScale);
+    lootQol.paint(frameBuffer.data());
     inventoryPaint(frameBuffer.data());
     nativeCodexPainter.paint(frameBuffer.data());
     const uint8_t* fb = frameBuffer.data();

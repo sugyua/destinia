@@ -1,6 +1,7 @@
 #pragma once
 #include "runtime_support.h"
 #include "game_modes.h"
+#include "loot_qol.h"
 #include "input_state.h"
 #include <SDL.h>
 #include <cctype>
@@ -80,6 +81,7 @@ inline int scaledVolume(int nativeLevel,int percent,bool muted) {
   return muted?0:128*std::clamp(nativeLevel,0,5)*std::clamp(percent,0,100)/500;
 }
 struct Preferences {
+  LootOptions loot;
   bool virtualControls=true;int uiScale=100;
   bool fullscreen=false,muteUnfocused=false,pauseUnfocused=false,pauseDisconnected=false;
   int width=1200,height=720,music=100,effects=100;
@@ -99,6 +101,12 @@ struct Preferences {
     p.virtualControls=preferenceInt(values,"interface."+host+".controles_virtuais",1,0,1)!=0;
     p.uiScale=preferenceInt(values,"interface."+host+".escala",100,75,125);
     if(p.uiScale!=75&&p.uiScale!=100&&p.uiScale!=125)throw std::runtime_error("Escala de interface deve ser 75, 100 ou 125.");
+    p.loot.visual=preferenceInt(values,"drops.filtro_visual",0,0,1)!=0;
+    p.loot.categories=preferenceInt(values,"drops.categorias",31,0,31);
+    p.loot.minRank=preferenceInt(values,"drops.rank_minimo",0,0,4);
+    p.loot.autoGold=preferenceInt(values,"coleta.ouro",1,0,1)!=0;
+    p.loot.autoMaterials=preferenceInt(values,"coleta.materiais",0,0,1)!=0;
+    p.loot.radius=preferenceInt(values,"coleta.raio",19,1,19);
     p.music=preferenceInt(values,"audio.musica",100,0,100);
     p.effects=preferenceInt(values,"audio.efeitos",100,0,100);
     p.muteUnfocused=preferenceInt(values,"audio.silenciar_sem_foco",0,0,1)!=0;

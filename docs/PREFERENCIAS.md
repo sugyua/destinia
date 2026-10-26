@@ -70,3 +70,7 @@ O configurador oferece 6 controles virtuais, 7 modo clássico/expandido, 8 escal
 ## Desenvolvimento0.9
 
 PT-BR é o padrão quando não há idioma configurado; inglês explícito é preservado. Para inglês use opção9/`idioma=en` ou `--lang en` (somente a sessão). `nomes_drops` permite mostrar os nomes/cores originais dos drops visíveis segurandoV; se V já estiver remapeado, esse padrão não ocupa a tecla. Configure outra tecla/botão na opção4. Perda de foco/pausa libera o comando; a coleta mantém seu alcance original. No navegador há botão de alternância e V para segurar.
+
+## QoL de loot — candidata 0.9.9
+
+As opções `drops.filtro_visual`, `drops.categorias`, `drops.rank_minimo`, `coleta.ouro`, `coleta.materiais` e `coleta.raio` são globais para os dois hosts. Defaults: 0, 31, 0, 1, 0 e 19 (ouro automático ativo, materiais desligados). Mescle no config.ini existente com o jogo fechado; `--check-settings ARQUIVO` valida limites. O reset de preferências remove essas chaves e preserva save_dir e chaves desconhecidas. BAT pessoal não foi alterado. [Uso e limites](LOOT_QOL.md).

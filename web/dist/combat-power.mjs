@@ -36,7 +36,7 @@ export class CombatPower {
      if(!info.valid){this.nativeText(panel.x+4,panel.y+16,'FC '+info.current);this.nativeText(panel.x+4,panel.y+30,r.language==='pt'?info.reason:({'OUTRA CLASSE':'OTHER CLASS','NIVEL BAIXO':'LOW LEVEL','IDENTIFIQUE':'IDENTIFY'}[info.reason]||'UNVERIFIED'),0xf800);}
      else{const d=info.projected-info.current;this.nativeText(panel.x+4,panel.y+16,`FC ${info.current} > ${info.projected}`,65535,150);this.nativeText(panel.x+158,panel.y+16,signed(d),deltaColor(d),56);let i=0;for(const[index,label]of[[7,'ATK'],[8,'DEF'],[5,r.language==='pt'?'PV':'HP'],[6,r.language==='pt'?'PM':'MP'],[11,'CRI']]){const n=info.after[index]-info.before[index],value=index===11?(n>0?'+':n<0?'-':'')+(Math.abs(n)/10).toFixed(1)+'%':signed(n);this.nativeText(panel.x+4+(i%2)*108,panel.y+28+Math.floor(i/2)*12,label+' '+value,deltaColor(n),104);i++;}}
     }
-    this.nativeText(panel.x+10,panel.y+71,'ITEM',kind==='item'?0xffc0:0x8c51,60);this.nativeText(panel.x+88,panel.y+71,'F6/RS',0x8c51,40);this.nativeText(panel.x+154,panel.y+71,r.language==='pt'?'COMPARAR':'COMPARE',kind==='compare'?0xffc0:0x8c51,60);
+    this.nativeText(panel.x+10,panel.y+71,'ITEM',kind==='item'?0xffc0:0x8c51,60);this.nativeText(panel.x+88,panel.y+71,'RS',0x8c51,40);this.nativeText(panel.x+154,panel.y+71,r.language==='pt'?'COMPARAR':'COMPARE',kind==='compare'?0xffc0:0x8c51,60);
    }
    const full=r.read(this.nativePixels,192000);data=new Uint8Array(area.w*area.h*2);for(let y=0;y<area.h;y++)data.set(full.subarray(((area.y+y)*400+area.x)*2,((area.y+y)*400+area.x+area.w)*2),y*area.w*2);
   }finally{r.uiRenderer.percent=scale;r.write(grp,graphics);r.put32(r.exports.get('Font'),font);r.put32(table,slot);}
