@@ -27,7 +27,9 @@
 - **Correção Crítica de Viewport Web 800x480**: Eliminação de duplicação do mapa e recuperação de 7 FPS para os 16 FPS originais via centralização de câmera (`Game+18552/18554`), limpeza de bordas com cinza médio (`0x8410`) e descarte imediato de tiles fora do mapa (`0x4000`/`fastReject`).
 - **Saves Nativos 100% Intocados**: Todos os dados estendidos residem em sidecars versionados com CAS (`progression-v1.txt`, `economy-v1.txt`, `titles-v1.txt`).
 
-### Backlog para 0.10.1 (Endgame e Seleção de Dificuldade)
+### Roadmap Oficial do Projeto (Cronograma de Versões)
+
+#### Versão 0.10.3 (Próxima — UI de Dificuldade & Polimento da Meta 0.10)
 
 1. **Troca de Dificuldade no Menu Sistema**:
    - Novo botão "Mudar Dificuldade" no menu Sistema.
@@ -38,12 +40,30 @@
    - Fonte branca nativa da engine; exibido exclusivamente em slots com save existente.
 3. **Restrição de Recursos**: 100% de reaproveitamento de molduras, fontes e bitmaps originais do jogo.
 
-### Backlog Futuro (Pós-0.10 / Versões 0.11 ou 0.12)
+#### Versão 0.11.0 (Expansão de Conteúdo, Novos Sets e Otimização de Títulos)
+- **Otimização do Título "Complecionista" (Armas por Nível/Cor)**:
+  - *Nova Regra:* Para as armas, o jogador **não precisa mais dropar todas as variantes aleatórias de buffs e nomes/sufixos**.
+  - Requisito refinado: registrar apenas **uma arma de cada nível e de cada raridade/cor** (ex: Pistola Nv 1 exige apenas 1 branca, 1 verde e 1 azul para ser concluída, em vez de dezenas de combinações de status secundários).
+  - A catalogação dos monstros no Códex permanece integral (100% de abates de comuns e chefes).
+- **Novos Sets de Equipamento e Balanceamento**:
+  - Adição de novos conjuntos temáticos para Atirador e Ladrão, ampliando a variedade de builds.
+  - Balanceamento fino das taxas de drop e atributos para os patamares de 2, 3, 4, 5 e 6 peças.
+- **Catálogo / Códex de Armas**:
+  - Visualização do progresso de armas registradas diretamente na interface do jogo.
 
-- **Modo Abissal (Desafio Extremo e Hardcore)**:
-  - Mecânica planejada: todos os monstros no Modo Abissal passam a ter aura de elite forçada em 100% dos spawns.
-  - Escalonamento brutal de atributos: 5x HP base em relação ao modo normal.
-  - Zero bônus de drop: tabela de drops idêntica às dificuldades padrão (sem facilitação ou aumento de recompensas), atuando puramente como o teste supremo de combate, builds de sets e estratégia para o endgame.
+#### Versão 0.12.0 (Endgame Extremo — O Modo Abissal Supremo)
+- **Modo Abissal Hardcore**:
+  - Desafio supremo para heróis no Nível 999 equipados com sets de 6 peças.
+  - **100% Aura de Elite:** Todos os monstros do mapa nascem compulsoriamente como monstros Elites.
+  - **Escalonamento Brutal:** 5× HP base em relação ao modo normal e aumento substancial da agressividade.
+  - **Zero Bônus de Drop:** Tabela de recompensas idêntica às dificuldades padrão (sem facilitação ou aumento de ganhos), servindo puramente como o teste supremo de combate, reflexos e teoria de builds.
+- **Título Lendário "Senhor do Abismo"**:
+  - Título cosmético e honorífico exclusivo para quem derrotar o Boss Final no Modo Abissal.
+
+
+
+
+
 
 
 ## META 0.10 — Frente 1 em preparação
