@@ -1,4 +1,5 @@
 import {LootQol} from './loot-qol.mjs';
+import {LootEconomy} from './loot-economy.mjs';
 import {Inventory} from './inventory.mjs';
 import {CombatPower} from './combat-power.mjs';
 import {DropNames} from './drop-names.mjs';
@@ -19,6 +20,7 @@ const requireValue=(value,message)=>{if(!value)throw Error(message);};
 export class DestiniaWeb {
   constructor(uc,assets,{onLog=()=>{},onSound=()=>{},fastGraphics=true,fastMemory=true,gameMode="classico",uiScale=100,language="pt",inventoryStorage,lootOptions,width=800,height=480}={}) {
     this.lootMaterialTable=assets.get('item_en.gdt');
+    this.economy=new LootEconomy();
     if(!["en","pt"].includes(language))throw Error("Idioma inválido.");this.language=language;if(language==="pt")assets=translatedAssets(assets);
     if(!["classico","expandido"].includes(gameMode))throw Error("Modo de jogo inválido.");this.gameMode=gameMode;if(![75,100,125].includes(uiScale))throw Error("Escala de interface inválida.");this.uiScale=uiScale;
     this.lootOptions=lootOptions;this.inventoryStorage=inventoryStorage;this.width=width;this.height=height;this.screenBytes=width*height*2;this.codexFilter=0;
@@ -227,7 +229,18 @@ export class DestiniaWeb {
       if(kind===3){this.codex.newMap();return;}if(kind===0){this.codex.respawn(p);return;}
       const id=this.get16(p+8),hp=this.get32(p+0x20)|0;
       // Normal procMonster notifies quests before it writes death state 2.
-      if(kind===2){if(hp<=0)this.codex.observe(p,id,true,this.monsterFacts(p));return;}
+      if(kind===2){
+        if(hp<=0){
+          this.codex.observe(p,id,true,this.monsterFacts(p));
+          if(id>=100&&id<=109){
+            this.economy.recordBossKill(slot,id);
+            if(typeof localStorage!=='undefined'){
+              try{localStorage.setItem('destinia:economy-v1:'+this.gameMode,this.economy.encode());}catch(_){}
+            }
+          }
+        }
+        return;
+      }
       const x=this.get16(p+0x1a,true)-this.get16(game+0x4878,true),y=this.get16(p+0x1c,true)-this.get16(game+0x487a,true);
       if(x>=0&&x<400&&y>=0&&y<240)this.codex.observe(p,id,false,this.monsterFacts(p));
     },null,at,at);});
@@ -248,7 +261,22 @@ export class DestiniaWeb {
     try{if(!this.codexMenuKey(key,true)){this.codexNativeMenuBypass++;try{this.call(target,[key]);}finally{this.codexNativeMenuBypass--;}}}finally{this.codexNativeMenuDraining=false;}
   }
   call(address,args=[]){requireValue(address,'Função ARM ausente');let sp=(STACK+STACK_SIZE-256-Math.max(0,args.length-4)*4)&~7;for(let i=4;i<args.length;i++)this.put32(sp+(i-4)*4,args[i]);for(let i=0;i<4;i++)this.w(i,args[i]||0);this.e.reg_write_i32(this.uc.ARM_REG_SP,sp);this.e.reg_write_i32(this.uc.ARM_REG_LR,RETURN);this.error=null;try{this.e.emu_start(address,RETURN,0,0);}catch(error){const pc=this.e.reg_read_i32(this.uc.ARM_REG_PC)>>>0;throw Error(String(error)+" [ARM pc=0x"+(pc-BASE).toString(16)+", UI="+(this.uiRenderer?.kind||"none")+", entry="+(this.uiRenderer?.entry||0).toString(16)+"]");}if(this.error)throw this.error;requireValue((this.e.reg_read_i32(this.uc.ARM_REG_PC)&~1)===RETURN,'Execução ARM interrompida');const result=this.r(0);this.codexDrainNativeMenu();return result;}
-  init(){const device=encoder.encode('DESTINIA-WEB-TEST'),model=encoder.encode('Browser');const id=this.array(device),m=this.array(model);this.screen=this.array(new Uint8Array(this.screenBytes));this.call(this.exports.get('Java_game_destiniaeng_GameThread_initGame'),[ENV,16,id,device.length,m,model.length,this.width,this.height,0]);this.log('initGame concluído.');}
+  init(){const device=encoder.encode('DESTINIA-WEB-TEST'),model=encoder.encode('Browser');const id=this.array(device),m=this.array(model);this.screen=this.array(new Uint8Array(this.screenBytes));this.call(this.exports.get('Java_game_destiniaeng_GameThread_initGame'),[ENV,16,id,device.length,m,model.length,this.width,this.height,0]);this.log('initGame concluído.');
+    const nowSec=Math.floor(Date.now()/1000);
+    if(typeof localStorage!=='undefined'){
+      try{
+        const text=localStorage.getItem('destinia:economy-v1:'+this.gameMode);
+        if(text)this.economy.decode(text);
+      }catch(_){}
+    }
+    const offlineRes=this.economy.processOfflineCash(nowSec);
+    if(offlineRes.cashToCredit>0){
+      try{
+        const curCash=this.call(this.exports.get('getMyCash'));
+        this.call(this.exports.get('setMyCash'),[curCash+offlineRes.cashToCredit]);
+        this.log('Cash offline creditado: +'+offlineRes.cashToCredit+' Cash.');
+      }catch(_){}
+    }}
   step(){this.finishOfflinePurchase();this.processNetwork();if(this.codexOpen){this.frame++;return 62;}if(this.inventory.open){this.frame++;return 62;}this.lootQol.collect(this.frame);this.inventory.beginFrame();this.combatPower.beginFrame();const wait=this.call(this.exports.get('Java_game_destiniaeng_GameThread_jniRun'),[ENV,16,this.screen,this.frame++]);this.finishOfflinePurchase();this.processNetwork();return wait>=1000?100:wait;}
   monsterFacts(p){const game=this.exports.get('Game'),file=`m${this.get16(game+0x4870)}_${this.get16(game+0x4872)}.mpd`;return {maxHP:this.get32(p+0x24),level:this.get16(p+0x10),elite:!!this.get32(p+0x4c),location:{file,name:this.monsterMetadata?.maps.get(file)||file}};}
   async prepareCodexPortraits(){this.portraits=await loadPortraits(this.assets,this.codex.names);try{this.monsterMetadata=await loadMonsterMetadata(this.assets);}catch(error){this.log(error.message);}}

@@ -895,6 +895,7 @@ static int runHost(int argc, char** argv) {
   if (!callFn(fnInit, {ENV_OBJ, 0x10, hId, (u32)devId.size(), hModel, (u32)model.size(), SCREEN_W, SCREEN_H, 0})) return 2;
   installCodex();
   installInventoryProtection();
+  destinia::initLootEconomy(saveDir);
   hostReport("[host] initGame ok. Rodando o jogo...\n");
 
   // [OK] jniTouch(env,obj, x, y, tipo): tipo 0=toque 1=solta 2=move 3=tecla de menu (Thumb decodificado)
@@ -1111,6 +1112,8 @@ static int runHost(int argc, char** argv) {
     frame++;
     runtimeLogTick(frame,emulMs);
     if(frame%16==0) codexFlush();
+    destinia::lootEconomyProcessOffline(saveDir, fnGetCash, fnSetCash, callFn);
+    destinia::lootEconomyPeriodicSave(saveDir, frame);
     probeTick(frame);
     if (wait == 0) { hostReport("[host] o jogo pediu para encerrar.\n"); break; }
 
@@ -1168,6 +1171,7 @@ static int runHost(int argc, char** argv) {
     try { destinia::saveWindowPreferences(settingsPath,"host",windowWidth,windowHeight,fullscreen); }
     catch(const std::exception& e) { hostReport("[host] Aviso: %s\n",e.what()); }
   }
+  if(destinia::lootEconomyReady){destinia::lootEconomy.lastTimestamp=int64_t(std::time(nullptr));try{destinia::saveLootEconomy(fs::path(saveDir),destinia::lootEconomy);}catch(...){}}
   return executionFailed ? 2 : 0;
 }
 

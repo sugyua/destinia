@@ -424,3 +424,11 @@ Pacotes oficiais e histórico detalhado ficam em [Releases](https://github.com/s
 O ZIP curado não inclui biblioteca original, APK, DEX, assets, áudio, saves ou DLLs de terceiros. Consulte [THIRD_PARTY.md](THIRD_PARTY.md). Não foi definida uma licença para o código do host nesta etapa.
 
 Se quiser ajudar no projeto, entre em contato comigo pelo WhatsApp: [+55 21 97468-6880](https://wa.me/5521974686880).
+
+
+### Sistemas de Loot e Economia (Meta 0.10 — Frente 2)
+
+- **Drops Exclusivos de Boss:** 10 itens lendários exclusivos para cada chefe (`species >= 100`), integrados aos detalhes do Códex e registrados em sidecar.
+- **Sets de Equipamento:** 5 conjuntos (Dragão, Sombrio, Imperial, Arcano, Guardião) com bônus ao equipar 2 e 4 peças.
+- **Cash Offline:** Ganho automático de 1 Cash a cada 30 minutos offline via timestamp, com teto máximo estrito de 24 horas (48 Cash).
+- **Saves:** Saves originais `save*.dat` 100% intocados (persistência atômica em `economy-v1.txt`). Detalhes em [LOOT_ECONOMY.md](docs/LOOT_ECONOMY.md).

@@ -4,6 +4,13 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.10.0 Beta (Frente 2: Loot e Economia) — 26/10/2026
+
+- **Drops Exclusivos de Boss:** Criado catálogo de 10 itens lendários (Rank 4) exclusivos para cada um dos chefes do jogo (species 100 a 109: Dungeon Guardian, Defcan, Salas, Defcan Desperto, Sileth, Berserk Tamur, Kaiser, Baramos, Diablo, Lava Guardian). Os drops possuem lore e bônus de atributos, são integrados ao Códex de monstros e persistidos em sidecar.
+- **Sets de Equipamento:** Criados 5 conjuntos temáticos (Set do Dragão, Set Sombrio, Set Imperial, Set Arcano, Set do Guardião) com detecção automática por nomes e concessão de bônus únicos progressivos ao equipar 2 ou 4 peças do mesmo conjunto.
+- **Cash Offline com Teto de 24h:** Implementado ganho de Cash baseado no tempo em que o jogo permaneceu fechado via timestamp UNIX, à taxa de 1 Cash a cada 30 minutos offline, com teto máximo e estrito de 24 horas (86.400s = máx 48 Cash) de acúmulo por período, creditado diretamente no saldo do jogador via rotina nativa ARM `setMyCash`.
+- **Integridade de Saves e Multiplataforma:** Saves binários originais `save*.dat` 100% intocados através de persistência atômica no sidecar `economy-v1.txt` no PC e `localStorage` na Web. Suíte completa de testes automatizados em C++ (`tests/test_loot_economy.py`) e Node (`web/tests/loot-economy.test.mjs`) aprovada.
+
 ## 0.9.9 Beta — 26/10/2026
 
 - Ajustes aprovados pelo proprietário: F7/P alternam proteção diretamente no equipamento do cursor, sem abrir FILTROS; F6 passa a abrir FILTROS. Item/Comparar continuam acessíveis por clique e controle/RS.

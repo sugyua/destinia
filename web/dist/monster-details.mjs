@@ -1,3 +1,4 @@
+import {findBossDrop} from './loot-economy.mjs';
 // Read-only metadata from the original APK 1.0.6, verified against Map_loadData,
 // Mon_createMonster, procScript, GameCanvas_dropItem and GameUI_getNItemIdx.
 import {unpackResource} from './codex-portraits.mjs';
@@ -83,6 +84,12 @@ function dropGroups(m,data,facts,known){
    groups.push({id:type===24?'eggs':'items-'+type,title:label,rows:[...new Set(items.map(item=>item.name))].map(name=>line(name))});
   }
   if(m.questId>=0)groups.push({id:'quest',title:'ITEM DE MISSAO',rows:[line('SO COM MISSAO ATIVA COMPATIVEL')]});
+ }
+ if(m.id>=100){
+  const bossDrop=findBossDrop(m.id);
+  if(bossDrop){
+   groups.push({id:'boss-exclusive',title:'DROP EXCLUSIVO DE CHEFE',rows:[line(bossDrop.namePt+' [LENDARIO]',0xfc08),line(bossDrop.descPt,0xffff)]});
+  }
  }
  return groups;
 }
