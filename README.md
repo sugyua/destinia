@@ -1,15 +1,15 @@
-# Destinia 0.9.8 Beta
+# Destinia 0.9.9 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.9.8 Beta — Proteção de Equipamentos e Chefes no Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.8-beta)** — ZIP Windows com dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
+**[Baixar Destinia 0.9.9 Beta — QoL, Autoloot, Indicador FC e Atalhos](https://github.com/sugyua/destinia/releases/tag/v0.9.9-beta)** — ZIP Windows com executáveis standalone portáteis (16 DLLs inclusas), dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
 
 **[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
 
-## Candidata 0.9.9 — Frente 4: filtro visual e coleta opcional
+## Novidades da Versão 0.9.9 — Filtro Visual, Autoloot e QoL de Inventário
 
 O **filtro visual de drops** destaca equipamentos com as cores do rank, materiais em ciano, ouro em amarelo e itens de missão em laranja. Categorias e rank mínimo de equipamento podem ser ocultados **apenas no desenho**, sem apagar drops ou mudar a coleta manual. A coleta automática de **ouro e materiais de fabricação** tem opções independentes do filtro visual: ouro ativo por padrão, materiais desligados por padrão. Mantém o alcance original (até 19 pixels por eixo), usa as verificações nativas de capacidade e não coleta equipamentos, poções, receitas ou itens de missão. A mochila cheia conserva o material no chão; tentativas malsucedidas têm intervalo para evitar repetição de mensagens.
 
@@ -28,7 +28,7 @@ coleta.raio=19
 
 `drops.categorias` soma **1 equipamentos + 2 materiais + 4 ouro + 8 missão + 16 outros**; 31 mostra todos e 0 oculta todos quando o filtro está ativo. `drops.rank_minimo` aceita 0–4 e só filtra equipamentos. `coleta.raio` aceita 1–19, nunca amplia a distância nativa. O padrão sem configuração é ouro=1 e materiais=0; opções explícitas anteriores são respeitadas. Use 0 para desativar o autoloot de ouro ou 1 para ativar materiais. Opções são gravadas fora dos `save*.dat`; itens coletados entram na memória do jogo pelo coletor original e serão salvos pelo fluxo normal quando o jogador salvar, sem mudar o formato.
 
-**Web:** abra **Itens no chão e coleta** para ajustar as mesmas opções; as preferências ficam neste navegador, separadas dos saves/Google Drive. Pausa, menus/transições e perda de foco suspendem a assistência. **Fontes web da candidata 0.9.9 atualizadas e testadas localmente; deployment não realizado por esta frente.** URL existente: [teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site/). Release, VERSION/manifesto da nova versão e deployment pertencem à integração do Maestro após revisão do Sentinel; nenhuma publicação 0.9.9 é declarada aqui. [Testes, contrato ARM e limites](docs/LOOT_QOL.md).
+**Web:** abra **Itens no chão e coleta** para ajustar as mesmas opções; as preferências ficam neste navegador, separadas dos saves/Google Drive. Pausa, menus/transições e perda de foco suspendem a assistência. **Status web 0.9.9:** código web atualizado e testado localmente (inclusive ponte worker/localStorage para F7 e bolinha verde de FC). URL existente: [teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site/). Deployment real no site requer ferramenta externa de deploy configurada com credenciais do serviço de hospedagem. [Testes, contrato ARM e limites](docs/LOOT_QOL.md).
 
 ## 0.9.8 — Proteção de equipamentos, separação de chefes no Códex e Web Destinia Zoom
 
@@ -112,6 +112,7 @@ Da mais recente para a mais antiga. As releases anteriores e seus downloads são
 
 | Release | Lançamento (Brasília) |
 | --- | --- |
+| [0.9.9 Beta — QoL, Autoloot, Indicador FC e Atalhos](https://github.com/sugyua/destinia/releases/tag/v0.9.9-beta) | 26/10/2026 |
 | [0.9.8 Beta — Proteção de equipamentos e chefes no Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.8-beta) | 26/10/2026 |
 | [0.9.7 Beta — FC e comparador nativos](https://github.com/sugyua/destinia/releases/tag/v0.9.7-beta) | 25/10/2026 |
 | [0.9.6 Beta — setas nativas do Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.6-beta) | 25/10/2026 |

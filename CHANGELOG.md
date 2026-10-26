@@ -4,7 +4,7 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
-## 0.9.9 Beta — candidata, Frente 4 (não publicada)
+## 0.9.9 Beta — 26/10/2026
 
 - Ajustes aprovados pelo proprietário: F7/P alternam proteção diretamente no equipamento do cursor, sem abrir FILTROS; F6 passa a abrir FILTROS. Item/Comparar continuam acessíveis por clique e controle/RS.
 - Proteção na web passa pela janela: worker solicita gravação e aguarda ACK do localStorage antes de confirmar F7/P. Falhas/concorrência não confirmam a alteração; venda bloqueada durante pendência, sem escrever nos saves ARM.
