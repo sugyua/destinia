@@ -5,6 +5,9 @@ import {
   findBossDrop,
   equipmentSetCatalog,
   epicMissionsCatalog,
+  bossTeleportCostCatalog,
+  findBossTeleport,
+  getBossTeleportCost,
   SetDropSourceType,
   identifySet,
   evaluateActiveSets,
@@ -240,52 +243,17 @@ test('missoes epicas de cash por abates de boss e set de 6 pecas', () => {
   assert.equal(econ.totalMissionCashAwarded, 300);
 });
 
-test('cash offline calcula progressao proporcional e aplica teto estrito de 24 horas', () => {
-  const rate = DEFAULT_OFFLINE_CASH_INTERVAL; // 1800s = 30min
+test('cash passivo offline desativado; ganho de cash exclusivo por missoes', () => {
+  const rate = DEFAULT_OFFLINE_CASH_INTERVAL;
   assert.equal(MAX_OFFLINE_SECONDS, 86400);
 
-  // Casos inválidos ou relógio invertido
+  // Diretriz do proprietário: Jogador NÃO ganha cash baseado em tempo
   assert.equal(calculateOfflineCash(0, 1000).cashToCredit, 0);
   assert.equal(calculateOfflineCash(1000, 1000).cashToCredit, 0);
-  assert.equal(calculateOfflineCash(1000, 500).cashToCredit, 0);
-
-  // Intervalo menor que 1800s
-  const r600 = calculateOfflineCash(1000, 1600, rate);
-  assert.equal(r600.cashToCredit, 0);
-  assert.equal(r600.capped, false);
-
-  // 1 Cash a cada 30min
-  const r1800 = calculateOfflineCash(1000, 2800, rate);
-  assert.equal(r1800.cashToCredit, 1);
-  assert.equal(r1800.capped, false);
-
-  // 2 Cash em 1h
-  const r3600 = calculateOfflineCash(1000, 4600, rate);
-  assert.equal(r3600.cashToCredit, 2);
-  assert.equal(r3600.capped, false);
-
-  // 12 horas (43200s) = 24 Cash
-  const r12h = calculateOfflineCash(1000, 1000 + 43200, rate);
-  assert.equal(r12h.cashToCredit, 24);
-  assert.equal(r12h.capped, false);
-
-  // Exatamente 24 horas (86400s) = 48 Cash
-  const r24h = calculateOfflineCash(1000, 1000 + 86400, rate);
-  assert.equal(r24h.cashToCredit, 48);
-  assert.equal(r24h.cappedSeconds, 86400);
-  assert.equal(r24h.capped, false);
-
-  // 48 horas (172800s) -> TETO ESTRITO DE 24H: 48 Cash
-  const r48h = calculateOfflineCash(1000, 1000 + 172800, rate);
-  assert.equal(r48h.cashToCredit, 48);
-  assert.equal(r48h.cappedSeconds, 86400);
-  assert.equal(r48h.capped, true);
-
-  // 1 mês offline -> Continua travado em 48 Cash
-  const rMonth = calculateOfflineCash(1000, 1000 + 2592000, rate);
-  assert.equal(rMonth.cashToCredit, 48);
-  assert.equal(rMonth.cappedSeconds, 86400);
-  assert.equal(rMonth.capped, true);
+  assert.equal(calculateOfflineCash(1000, 2800, rate).cashToCredit, 0);
+  assert.equal(calculateOfflineCash(1000, 1000 + 86400, rate).cashToCredit, 0);
+  assert.equal(calculateOfflineCash(1000, 1000 + 172800, rate).cashToCredit, 0);
+  assert.equal(calculateOfflineCash(1000, 1000 + 2592000, rate).cashToCredit, 0);
 });
 
 test('classe LootEconomy codifica, decodifica DESTINIA_ECONOMY_2 e suporta retrocompatibilidade com v1', () => {
@@ -305,10 +273,10 @@ test('classe LootEconomy codifica, decodifica DESTINIA_ECONOMY_2 e suporta retro
   assert.equal(econ.getBossKillCount(1, 100), 2);
   assert.equal(econ.getTotalBossKills(1), 3);
 
-  // Simular processamento offline
-  const result = econ.processOfflineCash(1600003600); // +3600s = 2 Cash
-  assert.equal(result.cashToCredit, 2);
-  assert.equal(econ.totalOfflineCashAwarded, 12);
+  // Simular processamento offline (cash passivo desativado: retorno 0)
+  const result = econ.processOfflineCash(1600003600);
+  assert.equal(result.cashToCredit, 0);
+  assert.equal(econ.totalOfflineCashAwarded, 10);
   assert.equal(econ.lastTimestamp, 1600003600);
 
   // Completar mais kills e resgatar missão
@@ -331,7 +299,7 @@ test('classe LootEconomy codifica, decodifica DESTINIA_ECONOMY_2 e suporta retro
   restored.decode(encoded);
 
   assert.equal(restored.lastTimestamp, 1600003600);
-  assert.equal(restored.totalOfflineCashAwarded, 12);
+  assert.equal(restored.totalOfflineCashAwarded, 10);
   assert.equal(restored.totalMissionCashAwarded, 75);
   assert.equal(restored.getBossDropCount(1, 100), 2);
   assert.equal(restored.getBossDropCount(1, 108), 1);
@@ -358,4 +326,38 @@ test('classe LootEconomy codifica, decodifica DESTINIA_ECONOMY_2 e suporta retro
   // Rejeição de formato inválido
   assert.throws(() => restored.decode('INVALID_HEADER\n'), /FORMATO DE ECONOMIA DESCONHECIDO/);
   assert.throws(() => restored.decode(''), /SIDECAR INVALIDO/);
+});
+
+test('mago dos bosses possui tabela canonica calibrada de teleporte para os 10 chefes', () => {
+  assert.equal(bossTeleportCostCatalog.length, 10);
+
+  const expectedLevels = [15, 25, 35, 45, 55, 65, 75, 85, 95, 99];
+  const expectedCosts = [500, 1000, 2500, 5000, 8500, 12000, 18000, 25000, 35000, 50000];
+
+  for (let i = 0; i < 10; i++) {
+    const sp = 100 + i;
+    const entry = findBossTeleport(sp);
+    assert.ok(entry, 'Entrada para chefe deve existir');
+    assert.equal(entry.species, sp);
+    assert.ok(entry.bossName.length > 0);
+    assert.ok(entry.dungeonNamePt.length > 0);
+    assert.ok(entry.dungeonNameEn.length > 0);
+    assert.equal(entry.recommendedLevel, expectedLevels[i]);
+    assert.equal(entry.goldCost, expectedCosts[i]);
+    assert.equal(getBossTeleportCost(sp), expectedCosts[i]);
+  }
+
+  // Monotonia crescente de nível e custo
+  for (let i = 1; i < bossTeleportCostCatalog.length; i++) {
+    assert.ok(bossTeleportCostCatalog[i].recommendedLevel > bossTeleportCostCatalog[i - 1].recommendedLevel);
+    assert.ok(bossTeleportCostCatalog[i].goldCost > bossTeleportCostCatalog[i - 1].goldCost);
+  }
+
+  // Casos inválidos
+  assert.equal(findBossTeleport(99), null);
+  assert.equal(findBossTeleport(110), null);
+  assert.equal(findBossTeleport(-1), null);
+  assert.equal(getBossTeleportCost(99), 0);
+  assert.equal(getBossTeleportCost(110), 0);
+  assert.equal(getBossTeleportCost(-1), 0);
 });

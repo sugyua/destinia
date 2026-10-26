@@ -186,47 +186,22 @@ void testOfflineCashCalculation() {
   assert(calculateOfflineCash(1000, 500, rate).cashToCredit == 0); // clock rewound
   assert(calculateOfflineCash(1000, 2000, 0).cashToCredit == 0);
 
-  // Normal offline progression
+  // Diretriz do proprietário: Jogador NÃO ganha cash baseado em tempo (cash passivo offline desativado)
   auto r600 = calculateOfflineCash(1000, 1600, rate);
   assert(r600.cashToCredit == 0);
   assert(r600.elapsedSeconds == 600);
-  assert(!r600.capped);
 
   auto r1800 = calculateOfflineCash(1000, 2800, rate);
-  assert(r1800.cashToCredit == 1);
-  assert(r1800.elapsedSeconds == 1800);
-  assert(!r1800.capped);
+  assert(r1800.cashToCredit == 0);
 
   auto r3600 = calculateOfflineCash(1000, 4600, rate);
-  assert(r3600.cashToCredit == 2);
-  assert(r3600.elapsedSeconds == 3600);
-  assert(!r3600.capped);
+  assert(r3600.cashToCredit == 0);
 
-  auto r12h = calculateOfflineCash(1000, 1000 + 43200, rate);
-  assert(r12h.cashToCredit == 24);
-  assert(r12h.elapsedSeconds == 43200);
-  assert(!r12h.capped);
-
-  // Exactly 24 Hours (86400s) = 48 Cash
   auto r24h = calculateOfflineCash(1000, 1000 + 86400, rate);
-  assert(r24h.cashToCredit == 48);
-  assert(r24h.elapsedSeconds == 86400);
-  assert(r24h.cappedSeconds == 86400);
-  assert(!r24h.capped);
+  assert(r24h.cashToCredit == 0);
 
-  // Exceeding 24 Hours: STRICT CAP AT 24H (86400s)
   auto r48h = calculateOfflineCash(1000, 1000 + 172800, rate);
-  assert(r48h.cashToCredit == 48); // Still strictly 48 Cash!
-  assert(r48h.elapsedSeconds == 172800);
-  assert(r48h.cappedSeconds == 86400); // Capped at 24h
-  assert(r48h.capped);
-
-  // 10 Days offline: Still strictly 48 Cash
-  auto r10d = calculateOfflineCash(1000, 1000 + 864000, rate);
-  assert(r10d.cashToCredit == 48);
-  assert(r10d.elapsedSeconds == 864000);
-  assert(r10d.cappedSeconds == 86400);
-  assert(r10d.capped);
+  assert(r48h.cashToCredit == 0);
 
   std::cout << "[PASS] testOfflineCashCalculation OK\n";
 }
@@ -331,10 +306,10 @@ void testStateSerializationAndSidecar(const std::string& tempDir) {
   assert(state.getBossKillCount(2, 100) == 2);
   assert(state.getBossKillCount(2, 108) == 1);
 
-  // Process offline cash
-  auto res = state.processOfflineCash(1600003600); // +3600s = +2 Cash
-  assert(res.cashToCredit == 2);
-  assert(state.totalOfflineCashAwarded == 17);
+  // Process offline cash (cash passivo desativado: retorno 0)
+  auto res = state.processOfflineCash(1600003600);
+  assert(res.cashToCredit == 0);
+  assert(state.totalOfflineCashAwarded == 15);
   assert(state.lastTimestamp == 1600003600);
 
   // Adicionar missões épicas
@@ -353,7 +328,7 @@ void testStateSerializationAndSidecar(const std::string& tempDir) {
   LootEconomyState loaded;
   loaded.decode(encoded);
   assert(loaded.lastTimestamp == 1600003600);
-  assert(loaded.totalOfflineCashAwarded == 17);
+  assert(loaded.totalOfflineCashAwarded == 15);
   assert(loaded.totalMissionCashAwarded == 75);
   assert(loaded.getBossDropCount(2, 100) == 2);
   assert(loaded.getBossDropCount(2, 108) == 1);
@@ -403,6 +378,43 @@ void testStateSerializationAndSidecar(const std::string& tempDir) {
   std::cout << "[PASS] testStateSerializationAndSidecar OK\n";
 }
 
+void testBossTeleportCosts() {
+  const auto& catalog = bossTeleportCostCatalog();
+  assert(catalog.size() == 10);
+
+  const uint32_t expectedLevels[10] = {15, 25, 35, 45, 55, 65, 75, 85, 95, 99};
+  const uint32_t expectedCosts[10] = {500, 1000, 2500, 5000, 8500, 12000, 18000, 25000, 35000, 50000};
+
+  for (int i = 0; i < 10; i++) {
+    int sp = 100 + i;
+    const auto* entry = findBossTeleport(sp);
+    assert(entry != nullptr);
+    assert(entry->species == sp);
+    assert(!entry->bossName.empty());
+    assert(!entry->dungeonNamePt.empty());
+    assert(!entry->dungeonNameEn.empty());
+    assert(entry->recommendedLevel == expectedLevels[i]);
+    assert(entry->goldCost == expectedCosts[i]);
+    assert(getBossTeleportCost(sp) == expectedCosts[i]);
+  }
+
+  // Verificação de monotonia estrita de nível e custo
+  for (size_t i = 1; i < catalog.size(); i++) {
+    assert(catalog[i].recommendedLevel > catalog[i - 1].recommendedLevel);
+    assert(catalog[i].goldCost > catalog[i - 1].goldCost);
+  }
+
+  // Limites e entradas inválidas
+  assert(findBossTeleport(99) == nullptr);
+  assert(findBossTeleport(110) == nullptr);
+  assert(findBossTeleport(-1) == nullptr);
+  assert(getBossTeleportCost(99) == 0);
+  assert(getBossTeleportCost(110) == 0);
+  assert(getBossTeleportCost(-1) == 0);
+
+  std::cout << "[PASS] testBossTeleportCosts OK\n";
+}
+
 int main(int argc, char** argv) {
   std::string tempDir = "tmp_economy_test";
   if (argc > 1) tempDir = argv[1];
@@ -412,6 +424,7 @@ int main(int argc, char** argv) {
   testEquipmentSets();
   testOfflineCashCalculation();
   testEpicMissionsAndKills();
+  testBossTeleportCosts();
   testStateSerializationAndSidecar(tempDir);
 
   std::error_code ec;

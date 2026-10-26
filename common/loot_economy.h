@@ -288,6 +288,8 @@ struct OfflineCashResult {
   bool capped = false;
 };
 
+// Cash passivo por tempo REMOVIDO conforme diretriz do proprietário.
+// Cash é obtido EXCLUSIVAMENTE por Missões Épicas / Marcos de Chefes.
 inline OfflineCashResult calculateOfflineCash(
     int64_t lastTimestamp,
     int64_t currentTimestamp,
@@ -297,9 +299,8 @@ inline OfflineCashResult calculateOfflineCash(
     return res;
   }
   res.elapsedSeconds = currentTimestamp - lastTimestamp;
-  res.capped = res.elapsedSeconds > MAX_OFFLINE_SECONDS;
   res.cappedSeconds = std::min(res.elapsedSeconds, MAX_OFFLINE_SECONDS);
-  res.cashToCredit = int(res.cappedSeconds / intervalSeconds);
+  res.cashToCredit = 0; // SEM CASH OFFLINE: Retorno sempre 0
   return res;
 }
 
@@ -346,7 +347,48 @@ inline const std::vector<EpicMission>& epicMissionsCatalog() {
 }
 
 // ============================================================================
-// 5. ESTADO DE ECONOMIA E SIDECAR (Atomic, save*.dat intocados)
+// 5. MAGO DOS BOSSES (Tabela Canônica de Custo em Ouro para Teleporte de Chefes)
+//    Calibrada de acordo com nível/dificuldade e economia nativa de ouro
+// ============================================================================
+struct BossTeleportEntry {
+  int species;
+  std::string bossName;
+  std::string dungeonNamePt;
+  std::string dungeonNameEn;
+  uint32_t recommendedLevel;
+  uint32_t goldCost;
+};
+
+inline const std::vector<BossTeleportEntry>& bossTeleportCostCatalog() {
+  static const std::vector<BossTeleportEntry> catalog = {
+    {100, "Dungeon Guardian", "Catacumbas Esquecidas", "Forgotten Catacombs", 15, 500},
+    {101, "Defcan", "Caverna Sombria", "Shadow Cavern", 25, 1000},
+    {102, "Salas", "Pantano das Serpentes", "Serpent Swamp", 35, 2500},
+    {103, "Defcan Desperto", "Vortice do Vazio", "Void Vortex", 45, 5000},
+    {104, "Sileth", "Torre Espectral", "Spectral Tower", 55, 8500},
+    {105, "Berserk Tamur", "Arena do Furor", "Rage Arena", 65, 12000},
+    {106, "Kaiser", "Fortaleza Imperial", "Imperial Fortress", 75, 18000},
+    {107, "Baramos", "Abismo Profano", "Unholy Abyss", 85, 25000},
+    {108, "Diablo", "Trono do Submundo", "Underworld Throne", 95, 35000},
+    {109, "Lava Guardian", "Cratera Primordial de Magma", "Primeval Magma Crater", 99, 50000}
+  };
+  return catalog;
+}
+
+inline const BossTeleportEntry* findBossTeleport(int species) {
+  for (const auto& entry : bossTeleportCostCatalog()) {
+    if (entry.species == species) return &entry;
+  }
+  return nullptr;
+}
+
+inline uint32_t getBossTeleportCost(int species) {
+  const auto* entry = findBossTeleport(species);
+  return entry ? entry->goldCost : 0;
+}
+
+// ============================================================================
+// 6. ESTADO DE ECONOMIA E SIDECAR (Atomic, save*.dat intocados)
 // ============================================================================
 class LootEconomyState {
 public:

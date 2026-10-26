@@ -294,15 +294,15 @@ export function evaluateActiveSets(equippedNames) {
   return summaries;
 }
 
+// Cash passivo por tempo REMOVIDO conforme diretriz do proprietário.
+// Cash é obtido EXCLUSIVAMENTE por Missões Épicas / Marcos de Chefes.
 export function calculateOfflineCash(lastTimestamp, currentTimestamp, intervalSeconds = DEFAULT_OFFLINE_CASH_INTERVAL) {
   if (!lastTimestamp || lastTimestamp <= 0 || !currentTimestamp || currentTimestamp <= lastTimestamp || intervalSeconds <= 0) {
     return { cashToCredit: 0, elapsedSeconds: 0, cappedSeconds: 0, capped: false };
   }
   const elapsedSeconds = currentTimestamp - lastTimestamp;
-  const capped = elapsedSeconds > MAX_OFFLINE_SECONDS;
   const cappedSeconds = Math.min(elapsedSeconds, MAX_OFFLINE_SECONDS);
-  const cashToCredit = Math.floor(cappedSeconds / intervalSeconds);
-  return { cashToCredit, elapsedSeconds, cappedSeconds, capped };
+  return { cashToCredit: 0, elapsedSeconds, cappedSeconds, capped: elapsedSeconds > MAX_OFFLINE_SECONDS };
 }
 
 export const epicMissionsCatalog = [
@@ -357,6 +357,35 @@ export const epicMissionsCatalog = [
     cashReward: 50
   }
 ];
+
+// ============================================================================
+// 5. MAGO DOS BOSSES (Tabela Canônica de Custo em Ouro para Teleporte de Chefes)
+//    Calibrada de acordo com nível/dificuldade e economia nativa de ouro
+// ============================================================================
+export const bossTeleportCostCatalog = [
+  { species: 100, bossName: 'Dungeon Guardian', dungeonNamePt: 'Catacumbas Esquecidas', dungeonNameEn: 'Forgotten Catacombs', recommendedLevel: 15, goldCost: 500 },
+  { species: 101, bossName: 'Defcan', dungeonNamePt: 'Caverna Sombria', dungeonNameEn: 'Shadow Cavern', recommendedLevel: 25, goldCost: 1000 },
+  { species: 102, bossName: 'Salas', dungeonNamePt: 'Pantano das Serpentes', dungeonNameEn: 'Serpent Swamp', recommendedLevel: 35, goldCost: 2500 },
+  { species: 103, bossName: 'Defcan Desperto', dungeonNamePt: 'Vortice do Vazio', dungeonNameEn: 'Void Vortex', recommendedLevel: 45, goldCost: 5000 },
+  { species: 104, bossName: 'Sileth', dungeonNamePt: 'Torre Espectral', dungeonNameEn: 'Spectral Tower', recommendedLevel: 55, goldCost: 8500 },
+  { species: 105, bossName: 'Berserk Tamur', dungeonNamePt: 'Arena do Furor', dungeonNameEn: 'Rage Arena', recommendedLevel: 65, goldCost: 12000 },
+  { species: 106, bossName: 'Kaiser', dungeonNamePt: 'Fortaleza Imperial', dungeonNameEn: 'Imperial Fortress', recommendedLevel: 75, goldCost: 18000 },
+  { species: 107, bossName: 'Baramos', dungeonNamePt: 'Abismo Profano', dungeonNameEn: 'Unholy Abyss', recommendedLevel: 85, goldCost: 25000 },
+  { species: 108, bossName: 'Diablo', dungeonNamePt: 'Trono do Submundo', dungeonNameEn: 'Underworld Throne', recommendedLevel: 95, goldCost: 35000 },
+  { species: 109, bossName: 'Lava Guardian', dungeonNamePt: 'Cratera Primordial de Magma', dungeonNameEn: 'Primeval Magma Crater', recommendedLevel: 99, goldCost: 50000 }
+];
+
+export function findBossTeleport(species) {
+  for (const entry of bossTeleportCostCatalog) {
+    if (entry.species === species) return entry;
+  }
+  return null;
+}
+
+export function getBossTeleportCost(species) {
+  const entry = findBossTeleport(species);
+  return entry ? entry.goldCost : 0;
+}
 
 export class LootEconomy {
   constructor() {
