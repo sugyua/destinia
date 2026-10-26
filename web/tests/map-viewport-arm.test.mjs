@@ -3,7 +3,7 @@ import {DestiniaWeb} from '../dist/engine.mjs';
 const require=createRequire(import.meta.url),temp=fs.mkdtempSync(path.join(os.tmpdir(),'destinia-viewport-'));
 fs.copyFileSync(new URL('../dist/vendor/unicorn_arm.js',import.meta.url),path.join(temp,'unicorn.cjs'));const uc=await require(path.join(temp,'unicorn.cjs'))();
 process.on('exit',()=>fs.rmSync(temp,{recursive:true,force:true}));
-const root=process.env.DESTINIA_GAME_ROOT||'/workspace/destinia-06/game',assets=new Map(fs.readdirSync(root+'/assets').map(n=>[n,new Uint8Array(fs.readFileSync(root+'/assets/'+n))]));
+const root=process.env.DESTINIA_GAME_ROOT||(fs.existsSync('game/assets') ? 'game' : '../game'),assets=new Map(fs.readdirSync(root+'/assets').map(n=>[n,new Uint8Array(fs.readFileSync(root+'/assets/'+n))]));
 const BASE=0x10000000,GAME=BASE+0x77ee0,MAP=BASE+0x80b18,CAMERA=GAME+18552;
 const sh=(r,p,n)=>r.write(p,new Uint8Array([n&255,n>>8&255]));
 function make(width=800){const r=new DestiniaWeb(uc,assets,{width,height:width===800?480:240,language:'en'});r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();return r;}

@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import {inflateSync} from 'node:zlib';
 import {portraitAssets,decodePortrait,loadPortraits} from '../dist/codex-portraits.mjs';
-const root=(process.env.DESTINIA_GAME_ROOT||'/workspace/destinia-06/game')+'/assets/';
+const root=(process.env.DESTINIA_GAME_ROOT||(fs.existsSync('game/assets') ? 'game' : '../game'))+'/assets/';
 const assets=new Map(fs.readdirSync(root).map(n=>[n,new Uint8Array(fs.readFileSync(root+n))]));
 const unpack=b=>b[0]===90?new Uint8Array(inflateSync(b.subarray(12))):b;
 test('figuras completas dos 73 monstros e variantes originais',async()=>{

@@ -11,7 +11,7 @@ const vendorTemp=fs.mkdtempSync(path.join(os.tmpdir(),'destinia-web-wasm-'));
 fs.copyFileSync(new URL('../dist/vendor/unicorn_arm.js',import.meta.url),path.join(vendorTemp,'unicorn.cjs'));
 const factory=require(path.join(vendorTemp,'unicorn.cjs'));
 process.on('exit',()=>fs.rmSync(vendorTemp,{recursive:true,force:true}));
-const root=process.env.DESTINIA_GAME_ROOT||'/workspace/destinia-06/game';
+const root=process.env.DESTINIA_GAME_ROOT||(fs.existsSync('game/assets') ? 'game' : '../game');
 const assets=new Map(fs.readdirSync(root+'/assets').map(n=>[n,new Uint8Array(fs.readFileSync(root+'/assets/'+n))]));
 const uc=await factory();
 function make(options){return new DestiniaWeb(uc,assets,{width:400,height:240,language:'en',...options});}

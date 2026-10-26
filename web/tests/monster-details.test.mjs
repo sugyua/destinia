@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
-const root=process.env.DESTINIA_GAME_ROOT||'/workspace/destinia-06/game',assets=new Map(fs.readdirSync(root+'/assets').map(n=>[n,new Uint8Array(fs.readFileSync(root+'/assets/'+n))]));
+const root=process.env.DESTINIA_GAME_ROOT||(fs.existsSync('game/assets') ? 'game' : '../game'),assets=new Map(fs.readdirSync(root+'/assets').map(n=>[n,new Uint8Array(fs.readFileSync(root+'/assets/'+n))]));
 test('dados originais mostram locais reais e HP variavel do Imperial Soldier',async()=>{
  const {loadMonsterMetadata,monsterDetailView}=await import('../dist/monster-details.mjs');const data=await loadMonsterMetadata(assets),m=data.monsters.get(61);
  assert.equal(data.monsters.size,73);assert.equal(data.mapCount,172);assert.equal(m.baseHP,100);assert.equal(m.locations.length,8);assert.ok(!m.locations.some(x=>x.file==='m2_51.mpd'));
