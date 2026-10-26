@@ -19,8 +19,19 @@ struct CatalogRect {
 class WeaponsCatalogUI {
 public:
   uint8_t selectedClass = 1; // 1: Guerreiro, 2: Atirador, 3: Ladino
+  CatalogItemCategory selectedCategory = CatalogItemCategory::Weapon; // 0: Armas, 1: Armaduras
   size_t page = 0;
   static constexpr size_t itemsPerPage = 4;
+
+  inline CatalogRect categoryButton(int width, int height) const {
+    auto p = panelRect(width, height);
+    return { p.x + 190, p.y + 6, 85, 16 };
+  }
+
+  void toggleCategory() {
+    selectedCategory = (selectedCategory == CatalogItemCategory::Weapon) ? CatalogItemCategory::Armor : CatalogItemCategory::Weapon;
+    page = 0;
+  }
 
   inline CatalogRect panelRect(int width, int height) const {
     return { (width - 360) / 2, (height - 240) / 2 + 15, 360, 220 };
@@ -69,6 +80,10 @@ public:
   bool handleTouch(int x, int y, int width, int height, size_t totalItems) {
     if (closeButton(width, height).contains(x, y)) {
       return false; // Sinal para fechar
+    }
+    if (categoryButton(width, height).contains(x, y)) {
+      toggleCategory();
+      return true;
     }
     for (int i = 0; i < 3; ++i) {
       if (tabRect(i, width, height).contains(x, y)) {
@@ -158,8 +173,14 @@ public:
     frame(p.x, p.y, p.w, p.h, borderCol);
     frame(p.x + 1, p.y + 1, p.w - 2, p.h - 2, gold);
 
-    // Cabeçalho
-    text(p.x + 12, p.y + 8, "CATALOGO DE ARMAS (0.11.0)", gold, 1);
+    // Cabeçalho e Botão de Categoria
+    bool isWeapon = (selectedCategory == CatalogItemCategory::Weapon);
+    text(p.x + 12, p.y + 8, isWeapon ? "CATALOGO: ARMAS" : "CATALOGO: ARMADURAS", gold, 1);
+
+    auto catBtn = categoryButton(width, height);
+    rect(catBtn.x, catBtn.y, catBtn.w, catBtn.h, tabActive);
+    frame(catBtn.x, catBtn.y, catBtn.w, catBtn.h, gold);
+    text(catBtn.x + 6, catBtn.y + 3, isWeapon ? "VER ARMADURAS" : "VER ARMAS", white, 1);
 
     // Botão Fechar [X]
     auto cb = closeButton(width, height);
@@ -167,13 +188,13 @@ public:
     text(cb.x + 5, cb.y + 3, "X", white, 1);
 
     // Cálculo do Progresso Geral
-    auto allWeapons = getCatalogWeaponsByClass(selectedClass);
-    size_t totalExpected = allWeapons.size() * 5; // 5 raridades por arma
+    auto allWeapons = getCatalogItems(selectedClass, selectedCategory);
+    size_t totalExpected = allWeapons.size() * 5; // 5 raridades por item
     float pct = catalog.completionPercentage(currentSlot, selectedClass, totalExpected);
 
     char buf[64];
-    std::snprintf(buf, sizeof(buf), "Colecao: %.1f%%", pct);
-    text(p.x + 220, p.y + 8, buf, (pct >= 100.0f) ? 0x07e0 : white, 1);
+    std::snprintf(buf, sizeof(buf), "%.1f%%", pct);
+    text(p.x + 285, p.y + 8, buf, (pct >= 100.0f) ? 0x07e0 : white, 1);
 
     // Barra de Progresso Gráfica
     int barX = p.x + 12, barY = p.y + 20, barW = p.w - 24, barH = 3;

@@ -59,7 +59,7 @@ function boot(){
  worker=new Worker('./worker.js?v=0.10.3-hotfix1');loadTimer=setTimeout(()=>{$('loading-text').textContent='Ainda carregando. Mantenha esta aba aberta…';$('restart').disabled=false;},20000);
  worker.onerror=event=>{clearTimeout(loadTimer);showError(event.message||'O navegador não conseguiu iniciar este teste.');};
  worker.onmessage=event=>{const data=event.data;
-  if(data.type==='ready'){clearTimeout(loadTimer);ready=true;$('virtual-controls').disabled=false;$('drop-names').disabled=false;if($('weapons-catalog')) $('weapons-catalog').disabled=false; if($('difficulty-btn')) $('difficulty-btn').disabled=false;lastFrame=performance.now();fpsStart=lastFrame;fpsFrames=0;$('loading').hidden=true;applyTouchVisibility();$('pause').disabled=false;$('restart').disabled=false;$('pause').textContent='Pausar';$('status').textContent='Experimental · progresso temporário · sem som';}
+  if(data.type==='ready'){clearTimeout(loadTimer);ready=true;$('virtual-controls').disabled=false;$('drop-names').disabled=false;if($('weapons-catalog')) $('weapons-catalog').disabled=false; if($('shared-stash')) $('shared-stash').disabled=false; if($('bounties-btn')) $('bounties-btn').disabled=false; if($('difficulty-btn')) $('difficulty-btn').disabled=false;lastFrame=performance.now();fpsStart=lastFrame;fpsFrames=0;$('loading').hidden=true;applyTouchVisibility();$('pause').disabled=false;$('restart').disabled=false;$('pause').textContent='Pausar';$('status').textContent='Experimental · progresso temporário · sem som';}
   else if(data.type==='inventoryProtectionWrite'){let ack;try{ack=writeInventoryProtection(localStorage,gameMode,data);}catch(error){ack={type:'inventoryProtectionAck',id:data.id,ok:false,text:null,error:error.message};}event.target.postMessage(ack);}
   else if(data.type==='status')$('loading-text').textContent=data.message;
   else if(data.type==='frame'){lastFrame=performance.now();const b16=new Uint16Array(data.pixels.buffer,data.pixels.byteOffset,384000);for(let i=0;i<384000;i++)image32[i]=lut[b16[i]];context.putImageData(image,0,0);canvas.dataset.frame=String(data.frame);if(!paused){fpsFrames++;if(lastFrame-fpsStart>=1000){const fps=(fpsFrames*1000/(lastFrame-fpsStart)).toFixed(1);canvas.dataset.fps=fps;$('status').textContent=fps+' FPS · meta 16 · progresso temporário · sem som';fpsStart=lastFrame;fpsFrames=0;}const delay=Math.max(0,Math.max(1000/16,data.wait||60)-(data.elapsed||15));setTimeout(()=>send({type:'nextFrame'}),delay);}}
@@ -112,4 +112,6 @@ $('fullscreen').addEventListener('click',async()=>{try{const mode=await toggleFu
 document.addEventListener('fullscreenchange',updateFullscreen);updateFullscreen();
 
 $('weapons-catalog')?.addEventListener('click', () => { if (ready && !paused) send({ type: 'toggleWeaponsCatalog' }); });
+$('shared-stash')?.addEventListener('click', () => { if (ready && !paused) send({ type: 'toggleSharedStash' }); });
+$('bounties-btn')?.addEventListener('click', () => { if (ready && !paused) send({ type: 'toggleBounties' }); });
 $('difficulty-btn')?.addEventListener('click', () => { if (ready && !paused) send({ type: 'toggleDifficulty' }); });

@@ -39,18 +39,18 @@ public:
         if (pool >= 200) continue;
 
         uint16_t header = rd16(gameBase + 0x2ed6 + 20 * pool);
-        uint8_t itemType = (header >> 5) & 7; // 0 = Arma
-        if (itemType != 0) continue;
+        uint8_t itemType = (header >> 5) & 7; // 0 = Arma, 1 = Armadura (Peitoral)
+        if (itemType != 0 && itemType != 1) continue;
 
         uint8_t rank = (header >> 8) & 7;     // 0..4 (Raridade)
         if (rank > 4) continue;
 
-        // Tenta associar com arma canônica pelo nível de requerimento ou mapeamento base
         uint8_t minLevel = uint8_t(header & 0x1f); // bitmask de level base
-        // Mapeia para uma das armas de allCatalogWeapons
-        for (const auto& w : allCatalogWeapons()) {
-          if (w.minLevel <= minLevel) {
-            if (catalog.record(slot, w.baseId, w.minLevel, rank, w.jobClass)) {
+        CatalogItemCategory cat = (itemType == 0) ? CatalogItemCategory::Weapon : CatalogItemCategory::Armor;
+
+        for (const auto& item : allCatalogEquipment()) {
+          if (item.category == cat && item.minLevel <= minLevel) {
+            if (catalog.record(slot, item.baseId, item.minLevel, rank, item.jobClass)) {
               changed = true;
             }
           }
@@ -84,12 +84,16 @@ public:
       return true;
     }
     if (key == 9 || key == 1073741903) { // Direita
-      auto list = getCatalogWeaponsByClass(ui.selectedClass);
+      auto list = getCatalogItems(ui.selectedClass, ui.selectedCategory);
       ui.nextPage(list.size());
       return true;
     }
     if (key == 9 || key == '\t') { // TAB
       ui.nextTab();
+      return true;
+    }
+    if (key == 't' || key == 'T') {
+      ui.toggleCategory();
       return true;
     }
     if (key == '1') { ui.selectedClass = 1; ui.page = 0; return true; }
@@ -102,7 +106,7 @@ public:
   bool handleTouch(int x, int y, int phase, int width, int height) {
     if (!open) return false;
     if (phase == 0) { // Click / Touch Down
-      auto list = getCatalogWeaponsByClass(ui.selectedClass);
+      auto list = getCatalogItems(ui.selectedClass, ui.selectedCategory);
       if (!ui.handleTouch(x, y, width, height, list.size())) {
         open = false; // Botão de fechar pressionado
       }

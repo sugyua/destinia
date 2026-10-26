@@ -117,6 +117,7 @@ static bool rd(u32 a, void* b, size_t n) { return n == 0 || uc_mem_read(uc, a, b
 static bool wr(u32 a, const void* b, size_t n) { return n == 0 || uc_mem_write(uc, a, b, n) == UC_ERR_OK; }
 static u32 rd32(u32 a) { u32 v = 0; rd(a, &v, 4); return v; }
 static void wr32(u32 a, u32 v) { wr(a, &v, 4); }
+static void wr16(u32 a, uint16_t v) { wr(a, &v, 2); }
 
 // n-esimo argumento de uma chamada (AAPCS: r0-r3, depois pilha)
 static u32 arg(int n) { return n < 4 ? R(n) : rd32(regSP() + 4 * (n - 4)); }
@@ -1166,6 +1167,8 @@ static void runtimeLogTick(long frame,double emulationMs) {
 #include "../common/codex_native_host.h"
 #include "../common/difficulty_host.h"
 #include "../common/weapons_catalog_host.h"
+#include "../common/shared_stash_host.h"
+#include "../common/bounties_host.h"
 
 static int runHost(int argc, char** argv) {
   std::string languageOverride;
@@ -1329,6 +1332,9 @@ static int runHost(int argc, char** argv) {
   installInventoryProtection();
   destinia::initLootEconomy(saveDir);
   weaponsCatalogHost.init(fs::path(saveDir));
+  sharedStashHost.init(fs::path(saveDir));
+  bountiesHost.init(fs::path(saveDir));
+  g_onMonsterDefeated = [&](int s, int id){ bountiesHost.onMonsterKilled(s, id); };
   hostReport("[host] initGame ok em %dx%d. Rodando o jogo...\n", SCREEN_W, SCREEN_H);
   hostReport("[host] zoom out: mapas pequenos centralizados; fundo cinza; UI nativa.\n");
   if (portugueseTextTest) hostReport("[host] traducao PT ativa: itens, equipamentos, habilidades, menus, Fabricacao e Missoes.\n");
@@ -1336,7 +1342,7 @@ static int runHost(int argc, char** argv) {
   // [OK] jniTouch(env,obj, x, y, tipo): tipo 0=toque 1=solta 2=move 3=tecla de menu (Thumb decodificado)
   bool mouseDown=false; int lastTouchX=0,lastTouchY=0;
   auto touch = [&](int x, int y, int type) {
-    if(weaponsCatalogHost.open || difficultyMenuTouch(x,y,type) || codexMenuTouch(x,y,type)) return;
+    if(sharedStashHost.open || bountiesHost.open || weaponsCatalogHost.open || difficultyMenuTouch(x,y,type) || codexMenuTouch(x,y,type)) return;
     lastTouchX=x; lastTouchY=y;
     if(type!=2) destinia::sessionLog.write("ENTRADA toque x="+std::to_string(x)+" y="+std::to_string(y)+" tipo="+std::to_string(type));
     if(preferences.uiScale!=100&&type!=3){u32 state=0;if(!callFn(exportsMap.at("_getTouchState"),{},&state))return;auto point=uiRenderer.touchPoint(x,y,int(state));x=point.first;y=point.second;}
@@ -1502,6 +1508,29 @@ static int runHost(int argc, char** argv) {
             if(down) weaponsCatalogHost.handleKey(ev.key.keysym.sym, true);
             continue;
           }
+          if(ev.key.keysym.sym==SDLK_F5 || (ev.key.keysym.sym==SDLK_b && (SDL_GetModState() & KMOD_CTRL))) {
+            if(down) { sharedStashHost.toggle(); }
+            continue;
+          }
+          if(sharedStashHost.open) {
+            if(down) sharedStashHost.handleKey(ev.key.keysym.sym, true, exportsMap.at("Game"), [](uint32_t a){return rd16(a);}, [](uint32_t a, uint16_t v){wr16(a, v);});
+            continue;
+          }
+          if(ev.key.keysym.sym==SDLK_F8 || (ev.key.keysym.sym==SDLK_c && (SDL_GetModState() & KMOD_CTRL))) {
+            if(down) { bountiesHost.toggle(); }
+            continue;
+          }
+          if(bountiesHost.open) {
+            if(down) bountiesHost.handleKey(ev.key.keysym.sym, true, rd16(exportsMap.at("Game")+0x4886), [&](uint32_t gold, uint16_t cash){
+              if(fnGetCash && fnSetCash) {
+                u32 curCash = 0; callFn(fnGetCash, {}, &curCash);
+                callFn(fnSetCash, {curCash + cash});
+              }
+              u32 curGold = rd32(exportsMap.at("Game")+0x4894);
+              wr32(exportsMap.at("Game")+0x4894, curGold + gold);
+            });
+            continue;
+          }
           if(ev.key.keysym.sym==SDLK_F11) { if(down) setFullscreen(!fullscreen); }
           else if(ev.key.keysym.sym==SDLK_F9) { if(traceViewport && down) toggleTraceViewportRecording(frame,arrays[hScreen]); }
           else controls.event(ev);
@@ -1512,6 +1541,15 @@ static int runHost(int argc, char** argv) {
           bool inside=mapMouseToGame(wx,wy,x,y,mouseDown && ev.type!=SDL_MOUSEBUTTONDOWN);
           if((inside || bossRushUI.open || codexTouchCaptured || inventoryTouchCaptured || fcTouchCaptured) && (ev.type==SDL_MOUSEBUTTONDOWN || ev.type==SDL_MOUSEBUTTONUP) && ev.button.button==SDL_BUTTON_LEFT) {
             if(weaponsCatalogHost.open && weaponsCatalogHost.handleTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1,SCREEN_W,SCREEN_H)){controls.release();continue;}
+            if(sharedStashHost.open && sharedStashHost.handleTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1,SCREEN_W,SCREEN_H)){controls.release();continue;}
+            if(bountiesHost.open && bountiesHost.handleTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1,SCREEN_W,SCREEN_H,rd16(exportsMap.at("Game")+0x4886),[&](uint32_t gold, uint16_t cash){
+              if(fnGetCash && fnSetCash) {
+                u32 curCash = 0; callFn(fnGetCash, {}, &curCash);
+                callFn(fnSetCash, {curCash + cash});
+              }
+              u32 curGold = rd32(exportsMap.at("Game")+0x4894);
+              wr32(exportsMap.at("Game")+0x4894, curGold + gold);
+            })){controls.release();continue;}
             if(bossRushUI.handleTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1,SCREEN_W,SCREEN_H)){controls.release();continue;}
             if(inventoryMenuTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1)){controls.release();continue;}
             if(fcMenuTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1)){controls.release();continue;}
@@ -1615,6 +1653,8 @@ static int runHost(int argc, char** argv) {
     nativeCodexPainter.paint(frameBuffer.data());
     difficultyPainter.paint(frameBuffer.data());
     weaponsCatalogHost.paint(frameBuffer.data(), SCREEN_W, SCREEN_H, rd16(exportsMap.at("Game")+0x4886), preferences.uiScale);
+    sharedStashHost.paint(frameBuffer.data(), SCREEN_W, SCREEN_H, preferences.uiScale);
+    bountiesHost.paint(frameBuffer.data(), SCREEN_W, SCREEN_H, rd16(exportsMap.at("Game")+0x4886), preferences.uiScale);
     const uint8_t* fb = frameBuffer.data();
     if (headlessFrames) {
       if (frame == 1 || frame % 10 == 0) { char nm[64]; snprintf(nm, sizeof nm, "/frame_%05ld.bmp", frame); writeBmp(outDir + nm, fb); }

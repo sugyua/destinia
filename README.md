@@ -1,12 +1,36 @@
-# Destinia 0.10.3 Beta
+# Destinia 0.11.0 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.10.3 Beta — Dificuldades Canônicas, Hooks ARM e Modo Abissal](https://github.com/sugyua/destinia/releases/tag/v0.10.3-beta)** — ZIP Windows com executáveis standalone portáteis (16 DLLs inclusas), dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**. [Release anterior 0.10.2 Beta](https://github.com/sugyua/destinia/releases/tag/v0.10.2-beta).
+**[Baixar Destinia 0.11.0 Beta — Catálogo de Equipamentos, Baú Compartilhado e Bounties Offline](https://github.com/sugyua/destinia/releases/tag/v0.11.0-beta)** — ZIP Windows com executáveis standalone portáteis (16 DLLs inclusas), dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**. [Release anterior 0.10.3 Beta](https://github.com/sugyua/destinia/releases/tag/v0.10.3-beta).
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
-**[Jogar a versão web no navegador](http://localhost:8000/)** — teste local na porta 8000 (ou na rede LAN em `http://192.168.1.11:8000/`). A versão web local foi atualizada com as mecânicas da 0.10.3 (Dificuldades e Hotfix Abissal) e da 0.11.0 (Catálogo de Armas via botão ou tecla F4). O deployment no site externo (`chatgpt.site`) permanece pendente de credenciais de publicação.
+**[Jogar a versão web no navegador](http://localhost:8000/)** — teste local na porta 8000 (ou na rede LAN em `http://192.168.1.11:8000/` ou Tailscale em `http://100.108.92.19:8000/`). A versão web foi atualizada com as 3 grandes novidades da 0.11.0 (Catálogo F4, Baú Compartilhado F5 e Bounties F8) e hotfix mobile com 16 FPS no Safari iOS. O deployment no site externo (`chatgpt.site`) permanece pendente de credenciais de publicação.
+
+## Novidades da Versão 0.11.0 Beta — Catálogo de Armamentos, Baú Compartilhado e Contratos Offline (Bounties)
+
+- **Catálogo Completo de Equipamentos e Complecionista (F4)**:
+  - 48 equipamentos canônicos catalogados: 24 Armas (Espadas, Pistolas/Canhões e Adagas) e 24 Armaduras (Peitorais leves, médios e pesados), distribuídos em 8 patamares por classe (Guerreiro, Atirador e Ladino).
+  - 5 patamares de raridade por equipamento (Comum, Mágico, Raro, Épico e Lendário), totalizando 240 entradas colecionáveis.
+  - Alternância imediata de categoria entre Armas e Armaduras via tecla `T` ou toque no botão de categoria.
+  - Varredura em tempo real do inventário em busca de novas descobertas, com cálculo proporcional de progresso e sinergia com o título `Complecionista` (+100% de atributos principais ao completar).
+  - Persistência transacional e segura no sidecar `weapons-catalog-v1.txt` (PC) e `localStorage` (Web).
+- **Baú Compartilhado entre Personagens / Shared Stash (F5 / B)**:
+  - Capacidade ampliada para 48 slots divididos em 2 páginas de 24 itens, acessível a qualquer momento ou em cidades.
+  - Permite transferir armamentos, elmos, armaduras, luvas, botas, acessórios e consumíveis entre todos os saves do jogador.
+  - Preservação estrita da integridade: gravações atômicas em `shared-stash-v1.txt` com checksums e backups, sem tocar na estrutura binária dos arquivos `save*.dat` originais.
+  - Interface intuitiva com destaque por cor de raridade, navegação por teclado e toque nas duas páginas.
+- **Sistema de Bounties / Contratos Offline Repetíveis (F8 / C)**:
+  - 3 contratos diários gerados por slot de personagem: Caça a Monstros Comuns (ex: Soldados Imperiais), Caça a Chefes (ex: Diablo) e Desafios de Caça Épica.
+  - Contabilização automática e sem overhead de abates através do hook ARM nativo de derrota de monstros.
+  - Resgate instantâneo de recompensas com premiações balanceadas em Ouro e Cash offline.
+  - Interface com barra de progresso em tempo real, status de resgate e persistência em `bounties-v1.txt` (PC) e `localStorage` (Web).
+- **Otimizações Críticas e Performance Web (Mobile / Safari iOS)**:
+  - Resolução definitiva de gargalos em navegadores móveis: tabela de busca (LUT) RGB565 -> RGBA32 de 256 KB, acelerando o desenho de quadro para ~0.35ms (ganho de 7x de performance).
+  - Pacing do Web Worker acionado diretamente pela janela principal (`nextFrame`), evitando o estrangulamento de segundo plano do Safari (que limitava a 3 FPS). Framerate cravado em 16 FPS.
+  - Avanço automático suave pelas telas de apresentação (Everple / Gamevil / Logos) e suporte a toque para pular direto para o menu inicial.
+  - 119 testes unitários automatizados passando com 100% de sucesso.
 
 ## Novidades da Versão 0.10.3 Beta — Dificuldades Canônicas e Modo Abissal
 

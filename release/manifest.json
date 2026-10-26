@@ -1,6 +1,6 @@
 {
-  "version": "0.10.3",
-  "base_commit": "161667fa8089ae7f004f785ade5188a47d716993",
+  "version": "0.11.0",
+  "base_commit": "ebef40c4ac3d3f1d1b8352cd7910da6faa1dd139",
   "files": [
     ".gitignore",
     "AGENTS.md",
@@ -261,6 +261,21 @@
     "tests/difficulty_arm_native.cpp",
     "tests/test_difficulty_arm.py",
     "docs/VERIFICACAO_0.10.3_PARTE2.md",
-    "docs/superpowers/plans/2026-10-26-difficulty-arm.md"
+    "docs/superpowers/plans/2026-10-26-difficulty-arm.md",
+    "common/weapons_catalog_defs.h",
+    "common/weapons_catalog.h",
+    "common/weapons_catalog_ui.h",
+    "common/weapons_catalog_host.h",
+    "common/shared_stash.h",
+    "common/shared_stash_ui.h",
+    "common/shared_stash_host.h",
+    "common/bounties.h",
+    "common/bounties_ui.h",
+    "common/bounties_host.h",
+    "release/NOTAS_0.11.0.md",
+    "web/dist/weapons-catalog.mjs",
+    "web/dist/shared-stash.mjs",
+    "web/dist/bounties.mjs",
+    "web/tests/features-0110.test.mjs"
   ]
 }

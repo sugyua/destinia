@@ -12,6 +12,7 @@ static destinia::CodexMetadata codexMetadata;
 static destinia::CodexInfoView codexDetailInfo;
 // Runtime facts are session-only; codex-v1.txt and original saves stay compatible.
 static std::map<int,std::map<int,destinia::CodexMonsterFacts>> codexFacts;
+static std::function<void(int, int)> g_onMonsterDefeated;
 static void codexChangeDetailPage(int direction){
  const auto count=codexDetailInfo.sections.size();if(!count){codexDetailPage=codexDetailScroll=0;return;}
  const auto next=static_cast<long long>(codexDetailPage)+direction;
@@ -203,7 +204,7 @@ static void codexHook(uc_engine*,uint64_t,uint32_t,void* context) {
     uint16_t species=0,state=0;int32_t hp=0;int16_t x=0,y=0,cx=0,cy=0;
     if(!rd(p+8,&species,2) || !rd(p+0x12,&state,2) || !rd(p+0x20,&hp,4)) return;
     // Normal procMonster notifies quests before it writes death state 2.
-    if(kind==2) {if(hp<=0){codexObserveFacts(p,game,species);codex.observe(p,species,true);difficultyBossDefeated(slot,species,p);if(species>=100&&species<=109)destinia::lootEconomyOnBossKilled(saveDir,slot,species);}return;}
+    if(kind==2) {if(hp<=0){codexObserveFacts(p,game,species);codex.observe(p,species,true);difficultyBossDefeated(slot,species,p);if(species>=100&&species<=109)destinia::lootEconomyOnBossKilled(saveDir,slot,species);if(g_onMonsterDefeated)g_onMonsterDefeated(slot,species);}return;}
     if(!rd(p+0x1a,&x,2) || !rd(p+0x1c,&y,2) || !rd(game+0x4878,&cx,2) || !rd(game+0x487a,&cy,2)) return;
     if(x-cx>=0 && x-cx<SCREEN_W && y-cy>=0 && y-cy<SCREEN_H){codexObserveFacts(p,game,species);codex.observe(p,species,false);}
   }catch(...) {codexAvailable=false;hostReport("[codex] Observador desativado por leitura incompatível.\n");}

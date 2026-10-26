@@ -4,6 +4,30 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.11.0 Beta — 26/10/2026
+
+- **Catálogo Completo de Equipamentos e Complecionista (F4)**:
+  - Expansão do catálogo para 48 equipamentos canônicos: 24 Armas (Espadas, Pistolas/Canhões e Adagas) e 24 Armaduras (Peitorais leves, médios e pesados), distribuídos em 8 patamares por classe (Guerreiro, Atirador e Ladino).
+  - 5 patamares de raridade rastreados para cada equipamento (Comum, Mágico, Raro, Épico e Lendário), totalizando 240 entradas colecionáveis.
+  - Alternância imediata de categoria entre Armas e Armaduras via tecla `T` ou toque no botão de categoria.
+  - Varredura em tempo real do inventário em busca de novas descobertas, com cálculo proporcional de progresso e sinergia com o título `Complecionista` (+100% de atributos principais ao completar).
+  - Persistência transacional e segura no sidecar `weapons-catalog-v1.txt` (PC) e `localStorage` (Web).
+- **Baú Compartilhado entre Personagens / Shared Stash (F5 / B)**:
+  - Capacidade ampliada para 48 slots divididos em 2 páginas de 24 itens, acessível a qualquer momento ou em cidades.
+  - Permite depositar e retirar armamentos, elmos, armaduras, luvas, botas, acessórios e consumíveis entre todos os saves do jogador.
+  - Preservação estrita da integridade: gravações atômicas em `shared-stash-v1.txt` com checksums e backups, sem tocar na estrutura binária dos arquivos `save*.dat` originais.
+  - Interface intuitiva com destaque por cor de raridade, navegação por teclado e toque nas duas páginas.
+- **Sistema de Bounties / Contratos Offline Repetíveis (F8 / C)**:
+  - 3 contratos diários gerados por slot de personagem: Caça a Monstros Comuns (ex: Soldados Imperiais), Caça a Chefes (ex: Diablo) e Desafios de Caça Épica.
+  - Contabilização automática e sem overhead de abates através do hook ARM nativo de derrota de monstros.
+  - Resgate instantâneo de recompensas com premiações balanceadas em Ouro e Cash offline.
+  - Interface com barra de progresso em tempo real, status de resgate e persistência em `bounties-v1.txt` (PC) e `localStorage` (Web).
+- **Otimizações Críticas e Performance Web (Mobile / Safari iOS)**:
+  - Resolução definitiva de gargalos em navegadores móveis: substituição de conversão lenta por tabela de busca (LUT) RGB565 -> RGBA32 de 256 KB, acelerando o desenho de quadro para ~0.35ms (ganho de 7x de performance).
+  - Pacing do Web Worker acionado diretamente pela janela principal (`nextFrame`), evitando o estrangulamento de segundo plano do Safari (que limitava a 3 FPS). Framerate cravado em 16 FPS.
+  - Avanço automático suave pelas telas de apresentação (Everple / Gamevil / Logos) e suporte a toque para pular direto para o menu inicial.
+  - 119 testes unitários automatizados passando com 100% de sucesso.
+
 ## 0.10.3 Beta — 26/10/2026
 
 - **Sistema Canônico de Dificuldades (Normal, Difícil, Pesadelo, Inferno e Abissal)**:
