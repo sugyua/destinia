@@ -71,3 +71,6 @@ Claude/exports/
 # Registro pessoal do bestiario
 codex-v1.txt
 .build-dependencies-ready
+
+# Marcacoes pessoais de equipamentos (sidecar)
+inventory-protect-v1.txt

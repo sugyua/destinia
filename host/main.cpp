@@ -891,6 +891,7 @@ static int runHost(int argc, char** argv) {
   arrays[hScreen].assign(FB_BYTES, 0);
   if (!callFn(fnInit, {ENV_OBJ, 0x10, hId, (u32)devId.size(), hModel, (u32)model.size(), SCREEN_W, SCREEN_H, 0})) return 2;
   installCodex();
+  installInventoryProtection();
   hostReport("[host] initGame ok. Rodando o jogo...\n");
 
   // [OK] jniTouch(env,obj, x, y, tipo): tipo 0=toque 1=solta 2=move 3=tecla de menu (Thumb decodificado)
@@ -1020,7 +1021,7 @@ static int runHost(int argc, char** argv) {
           if(ev.key.repeat) continue;
           const bool down=ev.type==SDL_KEYDOWN;
           if(ev.key.keysym.sym==SDLK_F6 && !preferences.keys.count(SDLK_F6) && !inventoryOpen && fcComparisonVisible()){if(down)fcMenuKey(10015,true);continue;}
-          if(ev.key.keysym.sym==SDLK_F7 && !preferences.keys.count(SDLK_F7) && (inventoryOpen || inventoryVisible())){if(down){controls.release();if(inventoryOpen)inventoryOpen=false;else inventoryEnter();}continue;}
+          if(ev.key.keysym.sym==SDLK_F7 && !preferences.keys.count(SDLK_F7) && (inventoryOpen || inventoryVisible())){if(down){controls.release();if(inventoryOpen)inventoryToggleProtection();else inventoryEnter();}continue;}
           if(codexOpen && ev.key.keysym.sym!=SDLK_F11) {
             if(down) {
               if(ev.key.keysym.sym==SDLK_ESCAPE)codexMenuKey(10,true);

@@ -10,15 +10,16 @@ import {loadPortraits} from './codex-portraits.mjs';
 import {Codex,monsterNames} from './codex.mjs';
 import {contains,entriesPerPage,detailListPages} from './codex-ui.mjs';
 // Experimental browser host. ARM/JNI/file ABI follows Destinia Windows 0.6.
-// Save files exist only in this engine instance; no disk or persistent browser storage.
+// ARM save payloads use the existing file/cloud shim; inventory protection persists separately in browser storage.
 const BASE=0x10000000,HEAP=0x20000000,HEAP_SIZE=0x4000000,STUB=0x30000000,COUNT=0x4000,RETURN=0x30100000;
 const DATA=0x40000000,STACK=0x7f000000,STACK_SIZE=0x200000,ENV=DATA,ENV_TAB=DATA+0x100,VM=DATA+0x1000,VM_TAB=DATA+0x1100,GUARD=DATA+0x2000;
 const encoder=new TextEncoder(),decoder=new TextDecoder();
 const requireValue=(value,message)=>{if(!value)throw Error(message);};
 export class DestiniaWeb {
-  constructor(uc,assets,{onLog=()=>{},onSound=()=>{},fastGraphics=true,fastMemory=true,gameMode="classico",uiScale=100,language="pt"}={}) {
+  constructor(uc,assets,{onLog=()=>{},onSound=()=>{},fastGraphics=true,fastMemory=true,gameMode="classico",uiScale=100,language="pt",inventoryStorage}={}) {
     if(!["en","pt"].includes(language))throw Error("Idioma inválido.");this.language=language;if(language==="pt")assets=translatedAssets(assets);
     if(!["classico","expandido"].includes(gameMode))throw Error("Modo de jogo inválido.");this.gameMode=gameMode;if(![75,100,125].includes(uiScale))throw Error("Escala de interface inválida.");this.uiScale=uiScale;
+    this.inventoryStorage=inventoryStorage;
     this.pendingPurchase=false;this.storeNotice=false;this.virtualControls=true;this.fastGraphics=fastGraphics;this.fastMemory=fastMemory;this.graphicsStats={draws:0,supported:false};this.portraits=new Map();this.codexOpen=false;this.codexTabSelected=false;this.codexTouchCaptured=false;this.codexPage=0;this.codexSelection=0;this.codexDetailsOpen=false;this.codexDetailPage=0;this.codexDetailScroll=0;this.monsterMetadata=null;this.codexNativeMenuPending=-1;this.codexNativeMenuTarget=0;this.codexNativeMenuBypass=0;this.codexNativeMenuDraining=false;this.nativeTouchDown=false;this.nativeTouchPoint={x:0,y:0};
     this.codex=new Codex(monsterNames(assets.get('mon_data_en.gdt')));this.uc=uc;this.assets=assets;this.log=onLog;this.onSound=onSound;this.e=new uc.Unicorn(uc.ARCH_ARM,uc.MODE_ARM);
     this.regs=Array.from({length:13},(_,i)=>uc['ARM_REG_R'+i]);this.handlers=new Map();this.imports=new Map();this.exports=new Map();
@@ -108,7 +109,7 @@ export class DestiniaWeb {
     const symbols=[];for(let i=0;i<count;i++){const at=sym+i*16,nameOff=d.getUint32(at,true);requireValue(nameOff<strsz,'ELF: nome inválido');const end=image.indexOf(0,str+nameOff);requireValue(end>=str+nameOff&&end<str+strsz&&end-str-nameOff<=4096,'ELF: string sem terminador');const name=decoder.decode(image.subarray(str+nameOff,end)),value=d.getUint32(at+4,true),defined=d.getUint16(at+14,true)!==0;symbols.push({name,value,defined});if(defined&&name)this.exports.set(name,BASE+value);}
     const relocations=[];for(const [offTag,sizeTag] of [[17,18],[23,2]]){const at=tags.get(offTag)||0,n=tags.get(sizeTag)||0;if(!n)continue;range(at,n);requireValue(n%8===0,'ELF: relocações inválidas');for(let pos=at;pos<at+n;pos+=8)relocations.push([d.getUint32(pos,true),d.getUint32(pos+4,true)]);}
     for(const [target,info] of relocations){range(target,4);const type=info&255,index=info>>>8;let value=d.getUint32(target,true);if(type===23)value+=BASE;else if([2,21,22].includes(type)){requireValue(index<symbols.length,'ELF: símbolo inválido');const s=symbols[index],address=s.defined?BASE+s.value:this.resolve(s.name);value=type===2?value+address:address;}else if(type===0)continue;else throw Error('ELF: relocação não suportada '+type);d.setUint32(target,value>>>0,true);}
-    this.e.mem_map(BASE,span,this.uc.PROT_ALL);this.write(BASE,image);this.log('Biblioteca ARM carregada: '+this.exports.size+' símbolos.');this.installCodex();this.installVirtualControls();this.dropNames=new DropNames(this);this.dropNames.install();this.combatPower=new CombatPower(this);this.combatPower.install();this.inventory=new Inventory(this);this.uiRenderer=new UiRenderer(this,this.uiScale);this.uiRenderer.install();if(this.fastGraphics)this.graphicsStats=installFastGraphics(this);this.nativeCodex=new NativeCodex(this);
+    this.e.mem_map(BASE,span,this.uc.PROT_ALL);this.write(BASE,image);this.log('Biblioteca ARM carregada: '+this.exports.size+' símbolos.');this.installCodex();this.installVirtualControls();this.dropNames=new DropNames(this);this.dropNames.install();this.combatPower=new CombatPower(this);this.combatPower.install();this.inventory=new Inventory(this);this.inventory.install();this.uiRenderer=new UiRenderer(this,this.uiScale);this.uiRenderer.install();if(this.fastGraphics)this.graphicsStats=installFastGraphics(this);this.nativeCodex=new NativeCodex(this);
   }
   finishOfflinePurchase(){
     if(!this.pendingPurchase)return;

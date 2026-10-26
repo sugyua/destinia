@@ -9,6 +9,16 @@
 
 **[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
 
+## Candidata 0.9.8 — Frente 1: equipamentos protegidos
+
+No painel **FILTROS**, selecione um equipamento e use **PROT/DESPROT**, **F7** livre ou a ação extra do controle para alternar a proteção. `[P]` e o nome dourado identificam o item protegido. F7 abre o painel quando fechado; dentro dele alterna a proteção; **VOLTAR/Esc** fecha. O item continua visível e pode ser equipado, mas a seleção pelo painel e a confirmação original de venda/desmanche no contexto `0x91040004` ficam bloqueadas. A guarda cobre comandos externos e os gerados pelo toque ARM. Outros contextos de descarte/desmanche ainda exigem cuidado: esta frente protege especificamente esse estado verificado.
+
+As marcações persistem no **sidecar `inventory-protect-v1.txt`**, na pasta de save ativa, separadas por personagem e por modo clássico/expandido. Os hosts compartilham o sidecar quando usam a mesma pasta; `save*.dat` e seu formato continuam intocados, compatíveis com o fluxo existente do Google Drive. Copie também o sidecar para transportar as proteções entre instalações; não há nova sincronização automática dele com o Drive. Versões antigas ignoram a proteção. Falha de gravação não confirma a alteração; sidecar inválido é preservado e bloqueia confirmações nesse contexto até recuperação do arquivo válido.
+
+Na **web**, os mesmos metadados ficam no armazenamento local do navegador, separados por modo. Persistem após recarregar, mas limpar os dados do site remove as marcações. Não são enviados ao Google Drive por esta frente; o fluxo de saves existente permanece separado. Armazenamento indisponível/inválido bloqueia essas confirmações e informa erro no painel. Identidade usa personagem + pool + fingerprint de 20 bytes: alterar os bytes invalida a marca; não se promete distinguir destruição/recriação de equipamento perfeitamente idêntico no mesmo pool entre observações.
+
+**Status web desta frente:** código da candidata 0.9.8 atualizado e testado localmente; **deployment não realizado nesta branch**. URL existente: [teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site/). Release, VERSION/manifesto globais e publicação web ficam na integração das três frentes pelo Maestro; nenhuma publicação 0.9.8 é declarada aqui. Validação física Windows/iPhone pendente. [Evidências e limites](docs/INVENTORY_PROTECTION.md).
+
 ## Laboratório local de PvP e Leilão
 
 Disponível um [servidor de simulação gratuito e guia de túnel](tools/network-mock/GUIA_TESTE.md), separado do jogo. **Não habilita o Multi Mode original.** A causa interna do `Codigo de Erro = 15` no Multi Mode (`MMain_run` em `0x104b6` após timeout de 150 quadros em `Comm_flush(cmd=0)`) e o contrato binário `Comm_*` / `Menu_netProc` foram mapeados em [CONTRATO_MULTI_MODE_ARM.md](docs/CONTRATO_MULTI_MODE_ARM.md); a integração do adaptador com o servidor continua pendente. [Estado técnico e próximos passos](docs/MULTI_MODE_REDE.md). Versão e releases do jogo preservadas.

@@ -101,6 +101,23 @@ int main(int argc,char**argv){
  for(int key:{9,6,9}){assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{u32(key)}));printf("SELL_NAV key=%d state=%08x\n",key,rd32(ui+0x7c));}
  printf("SELL_FOCUS indices=%u,%u,%u,%u\n",rd16(ui+0x54),rd16(ui+0x56),rd16(ui+0x58),rd16(ui+0x5a));
  assert(rd32(ui+0x7c)==0x91040004u);
+ // Protection toggles and the actual ARM confirmation must not mutate Game.
+ // A sidecar changed externally after startup fails closed and is preserved.
+ const auto sidecar=destinia::inventoryProtectionFile(fs::path(saveDir));
+ {std::ofstream out(sidecar);out<<"CORRUPTED";}
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{6}));assert(rd32(ui+0x7c)==0x91040004u);assert(!inventoryProtectionReady);
+ {std::ifstream in(sidecar);std::string value{std::istreambuf_iterator<char>(in),{}};assert(value=="CORRUPTED");}
+ {std::ofstream out(sidecar);out<<"DESTINIA_INVENTORY_PROTECT_1\n";}
+ assert(inventoryRefreshProtection());
+ assert(inventoryProtectionReady);assert(inventoryEnter());inventoryPanel.reset();inventoryPanel.selectedPool=ids[0];
+ rd(g,before.data(),before.size());assert(inventoryToggleProtection());assert(inventoryPanel.isProtected());assert(!inventoryChoose());
+ rd(g,after.data(),after.size());assert(before==after);inventoryOpen=false;
+ uint16_t first=0;wr(ui+0x5a,&first,2);std::vector<uint8_t> uiBefore(12088),uiAfter(uiBefore.size());rd(ui,uiBefore.data(),uiBefore.size());
+ for(int key:{6,17}){assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{u32(key)}));assert(rd32(ui+0x7c)==0x91040004u);}
+ rd(g,after.data(),after.size());assert(before==after);rd(ui,uiAfter.data(),uiAfter.size());assert(uiBefore==uiAfter);
+ // Identical equipment in another pool remains independently selectable.
+ assert(inventoryEnter());inventoryPanel.selectedPool=duplicate;assert(!inventoryPanel.isProtected());assert(inventoryChoose());
+ assert(inventoryEnter());inventoryPanel.selectedPool=ids[0];assert(inventoryToggleProtection());assert(!inventoryPanel.isProtected());inventoryOpen=false;
  assert(inventoryEnter());assert(inventoryPanel.items[0].price==records[0].price/5);inventoryPanel.reset();inventoryPanel.selectedPool=duplicate;assert(inventoryChoose()&&!inventoryOpen);assert(rd16(ui+0x5a)==3);assert(inventoryEnter());inventoryPanel.query.sort=destinia::InventorySort::Price;inventoryPanel.rebuild();inventoryPanel.selectedPool=ids[0];assert(inventoryChoose()&&!inventoryOpen);
  // Displayed price-order index2 points back to original slot0, not slot2.
  auto projected=destinia::inventorySelection(records,view,int(ids[0]));assert(projected && *projected==2);

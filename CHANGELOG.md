@@ -4,6 +4,14 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.9.8 Beta — candidata, Frente 1 (ainda não publicada)
+
+- Equipamentos podem receber/remover proteção pelo painel FILTROS, botão PROT/DESPROT, F7 livre e ação extra do controle. Indicador `[P]` e nome dourado; seleção normal para equipar preservada.
+- No estado original `0x91040004`, itens protegidos permanecem visíveis, mas não podem ser escolhidos no painel nem confirmados no menu ARM de venda/desmanche, incluindo comandos gerados pelo toque. Navegação, pools, gold e formato dos saves preservados.
+- Persistência autorizada em sidecar `inventory-protect-v1.txt` na pasta de saves, por personagem/pool/fingerprint; hosts compartilham a configuração da pasta e clássico/expandido seguem separados. Nenhuma escrita nova em `save*.dat`.
+- Gravação atômica do sidecar; falhas preservam o estado anterior. Arquivo inválido é preservado e bloqueia confirmações destrutivas no contexto protegido. Web usa metadados locais por modo, sem acrescentar sincronização do sidecar com Google Drive.
+- Testes automatizados C++, Node e sondas ARM dos dois hosts; gameplay físico Windows/iPhone e integração/release/deployment 0.9.8 pendentes. Escopo de proteção limitado ao estado verificado; versões antigas ignoram as marcações.
+
 ## 0.9.7 Beta — 25/10/2026
 
 - FC na aba Status desenhado com a fonte original do jogo e fundo preservado, substituindo a faixa azul.

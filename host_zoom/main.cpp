@@ -1295,6 +1295,7 @@ static int runHost(int argc, char** argv) {
   if (!callFn(fnInit, {ENV_OBJ, 0x10, hId, (u32)devId.size(), hModel, (u32)model.size(), SCREEN_W, SCREEN_H, 0})) return 2;
   if (traceViewport) traceViewportDimensions("after-init");
   installCodex();
+  installInventoryProtection();
   hostReport("[host] initGame ok em %dx%d. Rodando o jogo...\n", SCREEN_W, SCREEN_H);
   hostReport("[host] zoom out: mapas pequenos centralizados; fundo cinza; UI nativa.\n");
   if (portugueseTextTest) hostReport("[host] traducao PT ativa: itens, equipamentos, habilidades, menus, Fabricacao e Missoes.\n");
@@ -1432,7 +1433,7 @@ static int runHost(int argc, char** argv) {
           if(ev.key.repeat) continue;
           const bool down=ev.type==SDL_KEYDOWN;
           if(ev.key.keysym.sym==SDLK_F6 && !preferences.keys.count(SDLK_F6) && !inventoryOpen && fcComparisonVisible()){if(down)fcMenuKey(10015,true);continue;}
-          if(ev.key.keysym.sym==SDLK_F7 && !preferences.keys.count(SDLK_F7) && (inventoryOpen || inventoryVisible())){if(down){controls.release();if(inventoryOpen)inventoryOpen=false;else inventoryEnter();}continue;}
+          if(ev.key.keysym.sym==SDLK_F7 && !preferences.keys.count(SDLK_F7) && (inventoryOpen || inventoryVisible())){if(down){controls.release();if(inventoryOpen)inventoryToggleProtection();else inventoryEnter();}continue;}
           if(codexOpen && ev.key.keysym.sym!=SDLK_F11) {
             if(down) {
               if(ev.key.keysym.sym==SDLK_ESCAPE)codexMenuKey(10,true);

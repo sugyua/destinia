@@ -2,6 +2,14 @@
 import os,pathlib,subprocess,tempfile,unittest,shlex
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 class InventoryViewTests(unittest.TestCase):
+ def test_persistent_equipment_protection_preserves_original_saves(self):
+  with tempfile.TemporaryDirectory(prefix='destinia protection ') as folder:
+   exe=pathlib.Path(folder)/('favorite.exe' if os.name=='nt' else 'favorite')
+   built=subprocess.run(['g++','-std=c++17',str(ROOT/'tests/inventory_favorite_cases.cpp'),'-o',str(exe)],capture_output=True,text=True)
+   self.assertEqual(built.returncode,0,built.stderr)
+   run=subprocess.run([str(exe)],capture_output=True,text=True,timeout=20)
+   self.assertEqual(run.returncode,0,run.stdout+run.stderr)
+
  def test_projection_preserves_items_and_selection(self):
   with tempfile.TemporaryDirectory(prefix='destinia inventory ') as folder:
    exe=pathlib.Path(folder)/('inventory.exe' if os.name=='nt' else 'inventory')
