@@ -249,11 +249,12 @@ static void sendKey(u32 pressFn, u32 releaseFn, int key, bool down) {
   if (!fn) return;
   callFn(fn, {(u32)key});
 }
+static bool difficultyMenuKey(int key,bool down);
 static bool codexMenuKey(int key,bool down);
 static bool inventoryMenuKey(int key,bool down);
 static bool fcMenuKey(int key,bool down);
 static void gameKey(int key, bool down) {
-  if(bossRushUI.handleKey(key,down) || inventoryMenuKey(key,down) || fcMenuKey(key,down) || codexMenuKey(key,down)) return;
+  if(difficultyMenuKey(key,down) || bossRushUI.handleKey(key,down) || inventoryMenuKey(key,down) || fcMenuKey(key,down) || codexMenuKey(key,down)) return;
   destinia::sessionLog.write("ENTRADA tecla="+std::to_string(key)+(down?" pressionada":" solta"));
   int st = menuState();
   if (st <= 0) { if (down && fnLogoPress) callFn(fnLogoPress, {(u32)key}); return; }
@@ -437,6 +438,8 @@ static std::string arrText(u32 h) { auto it = arrays.find(h); return it == array
 static void stubSet(u32 id, const std::string& name, std::function<void()> f) { stubName[id] = name; handlers[id] = std::move(f); }
 
 static void codexFileRemoved(const std::string& path);
+static void difficultyPrepareRemoval(const std::string& path);
+static void difficultyEndCall();
 
 static void setupStubs() {
   u32 n = ID_LIBC;
@@ -505,7 +508,7 @@ static void setupStubs() {
   });
   L("fseek", [] { auto it = files.find(R(0)); W(0, it == files.end() ? (u32)-1 : (u32)fseek(it->second, (long)(int)R(1), (int)R(2))); });
   L("ftell", [] { auto it = files.find(R(0)); W(0, it == files.end() ? (u32)-1 : (u32)ftell(it->second)); });
-  L("remove", [] { const auto path=hostPath(cstr(R(0))); const int result=saveTransaction.remove(fs::path(path)); W(0,(u32)result); });
+  L("remove", [] { const auto path=hostPath(cstr(R(0))); const int result=saveTransaction.remove(fs::path(path)); if(result==0)difficultyPrepareRemoval(path); W(0,(u32)result); });
   L("__android_log_print", [] {
     const std::string message=fmtPrintf(R(2),3),tag=cstr(R(1));
     if(verbose) hostReport("[jogo:%s] %s\n",tag.c_str(),message.c_str());
@@ -904,6 +907,7 @@ static void stubHook(uc_engine*, uint64_t address, uint32_t, void*) {
 
 static bool codexDrainNativeMenu();
 static bool callFn(u32 addr, std::initializer_list<u32> args, u32* ret) {
+  struct DifficultyCallGuard{~DifficultyCallGuard(){difficultyEndCall();}} difficultyGuard;
   destinia::SaveCall saveCall(saveTransaction);
   std::vector<u32> a(args);
   u32 sp = STACK_BASE + STACK_SIZE - 0x100;
@@ -1127,6 +1131,10 @@ static bool getCharacterExperience(uint32_t& current, uint32_t& required) {
   return true;
 }
 
+static void difficultyBossDefeated(unsigned slot,int species,u32 p);
+static void difficultyNewMap();
+static void difficultyRespawn(u32 p);
+static void difficultyFileRemoved(const std::string& path);
 #include "../common/codex_host.h"
 #include "../common/codex_ui.h"
 
@@ -1153,6 +1161,7 @@ static void runtimeLogTick(long frame,double emulationMs) {
 #include "../common/combat_power_host.h"
 #include "../common/inventory_host.h"
 #include "../common/codex_native_host.h"
+#include "../common/difficulty_host.h"
 
 static int runHost(int argc, char** argv) {
   std::string languageOverride;
@@ -1197,7 +1206,7 @@ static int runHost(int argc, char** argv) {
   if(explicitScale) { scale=std::clamp(scale,1,10); windowWidth=400*scale; windowHeight=240*scale; }
   const fs::path reports=reportsDir.empty()?destinia::defaultReportsDir():fs::path(reportsDir);
   if(destinia::sessionLog.start(reports,"host_zoom")) hostReport("[host] Log TXT: %s\n",(destinia::sessionLog.directory()/"log.txt").string().c_str());
-  hostReport("[host] Destinia 0.10.2 Beta - host_zoom\n");
+  hostReport("[host] Destinia 0.10.3 Beta - host_zoom\n");
   if(saveDir.empty()) saveDir=destinia::modeSaveDir(destinia::configuredSaveDir(),preferences.gameMode).string();
   saveDir=fs::absolute(saveDir).lexically_normal().string();
   hostReport("[host] Save compartilhado: %s\n",saveDir.c_str());
@@ -1310,6 +1319,7 @@ static int runHost(int argc, char** argv) {
   if (!callFn(fnInit, {ENV_OBJ, 0x10, hId, (u32)devId.size(), hModel, (u32)model.size(), SCREEN_W, SCREEN_H, 0})) return 2;
   if (traceViewport) traceViewportDimensions("after-init");
   installCodex();
+  installDifficulty();
   installInventoryProtection();
   destinia::initLootEconomy(saveDir);
   hostReport("[host] initGame ok em %dx%d. Rodando o jogo...\n", SCREEN_W, SCREEN_H);
@@ -1319,7 +1329,7 @@ static int runHost(int argc, char** argv) {
   // [OK] jniTouch(env,obj, x, y, tipo): tipo 0=toque 1=solta 2=move 3=tecla de menu (Thumb decodificado)
   bool mouseDown=false; int lastTouchX=0,lastTouchY=0;
   auto touch = [&](int x, int y, int type) {
-    if(codexMenuTouch(x,y,type)) return;
+    if(difficultyMenuTouch(x,y,type) || codexMenuTouch(x,y,type)) return;
     lastTouchX=x; lastTouchY=y;
     if(type!=2) destinia::sessionLog.write("ENTRADA toque x="+std::to_string(x)+" y="+std::to_string(y)+" tipo="+std::to_string(type));
     if(preferences.uiScale!=100&&type!=3){u32 state=0;if(!callFn(exportsMap.at("_getTouchState"),{},&state))return;auto point=uiRenderer.touchPoint(x,y,int(state));x=point.first;y=point.second;}
@@ -1369,7 +1379,7 @@ static int runHost(int argc, char** argv) {
 #endif
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  // pixels nitidos
-    win = SDL_CreateWindow("Destinia 0.10.2 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
+    win = SDL_CreateWindow("Destinia 0.10.3 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
     if(!win) { hostReport("SDL_CreateWindow: %s\n",SDL_GetError()); return 1; }
     if (fullscreen) setFullscreen(true);
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_PRESENTVSYNC);
@@ -1489,7 +1499,7 @@ static int runHost(int argc, char** argv) {
             if(bossRushUI.handleTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1,SCREEN_W,SCREEN_H)){controls.release();continue;}
             if(inventoryMenuTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1)){controls.release();continue;}
             if(fcMenuTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1)){controls.release();continue;}
-            if(codexMenuTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1)){controls.release();continue;}
+            if(difficultyMenuTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1) || codexMenuTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1)){controls.release();continue;}
           }
           if(codexOpen) continue;
           if(probe && ev.type!=SDL_MOUSEMOTION) {
@@ -1519,7 +1529,7 @@ static int runHost(int argc, char** argv) {
       const bool paused=controls.paused();
       if(paused!=wasPaused) {
         controls.release();
-        SDL_SetWindowTitle(win,paused?"Destinia 0.10.2 Beta - PAUSADO":"Destinia 0.10.2 Beta");
+        SDL_SetWindowTitle(win,paused?"Destinia 0.10.3 Beta - PAUSADO":"Destinia 0.10.3 Beta");
         hostReport("[host] %s.\n",paused?"Pausado":"Retomado"); wasPaused=paused;
       }
       updateAudioState(controls.focused,paused);
@@ -1558,6 +1568,7 @@ static int runHost(int argc, char** argv) {
     }
     frame++;
     runtimeLogTick(frame,runMs);
+    difficultyFlush();
     if(frame%16==0) codexFlush();
     destinia::lootEconomyProcessOffline(saveDir, fnGetCash, fnSetCash, callFn);
     destinia::lootEconomyPeriodicSave(saveDir, frame);
@@ -1586,6 +1597,7 @@ static int runHost(int argc, char** argv) {
     lootQol.paint(frameBuffer.data());
     inventoryPaint(frameBuffer.data());
     nativeCodexPainter.paint(frameBuffer.data());
+    difficultyPainter.paint(frameBuffer.data());
     const uint8_t* fb = frameBuffer.data();
     if (headlessFrames) {
       if (frame == 1 || frame % 10 == 0) { char nm[64]; snprintf(nm, sizeof nm, "/frame_%05ld.bmp", frame); writeBmp(outDir + nm, fb); }
@@ -1649,7 +1661,7 @@ static int runHost(int argc, char** argv) {
 
 
 int main(int argc,char** argv) {
-  if(argc==2 && std::strcmp(argv[1],"--version")==0) { std::puts("Destinia 0.10.2 Beta"); return 0; }
+  if(argc==2 && std::strcmp(argv[1],"--version")==0) { std::puts("Destinia 0.10.3 Beta"); return 0; }
   int result=1;
   if(argc==2 && std::string(argv[1])=="--import-classic") {
     try {const auto base=destinia::configuredSaveDir();destinia::importClassicSave(base,destinia::modeSaveDir(base,"expandido"));printf("Copia criada no modo expandido; a partida classica foi preservada.\n");return 0;}
@@ -1663,6 +1675,7 @@ int main(int argc,char** argv) {
   catch(const std::exception& error) { hostReport("[host] ERRO: %s\n",error.what()); }
   for(auto& file:files) if(saveTransaction.close(file.second)!=0) { hostReport("[host] ERRO ao fechar arquivo pendente\n"); result=1; }
   files.clear(); filePaths.clear();
+  difficultyFlush();
   codexFlush();
   saveLock.release();
   if(uc) uc_close(uc);

@@ -4,6 +4,14 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.10.3 Beta — primeira parte, não publicada — 26/10/2026
+
+- Menu Sistema preserva as cinco ações originais e acrescenta Mudar Dificuldade, com cinco opções, cinza para bloqueadas e navegação por teclas/controle/toque.
+- Diablo (108) libera somente a dificuldade seguinte por slot; não reaproveita mortes antigas ou o mesmo cadáver após trocar de dificuldade.
+- Indicador junto da classe apenas nos slots com save. Usa fonte nativa, sem ativos externos.
+- Gravação transacional de dificuldade e liberações, preservando XP/NG+; exclusão do slot limpa os sidecars na mesma transação. Falhas temporárias de gravação de abate são repetidas durante a sessão.
+- Escopo desta etapa: UI/persistência PC. Balanceamento ARM, web, publicação e gameplay físico não são declarados concluídos. Ver `docs/VERIFICACAO_0.10.3_PARTE1.md` para evidências e limitações.
+
 ## 0.10.2 Beta — 26/10/2026
 
 - **Mago dos Bosses Presente em Todas as 5 Cidades (Safe Zones com Lojas)**:

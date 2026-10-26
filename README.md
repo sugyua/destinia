@@ -1,4 +1,4 @@
-# Destinia 0.10.2 Beta
+# Destinia 0.10.3 Beta — primeira parte em desenvolvimento
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
@@ -8,6 +8,15 @@
 
 
 **[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
+
+## Candidata 0.10.3 — primeira parte (PC)
+
+- Sistema: sexta opção **Mudar Dificuldade**, com Normal, Difícil, Pesadelo, Inferno e Abissal. Pelo teclado/controle, desça após a quinta opção original e confirme; clique/toque também funciona. **SAIR** ou Voltar fecha o painel.
+- Apenas matar **Diablo (espécie 108)** na dificuldade atual libera a próxima, por personagem. Repetir a mesma morte não permite saltar etapas. Dificuldades já liberadas continuam disponíveis; as bloqueadas aparecem em cinza. Abates antigos do Códex não são convertidos em liberações porque não registram dificuldade.
+- Seleção de personagem: dificuldade junto da classe, somente quando `saveN.dat` existe. Moldura, desenho e fonte originais; a fonte ARM utiliza a grafia sem acento `Dificil`.
+- Dificuldade atual em `progression-v1.txt`; teto liberado em `difficulty-unlocks-v1.txt`, com CAS, trava e transação conjunta. XP e NG+ existentes são preservados. Excluir um personagem remove também seu progresso estendido na mesma transação.
+- Esta parte entrega **UI e persistência**, sem alterar o balanceamento/multiplicadores ARM, campanha ou NG+. Gameplay físico no Windows permanece pendente. A release 0.10.3 ainda não foi publicada; o download acima permanece na 0.10.2.
+- **Web:** https://destinia-web-experimental.leafyheron257.chatgpt.site/ — código/revisão web preservados nesta primeira parte PC; estes recursos ainda não foram portados nem publicados na web.
 
 ## Novidades da Versão 0.10.2 — Mago dos Bosses Completo nas 5 Cidades e Teleporte Ativo
 

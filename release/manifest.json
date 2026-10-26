@@ -1,6 +1,6 @@
 {
-  "version": "0.10.2",
-  "base_commit": "a779e7044081c0d9a7c28cbb89577172f1b97b71",
+  "version": "0.10.3",
+  "base_commit": "d82b7ac4eff8d323391b3cf0ae5f9c79ea085610",
   "files": [
     ".gitignore",
     "AGENTS.md",
@@ -248,6 +248,14 @@
     "docs/BOSS_MAGE.md",
     "docs/superpowers/plans/2026-10-26-boss-mage-and-menu-bar.md",
     "common/boss_rush_ui.h",
-    "web/dist/boss-rush.mjs"
+    "web/dist/boss-rush.mjs",
+    "common/difficulty.h",
+    "common/difficulty_host.h",
+    "tests/difficulty_cases.cpp",
+    "tests/difficulty_native.cpp",
+    "tests/test_difficulty.py",
+    "docs/superpowers/plans/2026-10-26-difficulty-ui.md",
+    "docs/VERIFICACAO_0.10.3_PARTE1.md",
+    "release/NOTAS_0.10.3.md"
   ]
 }

@@ -186,6 +186,7 @@ static bool codexMenuTouch(int x,int y,int phase) {
  return false;
 }
 static void codexFileRemoved(const std::string& path) {
+  difficultyFileRemoved(path);
   const auto name=fs::path(path).filename().string();
   if(codexAvailable && name.size()==9 && name.compare(0,4,"save")==0 && name[4]>='0' && name[4]<='9' && name.substr(5)==".dat") {codex.erase(name[4]-'0');codexFacts.erase(name[4]-'0');codexFlush();}
 }
@@ -193,16 +194,16 @@ static void codexHook(uc_engine*,uint64_t,uint32_t,void* context) {
   if(!codexAvailable) return;
   try {
     auto kind=reinterpret_cast<uintptr_t>(context);
-    if(kind==4) {codex.select(int(R(0)));codex.newMap();return;}
+    if(kind==4) {difficultyNewMap();codex.select(int(R(0)));codex.newMap();return;}
     auto game=exportsMap.at("Game");uint16_t slot=0;
     if(!rd(game+0x4886,&slot,2) || slot>9) return;
     codex.select(slot);auto p=R(0);
-    if(kind==3) {codex.newMap();return;}
-    if(kind==0) {codex.respawn(p);return;}
+    if(kind==3) {difficultyNewMap();codex.newMap();return;}
+    if(kind==0) {difficultyRespawn(p);codex.respawn(p);return;}
     uint16_t species=0,state=0;int32_t hp=0;int16_t x=0,y=0,cx=0,cy=0;
     if(!rd(p+8,&species,2) || !rd(p+0x12,&state,2) || !rd(p+0x20,&hp,4)) return;
     // Normal procMonster notifies quests before it writes death state 2.
-    if(kind==2) {if(hp<=0){codexObserveFacts(p,game,species);codex.observe(p,species,true);if(species>=100&&species<=109)destinia::lootEconomyOnBossKilled(saveDir,slot,species);}return;}
+    if(kind==2) {if(hp<=0){codexObserveFacts(p,game,species);codex.observe(p,species,true);difficultyBossDefeated(slot,species,p);if(species>=100&&species<=109)destinia::lootEconomyOnBossKilled(saveDir,slot,species);}return;}
     if(!rd(p+0x1a,&x,2) || !rd(p+0x1c,&y,2) || !rd(game+0x4878,&cx,2) || !rd(game+0x487a,&cy,2)) return;
     if(x-cx>=0 && x-cx<SCREEN_W && y-cy>=0 && y-cy<SCREEN_H){codexObserveFacts(p,game,species);codex.observe(p,species,false);}
   }catch(...) {codexAvailable=false;hostReport("[codex] Observador desativado por leitura incompatível.\n");}
@@ -212,6 +213,7 @@ static void codexNativeMenuHook(uc_engine*,uint64_t address,uint32_t,void*){
  try{
   if(!codexAvailable||codexNativeMenuBypass||codexNativeMenuDraining||!codexMenuVisible())return;
   const int raw=int(R(0)),directions[]={3,9,5,7},key=raw>=13&&raw<=16?directions[raw-13]:raw;const auto state=rd32(exportsMap.at("GameUI")+0x7c);
+  if(difficultyMenuKey(raw,true)){u32 lr=0;uc_reg_read(uc,UC_ARM_REG_LR,&lr);uc_reg_write(uc,UC_ARM_REG_PC,&lr);return;}
   if(!(codexOpen||codexTabSelected||(key==5&&state==0)||(key==7&&(state==0x80000000u||state==0x80000001u))))return;
   if(codexNativeMenuPending<0){codexNativeMenuPending=raw;codexNativeMenuTarget=u32(address)|1u;}
   u32 lr=0;uc_reg_read(uc,UC_ARM_REG_LR,&lr);uc_reg_write(uc,UC_ARM_REG_PC,&lr);
