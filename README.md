@@ -6,7 +6,7 @@
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
-**[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário. A versão web permanece na revisão anterior estável; as novidades de combate ARM da 0.10.3 aplicam-se aos executáveis Windows nativos.
+**[Jogar a versão web no navegador](http://localhost:8000/)** — teste local na porta 8000 (ou na rede LAN em `http://192.168.1.11:8000/`). A versão web local foi atualizada com as mecânicas da 0.10.3 (Dificuldades e Hotfix Abissal) e da 0.11.0 (Catálogo de Armas via botão ou tecla F4). O deployment no site externo (`chatgpt.site`) permanece pendente de credenciais de publicação.
 
 ## Novidades da Versão 0.10.3 Beta — Dificuldades Canônicas e Modo Abissal
 
@@ -493,7 +493,7 @@ As associações **Necromante → foice** e **Granadeiro → granadas** já esta
 
 Quando uma correção ou funcionalidade do Destinia estiver **implementada e validada**, ela deverá ser comunicada no README e no CHANGELOG, registrada na [central das IAs](https://github.com/sugyua/ai-progress-shared/issues/4) e publicada como **nova versão em [GitHub Releases](https://github.com/sugyua/destinia/releases)**, com arquivos Windows pertinentes, fontes e checksums. Código experimental em branch ou PR **não é** uma versão jogável publicada. As Releases anteriores permanecem disponíveis; testes automatizados e testes reais são identificados separadamente.
 
-**Versão web:** [abrir o Destinia no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/) (acesso privado). Último deployment **confirmado** nesta atualização documental: base web da **0.9.1 Beta**, fonte `0da736c`, com Códex nativo na décima aba, filtros de equipamentos e escala web somente **100%**. O progresso do personagem na web ainda não é persistente após recarregar/fechar. A cada mudança futura na web, atualizar aqui a revisão/deployment e as novidades **somente depois da publicação confirmada**; se a versão web estiver pendente, informar explicitamente.
+**Versão web local:** disponível em `http://localhost:8000/` e na LAN em `http://192.168.1.11:8000/` (revisão `c850181`, com 5 Dificuldades, Hotfix Abissal e Catálogo de Armas F4). O deployment no domínio externo [chatgpt.site](https://destinia-web-experimental.leafyheron257.chatgpt.site/) permanece na revisão estável anterior por ausência de ferramenta remota de deployment configurada. O progresso do personagem na web ainda não é persistente após recarregar/fechar. A cada mudança futura na web, atualizar aqui a revisão/deployment e as novidades **somente depois da publicação confirmada**; se a versão web estiver pendente, informar explicitamente.
 
 **Correção visual em preparação:** a prévia da décima aba e a mão apontadora do menu estão em [PR #3 (rascunho)](https://github.com/sugyua/destinia/pull/3), **não incluído na 0.9.1 Beta publicada** e não implantado na web. Precisa de testes e release própria antes de ser anunciado como corrigido.
 
