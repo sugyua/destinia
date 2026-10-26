@@ -807,6 +807,9 @@ static void runtimeLogTick(long frame,double emulationMs) {
 #include "../common/weapons_catalog_host.h"
 #include "../common/shared_stash_host.h"
 #include "../common/bounties_host.h"
+#include "../common/quest_tracker_ui.h"
+
+static destinia::QuestTrackerUI questTrackerUI;
 
 static int runHost(int argc, char** argv) {
   std::string languageOverride;
@@ -936,6 +939,7 @@ static int runHost(int argc, char** argv) {
   // [OK] jniTouch(env,obj, x, y, tipo): tipo 0=toque 1=solta 2=move 3=tecla de menu (Thumb decodificado)
   bool mouseDown=false; int lastTouchX=0,lastTouchY=0;
   auto touch = [&](int x, int y, int type) {
+    if(questTrackerUI.handleTouch(x, y, type, SCREEN_W, SCREEN_H)) return;
     if(sharedStashHost.open || bountiesHost.open || weaponsCatalogHost.open || difficultyMenuTouch(x,y,type) || codexMenuTouch(x,y,type)) return;
     lastTouchX=x; lastTouchY=y;
     if(type!=2) destinia::sessionLog.write("ENTRADA toque x="+std::to_string(x)+" y="+std::to_string(y)+" tipo="+std::to_string(type));
@@ -1119,6 +1123,7 @@ static int runHost(int argc, char** argv) {
             });
             continue;
           }
+          if(ev.key.keysym.sym==SDLK_q) { if(down) questTrackerUI.toggle(); continue; }
           if(ev.key.keysym.sym==SDLK_F11) { if(down) setFullscreen(!fullscreen); }
           else if(ev.key.keysym.sym==SDLK_F9) {  }
           else controls.event(ev);
@@ -1228,6 +1233,15 @@ static int runHost(int argc, char** argv) {
     weaponsCatalogHost.paint(frameBuffer.data(), SCREEN_W, SCREEN_H, rd16(exportsMap.at("Game")+0x4886), preferences.uiScale);
     sharedStashHost.paint(frameBuffer.data(), SCREEN_W, SCREEN_H, preferences.uiScale);
     bountiesHost.paint(frameBuffer.data(), SCREEN_W, SCREEN_H, rd16(exportsMap.at("Game")+0x4886), preferences.uiScale);
+    {
+      auto curSlot = rd16(exportsMap.at("Game")+0x4886);
+      auto& contracts = bountiesHost.manager.getContracts(curSlot < 10 ? curSlot : 0);
+      if (!contracts.empty()) {
+        auto& c = contracts[0];
+        questTrackerUI.setQuest(c.title, "Abates: " + std::to_string(c.currentCount) + " / " + std::to_string(c.targetCount), "Campanha");
+      }
+      questTrackerUI.paint(frameBuffer.data(), SCREEN_W, SCREEN_H);
+    }
     const uint8_t* fb = frameBuffer.data();
     if (headlessFrames) {
       if (frame == 1 || frame % 10 == 0) { char nm[64]; snprintf(nm, sizeof nm, "/frame_%05ld.bmp", frame); writeBmp(outDir + nm, fb); }

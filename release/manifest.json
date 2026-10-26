@@ -276,6 +276,8 @@
     "web/dist/weapons-catalog.mjs",
     "web/dist/shared-stash.mjs",
     "web/dist/bounties.mjs",
+    "common/quest_tracker_ui.h",
+    "web/dist/quest-tracker.mjs",
     "web/tests/features-0110.test.mjs"
   ]
 }

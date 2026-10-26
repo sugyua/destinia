@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { CatalogEquipment, WeaponsCatalogWeb } from '../dist/weapons-catalog.mjs';
 import { SharedStashWeb, MAX_STASH_CAPACITY } from '../dist/shared-stash.mjs';
 import { BountiesWeb } from '../dist/bounties.mjs';
+import { QuestTrackerWeb } from '../dist/quest-tracker.mjs';
+import { BossRushUI, BOSS_RUSH_LIST } from '../dist/boss-rush.mjs';
 
 test('Catálogo de Equipamentos 0.11: contem 24 armas e 24 armaduras distribuidas igualmente', () => {
   const weapons = CatalogEquipment.filter(e => e.category === 0);
@@ -103,4 +105,30 @@ test('Contratos Offline 0.11: 3 contratos diarios, contagem de abates e resgate 
   // Não pode resgatar duas vezes
   const doubleClaim = bounties.claim(0, c1.id);
   assert.equal(doubleClaim, null, 'Não deve permitir resgate duplicado');
+});
+
+test('Quest Tracker HUD: alternancia de exibicao e leitura de objetivos', () => {
+  const tracker = new QuestTrackerWeb(null);
+  assert.equal(tracker.minimized, false);
+  tracker.toggle();
+  assert.equal(tracker.minimized, true);
+  tracker.toggle();
+  assert.equal(tracker.minimized, false);
+
+  tracker.setQuest('Mago dos Bosses', 'Derrotar Diablo', 'Lagrant');
+  assert.equal(tracker.questTitle, 'Mago dos Bosses');
+  assert.equal(tracker.questObjective, 'Derrotar Diablo');
+  assert.equal(tracker.destination, 'Lagrant');
+
+  // Toque na hitbox (canto superior direito)
+  const handled = tracker.handleTouch(700, 15, 0);
+  assert.equal(handled, true);
+  assert.equal(tracker.minimized, true);
+});
+
+test('Boss Rush Gauntlet: 11 opcoes disponiveis incluindo modo sobrevivencia 999', () => {
+  assert.equal(BOSS_RUSH_LIST.length, 11);
+  const gauntlet = BOSS_RUSH_LIST.find(b => b.species === 999);
+  assert.ok(gauntlet !== undefined, 'Modo Gauntlet deve existir na lista');
+  assert.equal(gauntlet.goldCost, 10000);
 });

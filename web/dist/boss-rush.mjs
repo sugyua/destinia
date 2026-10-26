@@ -10,7 +10,8 @@ export const BOSS_RUSH_LIST = [
   {species: 106, namePt: "Imperador Kaiser", nameEn: "Emperor Kaiser", goldCost: 15000, area: 2, map: 28},
   {species: 107, namePt: "Baramos", nameEn: "Baramos", goldCost: 25000, area: 2, map: 16},
   {species: 108, namePt: "Diablo", nameEn: "Diablo", goldCost: 35000, area: 1, map: 51},
-  {species: 109, namePt: "Guardiao de Lava", nameEn: "Lava Guardian", goldCost: 50000, area: 2, map: 48}
+  {species: 109, namePt: "Guardiao de Lava", nameEn: "Lava Guardian", goldCost: 50000, area: 2, map: 48},
+  {species: 999, namePt: "ARENA GAUNTLET (10 CHEFES)", nameEn: "BOSS GAUNTLET (10 BOSSES)", goldCost: 10000, area: 1, map: 5}
 ];
 
 export class BossRushUI {
@@ -38,13 +39,13 @@ export class BossRushUI {
 
     // Cima: 3
     if (key === 3) {
-      this.selectedIndex = (this.selectedIndex - 1 + 10) % 10;
+      this.selectedIndex = (this.selectedIndex - 1 + BOSS_RUSH_LIST.length) % BOSS_RUSH_LIST.length;
       this.statusMessage = "";
       return true;
     }
     // Baixo: 9
     if (key === 9) {
-      this.selectedIndex = (this.selectedIndex + 1) % 10;
+      this.selectedIndex = (this.selectedIndex + 1) % BOSS_RUSH_LIST.length;
       this.statusMessage = "";
       return true;
     }

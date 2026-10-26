@@ -28,7 +28,8 @@ inline const std::vector<BossRushEntry>& getBossRushList() {
     {106, "Imperador Kaiser", "Emperor Kaiser", 15000, 2, 28},
     {107, "Baramos", "Baramos", 25000, 2, 16},
     {108, "Diablo", "Diablo", 35000, 1, 51},
-    {109, "Guardiao de Lava", "Lava Guardian", 50000, 2, 48}
+    {109, "Guardiao de Lava", "Lava Guardian", 50000, 2, 48},
+    {999, "ARENA GAUNTLET (10 CHEFES)", "BOSS GAUNTLET (10 BOSSES)", 10000, 1, 5}
   };
   return list;
 }
@@ -58,15 +59,17 @@ public:
     if (!open) return false;
     if (!down) return true;
 
+    const auto& list = getBossRushList();
+    const int count = int(list.size());
     // Cima: key 3
     if (key == 3) {
-      selectedIndex = (selectedIndex - 1 + 10) % 10;
+      selectedIndex = (selectedIndex - 1 + count) % count;
       statusMessage.clear();
       return true;
     }
     // Baixo: key 9
     if (key == 9) {
-      selectedIndex = (selectedIndex + 1) % 10;
+      selectedIndex = (selectedIndex + 1) % count;
       statusMessage.clear();
       return true;
     }
