@@ -23,6 +23,8 @@ def pe64(path):
         raise ValueError('O pacote exige PE Windows x64 (AMD64)')
     return data
 
+RUNTIME_DLLS=['libFLAC.dll','libgcc_s_seh-1.dll','libmpg123-0.dll','libogg-0.dll','libopus-0.dll','libopusfile-0.dll','libstdc++-6.dll','libunicorn.dll','libvorbis-0.dll','libvorbisfile-3.dll','libwavpack-1.dll','libwinpthread-1.dll','libxmp.dll','SDL2.dll','SDL2_mixer.dll','zlib1.dll']
+
 def package(root,output,normal,zoom,launcher_normal=None,launcher_zoom=None):
     root,output=Path(root).resolve(),Path(output).resolve()
     version=(root/'VERSION').read_text().strip()
@@ -34,15 +36,24 @@ def package(root,output,normal,zoom,launcher_normal=None,launcher_zoom=None):
     inputs['host_zoom/build/destinia_host.exe']=pe64(zoom)
     inputs['Destinia.exe']=pe64(launcher_normal or root/'Destinia.exe')
     inputs['Destinia Zoom.exe']=pe64(launcher_zoom or root/'Destinia Zoom.exe')
+    for dll in RUNTIME_DLLS:
+        dll_file = root / dll
+        if not dll_file.is_file():
+            dll_file = root / 'host' / 'build' / dll
+        if dll_file.is_file():
+            data = dll_file.read_bytes()
+            inputs[dll] = data
+            inputs['host/build/' + dll] = data
+            inputs['host_zoom/build/' + dll] = data
     commit=os.environ.get('GITHUB_SHA','compilacao-local')
     if commit!='compilacao-local' and not re.fullmatch(r'[0-9a-f]{40}',commit):raise ValueError('Commit de build invalido')
-    inputs['BUILD_INFO.txt']=('Repositorio: https://github.com/sugyua/destinia\nVersao: '+version+' Beta\nCommit de compilacao: '+commit+'\nPlataforma: Windows x64 / MSYS2 UCRT64\nDependencias externas: consulte README.md e INSTALL.md.\n').encode('utf-8')
+    inputs['BUILD_INFO.txt']=('Repositorio: https://github.com/sugyua/destinia\nVersao: '+version+' Beta\nCommit de compilacao: '+commit+'\nPlataforma: Windows x64 / MSYS2 UCRT64 (Standalone)\nDependencias externas: runtime de DLLs incluso.\n').encode('utf-8')
     inputs['LEIA_PRIMEIRO.txt']=(
         'Destinia '+version+' Beta - pode apresentar bugs.\n'
-        'Instale as dependencias externas listadas em README.md / INSTALL.md.\n'
-        'Este pacote nao contem DLLs, instaladores, APK extraido ou saves pessoais.\n'
+        'Este pacote e portatil (standalone) e contem as DLLs necessarias para execucao no Windows x64.\n'
+        'Nao e necessario instalar MSYS2 para jogar.\n'
         'Coloque seus dados originais em game/lib/armeabi/libdestinia_jni.so, game/assets e game/res/raw.\n'
-        'Abra Destinia.exe ou Destinia Zoom.exe na raiz (sem BAT). BATs ficam para diagnostico. Nao precisa compilar.\n'
+        'Abra Destinia.exe ou Destinia Zoom.exe na raiz (sem BAT). BATs ficam para diagnostico.\n'
         'Configurar Destinia.bat ajusta video, audio, pausas e comandos.\n'
         'Progresso compartilhado: LOCALAPPDATA/Destinia/save ou a pasta global configurada.\n'
     ).encode('utf-8')

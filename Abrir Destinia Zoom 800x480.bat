@@ -22,15 +22,19 @@ if not exist "%EXE%" (
   exit /b 1
 )
 
-if not exist "%MSYS2_BIN%\SDL2.dll" (
-  echo Nao encontrei as DLLs do MSYS2 UCRT64 em:
+if exist "%HOST_DIR%\build\SDL2.dll" (
+  set "PATH=%HOST_DIR%\build;%PATH%"
+) else if exist "%ROOT%SDL2.dll" (
+  set "PATH=%ROOT%;%PATH%"
+) else if exist "%MSYS2_BIN%\SDL2.dll" (
+  set "PATH=%MSYS2_BIN%;%PATH%"
+) else (
+  echo Nao encontrei as DLLs do runtime em "%HOST_DIR%\build" nem em:
   echo   "%MSYS2_BIN%"
-  echo Verifique a instalacao do MSYS2.
+  echo Verifique a instalacao do MSYS2 ou utilize o pacote portatil completo.
   pause
   exit /b 1
 )
-
-set "PATH=%MSYS2_BIN%;%PATH%"
 if not exist "%ROOT%VERSION" (
   echo Falta VERSION. Extraia todos os arquivos do pacote na mesma pasta.
   pause
