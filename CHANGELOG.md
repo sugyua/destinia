@@ -4,6 +4,24 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.10.2 Beta — 26/10/2026
+
+- **Mago dos Bosses Presente em Todas as 5 Cidades (Safe Zones com Lojas)**:
+  - Injeção padronizada em todos os 5 mapas que cumprem a regra estrita de Safe Zone (bloqueio nativo de ataque/dash em `reserveHeroAct` e `GameCanvas_mKeyPressed`) com ambos os vendedores (Armas e Poções):
+    - Acampamento da Resistência (Resistance Camp - Mapa 61): X=280, Y=232.
+    - Bergheim (Mapa 62): X=504, Y=280.
+    - Acampamento dos Refugiados (Refuge Camp - Mapa 63): X=280, Y=296.
+    - Fermion (Mapa 64): X=344, Y=424.
+    - Lagrant (Mapa 65): X=328, Y=344.
+- **Hitbox de Colisão Física com o Cenário**:
+  - Implementada colisão sólida de 16x16 na grade nativa do mapa (`curMapData + 0x68`), impedindo que o jogador atravesse o Mago.
+  - Alcance de interação (`mageFacing`) calibrado para até 28 pixels para garantir acionamento natural imediato ao encostar no Mago.
+- **Letreiro de Nome com Fundo Nativo e Proximidade**:
+  - O nome "MAGO DOS BOSSES" agora só é renderizado quando o jogador está a menos de 48 pixels de distância.
+  - Caixa de fundo escuro semitransparente com bordas arredondadas e padding, perfeitamente integrada à identidade visual da UI nativa do jogo.
+- **Gatilho de Interação e Menu de Teleporte Ativo**:
+  - Pressionar o botão de Ação (ou tecla de ataque) abre a interface interativa de seleção de Boss Rush (`BossRushUI`), permitindo teleporte pago em ouro (500 a 50.000 G) para qualquer um dos 10 chefes de espécie 100 a 109.
+
 ## 0.10.1 Beta — 26/10/2026
 
 - **Correção Crítica de Inicialização Web em Redes Locais / HTTP**:

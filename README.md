@@ -1,15 +1,22 @@
-# Destinia 0.10.1 Beta
+# Destinia 0.10.2 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.9.9 Beta — QoL, Autoloot, Indicador FC e Atalhos](https://github.com/sugyua/destinia/releases/tag/v0.9.9-beta)** — ZIP Windows com executáveis standalone portáteis (16 DLLs inclusas), dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
+**[Baixar Destinia 0.10.2 Beta — Mago dos Bosses em Todas as Cidades, Colisão Física e Teleporte Ativo](https://github.com/sugyua/destinia/releases/tag/v0.10.2-beta)** — ZIP Windows com executáveis standalone portáteis (16 DLLs inclusas), dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
 
 **[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
 
-## Novidades da Versão 0.10.0 — Nível 999, Sets 2–6 Peças, Códex Completo e Mago dos Bosses
+## Novidades da Versão 0.10.2 — Mago dos Bosses Completo nas 5 Cidades e Teleporte Ativo
+
+- **Mago dos Bosses em Todas as 5 Cidades (Safe Zones com Lojas)**: Presente em todos os mapas que cumprem os requisitos estritos de Safe Zone (bloqueio de ataque/dash) e presença simultânea do Ferreiro e do Vendedor de Poções: Acampamento da Resistência (61), Bergheim (62), Acampamento dos Refugiados (63), Fermion (64) e Lagrant (65).
+- **Colisão Física e Hitbox Sólida**: Bloqueio sólido de 16x16 integrado à grade nativa do mapa (`curMapData + 0x68`). O jogador colide como em um obstáculo do cenário e não mais atravessa o corpo do Mago.
+- **Placa de Nome Nativa por Proximidade**: O letreiro "MAGO DOS BOSSES" só aparece quando o herói está a menos de 48 pixels de distância, renderizado com fundo escuro semitransparente e cantos arredondados no padrão da UI original.
+- **Gatilho de Interação e Menu de Teleporte Ativo**: Pressionar Ação adjacente ao NPC abre o menu interativo de seleção de chefes do Boss Rush (`BossRushUI`), permitindo teleporte calibrado em ouro para os 10 chefes de espécie 100 a 109.
+
+## Novidades da Versão 0.10.0 / 0.10.1 — Nível 999, Sets 2–6 Peças, Códex Completo e Fix Web HTTP/Wi-Fi
 
 - **Progressão NV 999 e 14 Patentes**: Núcleo canônico em [`common/progression.h`](common/progression.h) e [`web/dist/progression.mjs`](web/dist/progression.mjs) com aritmética segura em 64 bits (`uint64_t`/`BigInt`), sem overflow ARM. Curva original estendida até o cap de 2.035.180.079.455 XP.
 - **Sistema de Sets de Equipamento (2 a 6 Peças)**: Bônus progressivos cumulativos para conjuntos temáticos (2, 3, 4, 5 e 6 peças equipadas). Sets concentrados (100% das peças em 1 Boss) e distribuídos (peças divididas entre monstros elites e diferentes chefes).

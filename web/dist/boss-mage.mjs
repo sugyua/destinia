@@ -12,7 +12,7 @@ export async function unpackMageResource(bytes){
  try{for(;;){const {value,done}=await reader.read();if(done)break;if(at+value.length>size){await reader.cancel();throw Error('Mago: ZCP excessivo');}out.set(value,at);at+=value.length;}}finally{reader.releaseLock();}need(at===size,'Mago: ZCP tamanho divergente');return out;
 }
 export async function loadBossMageArt(assets){const [w,a,s]=await Promise.all(MAGE_ASSETS.map(n=>unpackMageResource(assets.get(n))));const body=decodePortrait(w,a),single=new Uint8Array(20);single[0]=1;single[2]=1;single[11]=1;const shadow=decodePortrait(s,single,0);validateArt(body);validateArt(shadow);return {body:bossMagePalette(body),shadow:{...shadow,pixels:Uint32Array.from(shadow.pixels,c=>c&0x10000?0x10823:0)}};}
-export function mageFacing(npc,x,y,facing){const dx=npc.x-x,dy=npc.y-y;if(Math.abs(dx)>16||Math.abs(dy)>16)return false;return facing===0?dx<0:facing===1?dx>0:facing===2?dy<0:facing===3?dy>0:false;}
+export function mageFacing(npc,x,y,facing){const dx=npc.x-x,dy=npc.y-y;if(Math.abs(dx)>28||Math.abs(dy)>28)return false;return facing===0?dx<0:facing===1?dx>0:facing===2?dy<0:facing===3?dy>0:false;}
 export function placeBossMage(area,map,bytes){
  need(Number.isInteger(area)&&area>=0&&area<=2&&Number.isInteger(map)&&map>=0&&map<=255&&bytes?.length<=2097152,'Mago: mapa invalido');let at=0;
  const check=n=>need(at+n<=bytes.length,'Mago: MPD truncado'),take=()=>{check(1);return bytes[at++];},skip=n=>{check(n);at+=n;};
@@ -45,10 +45,20 @@ export class BossMage{
   for(const [name,down] of [['GameCanvas_mKeyPressed',true],['GameCanvas_mKeyReleased',false]]){const at=r.exports.get(name)&~1;r.e.hook_add(r.uc.HOOK_CODE,()=>{try{if(this.input(r.r(0),down))r.e.reg_write_i32(r.uc.ARM_REG_PC,r.e.reg_read_i32(r.uc.ARM_REG_LR));}catch(error){r.error=error;r.e.emu_stop();}},null,at,at);}
   this.prepared=(async()=>{this.art=await loadBossMageArt(r.assets);for(const map of [61,62,63,64,65]){const f=r.assets.get(`m0_${map}.mpd`);if(f)await this.addCity(0,map,f);}this.ready=true;})().catch(error=>{this.ready=false;r.log('Mago desativado: '+error.message);});
  }
+ enforceCollision(site){
+  const r=this.r,curMap=r.exports.get('curMapData');if(!curMap)return;
+  const p3=r.get32(curMap+0x68),w=r.get16(curMap),h=r.get16(curMap+2);
+  if(p3&&w>0&&h>0){
+   const tx=Math.floor(site.x/16),ty=Math.floor(site.y/16);
+   if(tx>=0&&tx<w&&ty>=0&&ty<h)r.write(p3+ty*w+tx,new Uint8Array([1]));
+  }
+ }
  visibleSite(){
   if(!this.ready)return null;const r=this.r,g=r.exports.get('Game'),active=r.get32(BASE+0x44240);if(!active||r.get32(active)!==r.exports.get('GameCanvas')||r.get16(g+0x4854)!==0)return null;
   const site=this.sites.get(`${r.get16(g+0x4870)}:${r.get16(g+0x4872)}`);if(!site)return null;const count=r.get32(g+0x29f0);if(count>20)return null;
-  for(let i=0;i<count;i++){const npc=g+0x1fa8+132*i;if(r.get32(npc+108)&&Math.abs(r.get16(npc+4,true)-site.x)<64&&Math.abs(r.get16(npc+6,true)-site.y)<64)return null;}return site;
+  for(let i=0;i<count;i++){const npc=g+0x1fa8+132*i;if(r.get32(npc+108)&&Math.abs(r.get16(npc+4,true)-site.x)<64&&Math.abs(r.get16(npc+6,true)-site.y)<64)return null;}
+  this.enforceCollision(site);
+  return site;
  }
  canInteract(site){
   const r=this.r,g=r.exports.get('Game'),x=r.get16(g+0x4890,true),y=r.get16(g+0x4892,true);if(!r.lootQol.focused||r.get16(g+0x4866)!==0||!mageFacing(site,x,y,r.get16(g+0x4898,true)))return false;
@@ -61,7 +71,17 @@ export class BossMage{
  dispatch(){if(!this.menu.pending)return;const site=this.visibleSite();if(!site||!this.request||site.area!==this.request.area||site.map!==this.request.map||!this.canInteract(site)){this.menu.pending=false;this.request=null;return;}this.menu.dispatch();}
  paint(pixels){
   const site=this.visibleSite();if(!site)return;const r=this.r,g=r.exports.get('Game'),x=site.x-r.get16(g+0x4878,true),y=site.y-r.get16(g+0x487a,true);paintBossMage(pixels,r.width,r.height,this.art.body,this.art.shadow,x,y);
-  const label='MAGO DOS BOSSES',left=x-label.length*3,top=y-this.art.body.height-10;
+  const hx=r.get16(g+0x4890,true),hy=r.get16(g+0x4892,true);
+  if(Math.abs(hx-site.x)>48||Math.abs(hy-site.y)>48)return;
+  const label='MAGO DOS BOSSES',textW=label.length*6,textH=11,left=x-Math.floor(textW/2),top=y-this.art.body.height-12;
+  const padX=4,padY=2,bx=left-padX,by=top-padY,bw=textW+padX*2,bh=textH+padY*2;
+  for(let py=Math.max(0,by);py<Math.min(r.height,by+bh);py++){
+   for(let px=Math.max(0,bx);px<Math.min(r.width,bx+bw);px++){
+    if((px===bx||px===bx+bw-1)&&(py===by||py===by+bh-1))continue;
+    const at=(py*r.width+px)*2,c=pixels[at]|(pixels[at+1]<<8),dark=(c>>1)&0x7bef;
+    pixels[at]=dark&255;pixels[at+1]=dark>>>8;
+   }
+  }
   const text=(dx,dy,color)=>{for(let n=0;n<label.length;n++){const glyph=overlayGlyph(label[n]);for(let col=0;col<5;col++)for(let row=0;row<11;row++)if(glyph[col]&(1<<row)){const px=left+n*6+col+dx,py=top+row-2+dy;if(px>=0&&py>=0&&px<r.width&&py<r.height){const at=(py*r.width+px)*2;pixels[at]=color&255;pixels[at+1]=color>>>8;}}}};
   text(1,1,0);text(0,0,0xd7bf);
  }

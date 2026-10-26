@@ -6,6 +6,8 @@
 static destinia::LootQolRuntime lootQol;
 #include "../common/boss_mage_runtime.h"
 static destinia::BossMageRuntime bossMage;
+#include "../common/boss_rush_ui.h"
+static destinia::BossRushUI bossRushUI;
 static destinia::DropNamesRenderer dropNamesRenderer;
 static destinia::UiRenderer uiRenderer;
 // destinia_host - executa a libdestinia_jni.so ORIGINAL (ARM 32 bits) no PC.
@@ -212,7 +214,7 @@ static bool codexMenuKey(int key,bool down);
 static bool inventoryMenuKey(int key,bool down);
 static bool fcMenuKey(int key,bool down);
 static void gameKey(int key, bool down) {
-  if(inventoryMenuKey(key,down) || fcMenuKey(key,down) || codexMenuKey(key,down)) return;
+  if(bossRushUI.handleKey(key,down) || inventoryMenuKey(key,down) || fcMenuKey(key,down) || codexMenuKey(key,down)) return;
   destinia::sessionLog.write("ENTRADA tecla="+std::to_string(key)+(down?" pressionada":" solta"));
   int st = menuState();
   if (st <= 0) { if (down && fnLogoPress) callFn(fnLogoPress, {(u32)key}); return; }
@@ -821,7 +823,7 @@ static int runHost(int argc, char** argv) {
   if(explicitScale) { scale=std::clamp(scale,1,10); windowWidth=400*scale; windowHeight=240*scale; }
   const fs::path reports=reportsDir.empty()?destinia::defaultReportsDir():fs::path(reportsDir);
   if(destinia::sessionLog.start(reports,"host")) hostReport("[host] Log TXT: %s\n",(destinia::sessionLog.directory()/"log.txt").string().c_str());
-  hostReport("[host] Destinia 0.10.1 Beta - host\n");
+  hostReport("[host] Destinia 0.10.2 Beta - host\n");
   if(saveDir.empty()) saveDir=destinia::modeSaveDir(destinia::configuredSaveDir(),preferences.gameMode).string();
   saveDir=fs::absolute(saveDir).lexically_normal().string();
   hostReport("[host] Save compartilhado: %s\n",saveDir.c_str());
@@ -880,7 +882,12 @@ static int runHost(int argc, char** argv) {
   uiRenderer.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,preferences.uiScale,false,soPath);
   dropNamesRenderer.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,soPath);
   {std::vector<uint8_t> table;if(!readFile(assetsDir+"/item_en.gdt",table))throw std::runtime_error("Tabela de loot ausente");lootQol.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,soPath,table);lootQol.options=preferences.loot;}
-  try{bossMage.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,assetsDir,soPath,[]{return lootQol.autoTarget<0;});}catch(const std::exception& error){hostReport("[mago] Desativado: %s\n",error.what());}
+  try{bossMage.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,assetsDir,soPath,[]{return lootQol.autoTarget<0;});
+    bossMage.menu.opener = [&]{ bossRushUI.openMenu(); };
+    bossRushUI.getGold = [&]() -> int { return int(callFn(exportsMap["getMyGold"], {})); };
+    bossRushUI.setGold = [&](int g) { callFn(exportsMap["setMyGold"], {uint32_t(g)}); };
+    bossRushUI.teleport = [&](int a, int m, int e) { callFn(exportsMap["Map_loadData"], {uint32_t(a), uint32_t(m), uint32_t(e)}); };
+  }catch(const std::exception& error){hostReport("[mago] Desativado: %s\n",error.what());}
   fcInstall();
   u32 fnRun = exportsMap["Java_game_destiniaeng_GameThread_jniRun"];
   u32 fnTouch = exportsMap["Java_game_destiniaeng_GameThread_jniTouch"];
@@ -956,7 +963,7 @@ static int runHost(int argc, char** argv) {
 #endif
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  // pixels nitidos
-    win = SDL_CreateWindow("Destinia 0.10.1 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
+    win = SDL_CreateWindow("Destinia 0.10.2 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
     if(!win) { hostReport("SDL_CreateWindow: %s\n",SDL_GetError()); return 1; }
     if(fullscreen) setFullscreen(true);
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_PRESENTVSYNC);
@@ -1017,6 +1024,20 @@ static int runHost(int argc, char** argv) {
       controls.pollShortcuts();
       while (SDL_PollEvent(&ev)) {
         if(controls.touchShortcut(ev))continue;
+        if(bossRushUI.open) {
+          if(ev.type==SDL_CONTROLLERBUTTONDOWN && ev.cbutton.which==controls.controllerId()) {
+            auto binding=preferences.buttons.find((SDL_GameControllerButton)ev.cbutton.button);
+            if(binding!=preferences.buttons.end()) {const int k[]={3,9,5,7,17,10,27};int a=int(binding->second);if(a>=0 && a<7)bossRushUI.handleKey(k[a],true);}
+          }
+          if((ev.type==SDL_KEYDOWN) && !ev.key.repeat) {
+            if(ev.key.keysym.sym==SDLK_ESCAPE)bossRushUI.handleKey(10,true);
+            else if(ev.key.keysym.sym==SDLK_UP)bossRushUI.handleKey(3,true);
+            else if(ev.key.keysym.sym==SDLK_DOWN)bossRushUI.handleKey(9,true);
+            else if(ev.key.keysym.sym==SDLK_RETURN || ev.key.keysym.sym==SDLK_SPACE)bossRushUI.handleKey(17,true);
+            else {auto binding=preferences.keys.find(ev.key.keysym.sym);if(binding!=preferences.keys.end()) {const int k[]={3,9,5,7,17,10,27};int a=int(binding->second);if(a>=0 && a<7)bossRushUI.handleKey(k[a],true);}}
+          }
+          continue;
+        }
         if(codexOpen && (ev.type==SDL_CONTROLLERBUTTONDOWN || ev.type==SDL_CONTROLLERBUTTONUP || ev.type==SDL_CONTROLLERAXISMOTION)) {
           if(ev.type==SDL_CONTROLLERBUTTONDOWN && ev.cbutton.which==controls.controllerId()) {
             auto binding=preferences.buttons.find((SDL_GameControllerButton)ev.cbutton.button);
@@ -1052,7 +1073,8 @@ static int runHost(int argc, char** argv) {
           int wx=ev.type==SDL_MOUSEMOTION?ev.motion.x:ev.button.x,wy=ev.type==SDL_MOUSEMOTION?ev.motion.y:ev.button.y;
           int x=0,y=0;
           bool inside=mapMouseToGame(wx,wy,x,y,mouseDown && ev.type!=SDL_MOUSEBUTTONDOWN);
-          if((inside || codexTouchCaptured || inventoryTouchCaptured || fcTouchCaptured) && (ev.type==SDL_MOUSEBUTTONDOWN || ev.type==SDL_MOUSEBUTTONUP) && ev.button.button==SDL_BUTTON_LEFT) {
+          if((inside || bossRushUI.open || codexTouchCaptured || inventoryTouchCaptured || fcTouchCaptured) && (ev.type==SDL_MOUSEBUTTONDOWN || ev.type==SDL_MOUSEBUTTONUP) && ev.button.button==SDL_BUTTON_LEFT) {
+            if(bossRushUI.handleTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1,SCREEN_W,SCREEN_H)){controls.release();continue;}
             if(inventoryMenuTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1)){controls.release();continue;}
             if(fcMenuTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1)){controls.release();continue;}
             if(codexMenuTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1)){controls.release();continue;}
@@ -1085,7 +1107,7 @@ static int runHost(int argc, char** argv) {
       const bool paused=controls.paused();
       if(paused!=wasPaused) {
         controls.release();
-        SDL_SetWindowTitle(win,paused?"Destinia 0.10.1 Beta - PAUSADO":"Destinia 0.10.1 Beta");
+        SDL_SetWindowTitle(win,paused?"Destinia 0.10.2 Beta - PAUSADO":"Destinia 0.10.2 Beta");
         hostReport("[host] %s.\n",paused?"Pausado":"Retomado"); wasPaused=paused;
       }
       updateAudioState(controls.focused,paused);
@@ -1133,6 +1155,7 @@ static int runHost(int argc, char** argv) {
     if(preferences.uiScale==100?hasPlayerStatusHud(frameBuffer.data()):uiRenderer.statusDrawn){std::array<destinia::SkillHintRect,4> hints{};for(size_t i=0;i<hints.size();++i){int16_t r[4]{};if(rd(exportsMap.at("MMain")+0x11a+u32(i)*8,r,8))hints[i]={r[0],r[1],r[2],r[3]};}destinia::paintSkillHints(frameBuffer.data(),SCREEN_W,SCREEN_H,preferences,controls.lastInputDevice(),hints,preferences.uiScale);}
     if(!codexOpen)fcPaint(frameBuffer.data(),preferences.uiScale);
     bossMage.paint(frameBuffer.data());
+    bossRushUI.paint(frameBuffer.data(), SCREEN_W, SCREEN_H);
     lootQol.paint(frameBuffer.data());
     inventoryPaint(frameBuffer.data());
     nativeCodexPainter.paint(frameBuffer.data());
@@ -1184,7 +1207,7 @@ static int runHost(int argc, char** argv) {
 
 
 int main(int argc,char** argv) {
-  if(argc==2 && std::strcmp(argv[1],"--version")==0) { std::puts("Destinia 0.10.1 Beta"); return 0; }
+  if(argc==2 && std::strcmp(argv[1],"--version")==0) { std::puts("Destinia 0.10.2 Beta"); return 0; }
   int result=1;
   if(argc==2 && std::string(argv[1])=="--import-classic") {
     try {const auto base=destinia::configuredSaveDir();destinia::importClassicSave(base,destinia::modeSaveDir(base,"expandido"));printf("Copia criada no modo expandido; a partida classica foi preservada.\n");return 0;}

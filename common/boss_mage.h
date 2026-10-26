@@ -22,7 +22,7 @@ inline BossMageArt loadBossMageArt(const std::vector<uint8_t>& body,const std::v
  return {bossMagePalette(pose),std::move(shade)};
 }
 inline bool mageFacing(const MageSite& npc,int x,int y,int facing){
- const int64_t dx=int64_t(npc.x)-x,dy=int64_t(npc.y)-y;if(std::abs(dx)>16||std::abs(dy)>16)return false;
+ const int64_t dx=int64_t(npc.x)-x,dy=int64_t(npc.y)-y;if(std::abs(dx)>28||std::abs(dy)>28)return false;
  return facing==0?dx<0:facing==1?dx>0:facing==2?dy<0:facing==3?dy>0:false;
 }
 // Original MPD: dimensions, resource IDs, four byte planes, objects, events,
