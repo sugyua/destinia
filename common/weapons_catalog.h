@@ -121,4 +121,35 @@ public:
   }
 };
 
+
+inline WeaponsCatalog loadWeaponsCatalog(const std::filesystem::path& saveDir) {
+  const auto sidecarPath = saveDir / "weapons-catalog-v1.txt";
+  if (!std::filesystem::exists(sidecarPath)) {
+    return WeaponsCatalog{};
+  }
+  std::ifstream in(sidecarPath, std::ios::binary);
+  if (!in) return WeaponsCatalog{};
+  std::string content{std::istreambuf_iterator<char>(in), {}};
+  return WeaponsCatalog::deserialize(content);
+}
+
+inline bool saveWeaponsCatalog(const std::filesystem::path& saveDir, const WeaponsCatalog& catalog) {
+  try {
+    std::filesystem::create_directories(saveDir);
+    const auto sidecarPath = saveDir / "weapons-catalog-v1.txt";
+    const auto tempPath = saveDir / "weapons-catalog-v1.txt.tmp";
+    std::string text = catalog.serialize();
+    {
+      std::ofstream out(tempPath, std::ios::binary | std::ios::trunc);
+      if (!out) return false;
+      out.write(text.data(), text.size());
+      out.flush();
+    }
+    std::filesystem::rename(tempPath, sidecarPath);
+    return true;
+  } catch (...) {
+    return false;
+  }
+}
+
 } // namespace destinia

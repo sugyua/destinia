@@ -803,6 +803,7 @@ static void runtimeLogTick(long frame,double emulationMs) {
 #include "../common/inventory_host.h"
 #include "../common/codex_native_host.h"
 #include "../common/difficulty_host.h"
+#include "../common/weapons_catalog_host.h"
 
 static int runHost(int argc, char** argv) {
   std::string languageOverride;
@@ -923,12 +924,13 @@ static int runHost(int argc, char** argv) {
   difficultyArm.install(uc,SO_BASE,exportsMap,soPath,[](unsigned slot){return difficultyProgress.current(slot);});
   installInventoryProtection();
   destinia::initLootEconomy(saveDir);
+  weaponsCatalogHost.init(fs::path(saveDir));
   hostReport("[host] initGame ok. Rodando o jogo...\n");
 
   // [OK] jniTouch(env,obj, x, y, tipo): tipo 0=toque 1=solta 2=move 3=tecla de menu (Thumb decodificado)
   bool mouseDown=false; int lastTouchX=0,lastTouchY=0;
   auto touch = [&](int x, int y, int type) {
-    if(difficultyMenuTouch(x,y,type) || codexMenuTouch(x,y,type)) return;
+    if(weaponsCatalogHost.open || difficultyMenuTouch(x,y,type) || codexMenuTouch(x,y,type)) return;
     lastTouchX=x; lastTouchY=y;
     if(type!=2) destinia::sessionLog.write("ENTRADA toque x="+std::to_string(x)+" y="+std::to_string(y)+" tipo="+std::to_string(type));
     if(preferences.uiScale!=100&&type!=3){u32 state=0;if(!callFn(exportsMap.at("_getTouchState"),{},&state))return;auto point=uiRenderer.touchPoint(x,y,int(state));x=point.first;y=point.second;}
@@ -1080,6 +1082,14 @@ static int runHost(int argc, char** argv) {
             }
             continue;
           }
+          if(ev.key.keysym.sym==SDLK_F4 || (ev.key.keysym.sym==SDLK_w && (SDL_GetModState() & KMOD_CTRL))) {
+            if(down) { weaponsCatalogHost.toggle(rd16(exportsMap.at("Game")+0x4886), exportsMap.at("Game"), [](uint32_t a){return rd16(a);}); }
+            continue;
+          }
+          if(weaponsCatalogHost.open) {
+            if(down) weaponsCatalogHost.handleKey(ev.key.keysym.sym, true);
+            continue;
+          }
           if(ev.key.keysym.sym==SDLK_F11) { if(down) setFullscreen(!fullscreen); }
           else if(ev.key.keysym.sym==SDLK_F9) {  }
           else controls.event(ev);
@@ -1089,6 +1099,7 @@ static int runHost(int argc, char** argv) {
           int x=0,y=0;
           bool inside=mapMouseToGame(wx,wy,x,y,mouseDown && ev.type!=SDL_MOUSEBUTTONDOWN);
           if((inside || bossRushUI.open || codexTouchCaptured || inventoryTouchCaptured || fcTouchCaptured) && (ev.type==SDL_MOUSEBUTTONDOWN || ev.type==SDL_MOUSEBUTTONUP) && ev.button.button==SDL_BUTTON_LEFT) {
+            if(weaponsCatalogHost.open && weaponsCatalogHost.handleTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1,SCREEN_W,SCREEN_H)){controls.release();continue;}
             if(bossRushUI.handleTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1,SCREEN_W,SCREEN_H)){controls.release();continue;}
             if(inventoryMenuTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1)){controls.release();continue;}
             if(fcMenuTouch(x,y,ev.type==SDL_MOUSEBUTTONDOWN?0:1)){controls.release();continue;}
@@ -1176,6 +1187,7 @@ static int runHost(int argc, char** argv) {
     inventoryPaint(frameBuffer.data());
     nativeCodexPainter.paint(frameBuffer.data());
     difficultyPainter.paint(frameBuffer.data());
+    weaponsCatalogHost.paint(frameBuffer.data(), SCREEN_W, SCREEN_H, rd16(exportsMap.at("Game")+0x4886), preferences.uiScale);
     const uint8_t* fb = frameBuffer.data();
     if (headlessFrames) {
       if (frame == 1 || frame % 10 == 0) { char nm[64]; snprintf(nm, sizeof nm, "/frame_%05ld.bmp", frame); writeBmp(outDir + nm, fb); }
