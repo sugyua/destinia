@@ -19,6 +19,13 @@ export function placeBossMage(area,map,bytes){
  const w=take(),h=take(),p=take(),q=take();need(w&&h,'Mago: dimensoes invalidas');skip(p+q);check(w*h*4);const grid=at+w*h*3;skip(w*h*4);const occupied=[];
  const records=(stride,offset)=>{const count=take();for(let i=0;i<count;i++){check(stride);occupied.push([bytes[at+offset]*16+8,bytes[at+offset+1]*16+8]);skip(stride);}};
  records(3,1);skip(2);records(7,0);records(5,0);records(6,0);skip(12);const spawns=take();skip(spawns*4);need(at===bytes.length,'Mago: dados MPD extras');if(spawns)return null;
+ if(area===0){
+  if(map===61)return {area,map,x:280,y:232};
+  if(map===62)return {area,map,x:504,y:280};
+  if(map===63)return {area,map,x:280,y:296};
+  if(map===64)return {area,map,x:344,y:424};
+  if(map===65)return {area,map,x:328,y:344};
+ }
  let result=null,score=Infinity;for(let y=4;y<h-2;y++)for(let x=2;x<w-2;x++){let clear=true;for(let yy=y-3;yy<=y+1;yy++)for(let xx=x-1;xx<=x+1;xx++)if(bytes[grid+yy*w+xx]!==0)clear=false;
  const px=x*16+8,py=y*16+8;for(const [ox,oy] of occupied)if(Math.abs(px-ox)<64&&Math.abs(py-oy)<64)clear=false;const distance=(2*x-w)**2+(2*y-h)**2;if(clear&&distance<score){score=distance;result={area,map,x:px,y:py};}}
  return result;
@@ -36,7 +43,7 @@ export class BossMage{
  install(){
   const r=this.r;need(r.exports.get('Game')===BASE+0x77ee0&&(r.exports.get('GameCanvas_mKeyPressed')&~1)===BASE+0x20158,'Mago: layout incompativel');
   for(const [name,down] of [['GameCanvas_mKeyPressed',true],['GameCanvas_mKeyReleased',false]]){const at=r.exports.get(name)&~1;r.e.hook_add(r.uc.HOOK_CODE,()=>{try{if(this.input(r.r(0),down))r.e.reg_write_i32(r.uc.ARM_REG_PC,r.e.reg_read_i32(r.uc.ARM_REG_LR));}catch(error){r.error=error;r.e.emu_stop();}},null,at,at);}
-  this.prepared=(async()=>{this.art=await loadBossMageArt(r.assets);await this.addCity(0,65,r.assets.get('m0_65.mpd'));this.ready=true;})().catch(error=>{this.ready=false;r.log('Mago desativado: '+error.message);});
+  this.prepared=(async()=>{this.art=await loadBossMageArt(r.assets);for(const map of [61,62,63,64,65]){const f=r.assets.get(`m0_${map}.mpd`);if(f)await this.addCity(0,map,f);}this.ready=true;})().catch(error=>{this.ready=false;r.log('Mago desativado: '+error.message);});
  }
  visibleSite(){
   if(!this.ready)return null;const r=this.r,g=r.exports.get('Game'),active=r.get32(BASE+0x44240);if(!active||r.get32(active)!==r.exports.get('GameCanvas')||r.get16(g+0x4854)!==0)return null;

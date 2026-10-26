@@ -38,6 +38,6 @@ int main(int argc,char** argv){
  sh(g+0x1fac,site->x);sh(g+0x1fae,site->y);assert(!bossMage.visibleSite());assert(wr(g,before.data(),before.size()));
  sh(g+0x4854,16);assert(!bossMage.visibleSite());assert(wr(g,before.data(),before.size()));
  // Map changes invalidate an unbound request; no delayed menu in another scene.
- bossMage.menu.opener=nullptr;press(17);release(17);assert(bossMage.menu.pending);assert(callFn(exportsMap.at("Map_loadData"),{0,62,1}));assert(!bossMage.visibleSite()&&!bossMage.menu.pending);
+ bossMage.menu.opener=nullptr;press(17);release(17);assert(bossMage.menu.pending);assert(callFn(exportsMap.at("Map_loadData"),{0,1,1}));assert(!bossMage.visibleSite()&&!bossMage.menu.pending);
  assert(saveCalls==0);std::puts("BOSS_MAGE_ARM_OK");return 0;
 }

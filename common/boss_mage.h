@@ -36,6 +36,13 @@ inline std::optional<MageSite> placeBossMage(int area,int map,const std::vector<
  const auto records=[&](int stride,int coordinateOffset){const int count=take();for(int i=0;i<count;++i){need(stride);occupied.push_back({bytes[at+coordinateOffset]*16+8,bytes[at+coordinateOffset+1]*16+8});skip(stride);}};
  records(3,1);skip(2);records(7,0);records(5,0);records(6,0);skip(12);const int spawns=take();skip(size_t(spawns)*4);if(at!=bytes.size())throw std::invalid_argument("Mago: dados MPD extras");
  if(spawns)return std::nullopt;
+ if(area==0){
+  if(map==61)return MageSite{area,map,280,232};
+  if(map==62)return MageSite{area,map,504,280};
+  if(map==63)return MageSite{area,map,280,296};
+  if(map==64)return MageSite{area,map,344,424};
+  if(map==65)return MageSite{area,map,328,344};
+ }
  std::optional<MageSite> result;int score=std::numeric_limits<int>::max();
  for(int y=4;y<h-2;++y)for(int x=2;x<w-2;++x){bool clear=true;
   for(int yy=y-3;yy<=y+1;++yy)for(int xx=x-1;xx<=x+1;++xx)if(bytes[grid+size_t(yy)*w+xx]!=0)clear=false;

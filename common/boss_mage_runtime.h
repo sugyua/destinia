@@ -38,7 +38,7 @@ public:
  }
  void install(uc_engine* e,uint32_t soBase,const std::map<std::string,uint32_t>& symbols,int w,int h,const std::string& assets,const std::string& library,std::function<bool()> allowed={}){
   auto bytes=resource(library);uint64_t hash=14695981039346656037ull;for(auto b:bytes)hash=(hash^b)*1099511628211ull;if(hash!=0x74b2547839b88777ull)throw std::runtime_error("Mago: biblioteca incompativel");
-  art=loadBossMageArt(resource(assets+"/mon6_0_head.wmb"),resource(assets+"/mon6.agd"),resource(assets+"/shadow.wmb"));addCity(0,65,resource(assets+"/m0_65.mpd"));
+  art=loadBossMageArt(resource(assets+"/mon6_0_head.wmb"),resource(assets+"/mon6.agd"),resource(assets+"/shadow.wmb"));for(int map:{61,62,63,64,65})addCity(0,map,resource(assets+"/m0_"+std::to_string(map)+".mpd"));
   engine=e;base=soBase;game=symbols.at("Game");canvas=symbols.at("GameCanvas");width=w;height=h;manualAllowed=std::move(allowed);press=symbols.at("GameCanvas_mKeyPressed")&~1u;
   for(const char* name:{"GameCanvas_mKeyPressed","GameCanvas_mKeyReleased"}){uc_hook h;const auto at=symbols.at(name)&~1u;if(uc_hook_add(e,&h,UC_HOOK_CODE,reinterpret_cast<void*>(hook),this,at,at)!=UC_ERR_OK)throw std::runtime_error("Mago: falha no evento ARM");}
   ready=true;

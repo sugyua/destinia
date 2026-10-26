@@ -355,7 +355,7 @@ test('Mago sintetico usa ARM original sem tocar pools e chama UI fora da emulaca
   const pixels=new Uint8Array(width*r.height*2+32).fill(0x35);r.bossMage.paint(pixels.subarray(16,-16));assert(pixels.subarray(16,-16).some(c=>c!==0x35));assert(pixels.subarray(0,16).every(c=>c===0x35)&&pixels.subarray(-16).every(c=>c===0x35));assert.deepEqual(r.read(g,32056),before);assert.deepEqual([...r.saved],saved);
   r.lootQol.autoTarget=0;r.call(r.exports.get('GameCanvas_mKeyPressed'),[6]);r.lootQol.autoTarget=-1;assert.equal(opens,1);r.write(g,before);
   sh(g+0x1fac,site.x);sh(g+0x1fae,site.y);assert.equal(r.bossMage.visibleSite(),null);r.write(g,before);
-  r.bossMage.menu.opener=null;r.call(r.exports.get('GameCanvas_mKeyPressed'),[17]);assert(r.bossMage.menu.pending);r.call(r.exports.get('Map_loadData'),[0,62,1]);assert.equal(r.bossMage.visibleSite(),null);assert.equal(r.bossMage.menu.pending,false);
+  r.bossMage.menu.opener=null;r.call(r.exports.get('GameCanvas_mKeyPressed'),[17]);assert(r.bossMage.menu.pending);r.call(r.exports.get('Map_loadData'),[0,1,1]);assert.equal(r.bossMage.visibleSite(),null);assert.equal(r.bossMage.menu.pending,false);
   r.call(r.exports.get('openMainmenu'),[0]);const ui=r.exports.get('GameUI');sh(ui+0x76,16);
   for(const scale of [75,100,125]){r.uiScale=scale;const {nativeTransform,nativeTabRect}=await import('../dist/codex-native.mjs');const t=nativeTransform(scale,width,r.height);
    for(let i=0;i<10;i++){const b=nativeTabRect(i,width,r.height),p=t.point(b.x+11,b.y+12);r.touch(p.x,p.y,0);r.touch(p.x,p.y,1);if(i===9){assert(r.codexOpen);r.framebuffer();r.key(10,true);}else assert.equal(r.get32(ui+0x7c)>>>28,i);}
