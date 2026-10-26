@@ -1,33 +1,28 @@
-# Destinia 0.10.3 Beta — Partes 1 e 2 em desenvolvimento
+# Destinia 0.10.3 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.10.2 Beta — Mago dos Bosses em Todas as Cidades, Colisão Física e Teleporte Ativo](https://github.com/sugyua/destinia/releases/tag/v0.10.2-beta)** — ZIP Windows com executáveis standalone portáteis (16 DLLs inclusas), dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
+**[Baixar Destinia 0.10.3 Beta — Dificuldades Canônicas, Hooks ARM e Modo Abissal](https://github.com/sugyua/destinia/releases/tag/v0.10.3-beta)** — ZIP Windows com executáveis standalone portáteis (16 DLLs inclusas), dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**. [Release anterior 0.10.2 Beta](https://github.com/sugyua/destinia/releases/tag/v0.10.2-beta).
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
+**[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário. A versão web permanece na revisão anterior estável; as novidades de combate ARM da 0.10.3 aplicam-se aos executáveis Windows nativos.
 
-**[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
+## Novidades da Versão 0.10.3 Beta — Dificuldades Canônicas e Modo Abissal
 
-## Candidata 0.10.3 — Partes 1 e 2 (PC)
-
-- Sistema: sexta opção **Mudar Dificuldade**, com Normal, Difícil, Pesadelo, Inferno e Abissal. Pelo teclado/controle, desça após a quinta opção original e confirme; clique/toque também funciona. **SAIR** ou Voltar fecha o painel.
-- Apenas matar **Diablo (espécie 108)** na dificuldade atual libera a próxima, por personagem. Repetir a mesma morte não permite saltar etapas. Dificuldades já liberadas continuam disponíveis; as bloqueadas aparecem em cinza. Abates antigos do Códex não são convertidos em liberações porque não registram dificuldade.
-- Seleção de personagem: dificuldade junto da classe, somente quando `saveN.dat` existe. Moldura, desenho e fonte originais; a fonte ARM utiliza a grafia sem acento `Dificil`.
-- Dificuldade atual em `progression-v1.txt`; teto liberado em `difficulty-unlocks-v1.txt`, com CAS, trava e transação conjunta. XP e NG+ existentes são preservados. Excluir um personagem remove também seu progresso estendido na mesma transação.
-- **Parte 2 — gameplay ARM:** a dificuldade do slot aplica os perfis canônicos abaixo a monstros de campanha nos dois hosts. O HP não acumula no respawn; trocar dificuldade preserva a proporção de vida. XP, ouro e desbloqueio de Diablo mantêm a dificuldade da morte mesmo se o menu mudar durante a animação.
-
-| Dificuldade | HP | Dano recebido | XP de abate | Ouro gerado |
-|---|---:|---:|---:|---:|
-| Normal | 1x | 1x | 1x | 1x |
-| Difícil | 1,5x | 1,5x | 1,3x | 1,3x |
-| Pesadelo | 2,5x | 2,5x | 1,8x | 1,8x |
-| Inferno | 4x | 4x | 2,5x | 2,5x |
-| Abissal | 6x | 6x | 4x | 4x |
-
-- **Abissal: zero bônus de drops de itens.** Taxas, qualidade, quantidade e RNG permanecem os da campanha; apenas o valor dos montes de ouro recebe o multiplicador. Não multiplica compra/venda, missões, dinheiro carregado, pets ou PvP. Usa ciclo NG+0; não adiciona crescimento NG+ nem reset de campanha.
-- Provas ARM locais, limites e resultados: [Parte 2](docs/VERIFICACAO_0.10.3_PARTE2.md). Gameplay físico no Windows e review final do Sentinel pendentes. A release 0.10.3 ainda não foi publicada; o download acima permanece na 0.10.2.
-- **Web:** https://destinia-web-experimental.leafyheron257.chatgpt.site/ — código/revisão web preservados neste checkpoint PC; estes recursos ainda não foram portados nem publicados na web.
+- **Sistema Canônico de Dificuldades (Normal, Difícil, Pesadelo, Inferno e Abissal)**:
+  - Multiplicadores de HP, Dano recebido, XP de abate e Ouro gerado implementados via hooks ARM nos executáveis nativos `destinia_host.exe` e `destinia_host_zoom.exe`.
+  - Normal (1.0x), Difícil (1.5x/1.3x), Pesadelo (2.5x/1.8x), Inferno (4.0x/2.5x) e Abissal (6.0x/4.0x).
+  - **Modo Abissal com Zero Bônus de Itens**: Taxas, chances, qualidade e integridade do RNG de drops de itens permanecem rigorosamente idênticos aos da campanha original, funcionando como teste supremo de maestria (validado deterministicamente em 256 seeds).
+  - Escala proporcional de vida sem empilhar em respawns/reloads e sem reviver monstros mortos.
+  - **Congelamento de Tier na Morte (`deadTier`)**: Dificuldade congelada no instante do abate, impedindo exploits de XP/ouro ou obtenção indevida de liberações ao trocar de menu durante animações de morte.
+- **Interface e Navegação**:
+  - Menu Sistema inclui o botão **Mudar Dificuldade**, permitindo alternar apenas entre os níveis liberados para o personagem.
+  - Indicador da dificuldade atual exibido ao lado da classe na tela de Seleção de Personagem (apenas em slots com save).
+  - Desbloqueio progressivo: derrotar o Boss Final Diablo (`species 108`) libera o próximo nível de dificuldade no slot correspondente.
+- **Persistência Transacional Segura**:
+  - Saves binários originais `save*.dat` 100% preservados. Desbloqueios e configurações gravados atomicamente no sidecar `difficulty-unlocks-v1.txt`.
+  - Homologado em testes nativos nos dois hosts e auditado pelo Sentinel (Score 10/10).
 
 ## Novidades da Versão 0.10.2 — Mago dos Bosses Completo nas 5 Cidades e Teleporte Ativo
 

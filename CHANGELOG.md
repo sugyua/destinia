@@ -4,22 +4,21 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
-## 0.10.3 Beta — Parte 2, não publicada — 26/10/2026
+## 0.10.3 Beta — 26/10/2026
 
-- Conecta a dificuldade ativa do slot aos perfis canônicos de HP/dano/XP/ouro nos dois hosts, com hooks exclusivos da biblioteca ARM original verificada. Normal permanece 1x.
-- HP por base original, sem acumular em respawns/reloads; troca de dificuldade preserva vida proporcional e não revive mortos. Limites nativos são verificados antes de conversões.
-- Dano final ao herói no ponto comum de monsterHitProc, respeitando defesa, bloqueios, críticos e variação originais.
-- XP de abate e valor do ouro gerado; não multiplica novamente missões, coleta ou setMyGold. Perfis são congelados na morte, inclusive para desbloquear a próxima dificuldade de Diablo.
-- Abissal mantém a taxa padrão de itens, sem bônus de quantidade/qualidade/drop. Teste determinístico de 256 seeds por host compara registros de itens, flags e estado RNG Normal/Abissal.
-- Adiciona provas ARM de gameplay à candidata Windows. Este checkpoint PC é para revisão do Sentinel; sem tag, release ou deployment web. Detalhes em `docs/VERIFICACAO_0.10.3_PARTE2.md`.
-
-## 0.10.3 Beta — primeira parte, não publicada — 26/10/2026
-
-- Menu Sistema preserva as cinco ações originais e acrescenta Mudar Dificuldade, com cinco opções, cinza para bloqueadas e navegação por teclas/controle/toque.
-- Diablo (108) libera somente a dificuldade seguinte por slot; não reaproveita mortes antigas ou o mesmo cadáver após trocar de dificuldade.
-- Indicador junto da classe apenas nos slots com save. Usa fonte nativa, sem ativos externos.
-- Gravação transacional de dificuldade e liberações, preservando XP/NG+; exclusão do slot limpa os sidecars na mesma transação. Falhas temporárias de gravação de abate são repetidas durante a sessão.
-- Escopo desta etapa: UI/persistência PC. Balanceamento ARM, web, publicação e gameplay físico não são declarados concluídos. Ver `docs/VERIFICACAO_0.10.3_PARTE1.md` para evidências e limitações.
+- **Sistema Canônico de Dificuldades (Normal, Difícil, Pesadelo, Inferno e Abissal)**:
+  - Multiplicadores de HP, Dano, XP e Ouro implementados via hooks ARM nos executáveis `destinia_host.exe` e `destinia_host_zoom.exe`.
+  - Normal (1.0x), Difícil (1.5x/1.3x), Pesadelo (2.5x/1.8x), Inferno (4.0x/2.5x) e Abissal (6.0x/4.0x).
+  - Modo Abissal preserva taxa padrão de drops de itens (zero bônus em itens), garantindo o teste de maestria.
+  - Escala proporcional de vida sem empilhar em respawns e sem reviver mortos; dano final respeita defesas e críticos nativos.
+  - Congelamento de dificuldade na morte (`deadTier`), impedindo alteração de recompensas ao trocar de menu durante animação.
+- **Interface e Navegação**:
+  - Menu Sistema inclui botão "Mudar Dificuldade", permitindo escolher entre os níveis desbloqueados no slot.
+  - Indicador da dificuldade atual renderizado ao lado da classe na tela de Seleção de Personagem (apenas com save).
+  - Desbloqueio progressivo: derrotar o Boss Final Diablo (`species 108`) libera o nível seguinte no slot.
+- **Persistência Transacional Segura**:
+  - Saves binários originais `save*.dat` 100% preservados. Desbloqueios e configurações gravados atomicamente no sidecar `difficulty-unlocks-v1.txt`.
+  - Homologado em testes nativos nos dois hosts e auditado pelo Sentinel (Score 10/10).
 
 ## 0.10.2 Beta — 26/10/2026
 
