@@ -6,6 +6,8 @@ import {WebGamepad} from './gamepad.mjs';
 import {preferredLanguage} from './language.mjs';
 import {mapPoint,InputSources} from './input.mjs';
 const $=id=>document.getElementById(id),canvas=$('game'),context=canvas.getContext('2d',{alpha:false}),image=context.createImageData(800,480);
+const lut=new Uint32Array(65536);for(let p=0;p<65536;p++){const r=(p>>11)&31,g=(p>>5)&63,b=p&31;lut[p]=0xff000000|(((b<<3)|(b>>2))<<16)|(((g<<2)|(g>>4))<<8)|((r<<3)|(r>>2));}
+const image32=new Uint32Array(image.data.buffer);
 let worker=null,ready=false,paused=false,surfacePointer=null,lastPoint={x:0,y:0},lastFrame=0,loadTimer=null,fpsFrames=0,fpsStart=0;
 let language="pt";try{language=preferredLanguage(localStorage.getItem("destinia.language"));}catch{}$("language").value=language;
 const uiScale=100; // Web usa apenas a escala nativa; ignora preferencia antiga sem apagar outros dados.
@@ -54,13 +56,13 @@ function showError(message){ready=false;release();$('loading').hidden=true;$('er
 function setPaused(value){if(!ready)return;release();paused=value;fpsFrames=0;fpsStart=performance.now();send({type:'pause',value});$('paused').hidden=!value||storeOpen;$('pause').textContent=value?'Continuar':'Pausar';$('status').textContent=value?'Pausado · progresso somente nesta aba':'Experimental · progresso temporário · sem som';}
 function boot(){
  if(worker)worker.terminate();storeOpen=false;$('store-notice').hidden=true;release();ready=false;paused=false;surfacePointer=null;document.body.classList.add('running');$('welcome').hidden=true;$('error').hidden=true;$('paused').hidden=true;$('controls').hidden=true;$('loading').hidden=false;$('loading-text').textContent='Carregando o jogo…';$('pause').disabled=true;$('pause').setAttribute('aria-pressed','false');$('restart').disabled=true;$('virtual-controls').disabled=true;$('drop-names').disabled=true;
- worker=new Worker('./worker.js?v=0.10.3');loadTimer=setTimeout(()=>{$('loading-text').textContent='Ainda carregando. Mantenha esta aba aberta…';$('restart').disabled=false;},20000);
+ worker=new Worker('./worker.js?v=0.10.3-hotfix1');loadTimer=setTimeout(()=>{$('loading-text').textContent='Ainda carregando. Mantenha esta aba aberta…';$('restart').disabled=false;},20000);
  worker.onerror=event=>{clearTimeout(loadTimer);showError(event.message||'O navegador não conseguiu iniciar este teste.');};
  worker.onmessage=event=>{const data=event.data;
   if(data.type==='ready'){clearTimeout(loadTimer);ready=true;$('virtual-controls').disabled=false;$('drop-names').disabled=false;if($('weapons-catalog')) $('weapons-catalog').disabled=false; if($('difficulty-btn')) $('difficulty-btn').disabled=false;lastFrame=performance.now();fpsStart=lastFrame;fpsFrames=0;$('loading').hidden=true;applyTouchVisibility();$('pause').disabled=false;$('restart').disabled=false;$('pause').textContent='Pausar';$('status').textContent='Experimental · progresso temporário · sem som';}
   else if(data.type==='inventoryProtectionWrite'){let ack;try{ack=writeInventoryProtection(localStorage,gameMode,data);}catch(error){ack={type:'inventoryProtectionAck',id:data.id,ok:false,text:null,error:error.message};}event.target.postMessage(ack);}
   else if(data.type==='status')$('loading-text').textContent=data.message;
-  else if(data.type==='frame'){lastFrame=performance.now();const b=data.pixels;for(let i=0;i<384000;i++){const p=b[i*2]|b[i*2+1]<<8,at=i*4;image.data[at]=((p>>11)&31)*255/31;image.data[at+1]=((p>>5)&63)*255/63;image.data[at+2]=(p&31)*255/31;image.data[at+3]=255;}context.putImageData(image,0,0);canvas.dataset.frame=String(data.frame);if(!paused){fpsFrames++;if(lastFrame-fpsStart>=1000){const fps=(fpsFrames*1000/(lastFrame-fpsStart)).toFixed(1);canvas.dataset.fps=fps;$('status').textContent=fps+' FPS · meta 16 · progresso temporário · sem som';fpsStart=lastFrame;fpsFrames=0;}}}
+  else if(data.type==='frame'){lastFrame=performance.now();const b16=new Uint16Array(data.pixels.buffer,data.pixels.byteOffset,384000);for(let i=0;i<384000;i++)image32[i]=lut[b16[i]];context.putImageData(image,0,0);canvas.dataset.frame=String(data.frame);if(!paused){fpsFrames++;if(lastFrame-fpsStart>=1000){const fps=(fpsFrames*1000/(lastFrame-fpsStart)).toFixed(1);canvas.dataset.fps=fps;$('status').textContent=fps+' FPS · meta 16 · progresso temporário · sem som';fpsStart=lastFrame;fpsFrames=0;}const delay=Math.max(0,Math.max(1000/16,data.wait||60)-(data.elapsed||15));setTimeout(()=>send({type:'nextFrame'}),delay);}}
   else if(data.type==='storeNotice'){storeWasPaused=paused;storeOpen=true;setPaused(true);$('store-notice').hidden=false;$('close-store').focus();}
   else if(data.type==='pauseState')$('pause').setAttribute('aria-pressed',data.value?'true':'false');
   else if(data.type==='error'){clearTimeout(loadTimer);showError(data.message);}
@@ -90,7 +92,7 @@ for(const button of document.querySelectorAll('[data-key]')){
  for(const type of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(type,event=>{sources.release('pointer:'+event.pointerId);button.classList.remove('active');});
  button.addEventListener('contextmenu',event=>event.preventDefault());
 }
-canvas.addEventListener('pointerdown',event=>{if(!ready||paused||surfacePointer!==null)return;event.preventDefault();canvas.setPointerCapture(event.pointerId);surfacePointer=event.pointerId;lastPoint=mapPoint(event.clientX,event.clientY,canvas.getBoundingClientRect());send({type:'touch',...lastPoint,phase:0});});
+canvas.addEventListener('pointerdown',event=>{if(!ready||paused||surfacePointer!==null)return;event.preventDefault();canvas.setPointerCapture(event.pointerId);surfacePointer=event.pointerId;lastPoint=mapPoint(event.clientX,event.clientY,canvas.getBoundingClientRect());send({type:'touch',...lastPoint,phase:0});if(Number(canvas.dataset.frame||0)<80){send({type:'key',key:17,down:true});setTimeout(()=>send({type:'key',key:17,down:false}),50);}});
 canvas.addEventListener('pointermove',event=>{if(event.pointerId!==surfacePointer)return;lastPoint=mapPoint(event.clientX,event.clientY,canvas.getBoundingClientRect());send({type:'touch',...lastPoint,phase:2});});
 for(const type of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(type,event=>{if(event.pointerId!==surfacePointer)return;send({type:'touch',...lastPoint,phase:1});surfacePointer=null;});
 canvas.addEventListener('contextmenu',event=>event.preventDefault());

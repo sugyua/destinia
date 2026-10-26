@@ -28,54 +28,8 @@ export class DifficultyWeb {
   }
 
   install() {
-    const r = this.engine;
-    if (!r?.e || !r?.uc) return;
-    const BASE = r.BASE;
-
-    try {
-      // Hook no spawn de monstros (+0x12444): se Abissal, ativa aura de elite (+0x4c = 1)
-      const atSpawn = BASE + 0x12444;
-      r.e.hook_add(r.uc.HOOK_CODE, () => {
-        try {
-          if (this.currentTier === DifficultyTier.Abissal) {
-            const monster = r.r(0);
-            if (monster > 0) {
-              r.put32(monster + 0x4c, 1);
-            }
-          }
-        } catch (err) { r.error = err; }
-      }, null, atSpawn, atSpawn);
-
-      // Hook em dropItem (+0x16b7c): se Abissal, suprime temporariamente o bônus de raridade de elite
-      const atDrop = BASE + 0x16b7c;
-      r.e.hook_add(r.uc.HOOK_CODE, () => {
-        try {
-          if (this.currentTier === DifficultyTier.Abissal) {
-            const monster = r.r(0);
-            if (monster > 0) {
-              this._savedElite = r.get32(monster + 0x4c);
-              r.put32(monster + 0x4c, 0);
-            }
-          }
-        } catch (err) { r.error = err; }
-      }, null, atDrop, atDrop);
-
-      // Hook no retorno de dropItem (+0x16d6c): restaura a flag de elite
-      const atRestore = BASE + 0x16d6c;
-      r.e.hook_add(r.uc.HOOK_CODE, () => {
-        try {
-          if (this.currentTier === DifficultyTier.Abissal && this._savedElite !== undefined) {
-            const monster = r.r(0);
-            if (monster > 0) {
-              r.put32(monster + 0x4c, this._savedElite);
-            }
-            this._savedElite = undefined;
-          }
-        } catch (err) { r.error = err; }
-      }, null, atRestore, atRestore);
-    } catch (e) {
-      console.warn("[DifficultyWeb] Hooking warning:", e);
-    }
+    // No ambiente Web, mantemos a seleção e interface leves sem instalar hooks de ARM
+    // pesados em 0x12444 / 0x16b7c que degradam o compilador JIT do Unicorn.js em navegadores móveis.
   }
 
   onBossDefeated(species) {
