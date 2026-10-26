@@ -14,7 +14,7 @@ process.on('exit',()=>fs.rmSync(vendorTemp,{recursive:true,force:true}));
 const root=process.env.DESTINIA_GAME_ROOT||'/workspace/destinia-06/game';
 const assets=new Map(fs.readdirSync(root+'/assets').map(n=>[n,new Uint8Array(fs.readFileSync(root+'/assets/'+n))]));
 const uc=await factory();
-function make(options){return new DestiniaWeb(uc,assets,{language:'en',...options});}
+function make(options){return new DestiniaWeb(uc,assets,{width:400,height:240,language:'en',...options});}
 function invoke(r,name,args){args.forEach((n,i)=>r.w(i,n));r.handlers.get(r.imports.get(name))();return r.r(0);}
 test('recusa ELF que nao seja ARM original antes de executar',()=>{const r=make();try{assert.throws(()=>r.load(new Uint8Array(52)),/ELF/);}finally{r.close();}});
 test('inicializa a biblioteca original e produz framebuffer real com toque',()=>{const r=make();try{r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();for(let i=0;i<10;i++)r.step();const b=r.framebuffer();assert.equal(b.length,192000);assert.ok(b.some(n=>n));r.touch(200,190,0);r.touch(200,190,1);r.step();assert.equal(r.frame,11);}finally{r.close();}});

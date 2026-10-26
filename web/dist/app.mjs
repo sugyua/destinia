@@ -1,3 +1,4 @@
+import {lootOptions as validateLootOptions} from './loot-qol.mjs';
 import {TouchVisibility,toggleFullscreen} from './display.mjs';
 import {WebGamepad} from './gamepad.mjs';
 import {preferredLanguage} from './language.mjs';
@@ -15,6 +16,18 @@ const touchVisibility=new TouchVisibility(virtualControls);
 function updateVirtualControls(){const button=$('virtual-controls');button.textContent=virtualControls?'Ocultar botões do jogo':'Mostrar botões do jogo';button.setAttribute('aria-pressed',String(!virtualControls));}
 updateVirtualControls();
 const send=message=>{if(worker)worker.postMessage(message);};
+let lootOptions=validateLootOptions();try{const stored=localStorage.getItem('destinia.lootQol.v1');if(stored)lootOptions=validateLootOptions(JSON.parse(stored));}catch{$('loot-status').textContent='Preferências de loot inválidas ou indisponíveis; assistência desligada.';}
+function displayLootOptions(){for(const [id,key] of [['loot-visual','visual'],['loot-gold','autoGold'],['loot-materials','autoMaterials']])$(id).checked=lootOptions[key];$('loot-rank').value=lootOptions.minRank;$('loot-radius').value=lootOptions.radius;document.querySelectorAll('[data-loot-category]').forEach(input=>input.checked=!!(lootOptions.categories&Number(input.dataset.lootCategory)));}
+displayLootOptions();
+for(const type of ['keydown','keyup'])$('loot-settings').addEventListener(type,event=>event.stopPropagation());
+$('loot-settings').addEventListener('focusin',()=>sources.clear());
+$('loot-settings').addEventListener('change',()=>{try{
+ const categories=[...document.querySelectorAll('[data-loot-category]')].reduce((mask,input)=>mask|(input.checked?Number(input.dataset.lootCategory):0),0);
+ const next=validateLootOptions({visual:$('loot-visual').checked,autoGold:$('loot-gold').checked,autoMaterials:$('loot-materials').checked,categories,minRank:Number($('loot-rank').value),radius:Number($('loot-radius').value)});
+ lootOptions=next;send({type:'lootOptions',options:next});try{localStorage.setItem('destinia.lootQol.v1',JSON.stringify(next));$('loot-status').textContent='Preferências guardadas neste navegador.';}catch{$('loot-status').textContent='Preferências ativas só nesta sessão; armazenamento indisponível.';}
+ }catch(error){$('loot-status').textContent=error.message;displayLootOptions();}});
+window.addEventListener('blur',()=>send({type:'lootFocus',focused:false}));window.addEventListener('focus',()=>send({type:'lootFocus',focused:true}));
+
 const sources=new InputSources((key,down)=>send({type:'key',key,down}));
 const dropSources=new Set();
 function dropSource(source,on){if(on)dropSources.add(source);else dropSources.delete(source);const enabled=dropSources.size>0;$('drop-names').setAttribute('aria-pressed',String(enabled));send({type:'dropNames',enabled});}
@@ -49,7 +62,7 @@ function boot(){
   else if(data.type==='error'){clearTimeout(loadTimer);showError(data.message);}
   else if(data.type==='ended'){$('status').textContent='O jogo encerrou. Use Reiniciar para outro teste.';ready=false;release();}
  };
- worker.postMessage({type:'start',virtualControls:touchVisibility.gameVisible,gameMode,uiScale,language});
+ worker.postMessage({type:'start',virtualControls:touchVisibility.gameVisible,gameMode,uiScale,language,lootOptions,lootFocused:document.hasFocus()});
 }
 $('virtual-controls').addEventListener('click',()=>{
  if(!ready)return;release();virtualControls=!virtualControls;

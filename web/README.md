@@ -17,3 +17,7 @@ HTML/JS estáticos em dist, sem compilação. Python3 para tools/pack_game.py; N
 Os dados originais não acompanham o espelho GitHub: forneça o APK extraído compatível e execute `python tools/pack_game.py --game /caminho/game --out dist/game`. Biblioteca revisada SHA-256 f12f1d20ab42646ef81df27516851acccb9fffe7be07a054db83890d992df7e9. Respeite as licenças/direitos dos recursos. Emulador Unicorn.js2.1.4 e licença em dist/vendor, origem e alterações documentadas ali.
 
 Sirva dist por HTTP(S), por exemplo `python -m http.server 8000 --directory dist`. `DESTINIA_GAME_ROOT=/caminho/game npm test` valida com dados originais locais; navegadores exigem HTTPS para Gamepad API em dispositivos remotos.
+
+## Frente 4 — QoL candidata 0.9.9, não publicada
+
+A seção **Itens no chão e coleta** configura destaque/categorias/rank e autoloot separado de ouro/materiais, todos desligados por padrão. Preferências em localStorage `destinia.lootQol.v1`; se armazenamento falhar, ajuste permanece apenas na sessão e a interface informa. Nenhuma preferência é gravada em save*.dat ou enviada à sincronização Drive. A assistência usa a rotina ARM original e o alcance nativo, respeita capacidade, foco/pausa/menus e não recolhe equipamentos/poções/quest. [Contrato e testes](../docs/LOOT_QOL.md). Fontes atualizadas nesta branch; nenhum deployment desta candidata foi realizado. URL privada existente preservada.

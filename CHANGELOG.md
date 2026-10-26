@@ -4,6 +4,14 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.9.9 Beta — candidata, Frente 4 (não publicada)
+
+- Filtro visual de drops opcional: cores/marcadores por categoria e rank, máscara de categorias e rank mínimo de equipamento. Oculta somente sprites, nomes e marcadores; processamento de existência/expiração e coleta manual permanecem nativos.
+- Autoloot opcional e separado para ouro e materiais de fabricação confirmados nas tabelas originais. Desligado por padrão, raio configurável de 1–19 pixels por eixo, um alvo por ciclo de quatro frames e espera de 32 frames após tentativa sem coleta. Não coleta equipamento, poções, receitas ou itens de missão; mochila cheia mantém o material no chão.
+- Coleta usa o caminho ARM original, limitado ao alvo elegível e encerrado antes de interações com NPC/ataques. Pausa, menus/transições e perda de foco suspendem assistência. Configuração em config.ini no PC e controles/localStorage na web, sem novo formato ou gravação direta em save*.dat.
+- Classificação usa a tabela original antes da tradução PT-BR. Testes ARM em host/host_zoom e web 400×240/800×480, inclusive PT-BR, cobrem capacidade, não duplicação, filtro sem alteração extra de Game e nenhuma chamada a NPC/ataque/save. Validação física de campanha/controle permanece pendente.
+- Suíte legada Node declara explicitamente a fixture 400×240 após a migração prévia do produto para 800×480; o padrão da engine web continua 800×480 e novos casos validam ambas as bases. README, preferências e allowlist de fontes atualizados; release/deployment aguardam integração/revisão.
+
 ## 0.9.8 Beta — 25/10/2026
 
 - Equipamentos podem receber/remover proteção pelo painel FILTROS, botão PROT/DESPROT, F7 livre e ação extra do controle. Indicador `[P]` e nome dourado; seleção normal para equipar preservada.

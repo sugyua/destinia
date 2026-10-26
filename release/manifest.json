@@ -209,6 +209,16 @@
     "tests/inventory_favorite_cases.cpp",
     "tests/codex_boss_cases.cpp",
     "web/tests/inventory-favorite.test.mjs",
-    "web/tests/codex-boss-filter.test.mjs"
+    "web/tests/codex-boss-filter.test.mjs",
+    "common/loot_qol.h",
+    "common/loot_qol_runtime.h",
+    "docs/LOOT_QOL.md",
+    "docs/superpowers/plans/2026-10-26-qol-loot.md",
+    "tests/loot_qol_cases.cpp",
+    "tests/loot_qol_native.cpp",
+    "tests/test_loot_qol.py",
+    "web/dist/loot-qol.mjs",
+    "web/tests/loot-qol.test.mjs",
+    "web/tests/loot-qol-arm.test.mjs"
   ]
 }

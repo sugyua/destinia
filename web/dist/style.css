@@ -9,3 +9,5 @@ body.expanded{position:fixed;inset:0;z-index:10;height:100dvh;min-height:0;overf
 
 header{height:auto;min-height:44px;flex-wrap:wrap;gap:8px}.tools{flex-wrap:wrap;max-width:100%}footer{flex-shrink:0;flex-wrap:wrap}
 @supports(width:1cqw){body.controller-mode{height:100dvh;overflow:hidden}.controller-mode main{container-type:size}.controller-mode .surface,html:fullscreen body.controller-mode .surface,body.expanded.controller-mode .surface{width:min(100cqw,calc(100cqh * 5 / 3))}}
+
+#loot-settings{margin:8px 12px;padding:10px 12px;border:1px solid #ffffff25;border-radius:10px;background:#171d29;font-size:13px;flex-shrink:0;max-width:calc(100% - 24px)}#loot-settings summary{cursor:pointer;color:var(--accent);font-weight:600}#loot-settings label{display:inline-flex;align-items:center;gap:5px;margin:7px 10px 0 0;max-width:100%}#loot-settings input[type=number]{width:58px}#loot-settings p{font-size:12px;line-height:1.5;color:var(--muted)}#loot-settings select,#loot-settings input[type=number]{color:inherit;background:#1b2230;border:1px solid #ffffff25;border-radius:4px;padding:4px}#loot-status{display:block;color:var(--accent)}

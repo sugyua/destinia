@@ -9,6 +9,25 @@
 
 **[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
 
+## Candidata 0.9.9 — Frente 4: filtro visual e coleta opcional
+
+O **filtro visual de drops** destaca equipamentos com as cores do rank, materiais em ciano, ouro em amarelo e itens de missão em laranja. Categorias e rank mínimo de equipamento podem ser ocultados **apenas no desenho**, sem apagar drops ou mudar a coleta manual. A coleta automática de **ouro e materiais de fabricação** é opcional, desligada por padrão e independente do filtro visual. Mantém o alcance original (até 19 pixels por eixo), usa as verificações nativas de capacidade e não coleta equipamentos, poções, receitas ou itens de missão. A mochila cheia conserva o material no chão; tentativas malsucedidas têm intervalo para evitar repetição de mensagens.
+
+**PC:** com o jogo fechado, mescle as chaves abaixo no `config.ini` existente em `%LOCALAPPDATA%\Destinia` (ou o arquivo passado em `--settings`), preservando `save_dir` e as demais preferências. Reinicie para aplicar. Os dois hosts compartilham estas opções; não é preciso alterar o BAT pessoal.
+
+```ini
+drops.filtro_visual=1
+drops.categorias=31
+drops.rank_minimo=0
+coleta.ouro=0
+coleta.materiais=0
+coleta.raio=19
+```
+
+`drops.categorias` soma **1 equipamentos + 2 materiais + 4 ouro + 8 missão + 16 outros**; 31 mostra todos e 0 oculta todos quando o filtro está ativo. `drops.rank_minimo` aceita 0–4 e só filtra equipamentos. `coleta.raio` aceita 1–19, nunca amplia a distância nativa. Ative ouro/materiais com 1; volte a 0 para coleta manual. Opções são gravadas fora dos `save*.dat`; itens coletados entram na memória do jogo pelo coletor original e serão salvos pelo fluxo normal quando o jogador salvar, sem mudar o formato.
+
+**Web:** abra **Itens no chão e coleta** para ajustar as mesmas opções; as preferências ficam neste navegador, separadas dos saves/Google Drive. Pausa, menus/transições e perda de foco suspendem a assistência. **Fontes web da candidata 0.9.9 atualizadas e testadas localmente; deployment não realizado por esta frente.** URL existente: [teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site/). Release, VERSION/manifesto da nova versão e deployment pertencem à integração do Maestro após revisão do Sentinel; nenhuma publicação 0.9.9 é declarada aqui. [Testes, contrato ARM e limites](docs/LOOT_QOL.md).
+
 ## 0.9.8 — Proteção de equipamentos, separação de chefes no Códex e Web Destinia Zoom
 
 - **Favoritar/Proteger equipamentos (Sidecar)**: Proteção persistente de itens por personagem/pool/fingerprint gravada em `inventory-protect-v1.txt` (PC) e `localStorage` (Web). Itens protegidos recebem o indicador visual `[P]` e o botão alternador `PROT/DESPROT` (tecla F7/atalho extra). Venda rápida ou acidental bloqueada nativamente no estado `0x91040004` com guarda ARM de confirmação. Os arquivos `save*.dat` originais permanecem 100% intocados e compatíveis com a sincronização do Google Drive. [Evidências e limites](docs/INVENTORY_PROTECTION.md).
