@@ -1,6 +1,6 @@
 {
   "version": "0.10.2",
-  "base_commit": "61aa3780da71ad44b725cabe05a9d2f0603e4a38",
+  "base_commit": "a779e7044081c0d9a7c28cbb89577172f1b97b71",
   "files": [
     ".gitignore",
     "AGENTS.md",
