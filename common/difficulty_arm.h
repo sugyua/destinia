@@ -22,6 +22,7 @@ class DifficultyArmRuntime {
  std::map<U,Health> health;
  std::map<U,unsigned> deadTier;
  std::map<U,U> xpFrames,goldFrames;
+ std::map<U,std::pair<U,U>> abyssalEliteRestore;
  std::vector<uc_hook> hooks;
  template<class T>T read(U address)const{T value{};if(uc_mem_read(engine,address,&value,sizeof value)!=UC_ERR_OK)throw std::runtime_error("difficulty: invalid ARM read");return value;}
  template<class T>void write(U address,T value){if(uc_mem_write(engine,address,&value,sizeof value)!=UC_ERR_OK)throw std::runtime_error("difficulty: invalid ARM write");}
@@ -52,6 +53,9 @@ class DifficultyArmRuntime {
   // Mon_initMonster itself copies max HP (+0x24) to current HP (+0x20).
   // A respawn must reuse the original base, never the previously scaled max.
   if(raw!=scaled)write<int32_t>(monster+0x24,scaled);
+  if(activeTier()==4&&read<uint16_t>(monster+8)<=109&&read<uint16_t>(monster+0xa)<200){
+   write<uint32_t>(monster+0x4c,1);
+  }
   health[monster]={s,species,kind,original,scaled,factor,activeTier()};deadTier.erase(monster);
  }
  static void hook(uc_engine*,uint64_t pc,uint32_t,void* context){
@@ -69,9 +73,23 @@ class DifficultyArmRuntime {
   if(off==0x133b2){if(campaign(reg(UC_ARM_REG_R6))){const auto factor=active().attack;if(factor!=progression::Basis){const auto value=progression::scale(reg(UC_ARM_REG_R8),factor);progression::require(value<=INT32_MAX,"difficulty: damage exceeds signed ARM32");set(UC_ARM_REG_R8,U(value));}}return;}
   if(off==0x123f0){if(xpFrames.size()>=64)throw std::runtime_error("difficulty: XP call depth");xpFrames[reg(UC_ARM_REG_SP)]=campaign(reg(UC_ARM_REG_R0))?reward(reg(UC_ARM_REG_R0)).xp:progression::Basis;return;}
   if(off==0x12430){const auto key=reg(UC_ARM_REG_SP)+8;auto frame=xpFrames.find(key);if(frame!=xpFrames.end()){const auto factor=frame->second;xpFrames.erase(frame);if(factor!=progression::Basis)set(UC_ARM_REG_R0,progression::checkedArmXp(progression::scale(reg(UC_ARM_REG_R0),factor)));}return;}
-  if(off==0x16b7c){if(goldFrames.size()>=64)throw std::runtime_error("difficulty: drop call depth");goldFrames[reg(UC_ARM_REG_SP)]=campaign(reg(UC_ARM_REG_R2))?reward(reg(UC_ARM_REG_R2)).gold:progression::Basis;return;}
+  if(off==0x16b7c){
+   if(goldFrames.size()>=64)throw std::runtime_error("difficulty: drop call depth");
+   const U m=reg(UC_ARM_REG_R2);
+   goldFrames[reg(UC_ARM_REG_SP)]=campaign(m)?reward(m).gold:progression::Basis;
+   if(campaign(m)&&reward(m).hp>=60000){
+    const U elite=read<U>(m+0x4c);
+    if(elite!=0){abyssalEliteRestore[reg(UC_ARM_REG_SP)]={m,elite};write<U>(m+0x4c,0);}
+   }
+   return;
+  }
   if(off==0x16e96){auto frame=goldFrames.find(reg(UC_ARM_REG_SP)+0x38);if(frame!=goldFrames.end()&&frame->second!=progression::Basis){const auto value=progression::checkedU32(progression::scale(reg(UC_ARM_REG_R0),frame->second));set(UC_ARM_REG_R0,progression::checkedArmU16(value));}return;}
-  if(off==0x16d6c){goldFrames.erase(reg(UC_ARM_REG_SP)+0x38);return;}
+  if(off==0x16d6c){
+   goldFrames.erase(reg(UC_ARM_REG_SP)+0x38);
+   auto it=abyssalEliteRestore.find(reg(UC_ARM_REG_SP)+0x38);
+   if(it!=abyssalEliteRestore.end()){write<U>(it->second.first+0x4c,it->second.second);abyssalEliteRestore.erase(it);}
+   return;
+  }
  }
 public:
  std::string error;
@@ -80,7 +98,7 @@ public:
   auto found=deadTier.find(monster);if(found!=deadTier.end())return found->second;
   auto h=health.find(monster);const auto d=h!=health.end()?h->second.difficulty:activeTier();deadTier[monster]=d;return d;
  }
- void endCall(){xpFrames.clear();goldFrames.clear();}
+ void endCall(){xpFrames.clear();goldFrames.clear();abyssalEliteRestore.clear();}
  // Validate the next choice before committing it to disk. No ARM mutation here.
  void validateProfile(unsigned s,const progression::Multipliers& next)const{
   for(const auto& pair:health){const auto& h=pair.second;if(h.slot==s&&campaign(pair.first)&&read<int32_t>(pair.first+0x24)==h.scaled)scaledHealth(h.base,next.hp);}
