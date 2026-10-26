@@ -8,6 +8,6 @@ export class DropNames {
  if(pc===RETURN){this.drawing=false;r.e.reg_write_i32(r.uc.ARM_REG_LR,this.caller);setpc(this.caller);return;}
  if(pc===BASE+0x166e0){if(this.enabled&&!this.drawing){this.drawing=true;this.caller=lr();r.e.reg_write_i32(r.uc.ARM_REG_LR,RETURN|1);}return;}
  if(!this.drawing)return;const game=r.exports.get('Game'),index=r.r(0);let visible=false;
- if(index<20&&r.read(game+0x3e76+index,1)[0]>0&&r.read(game+0x3e76+index,1)[0]<128){const entry=game+0x3e90+index*60,x=r.get16(entry+40,true)-r.get16(game+0x4878,true),y=r.get16(entry+42,true)-r.get16(game+0x487a,true);visible=x>=0&&x<400&&y>=0&&y<240;}
+ if(index<20&&r.read(game+0x3e76+index,1)[0]>0&&r.read(game+0x3e76+index,1)[0]<128){const entry=game+0x3e90+index*60,x=r.get16(entry+40,true)-r.get16(game+0x4878,true),y=r.get16(entry+42,true)-r.get16(game+0x487a,true);visible=x>=0&&x<(this.r.width||800)&&y>=0&&y<(this.r.height||480);}
  r.w(0,visible?1:0);setpc(lr());}
 }

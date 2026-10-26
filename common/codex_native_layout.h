@@ -5,6 +5,15 @@ inline CodexRect nativeCodexRect(int x,int y,int w,int h,int sw,int sh){return {
 inline UiTransform nativeCodexTransform(int w,int h,int percent){return {w,h,percent,UiAnchor::Center,255,240,(w-400)/2+84,(h-240)/2};}
 inline int nativeCodexTab(int x,int y,int w,int h){x-=(w-400)/2;y-=(h-240)/2;return x>=86&&x<339&&y>=0&&y<24?(x>=304?9:std::max(0,std::min(8,(x-102)/23))):-1;}
 inline CodexRect nativeCodexBack(int w,int h){return nativeCodexRect(272,29,34,18,w,h);}
+inline CodexRect nativeCodexFilterTab(int filter,int w,int h){
+ if(filter==0) return nativeCodexRect(136,31,44,14,w,h);
+ if(filter==1) return nativeCodexRect(184,31,52,14,w,h);
+ return nativeCodexRect(240,31,50,14,w,h);
+}
+inline int nativeCodexFilterHit(int x,int y,int w,int h){
+ for(int f=0;f<3;++f) if(nativeCodexFilterTab(f,w,h).contains(x,y)) return f;
+ return -1;
+}
 inline CodexRect nativeCodexPrevious(int w,int h){return nativeCodexRect(92,215,62,20,w,h);}
 inline CodexRect nativeCodexNext(int w,int h){return nativeCodexRect(249,215,58,20,w,h);}
 inline CodexRect nativeCodexInfo(int w,int h){return nativeCodexRect(238,189,69,20,w,h);}

@@ -1,10 +1,12 @@
 // Discovery data only. This web prototype keeps its Codex in session memory.
 export class Codex {
- constructor(names=new Map()){this.names=names;this.characters=new Map();this.counted=new Set();this.slot=-1;}
+ constructor(names=new Map()){this.names=names;this.characters=new Map();this.counted=new Set();this.slot=-1;this.filter=0;}
  select(slot){if(!Number.isInteger(slot)||slot<0||slot>9)return;if(slot!==this.slot){this.slot=slot;this.counted.clear();}}
  respawn(instance){this.counted.delete(instance);}
  newMap(){this.counted.clear();}
  erase(slot){this.characters.delete(slot);this.counted.clear();}
+ isBoss(id){return Number.isInteger(id)&&id>=100;}
+ setFilter(filter){this.filter=Math.max(0,Math.min(2,Number(filter)||0));}
  observe(instance,id,killed,facts=null){
   if(this.slot<0||!this.names.has(id))return;
   if(!this.characters.has(this.slot))this.characters.set(this.slot,new Map());
@@ -17,8 +19,19 @@ export class Codex {
   if(killed&&!this.counted.has(instance)){this.counted.add(instance);const r=records.get(id);r.kills=Math.min(4294967295,r.kills+1);}
  }
  facts(id){const f=this.characters.get(this.slot)?.get(id)?.facts;return f?{...f,locations:f.locations.map(x=>({...x}))}:null;}
- catalog(){const records=this.characters.get(this.slot);return [...this.names].sort(([a],[b])=>a-b).map(([id,name])=>{const record=records?.get(id);return {id,name:record?name:'??????',found:!!record,kills:record?.kills||0};});}
- rows(){return [...(this.characters.get(this.slot)?.values()||[])].sort((a,b)=>a.id-b.id).map(r=>({...r}));}
+ catalog(filter=this.filter){
+  const records=this.characters.get(this.slot);
+  return [...this.names]
+   .filter(([id])=>filter===1?id<100:filter===2?id>=100:true)
+   .sort(([a],[b])=>a-b)
+   .map(([id,name])=>{
+    const record=records?.get(id);
+    const item={id,name:record?name:'??????',found:!!record,kills:record?.kills||0};
+    Object.defineProperty(item,'isBoss',{value:id>=100,enumerable:false,configurable:true});
+    return item;
+   });
+ }
+ rows(){return [...(this.characters.get(this.slot)?.values()||[])].sort((a,b)=>a.id-b.id).map(r=>({...r,isBoss:r.id>=100}));}
 }
 export function monsterNames(bytes){
  if(!bytes||bytes.length!==3840)throw Error('Tabela de monstros incompatível.');const names=new Map();

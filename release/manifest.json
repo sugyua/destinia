@@ -1,5 +1,5 @@
 {
-  "version": "0.9.7",
+  "version": "0.9.8",
   "base_commit": "21360fc7967414896eca15c1b9709a781c342e72",
   "files": [
     ".gitignore",
@@ -203,6 +203,12 @@
     "release/NOTAS_0.9.4.md",
     "release/NOTAS_0.9.5.md",
     "release/NOTAS_0.9.6.md",
-    "release/NOTAS_0.9.7.md"
+    "release/NOTAS_0.9.7.md",
+    "release/NOTAS_0.9.8.md",
+    "docs/INVENTORY_PROTECTION.md",
+    "tests/inventory_favorite_cases.cpp",
+    "tests/codex_boss_cases.cpp",
+    "web/tests/inventory-favorite.test.mjs",
+    "web/tests/codex-boss-filter.test.mjs"
   ]
 }

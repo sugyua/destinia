@@ -10,6 +10,16 @@ export const codexCell=(index,width=400,height=240)=>{const g=codexGrid(width,he
 export const codexDetails=(width=400,height=240)=>{const p=codexPanel(width,height);return {x:p.x+8,y:p.y+167,w:344,h:23};};
 export const codexPrevious=(width=400,height=240)=>{const p=codexPanel(width,height);return {x:p.x+4,y:p.y+192,w:90,h:20};};
 export const codexNext=(width=400,height=240)=>{const p=codexPanel(width,height);return {x:p.x+280,y:p.y+192,w:76,h:20};};
+export const codexFilterTab=(filter=0,width=400,height=240)=>{
+ const p=codexPanel(width,height);
+ if(filter===0)return {x:p.x+136,y:p.y+6,w:44,h:14};
+ if(filter===1)return {x:p.x+184,y:p.y+6,w:52,h:14};
+ return {x:p.x+240,y:p.y+6,w:50,h:14};
+};
+export const codexFilterHit=(x,y,width=400,height=240)=>{
+ for(let f=0;f<3;f++)if(contains(codexFilterTab(f,width,height),x,y))return f;
+ return -1;
+};
 export const detailRowsPerPage=7;
 // Each group starts a fresh subpage, even when the previous one has free rows.
 export function detailListPages(section){
@@ -25,7 +35,7 @@ export function codexHitTest(x,y,count,page=0,width=400,height=240){
  return -1;
 }
 export function codexTransform(width,height,percent,open){const p=codexPanel(width,height);return open?new UiTransform(width,height,percent,'Center',p.w,p.h,p.x,p.y):new UiTransform(width,height,percent,'Center',232,240);}
-export function paintCodex(pixels,rows,{open=false,inMenu=false,selected=false,page=0,selectedIndex=0,detailsOpen=false,detailData=null,detailPage=0,detailScroll=0,portraits=new Map(),width=400,height=240,uiPercent=100}={}){
+export function paintCodex(pixels,rows,{open=false,inMenu=false,selected=false,page=0,selectedIndex=0,detailsOpen=false,detailData=null,detailPage=0,detailScroll=0,portraits=new Map(),width=400,height=240,uiPercent=100,filter=0}={}){
  if(!open&&!inMenu)return;
  const dark=0x1946,gold=0xe5b2,white=0xe71c,muted=0x8c92,border=0x6b6b;
  const transform=codexTransform(width,height,uiPercent,open);
@@ -37,7 +47,12 @@ export function paintCodex(pixels,rows,{open=false,inMenu=false,selected=false,p
  const b=menuButton(width,height);rect(b.x,b.y,b.w,b.h,selected||open?gold:border);rect(b.x+1,b.y+1,b.w-2,b.h-2,dark);rect(b.x+6,b.y+6,13,12,gold);rect(b.x+7,b.y+7,5,9,dark);rect(b.x+13,b.y+7,5,9,dark);text(b.x+24,b.y+9,'CODEX',selected||open?gold:white);
  if(!open)return;
  const {x,y,w,h}=codexPanel(width,height),ink=0,slot=0xbdd7,paper=0xe71c;
- rect(x,y,w,h,border);rect(x+2,y+2,w-4,h-4,paper);rect(x+5,y+5,w-10,17,0);text(x+12,y+10,'CODEX - MONSTROS',gold);text(x+305,y+10,'VOLTAR',white);
+ rect(x,y,w,h,border);rect(x+2,y+2,w-4,h-4,paper);rect(x+5,y+5,w-10,17,0);text(x+12,y+10,'CODEX',gold);text(x+305,y+10,'VOLTAR',white);
+ for(let f=0;f<3;f++){
+  const tab=codexFilterTab(f,width,height),active=f===filter;
+  rect(tab.x,tab.y,tab.w,tab.h,active?gold:border);rect(tab.x+1,tab.y+1,tab.w-2,tab.h-2,dark);
+  text(tab.x+3,tab.y+4,['TODOS','COMUNS','CHEFES'][f],active?gold:muted);
+ }
  page=Math.max(0,Math.min(Math.floor(page),Math.max(0,Math.ceil(rows.length/entriesPerPage)-1)));
  if(detailsOpen){
   const row=rows[selectedIndex],found=row?.found===true,info=found?detailData:null;
@@ -48,7 +63,8 @@ export function paintCodex(pixels,rows,{open=false,inMenu=false,selected=false,p
    const dw=Math.max(1,Math.floor(56*art.width/Math.max(art.width,art.height))),dh=Math.max(1,Math.floor(56*art.height/Math.max(art.width,art.height)));
    for(let yy=0;yy<dh;yy++)for(let xx=0;xx<dw;xx++){const c=art.pixels[Math.floor(yy*art.height/dh)*art.width+Math.floor(xx*art.width/dw)];if(c&0x10000)pixel(x+14+Math.floor((56-dw)/2)+xx,y+30+Math.floor((56-dh)/2)+yy,c);}
   }else text(x+32,y+46,'?',0x4208,2);
-  text(x+82,y+30,found?row.name:'??????',0);text(x+82,y+44,'HP MAX: '+(info?.hp||'??????'),0);
+  const bossTag=row?.id>=100||row?.isBoss?'[CHEFE] ':'';
+  text(x+82,y+30,found?bossTag+row.name:'??????',row?.id>=100||row?.isBoss?gold:0);text(x+82,y+44,'HP MAX: '+(info?.hp||'??????'),0);
   text(x+82,y+58,found?'MORTOS: '+row.kills:'MORTOS: 0',0);text(x+82,y+74,(info?.notes||'???????').slice(0,43),border);
   const sections=info?.sections||[{title:'INFORMACOES',lines:['MONSTRO AINDA NAO ENCONTRADO']}],pages=Math.max(1,sections.length);detailPage=Math.max(0,Math.min(detailPage,pages-1));
   const section=sections[detailPage],listPages=detailListPages(section),lists=listPages.length;detailScroll=Math.max(0,Math.min(detailScroll,lists-1));const list=listPages[detailScroll];
@@ -61,23 +77,22 @@ export function paintCodex(pixels,rows,{open=false,inMenu=false,selected=false,p
    text(up.x+19,up.y+5,'SUBIR',detailScroll?0:muted);text(down.x+17,down.y+5,'DESCER',detailScroll+1<lists?0:muted);text(x+145,y+179,(section.groups?'DROP ':'LISTA ')+(detailScroll+1)+'/'+lists,border);
   }
   text(x+12,y+198,'ANTERIOR',detailPage?0:muted);text(x+145,y+198,'PAG '+(detailPage+1)+'/'+pages,border);text(x+298,y+198,'PROXIMA',detailPage+1<pages?0:muted);return;
-
  }
- text(x+180,y+10,'ACAO: INFO',gold);
  const start=page*entriesPerPage,end=Math.min(start+entriesPerPage,rows.length);
  selectedIndex=Math.max(start,Math.min(Math.floor(selectedIndex),end-1));
  for(let i=start;i<end;i++){
-  const row=rows[i],cell=codexCell(i-start,width,height),active=i===selectedIndex;
-  rect(cell.x,cell.y,cell.w,cell.h,active?gold:border);rect(cell.x+1,cell.y+1,30,30,slot);
+  const row=rows[i],cell=codexCell(i-start,width,height),active=i===selectedIndex,isBoss=row.isBoss||row.id>=100;
+  rect(cell.x,cell.y,cell.w,cell.h,active?gold:isBoss?0xf800:border);rect(cell.x+1,cell.y+1,30,30,slot);
   const art=row.found===true?portraits.get(row.id):null;
   if(art&&art.width>0&&art.height>0&&art.pixels?.length===art.width*art.height){
    const dw=Math.max(1,Math.floor(30*art.width/Math.max(art.width,art.height))),dh=Math.max(1,Math.floor(30*art.height/Math.max(art.width,art.height)));
    for(let dy=0;dy<dh;dy++)for(let dx=0;dx<dw;dx++){const c=art.pixels[Math.floor(dy*art.height/dh)*art.width+Math.floor(dx*art.width/dw)];if(c&0x10000)pixel(cell.x+1+Math.floor((30-dw)/2)+dx,cell.y+1+Math.floor((30-dh)/2)+dy,c);}
   }else text(cell.x+11,cell.y+9,'?',0x4208,2);
+  if(isBoss)text(cell.x+2,cell.y+22,'B',gold);
  }
- const detail=codexDetails(width,height),row=rows[selectedIndex],found=row?.found===true;
+ const detail=codexDetails(width,height),row=rows[selectedIndex],found=row?.found===true,isBoss=row?.isBoss||row?.id>=100;
  rect(detail.x,detail.y,detail.w,detail.h,0xffff);rect(x+156,detail.y,1,detail.h,border);rect(x+254,detail.y,1,detail.h,border);
- text(x+12,y+169,'MONSTRO',border);text(x+164,y+169,'ESTADO',border);text(x+270,y+169,'MORTOS',border);
- text(x+12,y+180,found?String(row.name||'').slice(0,23):'??????',ink);text(x+164,y+180,found?'ENCONTRADO':'???????',ink);text(x+270,y+180,String(found?row.kills:0),ink);
+ text(x+12,y+169,isBoss?'CHEFE':'MONSTRO',isBoss?gold:border);text(x+164,y+169,'ESTADO',border);text(x+270,y+169,'MORTOS',border);
+ text(x+12,y+180,found?String(row.name||'').slice(0,23):'??????',isBoss?0x8000:ink);text(x+164,y+180,found?'ENCONTRADO':'???????',ink);text(x+270,y+180,String(found?row.kills:0),ink);
  text(x+12,y+198,'ANTERIOR',page?ink:muted);text(x+145,y+198,'PAG '+(page+1)+'/'+Math.max(1,Math.ceil(rows.length/entriesPerPage)),border);text(x+298,y+198,'PROXIMA',end<rows.length?ink:muted);
 }

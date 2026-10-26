@@ -19,6 +19,16 @@ inline CodexRect codexDetails(int width,int height){auto p=codexPanel(width,heig
 inline CodexRect codexPrevious(int width,int height){auto p=codexPanel(width,height);return {p.x+4,p.y+192,90,20};}
 inline CodexRect codexNext(int width,int height){auto p=codexPanel(width,height);return {p.x+280,p.y+192,76,20};}
 inline CodexRect codexBack(int width,int height){auto p=codexPanel(width,height);return {p.x+298,p.y+4,58,20};}
+inline CodexRect codexFilterTab(int filter,int width,int height){
+ auto p=codexPanel(width,height);
+ if(filter==0) return {p.x+136,p.y+6,44,14};
+ if(filter==1) return {p.x+184,p.y+6,52,14};
+ return {p.x+240,p.y+6,50,14};
+}
+inline int codexFilterHit(int x,int y,int width,int height){
+ for(int f=0;f<3;++f)if(codexFilterTab(f,width,height).contains(x,y))return f;
+ return -1;
+}
 constexpr size_t codexDetailRowsPerPage=7;
 inline CodexRect codexDetailUp(int width,int height){auto p=codexPanel(width,height);return {p.x+8,p.y+174,70,16};}
 inline CodexRect codexDetailDown(int width,int height){auto p=codexPanel(width,height);return {p.x+282,p.y+174,70,16};}

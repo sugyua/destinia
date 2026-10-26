@@ -2,7 +2,7 @@ import {TouchVisibility,toggleFullscreen} from './display.mjs';
 import {WebGamepad} from './gamepad.mjs';
 import {preferredLanguage} from './language.mjs';
 import {mapPoint,InputSources} from './input.mjs';
-const $=id=>document.getElementById(id),canvas=$('game'),context=canvas.getContext('2d',{alpha:false}),image=context.createImageData(400,240);
+const $=id=>document.getElementById(id),canvas=$('game'),context=canvas.getContext('2d',{alpha:false}),image=context.createImageData(800,480);
 let worker=null,ready=false,paused=false,surfacePointer=null,lastPoint={x:0,y:0},lastFrame=0,loadTimer=null,fpsFrames=0,fpsStart=0;
 let language="pt";try{language=preferredLanguage(localStorage.getItem("destinia.language"));}catch{}$("language").value=language;
 const uiScale=100; // Web usa apenas a escala nativa; ignora preferencia antiga sem apagar outros dados.
@@ -43,7 +43,7 @@ function boot(){
  worker.onmessage=event=>{const data=event.data;
   if(data.type==='ready'){clearTimeout(loadTimer);ready=true;$('virtual-controls').disabled=false;$('drop-names').disabled=false;lastFrame=performance.now();fpsStart=lastFrame;fpsFrames=0;$('loading').hidden=true;applyTouchVisibility();$('pause').disabled=false;$('restart').disabled=false;$('pause').textContent='Pausar';$('status').textContent='Experimental · progresso temporário · sem som';}
   else if(data.type==='status')$('loading-text').textContent=data.message;
-  else if(data.type==='frame'){lastFrame=performance.now();const b=data.pixels;for(let i=0;i<96000;i++){const p=b[i*2]|b[i*2+1]<<8,at=i*4;image.data[at]=((p>>11)&31)*255/31;image.data[at+1]=((p>>5)&63)*255/63;image.data[at+2]=(p&31)*255/31;image.data[at+3]=255;}context.putImageData(image,0,0);canvas.dataset.frame=String(data.frame);if(!paused){fpsFrames++;if(lastFrame-fpsStart>=1000){const fps=(fpsFrames*1000/(lastFrame-fpsStart)).toFixed(1);canvas.dataset.fps=fps;$('status').textContent=fps+' FPS · meta 16 · progresso temporário · sem som';fpsStart=lastFrame;fpsFrames=0;}}}
+  else if(data.type==='frame'){lastFrame=performance.now();const b=data.pixels;for(let i=0;i<384000;i++){const p=b[i*2]|b[i*2+1]<<8,at=i*4;image.data[at]=((p>>11)&31)*255/31;image.data[at+1]=((p>>5)&63)*255/63;image.data[at+2]=(p&31)*255/31;image.data[at+3]=255;}context.putImageData(image,0,0);canvas.dataset.frame=String(data.frame);if(!paused){fpsFrames++;if(lastFrame-fpsStart>=1000){const fps=(fpsFrames*1000/(lastFrame-fpsStart)).toFixed(1);canvas.dataset.fps=fps;$('status').textContent=fps+' FPS · meta 16 · progresso temporário · sem som';fpsStart=lastFrame;fpsFrames=0;}}}
   else if(data.type==='storeNotice'){storeWasPaused=paused;storeOpen=true;setPaused(true);$('store-notice').hidden=false;$('close-store').focus();}
   else if(data.type==='pauseState')$('pause').setAttribute('aria-pressed',data.value?'true':'false');
   else if(data.type==='error'){clearTimeout(loadTimer);showError(data.message);}

@@ -6,6 +6,8 @@
 #include <stdexcept>
 
 namespace destinia {
+inline bool isCodexBoss(int species) { return species >= 100; }
+enum class CodexCategoryFilter : int { All = 0, Common = 1, Bosses = 2 };
 struct CodexMonsterFacts {int maxHP=0,level=0;bool elite=false;std::set<std::string> locations;};
 struct CodexInfoLine {std::string text;uint16_t color=0xffff;};
 struct CodexInfoGroup {std::string id,title;std::vector<CodexInfoLine> rows;};

@@ -1,23 +1,22 @@
-# Destinia 0.9.7 Beta
+# Destinia 0.9.8 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.9.7 Beta — FC e comparador nativos](https://github.com/sugyua/destinia/releases/tag/v0.9.7-beta)** — ZIP Windows com dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
+**[Baixar Destinia 0.9.8 Beta — Proteção de Equipamentos e Chefes no Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.8-beta)** — ZIP Windows com dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**.
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
 
 **[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
 
-## Candidata 0.9.8 — Frente 1: equipamentos protegidos
+## 0.9.8 — Proteção de equipamentos, separação de chefes no Códex e Web Destinia Zoom
 
-No painel **FILTROS**, selecione um equipamento e use **PROT/DESPROT**, **F7** livre ou a ação extra do controle para alternar a proteção. `[P]` e o nome dourado identificam o item protegido. F7 abre o painel quando fechado; dentro dele alterna a proteção; **VOLTAR/Esc** fecha. O item continua visível e pode ser equipado, mas a seleção pelo painel e a confirmação original de venda/desmanche no contexto `0x91040004` ficam bloqueadas. A guarda cobre comandos externos e os gerados pelo toque ARM. Outros contextos de descarte/desmanche ainda exigem cuidado: esta frente protege especificamente esse estado verificado.
+- **Favoritar/Proteger equipamentos (Sidecar)**: Proteção persistente de itens por personagem/pool/fingerprint gravada em `inventory-protect-v1.txt` (PC) e `localStorage` (Web). Itens protegidos recebem o indicador visual `[P]` e o botão alternador `PROT/DESPROT` (tecla F7/atalho extra). Venda rápida ou acidental bloqueada nativamente no estado `0x91040004` com guarda ARM de confirmação. Os arquivos `save*.dat` originais permanecem 100% intocados e compatíveis com a sincronização do Google Drive. [Evidências e limites](docs/INVENTORY_PROTECTION.md).
+- **Separação de Monstros Comuns vs Chefes/Bosses no Códex**: Classificação nativa da engine (`species >= 100` para Chefes e `species < 100` para Monstros Comuns). Três abas de categoria implementadas no cabeçalho do Códex: `[TODOS]`, `[COMUNS]` e `[CHEFES]`. Grade de 8x4 e paginação recalculadas por categoria, com destaque visual diferenciado para chefes e navegação completa por toque, teclado e controle.
+- **Unificação da Versão Web com o Destinia Zoom**: Versão Web migrada para a base e layout do Destinia Zoom (`host_zoom`, 800x480 fixo), eliminando seletores de zoom dinâmico e unificando proporções e renderização entre PC e Web.
+- **Testes Automatizados**: Suíte completa de testes no Node.js (testes de runtime, inventário, Códex e novos casos dedicados) e casos de teste nativos em C++ aprovados. Validação física Windows/iPhone pendente.
 
-As marcações persistem no **sidecar `inventory-protect-v1.txt`**, na pasta de save ativa, separadas por personagem e por modo clássico/expandido. Os hosts compartilham o sidecar quando usam a mesma pasta; `save*.dat` e seu formato continuam intocados, compatíveis com o fluxo existente do Google Drive. Copie também o sidecar para transportar as proteções entre instalações; não há nova sincronização automática dele com o Drive. Versões antigas ignoram a proteção. Falha de gravação não confirma a alteração; sidecar inválido é preservado e bloqueia confirmações nesse contexto até recuperação do arquivo válido.
-
-Na **web**, os mesmos metadados ficam no armazenamento local do navegador, separados por modo. Persistem após recarregar, mas limpar os dados do site remove as marcações. Não são enviados ao Google Drive por esta frente; o fluxo de saves existente permanece separado. Armazenamento indisponível/inválido bloqueia essas confirmações e informa erro no painel. Identidade usa personagem + pool + fingerprint de 20 bytes: alterar os bytes invalida a marca; não se promete distinguir destruição/recriação de equipamento perfeitamente idêntico no mesmo pool entre observações.
-
-**Status web desta frente:** código da candidata 0.9.8 atualizado e testado localmente; **deployment não realizado nesta branch**. URL existente: [teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site/). Release, VERSION/manifesto globais e publicação web ficam na integração das três frentes pelo Maestro; nenhuma publicação 0.9.8 é declarada aqui. Validação física Windows/iPhone pendente. [Evidências e limites](docs/INVENTORY_PROTECTION.md).
+**Status web 0.9.8:** código web atualizado e testado localmente. URL existente: [teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site/). Deployment real no site requer ferramenta externa de deploy configurada com credenciais do serviço de hospedagem.
 
 ## Laboratório local de PvP e Leilão
 
@@ -92,6 +91,7 @@ Da mais recente para a mais antiga. As releases anteriores e seus downloads são
 
 | Release | Lançamento (Brasília) |
 | --- | --- |
+| [0.9.8 Beta — Proteção de equipamentos e chefes no Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.8-beta) | 26/10/2026 |
 | [0.9.7 Beta — FC e comparador nativos](https://github.com/sugyua/destinia/releases/tag/v0.9.7-beta) | 25/10/2026 |
 | [0.9.6 Beta — setas nativas do Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.6-beta) | 25/10/2026 |
 | [0.9.5 Beta — moldura integrada do Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.5-beta) | 25/10/2026 |
