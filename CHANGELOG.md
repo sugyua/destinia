@@ -4,6 +4,13 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.10.1 Beta — 26/10/2026
+
+- **Correção Crítica de Inicialização Web em Redes Locais / HTTP**:
+  - Resolução da falha de tela preta undefined is not an object (evaluating 'crypto.subtle.digest') observada ao acessar o jogo via IP local (ex: http://192.168.x.x:8000/) em dispositivos móveis e navegadores sem HTTPS.
+  - Implementado algoritmo SHA-256 nativo em JavaScript puro como fallback transparente dentro do Web Worker (sha256Hex). A validação de integridade dos binários não depende mais da API WebCrypto restrita a contextos seguros.
+  - Atualização do controle de cache (?v=0.10.1), cabeçalhos Cache-Control: no-cache e desregistro forçado de Service Workers legados.
+
 ## 0.10.0 Beta — 26/10/2026
 
 - **Correção Crítica de Viewport e Performance Web 800x480**:

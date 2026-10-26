@@ -1,4 +1,4 @@
-# Destinia 0.10.0 Beta
+# Destinia 0.10.1 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 

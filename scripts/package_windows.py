@@ -8,7 +8,7 @@ import re
 import struct
 import zipfile
 
-FILES=['release/NOTAS_0.10.md','release/NOTAS_0.9.9.md','release/NOTAS_0.9.8.md','docs/LOOT_QOL.md','docs/INVENTORY_PROTECTION.md','release/NOTAS_0.9.3.md','docs/CODEX_NATIVO_0.9.1.md','docs/INVENTARIO_0.9.1.md','release/NOTAS_0.9.1.md','README.md','INSTALL.md','CHANGELOG.md','THIRD_PARTY.md','VERSION',
+FILES=['release/NOTAS_0.10.1.md','release/NOTAS_0.10.md','release/NOTAS_0.9.9.md','release/NOTAS_0.9.8.md','docs/LOOT_QOL.md','docs/INVENTORY_PROTECTION.md','release/NOTAS_0.9.3.md','docs/CODEX_NATIVO_0.9.1.md','docs/INVENTARIO_0.9.1.md','release/NOTAS_0.9.1.md','README.md','INSTALL.md','CHANGELOG.md','THIRD_PARTY.md','VERSION',
        'Abrir Destinia.bat','Abrir Destinia Zoom 800x480.bat','Configurar Destinia.bat',
        'Configurar pasta de saves.bat','scripts/configure_game.ps1','scripts/game_preferences.ps1',
        'scripts/configure_saves.ps1','scripts/shared_saves.ps1','docs/PREFERENCIAS.md',

@@ -1,5 +1,5 @@
 {
-  "version": "0.10.0",
+  "version": "0.10.1",
   "base_commit": "21360fc7967414896eca15c1b9709a781c342e72",
   "files": [
     ".gitignore",
