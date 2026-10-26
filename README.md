@@ -1,4 +1,4 @@
-# Destinia 0.9.9 Beta
+# Destinia 0.10.0 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
@@ -8,6 +8,36 @@
 
 
 **[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
+
+## Novidades da Versão 0.10.0 — Nível 999, Sets 2–6 Peças, Códex Completo e Mago dos Bosses
+
+- **Progressão NV 999 e 14 Patentes**: Núcleo canônico em [`common/progression.h`](common/progression.h) e [`web/dist/progression.mjs`](web/dist/progression.mjs) com aritmética segura em 64 bits (`uint64_t`/`BigInt`), sem overflow ARM. Curva original estendida até o cap de 2.035.180.079.455 XP.
+- **Sistema de Sets de Equipamento (2 a 6 Peças)**: Bônus progressivos cumulativos para conjuntos temáticos (2, 3, 4, 5 e 6 peças equipadas). Sets concentrados (100% das peças em 1 Boss) e distribuídos (peças divididas entre monstros elites e diferentes chefes).
+- **Economia de Cash por Missões Épicas**: Remoção integral de Cash offline passivo. Cash concedido exclusivamente como recompensa de missões de alto risco (marcos de abate de chefes e conjunto de 6 peças), calibrado com a loja original (10 a 25 Cash).
+- **Mago dos Bosses (Boss Rush)**: NPC teletransportador em Lagrant com paleta azul/branco/sombra (`mon_6_0`), tabela canônica de teleporte calibrada em ouro (500 a 50.000 de ouro) para os 10 chefes exclusivos (`species 100..109`).
+- **Sistema de Títulos & Título Complecionista**: Título concedido ao atingir 100% de descobertas no Códex (73 monstros), conferindo buff épico de +100% em todos os status principais (ATK, DEF, PV, PM).
+- **Centralização da Barra de Menu (10 Ícones)**: Recálculo dos offsets em X para acomodar a inclusão do 10º ícone (Códex) com alinhamento visual e hitboxes perfeitas em 400x240 e 800x480.
+- **Correção Crítica de Viewport Web 800x480**: Eliminação de duplicação do mapa e recuperação de 7 FPS para os 16 FPS originais via centralização de câmera (`Game+18552/18554`), limpeza de bordas com cinza médio (`0x8410`) e descarte imediato de tiles fora do mapa (`0x4000`/`fastReject`).
+- **Saves Nativos 100% Intocados**: Todos os dados estendidos residem em sidecars versionados com CAS (`progression-v1.txt`, `economy-v1.txt`, `titles-v1.txt`).
+
+### Backlog para 0.10.1 (Endgame e Seleção de Dificuldade)
+
+1. **Troca de Dificuldade no Menu Sistema**:
+   - Novo botão "Mudar Dificuldade" no menu Sistema.
+   - Lista das 5 dificuldades (Normal, Difícil, Pesadelo, Inferno, Abissal).
+   - Bloqueio progressivo: apenas libera a próxima dificuldade após derrotar o Boss Final da dificuldade atual. Opções bloqueadas em tom escuro/cinza.
+2. **Indicador de Dificuldade na Seleção de Personagem**:
+   - Exibição da dificuldade atual do save ao lado do nome da classe (Guerreiro, Atirador, Ladrão) na tela de seleção.
+   - Fonte branca nativa da engine; exibido exclusivamente em slots com save existente.
+3. **Restrição de Recursos**: 100% de reaproveitamento de molduras, fontes e bitmaps originais do jogo.
+
+### Backlog Futuro (Pós-0.10 / Versões 0.11 ou 0.12)
+
+- **Modo Abissal (Desafio Extremo e Hardcore)**:
+  - Mecânica planejada: todos os monstros no Modo Abissal passam a ter aura de elite forçada em 100% dos spawns.
+  - Escalonamento brutal de atributos: 5x HP base em relação ao modo normal.
+  - Zero bônus de drop: tabela de drops idêntica às dificuldades padrão (sem facilitação ou aumento de recompensas), atuando puramente como o teste supremo de combate, builds de sets e estratégia para o endgame.
+
 
 ## META 0.10 — Frente 1 em preparação
 

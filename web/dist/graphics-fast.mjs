@@ -7,12 +7,13 @@ export function blitIndexed(r,{dst,src,palette,width:w,height:h,sourceStride,des
  if(!Number.isInteger(w)||!Number.isInteger(h)||w<1||h<1||w>2048||h>2048||w*h>limit||sourceStride<w||!step||Math.abs(step)>8192||Math.abs(stride)>8192)return false;
  const x=(w-1)*step,y=(h-1)*stride,lo=dst+Math.min(0,x)+Math.min(0,y),hi=dst+Math.max(0,x)+Math.max(0,y)+2,n=hi-lo,sourceSize=(h-1)*sourceStride+w;
  if(lo<0||hi>0x100000000||n>limit||sourceSize>limit||src+sourceSize>0x100000000||overlap(lo,n,src,sourceSize)||overlap(lo,n,palette,512))return false;
- const source=r.read(src,sourceSize),colors=r.read(palette,512),pixels=r.read(lo,n);
+ const tileCache=r.mapViewport?.context?r.mapViewport:null;
+ const source=tileCache?tileCache.tileBytes(src,sourceSize):r.read(src,sourceSize),colors=tileCache?tileCache.tileBytes(palette,512,true):r.read(palette,512),window=tileCache?.pixelWindow(lo,n,src,sourceSize,palette),pixels=window||r.read(lo,n);
  for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){
   const p=source[yy*sourceStride+xx]*2,c=colors[p]|colors[p+1]<<8;
   if(c!==key){const at=dst+yy*stride+xx*step-lo;const result=effect?effect(pixels[at]|pixels[at+1]<<8,c):c;pixels[at]=result&255;pixels[at+1]=result>>>8;}
  }
- r.write(lo,pixels);return true;
+ if(!window)r.write(lo,pixels);return true;
 }
 export function installFastGraphics(r) {
  const stats={draws:0,effects:0,alpha:0,multiply:0,fills:0,supported:false};
@@ -30,8 +31,8 @@ export function installFastGraphics(r) {
  stats.supported=true;
  for(const site of sites)r.e.hook_add(r.uc.HOOK_CODE,()=>{
   try {
-   if(!r.fastGraphics||r.uiRenderer?.primitive)return;
-   const sp=r.e.reg_read_i32(r.uc.ARM_REG_SP)>>>0,get=at=>r.get32(sp+at),simple=site.kind==='simple',light=!['normal','simple'].includes(site.kind);
+   if(!r.fastGraphics||r.uiRenderer?.primitive){r.mapViewport?.releasePixels();return;}
+   const sp=r.e.reg_read_i32(r.uc.ARM_REG_SP)>>>0,stack=r.mapViewport?.context?r.read(sp,0x80):null,view=stack?new DataView(stack.buffer,stack.byteOffset,stack.length):null,get=at=>view?view.getUint32(at,true):r.get32(sp+at),simple=site.kind==='simple',light=!['normal','simple'].includes(site.kind);
    let args,commit=()=>{};
    if(light){
     const dodge=site.kind==='dodge',screen=site.kind==='screen',short=['alpha','multiply'].includes(site.kind),w=dodge?r.r(9):short?r.r(8):get(0x14),step=short?(r.r(9)|0):(get(dodge?4:0x18)|0);
@@ -53,7 +54,7 @@ export function installFastGraphics(r) {
     const w=simple?r.r(4):get(0x78),step=simple?2:(get(0x34)|0)*2,gap=get(simple?0x28:0x38)|0;
     args={dst:r.r(simple?0:5),src:r.r(simple?1:6),palette:r.r(simple?2:8),width:w,height:get(simple?0x64:0x7c),sourceStride:w+(get(simple?0x24:0x3c)|0),destinationStep:step,destinationStride:w*step+gap*2,key:simple?null:r.get32(r.r(9)+0x50)};
    }
-   if(blitIndexed(r,args)){commit();stats.draws++;if(light)stats.effects++;if(site.kind.startsWith('alpha'))stats.alpha++;if(site.kind==='multiply')stats.multiply++;r.e.reg_write_i32(r.uc.ARM_REG_PC,(base+site.end)|1);}
+   if(blitIndexed(r,args)){commit();stats.draws++;if(light)stats.effects++;if(site.kind.startsWith('alpha'))stats.alpha++;if(site.kind==='multiply')stats.multiply++;r.e.reg_write_i32(r.uc.ARM_REG_PC,(base+site.end)|1);}else r.mapViewport?.releasePixels();
 
   }catch(error){r.error=error;r.e.emu_stop();}
  },null,base+site.at,base+site.at);
@@ -61,6 +62,7 @@ export function installFastGraphics(r) {
  const fillAt=base+0xac34,fillBytes=[99,110,129,70,1,43];
  if(r.read(fillAt,fillBytes.length).every((b,i)=>b===fillBytes[i]))r.e.hook_add(r.uc.HOOK_CODE,()=>{
   try{
+   r.mapViewport?.releasePixels();
    if(!r.fastGraphics||r.uiRenderer?.primitive)return;
    const dst=r.r(0),w=r.e.reg_read_i32(r.uc.ARM_REG_R10)|0,h=r.e.reg_read_i32(r.uc.ARM_REG_R11)|0,stride=r.r(8)*2,color=r.r(5)&65535,grp=r.r(4);
    if(w<=0||h<=0||w>2048||h>2048||stride<w*2||stride>8192)return;

@@ -2,7 +2,6 @@
 #include "loot_economy.h"
 #include "loot_economy_store.h"
 #include <ctime>
-#include <functional>
 
 namespace destinia {
 
@@ -20,13 +19,7 @@ inline void initLootEconomy(const std::string& directory) {
   }
 }
 
-inline void lootEconomyOnBossKilled(
-    const std::string& directory,
-    int slot,
-    int species,
-    u32 fnGetCash = 0,
-    u32 fnSetCash = 0,
-    const std::function<bool(u32, const std::vector<u32>&, u32*)>& callFn = nullptr) {
+inline void lootEconomyOnBossKilled(const std::string& directory, int slot, int species) {
   if (species < 100 || species > 109) return;
   lootEconomy.recordBossKill(slot, species);
   const auto* drop = findBossDrop(species);
@@ -34,9 +27,31 @@ inline void lootEconomyOnBossKilled(
     hostReport("[boss drop] Chefe derrotado: %s (species %d)! Drop exclusivo: %s\n",
                drop->bossName.c_str(), species, drop->namePt.c_str());
   }
-  // Avaliar Missões Épicas de Cash
+  lootEconomy.checkAndClaimEpicMissions(slot);
+  try {
+    saveLootEconomy(fs::path(directory), lootEconomy);
+  } catch (const std::exception& e) {
+    hostReport("[economia] Erro salvando boss drop / missoes: %s\n", e.what());
+  }
+}
+
+template <typename CallFn>
+inline void lootEconomyOnBossKilled(
+    const std::string& directory,
+    int slot,
+    int species,
+    u32 fnGetCash,
+    u32 fnSetCash,
+    CallFn callFn) {
+  if (species < 100 || species > 109) return;
+  lootEconomy.recordBossKill(slot, species);
+  const auto* drop = findBossDrop(species);
+  if (drop) {
+    hostReport("[boss drop] Chefe derrotado: %s (species %d)! Drop exclusivo: %s\n",
+               drop->bossName.c_str(), species, drop->namePt.c_str());
+  }
   int missionCash = lootEconomy.checkAndClaimEpicMissions(slot);
-  if (missionCash > 0 && fnGetCash && fnSetCash && callFn) {
+  if (missionCash > 0 && fnGetCash && fnSetCash) {
     u32 cur = 0;
     if (callFn(fnGetCash, {}, &cur)) {
       u32 nextCash = cur + u32(missionCash);
@@ -52,11 +67,12 @@ inline void lootEconomyOnBossKilled(
   }
 }
 
+template <typename CallFn>
 inline void lootEconomyProcessOffline(
     const std::string& directory,
     u32 fnGetCash,
     u32 fnSetCash,
-    const std::function<bool(u32, const std::vector<u32>&, u32*)>& callFn) {
+    CallFn callFn) {
   if (lootEconomyOfflineAwarded || !fnGetCash || !fnSetCash) return;
   const auto now = int64_t(std::time(nullptr));
   auto res = lootEconomy.processOfflineCash(now);

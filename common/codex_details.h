@@ -1,5 +1,6 @@
 #pragma once
 #include "codex_portraits.h"
+#include "loot_economy.h"
 #include <filesystem>
 #include <fstream>
 #include <set>
@@ -9,7 +10,7 @@ namespace destinia {
 inline bool isCodexBoss(int species) { return species >= 100; }
 enum class CodexCategoryFilter : int { All = 0, Common = 1, Bosses = 2 };
 struct CodexMonsterFacts {int maxHP=0,level=0;bool elite=false;std::set<std::string> locations;};
-struct CodexInfoLine {std::string text;uint16_t color=0xffff;};
+struct CodexInfoLine {std::string text;uint16_t color=0xffff; CodexInfoLine(std::string t="", uint16_t c=0xffff) : text(std::move(t)), color(c) {} };
 struct CodexInfoGroup {std::string id,title;std::vector<CodexInfoLine> rows;};
 struct CodexInfoSection {std::string id,title;std::vector<CodexInfoGroup> groups;};
 struct CodexInfoView {std::string hp,notes;std::vector<CodexInfoSection> sections;};

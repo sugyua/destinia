@@ -2,6 +2,7 @@
 #include "codex.h"
 #include "codex_ui.h"
 #include "codex_native_layout.h"
+#include "loot_economy_host.h"
 static destinia::Codex codex;
 static bool codexAvailable=false,codexWritable=true,codexOpen=false;
 static size_t codexPage=0,codexSelection=0;

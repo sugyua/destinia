@@ -4,7 +4,40 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
-## Em preparação — META 0.10 (Endgame, Títulos e Economia)
+## 0.10.0 Beta — 26/10/2026
+
+- **Correção Crítica de Viewport e Performance Web 800x480**:
+  - Resolução da regressão visual onde mapas menores que 800x480 apareciam duplicados no canto direito e o framerate caía para ~7 FPS.
+  - Implementado em web/dist/map-viewport.mjs espelhando host_zoom: centralização de eixos pequenos em Game+18552/18554, limpeza de margens com cinza médio (0x8410) em 0x19308 e descarte imediato (0x4000 com fastReject) de tiles fora dos limites em 0xBB90/0xB4BC.
+  - Queda de milhares de chamadas redundantes para renderização leve a ~55ms por quadro (meta de 16 FPS estável). Suíte completa Web com 114 testes aprovados (0 falhas).
+  - Cache buster aplicado no Service Worker/Web Worker e cliente web (?v=0.10.0), com headers no-cache e desregistro forçado de caches legados para dispositivos móveis.
+- **Barra Superior Centralizada (10 Ícones)**:
+  - Recálculo dos offsets em X de todos os ícones nativos para centralização exata da barra com a adição do 10º ícone (Códex). Hitboxes de toque e clique recalculadas e perfeitamente alinhadas em 400x240 e 800x480.
+- **Mago dos Bosses (Boss Rush)**:
+  - NPC em Lagrant estilizado em memória com base no mon_6_0 (paleta azul/branco/sombra).
+  - Tabela canônica de custo em ouro por Boss (species 100 a 109, custando de 500 a 50.000 ouro de acordo com o nível/dificuldade).
+  - Disparo de evento deferido openBossRushMenu() fora da emulação ARM para a interface de seleção.
+- **Sistema de Títulos & Título Complecionista**:
+  - Persistência sidecar titles-v1.txt com locking e compare-and-swap.
+  - Título Complecionista desbloqueado ao registrar 100% do catálogo do Códex (73 monstros), concedendo bônus épico de +100% em ATK, DEF, PV e PM.
+- **Frente 1 (Vanguard - Core de Progressão e Nível 999)**:
+  - Núcleo puro NV1–999: XP em u64/BigInt com extensão da curva original até o cap de 2.035.180.079.455 XP.
+  - 14 Patentes de Ranks (Aprendiz até Supremo), status parametrizados e guardas contra overflow e truncamento ARM.
+  - Cinco dificuldades com multiplicadores aprovados e NG+ linear configurável.
+  - Suporte a conjuntos de equipamento com bônus progressivos cumulativos para patamares de 2, 3, 4, 5 e 6 peças equipadas.
+  - Sidecar progression-v1.txt com CAS e lock; saves nativos intocados.
+- **Frente 2 (Sentinel - Sistemas de Loot e Economia)**:
+  - Drops exclusivos para os 10 chefes de espécie 100 a 109.
+  - 5 Conjuntos de Equipamento completos com origens Concentradas e Distribuídas.
+  - Economia de Cash reformulada: remoção total do ganho passivo de Cash offline por tempo. Cash concedido exclusivamente por 5 Missões Épicas de marcos de chefes e set completo (10 a 25 Cash), calibrado com os preços da loja (.gdt).
+  - Sidecar economy-v1.txt / DESTINIA_ECONOMY_2 sem tocar nos saves originais.
+
+### Backlog Planejado para 0.10.1 (Endgame e Seleção de Dificuldade)
+
+1. **Troca de Dificuldade no Menu Sistema**: Botão 'Mudar Dificuldade' no menu Sistema listando as 5 dificuldades; liberação sequencial após derrotar o Boss Final da dificuldade atual; opções bloqueadas em tom escuro/cinza.
+2. **Indicador de Dificuldade na Seleção de Personagem**: Dificuldade do save em fonte branca nativa ao lado do nome da classe (apenas para personagens salvos).
+3. **Reaproveitamento Estrito**: 100% de recursos, fontes e molduras originais da engine.
+
 
 - Barra superior: dez ícones centralizados, desenho/cursor/hitboxes compartilhados nos dois tamanhos e escalas; superfície/toque web800 corrigidos sem criar estados ARM extras.
 - Mago Boss Rush: paleta azul/branco/sombra isolada sobre mon6_0 e shadow originais, NPC host-side em posição livre de Lagrant, ação nativa manual com evento openBossRushMenu diferido para a UI externa. Pools, colisões, assets e saves preservados; ver docs/BOSS_MAGE.md para contrato e identificação pendente de Icarus.
