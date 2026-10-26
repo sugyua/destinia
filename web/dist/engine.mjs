@@ -71,7 +71,7 @@ export class DestiniaWeb {
     L('malloc',()=>this.w(0,this.malloc(this.r(0))));L('free',()=>this.free(this.r(0)));
     L('clock',()=>this.w(0,Math.floor((performance.now()-this.started)*1000)));
     L('fopen',()=>{const path=this.cstr(this.r(0)),mode=this.cstr(this.r(1));let bytes=this.saved.get(path);if(mode.includes('w'))bytes=new Uint8Array();if(!bytes&&mode.includes('a'))bytes=new Uint8Array();if(!bytes){this.w(0,0);return;}this.saved.set(path,bytes);const h=this.nextFile;this.nextFile+=16;this.files.set(h,{path,pos:mode.includes('a')?bytes.length:0,mode});this.w(0,h);});
-    L('fclose',()=>{this.files.delete(this.r(0));this.w(0,0);});
+    L('fclose',()=>{const f=this.files.get(this.r(0));if(f&&(f.mode.includes('w')||f.mode.includes('a'))){this.persistCloudSave(f.path);}this.files.delete(this.r(0));this.w(0,0);});
     L('fread',()=>{const f=this.files.get(this.r(3)),size=this.r(1),count=this.r(2);if(!f||!size||!count){this.w(0,0);return;}requireValue(size*count<=HEAP_SIZE,'fread excessivo');const bytes=this.saved.get(f.path);const n=Math.min(size*count,Math.max(0,bytes.length-f.pos));this.write(this.r(0),bytes.slice(f.pos,f.pos+n));f.pos+=n;this.w(0,Math.floor(n/size));});
     L('fwrite',()=>{const f=this.files.get(this.r(3)),size=this.r(1),count=this.r(2);if(!f||!size||!count){this.w(0,0);return;}const n=size*count;requireValue(n<=HEAP_SIZE&&f.pos+n<=HEAP_SIZE,'fwrite excessivo');const old=this.saved.get(f.path),bytes=new Uint8Array(Math.max(old.length,f.pos+n));bytes.set(old);bytes.set(this.read(this.r(0),n),f.pos);this.saved.set(f.path,bytes);f.pos+=n;this.w(0,count);});
     L('fseek',()=>{const f=this.files.get(this.r(0));if(!f){this.w(0,-1);return;}const origin=this.r(2),offset=this.r(1)|0;const pos=(origin===0?0:origin===1?f.pos:this.saved.get(f.path).length)+offset;if(pos<0||pos>HEAP_SIZE){this.w(0,-1);return;}f.pos=pos;this.w(0,0);});
@@ -119,6 +119,81 @@ export class DestiniaWeb {
     this.call(this.exports.get('MMain_setNetState'),[0]);
     requireValue(this.call(this.exports.get('getMyCash'))===before&&this.get16(this.exports.get('MMain')+14624)===0,'Falha no cancelamento offline.');
     this.storeNotice=true;this.log('Loja offline: saldo preservado; rede liberada.');
+  }
+  replyComm(cmd,payload){
+    const b=new Uint8Array(payload.length+8);
+    const v=new DataView(b.buffer);
+    v.setUint32(0,payload.length+4,false);
+    v.setUint32(4,cmd,false);
+    b.set(payload,8);
+    const arr=this.array(b);
+    this.call(this.exports.get('Java_game_destiniaeng_GameThread_procCommMsg'),[ENV,16,1,0]);
+    this.call(this.exports.get('Java_game_destiniaeng_GameThread_procCommRead'),[ENV,16,arr,b.length]);
+    for(let i=0;i<4;i++)this.call(this.exports.get('Comm_mRun'));
+  }
+  persistCloudSave(filePath){
+    const fileName=filePath.split('/').pop().split('\\').pop();
+    if(!fileName.includes('save')&&!fileName.includes('msave')&&!fileName.includes('codex'))return;
+    const bytes=this.saved.get(filePath)||this.saved.get(fileName);
+    if(!bytes||typeof fetch!=='function')return;
+    try{
+      let b64='';
+      for(let i=0;i<bytes.length;i++)b64+=String.fromCharCode(bytes[i]);
+      b64=btoa(b64);
+      const base=(typeof location!=='undefined'&&location.origin)?location.origin:'http://localhost:8000';
+      fetch(base+'/api/save',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({name:fileName,data:b64})
+      }).then(r=>r.json()).then(res=>{
+        if(res?.ok)this.log('Save sincronizado com Google Drive: '+fileName);
+      }).catch(err=>{
+        this.log('Aviso Sync Drive: '+(err?.message||err));
+      });
+    }catch(_){}
+  }
+  async loadCloudSaves(){
+    if(typeof fetch!=='function')return;
+    try{
+      const base=(typeof location!=='undefined'&&location.origin)?location.origin:'http://localhost:8000';
+      const res=await fetch(base+'/api/save?format=json');
+      if(!res.ok)return;
+      const json=await res.json();
+      if(!json?.ok||!json.saves)return;
+      for(const [file,b64] of Object.entries(json.saves)){
+        const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+        this.saved.set(file,bin);
+        this.saved.set('/data/data/game.destiniaeng/files/'+file,bin);
+        this.saved.set('./'+file,bin);
+      }
+      this.log('Saves carregados do Google Drive: '+Object.keys(json.saves).join(', '));
+    }catch(err){
+      this.log('Drive sync indisponivel: '+(err?.message||err));
+    }
+  }
+  processNetwork(){
+    const comm=this.exports.get('Comm');if(!comm)return;
+    const pending=this.get32(comm+0x2f90);if(!pending)return;
+    const bytes=this.read(comm+52,pending);
+    this.put32(comm+0x2f90,0);
+    if(pending<8)return;
+    const v=new DataView(bytes.buffer,bytes.byteOffset,bytes.length);
+    const cmd=v.getUint32(4,false);
+    if(cmd===0){
+      const p0=new Uint8Array([0,0,0,1,0,0,0,8,0x44,0x45,0x53,0x54,0x49,0x4e,0x49,0x41,0,0,0,2,0x4f,0x4b,0,0,0,0]);
+      this.replyComm(0,p0);
+      try{
+        const g=this.exports.get('Game'),job=g?this.get16(g+0x4886):0;
+        const name=job===0?'Guerreiro':job===1?'Atirador':'Ladrão';
+        if(typeof fetch==='function'){
+          const eps=['http://localhost:3000/api/onJoin','http://127.0.0.1:3000/api/onJoin','/api/onJoin'];
+          (async()=>{for(const u of eps){try{const r=await fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,room:'sala1'})});if(r.ok)break;}catch(_){}}})();
+        }
+      }catch(_){}
+    }else if(cmd===8){
+      const p8=new Uint8Array([0,0,0,1,0,0]);
+      this.replyComm(8,p8);
+    }
   }
   setVirtualControls(visible){
     requireValue(typeof visible==='boolean','Preferência de controles inválida.');
@@ -171,7 +246,7 @@ export class DestiniaWeb {
   }
   call(address,args=[]){requireValue(address,'Função ARM ausente');let sp=(STACK+STACK_SIZE-256-Math.max(0,args.length-4)*4)&~7;for(let i=4;i<args.length;i++)this.put32(sp+(i-4)*4,args[i]);for(let i=0;i<4;i++)this.w(i,args[i]||0);this.e.reg_write_i32(this.uc.ARM_REG_SP,sp);this.e.reg_write_i32(this.uc.ARM_REG_LR,RETURN);this.error=null;try{this.e.emu_start(address,RETURN,0,0);}catch(error){const pc=this.e.reg_read_i32(this.uc.ARM_REG_PC)>>>0;throw Error(String(error)+" [ARM pc=0x"+(pc-BASE).toString(16)+", UI="+(this.uiRenderer?.kind||"none")+", entry="+(this.uiRenderer?.entry||0).toString(16)+"]");}if(this.error)throw this.error;requireValue((this.e.reg_read_i32(this.uc.ARM_REG_PC)&~1)===RETURN,'Execução ARM interrompida');const result=this.r(0);this.codexDrainNativeMenu();return result;}
   init(){const device=encoder.encode('DESTINIA-WEB-TEST'),model=encoder.encode('Browser');const id=this.array(device),m=this.array(model);this.screen=this.array(new Uint8Array(400*240*2));this.call(this.exports.get('Java_game_destiniaeng_GameThread_initGame'),[ENV,16,id,device.length,m,model.length,400,240,0]);this.log('initGame concluído.');}
-  step(){this.finishOfflinePurchase();if(this.codexOpen){this.frame++;return 62;}if(this.inventory.open){this.frame++;return 62;}this.combatPower.beginFrame();const wait=this.call(this.exports.get('Java_game_destiniaeng_GameThread_jniRun'),[ENV,16,this.screen,this.frame++]);this.finishOfflinePurchase();return wait>=1000?100:wait;}
+  step(){this.finishOfflinePurchase();this.processNetwork();if(this.codexOpen){this.frame++;return 62;}if(this.inventory.open){this.frame++;return 62;}this.combatPower.beginFrame();const wait=this.call(this.exports.get('Java_game_destiniaeng_GameThread_jniRun'),[ENV,16,this.screen,this.frame++]);this.finishOfflinePurchase();this.processNetwork();return wait>=1000?100:wait;}
   monsterFacts(p){const game=this.exports.get('Game'),file=`m${this.get16(game+0x4870)}_${this.get16(game+0x4872)}.mpd`;return {maxHP:this.get32(p+0x24),level:this.get16(p+0x10),elite:!!this.get32(p+0x4c),location:{file,name:this.monsterMetadata?.maps.get(file)||file}};}
   async prepareCodexPortraits(){this.portraits=await loadPortraits(this.assets,this.codex.names);try{this.monsterMetadata=await loadMonsterMetadata(this.assets);}catch(error){this.log(error.message);}}
   codexDetailData(){const row=this.codex.catalog()[this.codexSelection];return monsterDetailView(row,this.monsterMetadata,this.codex.facts(row?.id));}
@@ -212,8 +287,8 @@ export class DestiniaWeb {
 
    if(phase===0&&!this.codexMenuVisible())this.codexTabSelected=false;return false;
   }
-  touch(x,y,type){if(this.inventory.touch(x,y,type))return;if(this.combatPower.touch(x,y,type))return;if(this.codexMenuTouch(x,y,type))return;if(type===0)this.nativeTouchDown=true;if(type===1)this.nativeTouchDown=false;if(type===0||type===2)this.nativeTouchPoint={x,y};if(this.uiScale!==100&&type!==3){const point=this.uiRenderer.touchPoint(x,y,this.call(this.exports.get('_getTouchState')));x=point.x;y=point.y;}this.call(this.exports.get('Java_game_destiniaeng_GameThread_jniTouch'),[ENV,16,x,y,type]);}
+  touch(x,y,type){if(this.inventory.touch(x,y,type))return;if(this.combatPower.touch(x,y,type))return;if(this.codexMenuTouch(x,y,type))return;if(type===0)this.nativeTouchDown=true;if(type===1)this.nativeTouchDown=false;if(type===0||type===2)this.nativeTouchPoint={x,y};if(this.uiScale!==100&&type!==3){const point=this.uiRenderer.touchPoint(x,y,this.call(this.exports.get('_getTouchState')));x=point.x;y=point.y;}this.call(this.exports.get('Java_game_destiniaeng_GameThread_jniTouch'),[ENV,16,x,y,type]);this.processNetwork();}
   menuState(){return this.gMenu?this.get32(this.gMenu+156):0;}
-  key(key,down){if(this.inventory.key(key,down))return;if(this.combatPower.key(key,down))return;if(this.codexMenuKey(key,down))return;const state=this.menuState(),prefix=state<=0?'LogoCanvas':state===1?'MenuCanvas':'GameCanvas';if(state<=0&&!down)return;const fn=this.exports.get(prefix+(down?'_mKeyPressed':'_mKeyReleased'));if(fn)this.call(fn,[key]);}
+  key(key,down){if(this.inventory.key(key,down))return;if(this.combatPower.key(key,down))return;if(this.codexMenuKey(key,down))return;const state=this.menuState(),prefix=state<=0?'LogoCanvas':state===1?'MenuCanvas':'GameCanvas';if(state<=0&&!down)return;const fn=this.exports.get(prefix+(down?'_mKeyPressed':'_mKeyReleased'));if(fn)this.call(fn,[key]);this.processNetwork();}
   close(){this.e.close();this.saved.clear();this.files.clear();this.arrays.clear();}
 }

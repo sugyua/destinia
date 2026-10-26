@@ -48,11 +48,16 @@ function createMockServer() {
         res.end(fs.readFileSync(path.join(__dirname, 'public', file))); return;
       }
       if (req.method === 'GET' && url.pathname === '/health') { json(200, { ok: true, simulation: true }); return; }
-      // Mesmo Origin quando presente; não habilitar CORS para qualquer site.
+      // Mesmo Origin quando presente; permitir também origens locais de teste (localhost e 127.0.0.1)
       if (req.headers.origin) {
         const origin = new URL(req.headers.origin);
-        if (origin.host !== req.headers.host) fail(403, 'Origem não permitida.');
+        const isLocal = origin.hostname === 'localhost' || origin.hostname === '127.0.0.1';
+        if (origin.host !== req.headers.host && !isLocal) fail(403, 'Origem não permitida.');
+        res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
       }
+      if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
       if (req.method === 'POST' && url.pathname === '/api/onJoin') {
         const data = await body(req);
         if (typeof data.name !== 'string' || !data.name.trim() || data.name.trim().length > 24) fail(400, 'Nome: 1 a 24 caracteres.');
