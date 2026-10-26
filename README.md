@@ -79,16 +79,18 @@
    - Fonte branca nativa da engine; exibido exclusivamente em slots com save existente.
 3. **Restrição de Recursos**: 100% de reaproveitamento de molduras, fontes e bitmaps originais do jogo.
 
-#### Versão 0.11.0 (Expansão de Conteúdo, Novos Sets e Otimização de Títulos)
-- **Otimização do Título "Complecionista" (Armas por Nível/Cor)**:
-  - *Nova Regra:* Para as armas, o jogador **não precisa mais dropar todas as variantes aleatórias de buffs e nomes/sufixos**.
-  - Requisito refinado: registrar apenas **uma arma de cada nível e de cada raridade/cor** (ex: Pistola Nv 1 exige apenas 1 branca, 1 verde e 1 azul para ser concluída, em vez de dezenas de combinações de status secundários).
-  - A catalogação dos monstros no Códex permanece integral (100% de abates de comuns e chefes).
-- **Novos Sets de Equipamento e Balanceamento**:
-  - Adição de novos conjuntos temáticos para Atirador e Ladrão, ampliando a variedade de builds.
-  - Balanceamento fino das taxas de drop e atributos para os patamares de 2, 3, 4, 5 e 6 peças.
-- **Catálogo / Códex de Armas**:
-  - Visualização do progresso de armas registradas diretamente na interface do jogo.
+#### Versão 0.11.0 (Entregue — Expansão Completa de Conteúdo, QoL & Endgame)
+- **Catálogo Completo de Equipamentos e Complecionista (F4 / Ctrl+W)**: 48 equipamentos canônicos (24 armas e 24 armaduras em 8 patamares por classe), 240 entradas colecionáveis por raridade, alternância imediata de categoria (`T`) e sinergia com o título Complecionista (+100% atributos principais).
+- **Baú Compartilhado entre Personagens / Shared Stash (F5 / B)**: 48 slots (2 páginas de 24 itens) com persistência isolada em `shared-stash-v1.txt`.
+- **Mural de Bounties / Contratos Offline Repetíveis (F8 / C)**: 3 contratos diários por slot de personagem, contagem nativa via hooks ARM e recompensas em Ouro e Cash.
+- **Quest Tracker HUD Retrátil (Q / Toque)**: Rastreador no canto superior direito do HUD com moldura Gamevil, pergaminho pixel-art e alternância rápida via tecla `Q`.
+- **Boss Rush Gauntlet (Arena de Sobrevivência 10 Chefes)**: 11ª opção no Mago dos Bosses (`species 999`), combate contínuo contra todos os 10 chefes de Destinia.
+- **Auto-Potion QoL / Consumo Inteligente (H)**: Monitoramento contínuo de PV (< 35%) e PM (< 25%), consumo com cooldown de 60 frames e atalho `H` para ativar/desativar.
+- **Reset de Atributos e Habilidades Offline (Santuário do Poder)**: Devolução integral de pontos acumulados por 5.000 G no Mago dos Bosses e recálculo ARM (`GameUI_calcHeroStat`).
+- **Mascotes & Companheiros Offline (Pets System)**: 4 mascotes (Lobo Glacial, Fênix Ígnea, Golem de Pedra, Mini-Diablo) com buffs passivos, níveis até Lv50 e mascote flutuante renderizado ao lado do herói.
+- **Ciclo Novo Jogo+ (NG+1 a NG+5)**: Reinício da campanha preservando nível, equipamentos, baú, títulos e mascotes, com escalonamento de dificuldade e recompensas.
+- **Torre Abissal / Masmorra Infinita (50 Andares)**: 50 andares de desafios progressivos no Mago dos Bosses com chefes a cada 5 andares.
+- **Otimização Crítica Web (Mobile / Safari iOS)**: LUT RGB565 -> RGBA32 (aceleração de 7x), pacing por `nextFrame` a 16 FPS contínuos e 126 testes aprovados.
 
 #### Versão 0.12.0 (Endgame Extremo — O Modo Abissal Supremo)
 - **Modo Abissal Hardcore**:

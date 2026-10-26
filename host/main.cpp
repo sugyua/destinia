@@ -10,6 +10,8 @@ static destinia::BossMageRuntime bossMage;
 static destinia::DifficultyArmRuntime difficultyArm;
 #include "../common/boss_rush_ui.h"
 static destinia::BossRushUI bossRushUI;
+#include "../common/auto_potion.h"
+static destinia::AutoPotionController autoPotion;
 static destinia::DropNamesRenderer dropNamesRenderer;
 static destinia::UiRenderer uiRenderer;
 // destinia_host - executa a libdestinia_jni.so ORIGINAL (ARM 32 bits) no PC.
@@ -906,6 +908,11 @@ static int runHost(int argc, char** argv) {
     bossRushUI.getGold = [&]() -> int { return int(callFn(exportsMap["getMyGold"], {})); };
     bossRushUI.setGold = [&](int g) { callFn(exportsMap["setMyGold"], {uint32_t(g)}); };
     bossRushUI.teleport = [&](int a, int m, int e) { callFn(exportsMap["Map_loadData"], {uint32_t(a), uint32_t(m), uint32_t(e)}); };
+    bossRushUI.calcHeroStat = [&]() -> bool { return callFn(exportsMap["GameUI_calcHeroStat"], {}); };
+    bossRushUI.rd16 = [](u32 a) { return rd16(a); };
+    bossRushUI.wr16 = [](u32 a, uint16_t v) { wr16(a, v); };
+    bossRushUI.gameBase = exportsMap["Game"];
+    bossRushUI.saveDir = saveDir;
   }catch(const std::exception& error){hostReport("[mago] Desativado: %s\n",error.what());}
   fcInstall();
   u32 fnRun = exportsMap["Java_game_destiniaeng_GameThread_jniRun"];
@@ -1124,6 +1131,7 @@ static int runHost(int argc, char** argv) {
             continue;
           }
           if(ev.key.keysym.sym==SDLK_q) { if(down) questTrackerUI.toggle(); continue; }
+          if(ev.key.keysym.sym==SDLK_h) { if(down) autoPotion.toggle(); continue; }
           if(ev.key.keysym.sym==SDLK_F11) { if(down) setFullscreen(!fullscreen); }
           else if(ev.key.keysym.sym==SDLK_F9) {  }
           else controls.event(ev);
@@ -1224,6 +1232,15 @@ static int runHost(int argc, char** argv) {
     }
     if(preferences.uiScale==100?hasPlayerStatusHud(frameBuffer.data()):uiRenderer.statusDrawn){std::array<destinia::SkillHintRect,4> hints{};for(size_t i=0;i<hints.size();++i){int16_t r[4]{};if(rd(exportsMap.at("MMain")+0x11a+u32(i)*8,r,8))hints[i]={r[0],r[1],r[2],r[3]};}destinia::paintSkillHints(frameBuffer.data(),SCREEN_W,SCREEN_H,preferences,controls.lastInputDevice(),hints,preferences.uiScale);}
     if(!codexOpen)fcPaint(frameBuffer.data(),preferences.uiScale);
+    bossRushUI.currentSlot = rd16(exportsMap.at("Game")+0x4886);
+    autoPotion.update(exportsMap.at("Game"), [](u32 a){return rd16(a);}, [](u32 a, uint16_t v){wr16(a, v);}, playSoundId);
+    if(int16_t(rd16(exportsMap.at("Game")+0x4854))==0) {
+      int hX = int16_t(rd16(exportsMap.at("Game")+0x4890));
+      int hY = int16_t(rd16(exportsMap.at("Game")+0x4892));
+      int cX = int16_t(rd16(exportsMap.at("Game")+0x4878));
+      int cY = int16_t(rd16(exportsMap.at("Game")+0x487a));
+      bossRushUI.pets.paintCompanion(frameBuffer.data(), SCREEN_W, SCREEN_H, hX - cX, hY - cY, frame);
+    }
     bossMage.paint(frameBuffer.data());
     bossRushUI.paint(frameBuffer.data(), SCREEN_W, SCREEN_H);
     lootQol.paint(frameBuffer.data());
@@ -1241,6 +1258,7 @@ static int runHost(int argc, char** argv) {
         questTrackerUI.setQuest(c.title, "Abates: " + std::to_string(c.currentCount) + " / " + std::to_string(c.targetCount), "Campanha");
       }
       questTrackerUI.paint(frameBuffer.data(), SCREEN_W, SCREEN_H);
+      autoPotion.paintNotice(frameBuffer.data(), SCREEN_W, SCREEN_H);
     }
     const uint8_t* fb = frameBuffer.data();
     if (headlessFrames) {

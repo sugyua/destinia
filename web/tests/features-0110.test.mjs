@@ -4,7 +4,8 @@ import { CatalogEquipment, WeaponsCatalogWeb } from '../dist/weapons-catalog.mjs
 import { SharedStashWeb, MAX_STASH_CAPACITY } from '../dist/shared-stash.mjs';
 import { BountiesWeb } from '../dist/bounties.mjs';
 import { QuestTrackerWeb } from '../dist/quest-tracker.mjs';
-import { BossRushUI, BOSS_RUSH_LIST } from '../dist/boss-rush.mjs';
+import { BossRushUI, BOSS_RUSH_LIST, ABYSS_FLOORS, PETS_LIST } from '../dist/boss-rush.mjs';
+import { AutoPotionController } from '../dist/auto-potion.mjs';
 
 test('Catálogo de Equipamentos 0.11: contem 24 armas e 24 armaduras distribuidas igualmente', () => {
   const weapons = CatalogEquipment.filter(e => e.category === 0);
@@ -131,4 +132,76 @@ test('Boss Rush Gauntlet: 11 opcoes disponiveis incluindo modo sobrevivencia 999
   const gauntlet = BOSS_RUSH_LIST.find(b => b.species === 999);
   assert.ok(gauntlet !== undefined, 'Modo Gauntlet deve existir na lista');
   assert.equal(gauntlet.goldCost, 10000);
+});
+
+test('Auto Potion QoL: consumo automatico sob threshold e respeito a cooldown', () => {
+  const fakeEngine = {
+    exports: new Map([['Game', 0x1000]]),
+    mem: new Map(),
+    rd16(addr) { return this.mem.get(addr) || 0; },
+    wr16(addr, val) { this.mem.set(addr, val); }
+  };
+
+  const ap = new AutoPotionController(fakeEngine);
+  assert.equal(ap.enabled, true);
+
+  // Toggle
+  ap.toggle();
+  assert.equal(ap.enabled, false);
+  ap.toggle();
+  assert.equal(ap.enabled, true);
+
+  // Setup: In gameplay (0x4854 = 0), Max HP = 1000 (0x48c4), Cur HP = 200 (0x48f2) (20% <= 35%)
+  fakeEngine.mem.set(0x1000 + 0x4854, 0);
+  fakeEngine.mem.set(0x1000 + 0x48c4, 1000);
+  fakeEngine.mem.set(0x1000 + 0x48f2, 200);
+
+  ap.update();
+  assert.ok(fakeEngine.mem.get(0x1000 + 0x48f2) > 200, 'HP deve ser recuperado');
+  assert.equal(ap.cooldownHpTimer, 60, 'Cooldown de HP deve ser ativado');
+
+  // Próximo frame não deve curar de novo
+  const healedHp = fakeEngine.mem.get(0x1000 + 0x48f2);
+  ap.update();
+  assert.equal(fakeEngine.mem.get(0x1000 + 0x48f2), healedHp, 'Não deve curar em cooldown');
+});
+
+test('Mago dos Bosses 0.11: 4 Abas (Chefes, Torre Abissal, Mascotes, Santuario)', () => {
+  const ui = new BossRushUI(null);
+  assert.equal(ui.currentTab, 0);
+
+  // Alternar abas com teclas 5 (esquerda) e 7 (direita)
+  ui.openMenu();
+  ui.handleKey(7, true); // Aba 1: Torre Abissal
+  assert.equal(ui.currentTab, 1);
+  assert.equal(ui.getItemsCount(), 5); // maxUnlockedFloor padrão = 5
+
+  ui.handleKey(7, true); // Aba 2: Mascotes
+  assert.equal(ui.currentTab, 2);
+  assert.equal(ui.getItemsCount(), 4); // 4 mascotes
+
+  ui.handleKey(7, true); // Aba 3: Santuário
+  assert.equal(ui.currentTab, 3);
+  assert.equal(ui.getItemsCount(), 3); // Reset Atributos, Reset Skills, NG+
+
+  ui.handleKey(7, true); // Volta para Aba 0: Chefes
+  assert.equal(ui.currentTab, 0);
+  assert.equal(ui.getItemsCount(), 11);
+});
+
+test('Torre Abissal: 50 andares com chefes a cada 5 andares', () => {
+  assert.equal(ABYSS_FLOORS.length, 50);
+  for (let f = 1; f <= 50; f++) {
+    const fl = ABYSS_FLOORS[f - 1];
+    assert.equal(fl.floor, f);
+    assert.equal(fl.isBoss, f % 5 === 0);
+  }
+});
+
+test('Mascotes / Companheiros: 4 mascotes canonicos com buffs', () => {
+  assert.equal(PETS_LIST.length, 4);
+  assert.equal(PETS_LIST[0].namePt, 'Lobo Glacial');
+  assert.equal(PETS_LIST[1].namePt, 'Fenix Ignea');
+  assert.equal(PETS_LIST[2].namePt, 'Golem de Pedra');
+  assert.equal(PETS_LIST[3].namePt, 'Mini-Diablo');
 });

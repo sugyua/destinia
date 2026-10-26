@@ -6,7 +6,7 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 
 ## 0.11.0 Beta — 26/10/2026
 
-- **Catálogo Completo de Equipamentos e Complecionista (F4)**:
+- **Catálogo Completo de Equipamentos e Complecionista (F4 / Ctrl+W)**:
   - Expansão do catálogo para 48 equipamentos canônicos: 24 Armas (Espadas, Pistolas/Canhões e Adagas) e 24 Armaduras (Peitorais leves, médios e pesados), distribuídos em 8 patamares por classe (Guerreiro, Atirador e Ladino).
   - 5 patamares de raridade rastreados para cada equipamento (Comum, Mágico, Raro, Épico e Lendário), totalizando 240 entradas colecionáveis.
   - Alternância imediata de categoria entre Armas e Armaduras via tecla `T` ou toque no botão de categoria.
@@ -22,11 +22,31 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
   - Contabilização automática e sem overhead de abates através do hook ARM nativo de derrota de monstros.
   - Resgate instantâneo de recompensas com premiações balanceadas em Ouro e Cash offline.
   - Interface com barra de progresso em tempo real, status de resgate e persistência em `bounties-v1.txt` (PC) e `localStorage` (Web).
+- **Rastreador de Missões no HUD / Quest Tracker (Q / Toque)**:
+  - Widget retrátil no canto superior direito do HUD exibindo missão ativa ou contrato diário prioritário, contagem de abates e destino.
+  - Moldura e paleta dourada autêntica Gamevil (`0xee00` / `0x1084`), ícone de pergaminho pixel-art estilizado e alternância por toque ou tecla `Q`.
+- **Arena Gauntlet / Boss Rush de Sobrevivência (Mago dos Bosses)**:
+  - 11ª opção no Mago dos Bosses (`species 999`), desafiando o jogador a derrotar em sequência todos os 10 chefes de Destinia (Dungeon Guardian até Lava Guardian).
+  - Taxa de entrada de 10.000 G e recompensas multiplicadas ao sobreviver ao desafio.
+- **Auto-Potion QoL / Consumo Inteligente de Poções (H)**:
+  - Monitoramento contínuo de PV (< 35%) e PM (< 25%), consumindo automaticamente poções da bolsa de consumíveis com respeito estrito ao cooldown de 60 frames (1 segundo).
+  - Tecla de atalho `H` para alternar entre Ativado e Desativado com aviso visual translúcido no HUD.
+- **Reset de Atributos e Habilidades Offline (Santuário do Poder)**:
+  - Opções integradas ao Mago dos Bosses permitindo resetar Atributos (FOR, DES, CON, INT) e Habilidades por 5.000 G de ouro do jogo.
+  - Devolução integral de pontos acumulados para redistribuição imediata e recálculo seguro no motor ARM nativo (`GameUI_calcHeroStat`), eliminando o bloqueio de builds originais dependentes da loja online descontinuada.
+- **Mascotes & Companheiros Offline / Pets System**:
+  - 4 mascotes canônicos introduzidos: Lobo Glacial (+10% Velocidade, +15% Crítico), Fênix Ígnea (+20% Dano de Ataque, +10% Regen PV), Golem de Pedra (+25% Defesa, +15% Vida Máx) e Mini-Diablo (+15% Dano Geral, +5% Roubo de Vida).
+  - Progressão individual de níveis até Lv50, persistência segura no sidecar `pets-v1.txt` e mascote flutuante com animação de flutuação e sombra suave desenhado ao lado do herói durante o jogo.
+- **Ciclo Novo Jogo+ / New Game+ (NG+1 a NG+5)**:
+  - Reinício de campanha preservando nível, experiência, atributos, equipamentos, baú compartilhado, títulos e mascotes.
+  - Escalonamento progressivo de dificuldade (+35% de Vida e Dano por ciclo) e ganhos (+50% de XP e Ouro por ciclo), gravado no sidecar canônico `progression-v1.txt`.
+- **Torre Abissal / Masmorra Infinita (50 Andares)**:
+  - 50 andares de desafio progressivo no Mago dos Bosses, com andares de chefes a cada 5 níveis e recompensas escalonadas de ouro e experiência registradas no sidecar `abyss-v1.txt`.
 - **Otimizações Críticas e Performance Web (Mobile / Safari iOS)**:
   - Resolução definitiva de gargalos em navegadores móveis: substituição de conversão lenta por tabela de busca (LUT) RGB565 -> RGBA32 de 256 KB, acelerando o desenho de quadro para ~0.35ms (ganho de 7x de performance).
   - Pacing do Web Worker acionado diretamente pela janela principal (`nextFrame`), evitando o estrangulamento de segundo plano do Safari (que limitava a 3 FPS). Framerate cravado em 16 FPS.
   - Avanço automático suave pelas telas de apresentação (Everple / Gamevil / Logos) e suporte a toque para pular direto para o menu inicial.
-  - 119 testes unitários automatizados passando com 100% de sucesso.
+  - 129 testes unitários automatizados passando com 100% de sucesso.
 
 ## 0.10.3 Beta — 26/10/2026
 

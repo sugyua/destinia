@@ -1,5 +1,9 @@
 #pragma once
 #include "overlay_font.h"
+#include "pets_expansion.h"
+#include "abyss_tower.h"
+#include "stat_reset.h"
+#include "new_game_plus.h"
 #include <string>
 #include <vector>
 #include <functional>
@@ -37,17 +41,34 @@ inline const std::vector<BossRushEntry>& getBossRushList() {
 class BossRushUI {
 public:
   bool open = false;
+  int currentTab = 0; // 0 = Chefes, 1 = Torre Abissal, 2 = Mascotes, 3 = Santuario
   int selectedIndex = 0;
+  int scrollOffset = 0;
   std::string statusMessage;
   
   std::function<int()> getGold;
   std::function<void(int)> setGold;
   std::function<void(int, int, int)> teleport; // area, map, entry
+  std::function<bool()> calcHeroStat;
+  std::function<uint16_t(uint32_t)> rd16;
+  std::function<void(uint32_t, uint16_t)> wr16;
+  uint32_t gameBase = 0;
+  fs::path saveDir;
+  uint32_t currentSlot = 0;
+
+  PetsManager pets;
+  AbyssTowerManager abyss;
 
   void openMenu() {
     open = true;
+    currentTab = 0;
     selectedIndex = 0;
+    scrollOffset = 0;
     statusMessage.clear();
+    if (!saveDir.empty()) {
+      pets.load(saveDir);
+      abyss.load(saveDir);
+    }
   }
 
   void closeMenu() {
@@ -55,21 +76,52 @@ public:
     statusMessage.clear();
   }
 
+  int getItemsCountInCurrentTab() const {
+    if (currentTab == 0) return int(getBossRushList().size());
+    if (currentTab == 1) return abyss.maxUnlockedFloor;
+    if (currentTab == 2) return 4;
+    if (currentTab == 3) return 3; // Reset Atributos, Reset Habilidades, Avancar Novo Jogo+
+    return 0;
+  }
+
   bool handleKey(int key, bool down) {
     if (!open) return false;
     if (!down) return true;
 
-    const auto& list = getBossRushList();
-    const int count = int(list.size());
+    // Alternar abas: Esquerda (5), Direita (7)
+    if (key == 5) {
+      currentTab = (currentTab - 1 + 4) % 4;
+      selectedIndex = 0;
+      scrollOffset = 0;
+      statusMessage.clear();
+      return true;
+    }
+    if (key == 7) {
+      currentTab = (currentTab + 1) % 4;
+      selectedIndex = 0;
+      scrollOffset = 0;
+      statusMessage.clear();
+      return true;
+    }
+
+    const int count = getItemsCountInCurrentTab();
     // Cima: key 3
     if (key == 3) {
-      selectedIndex = (selectedIndex - 1 + count) % count;
+      if (count > 0) {
+        selectedIndex = (selectedIndex - 1 + count) % count;
+        if (selectedIndex < scrollOffset) scrollOffset = selectedIndex;
+        if (selectedIndex >= scrollOffset + 7) scrollOffset = selectedIndex - 6;
+      }
       statusMessage.clear();
       return true;
     }
     // Baixo: key 9
     if (key == 9) {
-      selectedIndex = (selectedIndex + 1) % count;
+      if (count > 0) {
+        selectedIndex = (selectedIndex + 1) % count;
+        if (selectedIndex >= scrollOffset + 7) scrollOffset = selectedIndex - 6;
+        if (selectedIndex < scrollOffset) scrollOffset = selectedIndex;
+      }
       statusMessage.clear();
       return true;
     }
@@ -80,16 +132,58 @@ public:
     }
     // Ação / Confirmar: key 6 ou key 17
     if (key == 6 || key == 17) {
-      const auto& list = getBossRushList();
-      if (selectedIndex >= 0 && selectedIndex < int(list.size())) {
-        const auto& boss = list[selectedIndex];
-        int curGold = getGold ? getGold() : 999999;
-        if (curGold < boss.goldCost) {
-          statusMessage = "OURO INSUFICIENTE!";
-        } else {
-          if (setGold) setGold(curGold - boss.goldCost);
-          if (teleport) teleport(boss.area, boss.map, 1);
-          closeMenu();
+      int curGold = getGold ? getGold() : 999999;
+
+      if (currentTab == 0) {
+        // Tab 0: Boss Rush
+        const auto& list = getBossRushList();
+        if (selectedIndex >= 0 && selectedIndex < int(list.size())) {
+          const auto& boss = list[selectedIndex];
+          if (curGold < boss.goldCost) {
+            statusMessage = "OURO INSUFICIENTE!";
+          } else {
+            if (setGold) setGold(curGold - boss.goldCost);
+            if (teleport) teleport(boss.area, boss.map, 1);
+            closeMenu();
+          }
+        }
+      } else if (currentTab == 1) {
+        // Tab 1: Torre Abissal
+        const auto& floors = getAbyssFloors();
+        if (selectedIndex >= 0 && selectedIndex < int(floors.size())) {
+          const auto& fl = floors[selectedIndex];
+          if (curGold < fl.goldCost) {
+            statusMessage = "OURO INSUFICIENTE!";
+          } else {
+            if (setGold) setGold(curGold - fl.goldCost);
+            if (teleport) teleport(fl.area, fl.map, 1);
+            abyss.currentFloor = fl.floor;
+            statusMessage = "DESAFIANDO ANDAR " + std::to_string(fl.floor) + "!";
+            closeMenu();
+          }
+        }
+      } else if (currentTab == 2) {
+        // Tab 2: Mascotes
+        if (selectedIndex >= 0 && selectedIndex < 4) {
+          pets.selectPet(selectedIndex);
+          if (!saveDir.empty()) pets.save(saveDir);
+          statusMessage = "MASCOTE " + std::string(pets.pets[selectedIndex].namePt) + " INVOCADO!";
+        }
+      } else if (currentTab == 3) {
+        // Tab 3: Santuario
+        if (selectedIndex == 0) {
+          // Reset Atributos (5000 G)
+          auto res = resetHeroStats(gameBase, getGold, setGold, calcHeroStat, rd16, wr16, 5000);
+          statusMessage = res.message;
+        } else if (selectedIndex == 1) {
+          // Reset Habilidades (5000 G)
+          auto res = resetHeroSkills(gameBase, getGold, setGold, rd16, wr16, 5000);
+          statusMessage = res.message;
+        } else if (selectedIndex == 2) {
+          // Avancar Novo Jogo+
+          auto res = NewGamePlusManager::advanceCycle(currentSlot, saveDir, teleport);
+          statusMessage = res.message;
+          if (res.success) closeMenu();
         }
       }
       return true;
@@ -99,7 +193,7 @@ public:
 
   bool handleTouch(int x, int y, int type, int width, int height) {
     if (!open) return false;
-    const int pw = std::min(340, width - 20), ph = std::min(220, height - 20);
+    const int pw = std::min(360, width - 20), ph = std::min(220, height - 20);
     const int px = (width - pw) / 2, py = (height - ph) / 2;
 
     if (x < px || x >= px + pw || y < py || y >= py + ph) {
@@ -113,11 +207,26 @@ public:
       return true;
     }
 
+    // Abas no topo: py + 22 a py + 36
+    if (y >= py + 22 && y <= py + 36) {
+      if (type == 0) {
+        int tabW = (pw - 16) / 4;
+        int t = (x - (px + 8)) / tabW;
+        if (t >= 0 && t < 4) {
+          currentTab = t;
+          selectedIndex = 0;
+          scrollOffset = 0;
+          statusMessage.clear();
+        }
+      }
+      return true;
+    }
+
     // Linhas da lista
-    int rowY = py + 34;
-    const auto& list = getBossRushList();
-    for (int i = 0; i < int(list.size()); i++) {
-      if (y >= rowY - 2 && y < rowY + 13) {
+    int rowY = py + 44;
+    const int count = getItemsCountInCurrentTab();
+    for (int i = scrollOffset; i < count && i < scrollOffset + 7; i++) {
+      if (y >= rowY - 2 && y < rowY + 14) {
         if (type == 0) {
           if (selectedIndex == i) {
             handleKey(17, true);
@@ -128,7 +237,7 @@ public:
         }
         return true;
       }
-      rowY += 15;
+      rowY += 16;
     }
     return true;
   }
@@ -136,7 +245,7 @@ public:
   void paint(uint8_t* pixels, int width, int height) const {
     if (!open || !pixels) return;
 
-    const int pw = std::min(340, width - 20), ph = std::min(220, height - 20);
+    const int pw = std::min(360, width - 20), ph = std::min(220, height - 20);
     const int px = (width - pw) / 2, py = (height - ph) / 2;
 
     // Fundo semitransparente escuro com moldura dourada
@@ -156,67 +265,155 @@ public:
       }
     }
 
-    // Título
-    const std::string title = "MAGO DOS BOSSES -- BOSS RUSH";
-    paintOverlayText(pixels, width, height, px + (pw - overlayTextWidth(title)) / 2 + 1, py + 8 + 1, title, 0);
-    paintOverlayText(pixels, width, height, px + (pw - overlayTextWidth(title)) / 2, py + 8, title, 0xd7bf);
+    // Título Principal
+    const std::string title = "MAGO DOS BOSSES -- SALAO ANCESTRAL";
+    paintOverlayText(pixels, width, height, px + (pw - overlayTextWidth(title)) / 2 + 1, py + 6 + 1, title, 0);
+    paintOverlayText(pixels, width, height, px + (pw - overlayTextWidth(title)) / 2, py + 6, title, 0xd7bf);
 
     // Botão [X]
-    paintOverlayText(pixels, width, height, px + pw - 24, py + 8, "[X]", 0xf800);
+    paintOverlayText(pixels, width, height, px + pw - 24, py + 6, "[X]", 0xf800);
 
-    // Linha divisória
-    for (int x = px + 8; x < px + pw - 8; ++x) {
-      const size_t at = (size_t(py + 24) * width + x) * 2;
-      pixels[at] = 0xbf; pixels[at + 1] = 0xd7;
-    }
-
-    // Lista de Chefes
-    const auto& list = getBossRushList();
-    int rowY = py + 34;
-    for (int i = 0; i < int(list.size()); i++) {
-      const auto& b = list[i];
-      const bool sel = (i == selectedIndex);
-
-      if (sel) {
-        for (int y = rowY - 1; y < rowY + 13; ++y) {
-          for (int x = px + 8; x < px + pw - 8; ++x) {
-            const size_t at = (size_t(y) * width + x) * 2;
-            uint16_t c = pixels[at] | (pixels[at + 1] << 8);
-            uint16_t hl = ((c >> 1) & 0x7BEF) + 0x2104;
-            pixels[at] = uint8_t(hl); pixels[at + 1] = uint8_t(hl >> 8);
+    // Barra de Abas
+    static const char* tabNames[4] = {"[CHEFES]", "[TORRE]", "[MASCOTES]", "[SANTUARIO]"};
+    int tabW = (pw - 16) / 4;
+    for (int t = 0; t < 4; ++t) {
+      int tx = px + 8 + t * tabW;
+      bool selTab = (t == currentTab);
+      uint16_t tabCol = selTab ? 0x07e0 : 0x8c51;
+      if (selTab) {
+        for (int y = py + 20; y < py + 34; ++y) {
+          for (int x = tx; x < tx + tabW - 2; ++x) {
+            size_t at = (size_t(y) * width + x) * 2;
+            pixels[at] = 0x20; pixels[at + 1] = 0x20;
           }
         }
       }
+      paintOverlayText(pixels, width, height, tx + 4, py + 22, tabNames[t], tabCol);
+    }
 
-      std::string marker = sel ? "> " : "  ";
-      std::string bossLine = marker + std::to_string(i + 1) + ". " + b.namePt;
-      std::string costStr = std::to_string(b.goldCost) + " G";
+    // Linha divisória
+    for (int x = px + 8; x < px + pw - 8; ++x) {
+      const size_t at = (size_t(py + 36) * width + x) * 2;
+      pixels[at] = 0xbf; pixels[at + 1] = 0xd7;
+    }
 
-      uint16_t colText = sel ? 0xffff : 0xce59;
-      uint16_t colCost = sel ? 0x07e0 : 0xa510;
+    // Renderizar conteúdo da aba ativa
+    int rowY = py + 42;
 
-      paintOverlayText(pixels, width, height, px + 12 + 1, rowY + 1, bossLine, 0);
-      paintOverlayText(pixels, width, height, px + 12, rowY, bossLine, colText);
+    if (currentTab == 0) {
+      // TAB 0: Chefes
+      const auto& list = getBossRushList();
+      for (int i = scrollOffset; i < int(list.size()) && i < scrollOffset + 7; i++) {
+        const auto& b = list[i];
+        const bool sel = (i == selectedIndex);
+        if (sel) {
+          for (int y = rowY - 1; y < rowY + 13; ++y) {
+            for (int x = px + 8; x < px + pw - 8; ++x) {
+              const size_t at = (size_t(y) * width + x) * 2;
+              uint16_t c = pixels[at] | (pixels[at + 1] << 8);
+              uint16_t hl = ((c >> 1) & 0x7BEF) + 0x2104;
+              pixels[at] = uint8_t(hl); pixels[at + 1] = uint8_t(hl >> 8);
+            }
+          }
+        }
+        std::string line = (sel ? "> " : "  ") + std::to_string(i + 1) + ". " + b.namePt;
+        std::string cost = std::to_string(b.goldCost) + " G";
+        paintOverlayText(pixels, width, height, px + 12, rowY, line, sel ? 0xffff : 0xce59);
+        paintOverlayText(pixels, width, height, px + pw - 16 - overlayTextWidth(cost), rowY, cost, sel ? 0x07e0 : 0xa510);
+        rowY += 15;
+      }
+    } else if (currentTab == 1) {
+      // TAB 1: Torre Abissal
+      const auto& floors = getAbyssFloors();
+      for (int i = scrollOffset; i < abyss.maxUnlockedFloor && i < scrollOffset + 7; i++) {
+        const auto& fl = floors[i];
+        const bool sel = (i == selectedIndex);
+        if (sel) {
+          for (int y = rowY - 1; y < rowY + 13; ++y) {
+            for (int x = px + 8; x < px + pw - 8; ++x) {
+              const size_t at = (size_t(y) * width + x) * 2;
+              uint16_t c = pixels[at] | (pixels[at + 1] << 8);
+              uint16_t hl = ((c >> 1) & 0x7BEF) + 0x2104;
+              pixels[at] = uint8_t(hl); pixels[at + 1] = uint8_t(hl >> 8);
+            }
+          }
+        }
+        std::string line = (sel ? "> " : "  ") + std::string("Andar ") + std::to_string(fl.floor) + ": " + fl.titlePt;
+        std::string info = "(Lv" + std::to_string(fl.recommendedLevel) + ") " + std::to_string(fl.goldCost) + " G";
+        paintOverlayText(pixels, width, height, px + 12, rowY, line, fl.isBoss ? (sel ? 0xfd00 : 0xf800) : (sel ? 0xffff : 0xce59));
+        paintOverlayText(pixels, width, height, px + pw - 16 - overlayTextWidth(info), rowY, info, sel ? 0x07e0 : 0xa510);
+        rowY += 15;
+      }
+    } else if (currentTab == 2) {
+      // TAB 2: Mascotes & Companheiros
+      for (int i = 0; i < 4; ++i) {
+        const auto& pt = pets.pets[i];
+        const bool sel = (i == selectedIndex);
+        const bool active = (pets.activePetId == i);
+        if (sel) {
+          for (int y = rowY - 1; y < rowY + 13; ++y) {
+            for (int x = px + 8; x < px + pw - 8; ++x) {
+              const size_t at = (size_t(y) * width + x) * 2;
+              uint16_t c = pixels[at] | (pixels[at + 1] << 8);
+              uint16_t hl = ((c >> 1) & 0x7BEF) + 0x2104;
+              pixels[at] = uint8_t(hl); pixels[at + 1] = uint8_t(hl >> 8);
+            }
+          }
+        }
+        std::string statusMark = active ? "[ATIVO] " : "[GUARDADO] ";
+        std::string line = (sel ? "> " : "  ") + statusMark + pt.namePt + " (Lv." + std::to_string(pt.level) + ")";
+        paintOverlayText(pixels, width, height, px + 12, rowY, line, active ? 0x07e0 : (sel ? 0xffff : 0xce59));
+        paintOverlayText(pixels, width, height, px + 24, rowY + 11, pt.descPt, 0xd7bf);
+        rowY += 24;
+      }
+    } else if (currentTab == 3) {
+      // TAB 3: Santuario do Poder
+      static const char* optTitles[3] = {
+        "Resetar Atributos (FOR/DES/CON/INT)",
+        "Resetar Arvore de Habilidades",
+        "Avancar Ciclo Novo Jogo+ (NG+)"
+      };
+      static const char* optSub[3] = {
+        "Devolve pontos ao saldo por 5.000 G",
+        "Devolve pontos ao saldo por 5.000 G",
+        "Reinicia mapa preservando Lv/Itens/Mascotes"
+      };
 
-      int costX = px + pw - 16 - overlayTextWidth(costStr);
-      paintOverlayText(pixels, width, height, costX + 1, rowY + 1, costStr, 0);
-      paintOverlayText(pixels, width, height, costX, rowY, costStr, colCost);
+      uint32_t curCycle = NewGamePlusManager::getCycle(currentSlot, saveDir);
 
-      rowY += 15;
+      for (int i = 0; i < 3; ++i) {
+        const bool sel = (i == selectedIndex);
+        if (sel) {
+          for (int y = rowY - 1; y < rowY + 13; ++y) {
+            for (int x = px + 8; x < px + pw - 8; ++x) {
+              const size_t at = (size_t(y) * width + x) * 2;
+              uint16_t c = pixels[at] | (pixels[at + 1] << 8);
+              uint16_t hl = ((c >> 1) & 0x7BEF) + 0x2104;
+              pixels[at] = uint8_t(hl); pixels[at + 1] = uint8_t(hl >> 8);
+            }
+          }
+        }
+        std::string line = (sel ? "> " : "  ") + std::string(optTitles[i]);
+        if (i == 2) line += " [Atual: NG+" + std::to_string(curCycle) + "]";
+        std::string sub = "   " + std::string(optSub[i]);
+        paintOverlayText(pixels, width, height, px + 12, rowY, line, sel ? 0xffff : 0xce59);
+        paintOverlayText(pixels, width, height, px + 12, rowY + 11, sub, 0xa510);
+        rowY += 24;
+      }
     }
 
     // Rodapé
     for (int x = px + 8; x < px + pw - 8; ++x) {
-      const size_t at = (size_t(py + ph - 24) * width + x) * 2;
+      const size_t at = (size_t(py + ph - 22) * width + x) * 2;
       pixels[at] = 0xbf; pixels[at + 1] = 0xd7;
     }
 
     int myGoldVal = getGold ? getGold() : 0;
-    std::string footer = "SEU OURO: " + std::to_string(myGoldVal) + " G  [ENTER]: DESAFIAR  [ESC]: SAIR";
-    if (!statusMessage.empty()) footer = statusMessage + " -- " + footer;
+    std::string footer = "OURO: " + std::to_string(myGoldVal) + " G  [< >]: ABAS  [ENTER]: CONFIRMAR  [ESC]: SAIR";
+    if (!statusMessage.empty()) footer = statusMessage;
 
-    paintOverlayText(pixels, width, height, px + 12 + 1, py + ph - 16 + 1, footer, 0);
-    paintOverlayText(pixels, width, height, px + 12, py + ph - 16, footer, statusMessage.empty() ? 0xd7bf : 0xf800);
+    paintOverlayText(pixels, width, height, px + 12 + 1, py + ph - 15 + 1, footer, 0);
+    paintOverlayText(pixels, width, height, px + 12, py + ph - 15, footer, statusMessage.empty() ? 0xd7bf : 0xf800);
   }
 };
 

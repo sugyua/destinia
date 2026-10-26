@@ -24,8 +24,24 @@
 * **Recompensas Balanceadas:** Premiações proporcionais em Ouro e Cash offline ao reivindicar contratos concluídos.
 * **Interface e Persistência:** Cartões interativos com barras de progresso, botões de resgate e persistência isolada em `bounties-v1.txt` (PC) e `localStorage` (Web).
 
-### 4. Hotfix Crítico de Performance Web (Mobile / Safari iOS)
+### 4. Quest Tracker HUD & Arena Gauntlet de Chefes
+* **Rastreador de Missões (Q / Toque):** Widget no canto superior direito do HUD com arte dourada Gamevil, ícone de pergaminho pixel-art, exibição dinâmica do objetivo e destino ativo e alternância rápida via tecla `Q`.
+* **Arena Gauntlet (10 Chefes em Sequência):** Modo sobrevivência definitivo na 11ª opção do Mago dos Bosses (`species 999`), batalhando sem descanso por 10.000 G.
+
+### 5. Auto-Potion QoL (Consumo Inteligente de Poções) (H)
+* **Consumo Automático:** Auto-cura quando PV < 35% e recuperação de PM quando < 25%, respeitando intervalo seguro de recarga de 60 frames (1 segundo).
+* **Atalho Rápido:** Tecla `H` ativa/desativa com aviso visual e sonoro nativo.
+
+### 6. Santuário do Poder: Reset de Atributos & Habilidades + Novo Jogo+
+* **Reset Offline por Ouro (5.000 G):** Restaura atributos básicos (FOR, DES, CON, INT) e habilidades, devolvendo 100% dos pontos para redistribuição imediata via `GameUI_calcHeroStat`.
+* **Ciclos de Novo Jogo+ (NG+1 a NG+5):** Reinicia o mapa da campanha preservando nível, itens, baú, títulos e mascotes, com escalonamento de monstros (+35% HP/ATK) e bônus de XP/Ouro (+50%).
+
+### 7. Mascotes & Companheiros Canônicos + Torre Abissal (50 Andares)
+* **4 Mascotes Offline:** Lobo Glacial, Fênix Ígnea, Golem de Pedra e Mini-Diablo com bônus passivos e sprite flutuante com animação e sombra renderizado ao lado do herói.
+* **Masmorra Infinita da Torre Abissal:** 50 andares de desafios progressivos com chefes a cada 5 andares e recompensas escalonadas salvas em `abyss-v1.txt`.
+
+### 8. Hotfix Crítico de Performance Web (Mobile / Safari iOS)
 * **Aceleração de 7x no Framebuffer:** Implementada LUT RGB565 -> RGBA32 de 256 KB em `Uint32Array`, reduzindo o tempo de render para ~0.35ms.
 * **16 FPS Estáveis no Safari iOS:** Pacing do loop em Web Worker acionado diretamente pela janela principal (`nextFrame`), contornando o estrangulamento de 3 FPS do iOS Safari em background.
 * **Auto-Avanço de Logos:** Pula sequencialmente as telas da Everple e Gamevil com suporte a toque para avançar ao menu inicial em menos de 1.6s.
-* **119 Testes Unitários:** Suíte automatizada Web aprovada com 100% de sucesso.
+* **129 Testes Unitários:** Suíte automatizada Web aprovada com 100% de sucesso.
