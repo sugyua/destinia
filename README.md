@@ -9,6 +9,12 @@
 
 **[Jogar a versão web no navegador](https://destinia-web-experimental.leafyheron257.chatgpt.site/)** — sem instalar; acesso privado e progresso temporário.
 
+## META 0.10 — Frente 1 em preparação
+
+Núcleo canônico disponível em [`common/progression.h`](common/progression.h) e [`web/dist/progression.mjs`](web/dist/progression.mjs): curva de XP até NV999 em u64/BigInt, 14 patentes, status parametrizados e cinco dificuldades/NG+ configurável, com verificações de overflow e conversões ARM. Persistência separada em `progression-v1.txt`, com validação, lock e compare-and-swap; **nenhum `save*.dat` é alterado pelo módulo**. [Contrato/API, limites e testes](docs/PROGRESSION_CORE.md).
+
+Esta frente permanece desacoplada de ARM/HUD/combate e **não habilita NV999 no jogo nesta etapa**. `VERSION` continua 0.9.9 até a integração pela orquestração; não há release 0.10 publicada por esta branch. **Web:** módulo atualizado e testado localmente, sem deployment desta revisão. URL existente: https://destinia-web-experimental.leafyheron257.chatgpt.site/; nenhuma versão 0.10 nesse endereço foi confirmada por esta entrega.
+
 ## Novidades da Versão 0.9.9 — Filtro Visual, Autoloot e QoL de Inventário
 
 O **filtro visual de drops** destaca equipamentos com as cores do rank, materiais em ciano, ouro em amarelo e itens de missão em laranja. Categorias e rank mínimo de equipamento podem ser ocultados **apenas no desenho**, sem apagar drops ou mudar a coleta manual. A coleta automática de **ouro e materiais de fabricação** tem opções independentes do filtro visual: ouro ativo por padrão, materiais desligados por padrão. Mantém o alcance original (até 19 pixels por eixo), usa as verificações nativas de capacidade e não coleta equipamentos, poções, receitas ou itens de missão. A mochila cheia conserva o material no chão; tentativas malsucedidas têm intervalo para evitar repetição de mensagens.

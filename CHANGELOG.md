@@ -4,6 +4,15 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## Em preparação — META 0.10 / Frente 1
+
+> **Beta em desenvolvimento: integração ARM/HUD e validação física pendentes.**
+
+- Novo núcleo puro C++/web para NV1–999: XP u64/BigInt com a curva original estendida, 14 ranks canônicos, status u32 parametrizados e guardas contra overflow/truncamento ARM (u16/i16/u32).
+- Cinco dificuldades com multiplicadores aprovados e NG+ linear configurável; Normal/NG+0 permanece 1x. Não há reset automático de nível ou campanha.
+- Sidecar versionado `progression-v1.txt` por modo/slot, codec C++/JS idêntico, parser estrito, lock/CAS e substituição atômica nativa; adaptador web exige Web Locks e confirmação de gravação. Arquivos `save*.dat` e pools/memória ARM intactos.
+- Testes unitários C++ e Node verificam todos os níveis, paridade, overflow, corrupção, falha de persistência, concorrência e preservação de save sintético. Nenhuma promessa de NV999 em gameplay: hooks, HUD, combate e ponte worker permanecem para integração. Sem release/deployment 0.10 nesta frente.
+
 ## 0.9.9 Beta — 26/10/2026
 
 - Ajustes aprovados pelo proprietário: F7/P alternam proteção diretamente no equipamento do cursor, sem abrir FILTROS; F6 passa a abrir FILTROS. Item/Comparar continuam acessíveis por clique e controle/RS.

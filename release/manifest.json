@@ -224,6 +224,14 @@
     "tests/inventory_upgrade_native.cpp",
     "web/tests/inventory-upgrade.test.mjs",
     "web/dist/inventory-storage.mjs",
-    "web/tests/inventory-storage.test.mjs"
+    "web/tests/inventory-storage.test.mjs",
+    "common/progression.h",
+    "common/progression_store.h",
+    "web/dist/progression.mjs",
+    "tests/progression_cases.cpp",
+    "tests/test_progression.py",
+    "web/tests/progression.test.mjs",
+    "docs/PROGRESSION_CORE.md",
+    "docs/superpowers/plans/2026-10-26-progression-core.md"
   ]
 }
