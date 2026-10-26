@@ -224,12 +224,21 @@ static bool codexDrainNativeMenu(){
  catch(...){codexNativeMenuDraining=false;throw;}
  codexNativeMenuDraining=false;return ok;
 }
+// Suppress only the original top-bar hand. The painter relocates the same sprite.
+// Body cursors and off-screen sprite extraction keep their original ARM path.
+static void codexTopHandHook(uc_engine*,uint64_t,uint32_t,void*){
+ const auto oy=(SCREEN_H-240)/2;u32 lr=0;uc_reg_read(uc,UC_ARM_REG_LR,&lr);
+ if(R(3)==exportsMap.at("MMain")+12&&int32_t(R(2))>=oy&&int32_t(R(2))<oy+40&&
+    (lr&~1u)>=(exportsMap.at("GameUI_drawMainMenu")&~1u)&&(lr&~1u)<(exportsMap.at("GameUI_drawMainMenu")&~1u)+8400)
+  uc_reg_write(uc,UC_ARM_REG_PC,&lr);
+}
 static void installCodex() {
   std::vector<uint8_t> library,table;
   if(!readFile(soPath,library)) return;
   uint64_t fingerprint=14695981039346656037ull;for(auto b:library) fingerprint=(fingerprint^b)*1099511628211ull;
   if(fingerprint!=0x74b2547839b88777ull || !exportsMap.count("Game")) {hostReport("[codex] Biblioteca diferente da original verificada; observador desativado.\n");return;}
   try {
+    {uc_hook hook;const auto at=exportsMap.at("Grp_drawWImage")&~1u;if(uc_hook_add(uc,&hook,UC_HOOK_CODE,reinterpret_cast<void*>(codexTopHandHook),nullptr,at,at)!=UC_ERR_OK)throw std::runtime_error("Falha ao alinhar cursor da barra.");}
     if(!readFile(assetsDir+"/mon_data_en.gdt",table)) throw std::runtime_error("Tabela de monstros ausente.");
     codex.readNames(table);
     try {codex.load(fs::path(saveDir)/"codex-v1.txt");}

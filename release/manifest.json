@@ -232,6 +232,17 @@
     "tests/test_progression.py",
     "web/tests/progression.test.mjs",
     "docs/PROGRESSION_CORE.md",
-    "docs/superpowers/plans/2026-10-26-progression-core.md"
+    "docs/superpowers/plans/2026-10-26-progression-core.md",
+    "common/boss_mage.h",
+    "common/boss_mage_runtime.h",
+    "web/dist/boss-mage.mjs",
+    "tests/boss_mage_cases.cpp",
+    "tests/boss_mage_native.cpp",
+    "tests/menu_bar_cases.cpp",
+    "tests/test_boss_mage.py",
+    "web/tests/boss-mage.test.mjs",
+    "web/tests/menu-bar.test.mjs",
+    "docs/BOSS_MAGE.md",
+    "docs/superpowers/plans/2026-10-26-boss-mage-and-menu-bar.md"
   ]
 }

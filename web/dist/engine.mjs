@@ -1,3 +1,4 @@
+import {BossMage} from './boss-mage.mjs';
 import {LootQol} from './loot-qol.mjs';
 import {Inventory} from './inventory.mjs';
 import {CombatPower} from './combat-power.mjs';
@@ -17,11 +18,11 @@ const DATA=0x40000000,STACK=0x7f000000,STACK_SIZE=0x200000,ENV=DATA,ENV_TAB=DATA
 const encoder=new TextEncoder(),decoder=new TextDecoder();
 const requireValue=(value,message)=>{if(!value)throw Error(message);};
 export class DestiniaWeb {
-  constructor(uc,assets,{onLog=()=>{},onSound=()=>{},fastGraphics=true,fastMemory=true,gameMode="classico",uiScale=100,language="pt",inventoryStorage,lootOptions,width=800,height=480}={}) {
+  constructor(uc,assets,{onLog=()=>{},onSound=()=>{},fastGraphics=true,fastMemory=true,gameMode="classico",uiScale=100,language="pt",inventoryStorage,lootOptions,onOpenBossRushMenu=null,width=800,height=480}={}) {
     this.lootMaterialTable=assets.get('item_en.gdt');
     if(!["en","pt"].includes(language))throw Error("Idioma inválido.");this.language=language;if(language==="pt")assets=translatedAssets(assets);
     if(!["classico","expandido"].includes(gameMode))throw Error("Modo de jogo inválido.");this.gameMode=gameMode;if(![75,100,125].includes(uiScale))throw Error("Escala de interface inválida.");this.uiScale=uiScale;
-    this.lootOptions=lootOptions;this.inventoryStorage=inventoryStorage;this.width=width;this.height=height;this.screenBytes=width*height*2;this.codexFilter=0;
+    this.onOpenBossRushMenu=onOpenBossRushMenu;this.lootOptions=lootOptions;this.inventoryStorage=inventoryStorage;this.width=width;this.height=height;this.screenBytes=width*height*2;this.codexFilter=0;
     this.pendingPurchase=false;this.storeNotice=false;this.virtualControls=true;this.fastGraphics=fastGraphics;this.fastMemory=fastMemory;this.graphicsStats={draws:0,supported:false};this.portraits=new Map();this.codexOpen=false;this.codexTabSelected=false;this.codexTouchCaptured=false;this.codexPage=0;this.codexSelection=0;this.codexDetailsOpen=false;this.codexDetailPage=0;this.codexDetailScroll=0;this.monsterMetadata=null;this.codexNativeMenuPending=-1;this.codexNativeMenuTarget=0;this.codexNativeMenuBypass=0;this.codexNativeMenuDraining=false;this.nativeTouchDown=false;this.nativeTouchPoint={x:0,y:0};
     this.codex=new Codex(monsterNames(assets.get('mon_data_en.gdt')));this.uc=uc;this.assets=assets;this.log=onLog;this.onSound=onSound;this.e=new uc.Unicorn(uc.ARCH_ARM,uc.MODE_ARM);
     this.regs=Array.from({length:13},(_,i)=>uc['ARM_REG_R'+i]);this.handlers=new Map();this.imports=new Map();this.exports=new Map();
@@ -111,7 +112,7 @@ export class DestiniaWeb {
     const symbols=[];for(let i=0;i<count;i++){const at=sym+i*16,nameOff=d.getUint32(at,true);requireValue(nameOff<strsz,'ELF: nome inválido');const end=image.indexOf(0,str+nameOff);requireValue(end>=str+nameOff&&end<str+strsz&&end-str-nameOff<=4096,'ELF: string sem terminador');const name=decoder.decode(image.subarray(str+nameOff,end)),value=d.getUint32(at+4,true),defined=d.getUint16(at+14,true)!==0;symbols.push({name,value,defined});if(defined&&name)this.exports.set(name,BASE+value);}
     const relocations=[];for(const [offTag,sizeTag] of [[17,18],[23,2]]){const at=tags.get(offTag)||0,n=tags.get(sizeTag)||0;if(!n)continue;range(at,n);requireValue(n%8===0,'ELF: relocações inválidas');for(let pos=at;pos<at+n;pos+=8)relocations.push([d.getUint32(pos,true),d.getUint32(pos+4,true)]);}
     for(const [target,info] of relocations){range(target,4);const type=info&255,index=info>>>8;let value=d.getUint32(target,true);if(type===23)value+=BASE;else if([2,21,22].includes(type)){requireValue(index<symbols.length,'ELF: símbolo inválido');const s=symbols[index],address=s.defined?BASE+s.value:this.resolve(s.name);value=type===2?value+address:address;}else if(type===0)continue;else throw Error('ELF: relocação não suportada '+type);d.setUint32(target,value>>>0,true);}
-    this.e.mem_map(BASE,span,this.uc.PROT_ALL);this.write(BASE,image);this.log('Biblioteca ARM carregada: '+this.exports.size+' símbolos.');this.installCodex();this.installVirtualControls();this.dropNames=new DropNames(this);this.dropNames.install();this.lootQol=new LootQol(this,this.lootOptions);this.lootQol.install();this.combatPower=new CombatPower(this);this.combatPower.install();this.inventory=new Inventory(this);this.inventory.install();this.uiRenderer=new UiRenderer(this,this.uiScale);this.uiRenderer.install();if(this.fastGraphics)this.graphicsStats=installFastGraphics(this);this.nativeCodex=new NativeCodex(this);
+    this.e.mem_map(BASE,span,this.uc.PROT_ALL);this.write(BASE,image);this.log('Biblioteca ARM carregada: '+this.exports.size+' símbolos.');this.installCodex();this.installVirtualControls();this.dropNames=new DropNames(this);this.dropNames.install();this.lootQol=new LootQol(this,this.lootOptions);this.lootQol.install();this.combatPower=new CombatPower(this);this.combatPower.install();this.inventory=new Inventory(this);this.inventory.install();this.uiRenderer=new UiRenderer(this,this.uiScale);this.uiRenderer.install();if(this.fastGraphics)this.graphicsStats=installFastGraphics(this);this.nativeCodex=new NativeCodex(this);this.bossMage=new BossMage(this,this.onOpenBossRushMenu);this.bossMage.install();
   }
   finishOfflinePurchase(){
     if(!this.pendingPurchase)return;
@@ -220,6 +221,10 @@ export class DestiniaWeb {
   get16(at,signed=false){const bytes=this.read(at,2),v=new DataView(bytes.buffer,bytes.byteOffset,2);return signed?v.getInt16(0,true):v.getUint16(0,true);}
   installCodex(){
     const game=this.exports.get('Game');if(game!==BASE+0x77ee0)throw Error('Layout do Códex incompatível.');
+    {const at=this.exports.get('Grp_drawWImage')&~1,menu=this.exports.get('GameUI_drawMainMenu')&~1;this.e.hook_add(this.uc.HOOK_CODE,()=>{
+      const lr=this.e.reg_read_i32(this.uc.ARM_REG_LR)>>>0;
+      if(this.r(3)===this.exports.get('MMain')+12&&this.r(2)<40&&(lr&~1)>=menu&&(lr&~1)<menu+8400)this.e.reg_write_i32(this.uc.ARM_REG_PC,lr);
+    },null,at,at);}
     const symbols=['Mon_initMonster','drawMonsterOddEff','checkQuestMonster','Mon_createMonster','GameCanvas_LoadGame'];
     symbols.forEach((name,kind)=>{const at=this.exports.get(name)&~1;requireValue(at>=BASE,'Rotina do Códex ausente');this.e.hook_add(this.uc.HOOK_CODE,()=>{
       if(kind===4){this.codex.select(this.r(0));this.codex.newMap();return;}
@@ -247,7 +252,7 @@ export class DestiniaWeb {
     const key=this.codexNativeMenuPending,target=this.codexNativeMenuTarget;this.codexNativeMenuPending=-1;this.codexNativeMenuDraining=true;
     try{if(!this.codexMenuKey(key,true)){this.codexNativeMenuBypass++;try{this.call(target,[key]);}finally{this.codexNativeMenuBypass--;}}}finally{this.codexNativeMenuDraining=false;}
   }
-  call(address,args=[]){requireValue(address,'Função ARM ausente');let sp=(STACK+STACK_SIZE-256-Math.max(0,args.length-4)*4)&~7;for(let i=4;i<args.length;i++)this.put32(sp+(i-4)*4,args[i]);for(let i=0;i<4;i++)this.w(i,args[i]||0);this.e.reg_write_i32(this.uc.ARM_REG_SP,sp);this.e.reg_write_i32(this.uc.ARM_REG_LR,RETURN);this.error=null;try{this.e.emu_start(address,RETURN,0,0);}catch(error){const pc=this.e.reg_read_i32(this.uc.ARM_REG_PC)>>>0;throw Error(String(error)+" [ARM pc=0x"+(pc-BASE).toString(16)+", UI="+(this.uiRenderer?.kind||"none")+", entry="+(this.uiRenderer?.entry||0).toString(16)+"]");}if(this.error)throw this.error;requireValue((this.e.reg_read_i32(this.uc.ARM_REG_PC)&~1)===RETURN,'Execução ARM interrompida');const result=this.r(0);this.codexDrainNativeMenu();return result;}
+  call(address,args=[]){requireValue(address,'Função ARM ausente');let sp=(STACK+STACK_SIZE-256-Math.max(0,args.length-4)*4)&~7;for(let i=4;i<args.length;i++)this.put32(sp+(i-4)*4,args[i]);for(let i=0;i<4;i++)this.w(i,args[i]||0);this.e.reg_write_i32(this.uc.ARM_REG_SP,sp);this.e.reg_write_i32(this.uc.ARM_REG_LR,RETURN);this.error=null;try{this.e.emu_start(address,RETURN,0,0);}catch(error){const pc=this.e.reg_read_i32(this.uc.ARM_REG_PC)>>>0;throw Error(String(error)+" [ARM pc=0x"+(pc-BASE).toString(16)+", UI="+(this.uiRenderer?.kind||"none")+", entry="+(this.uiRenderer?.entry||0).toString(16)+"]");}if(this.error)throw this.error;requireValue((this.e.reg_read_i32(this.uc.ARM_REG_PC)&~1)===RETURN,'Execução ARM interrompida');const result=this.r(0);this.bossMage?.dispatch();this.codexDrainNativeMenu();return result;}
   init(){const device=encoder.encode('DESTINIA-WEB-TEST'),model=encoder.encode('Browser');const id=this.array(device),m=this.array(model);this.screen=this.array(new Uint8Array(this.screenBytes));this.call(this.exports.get('Java_game_destiniaeng_GameThread_initGame'),[ENV,16,id,device.length,m,model.length,this.width,this.height,0]);this.log('initGame concluído.');}
   step(){this.finishOfflinePurchase();this.processNetwork();if(this.codexOpen){this.frame++;return 62;}if(this.inventory.open){this.frame++;return 62;}this.lootQol.collect(this.frame);this.inventory.beginFrame();this.combatPower.beginFrame();const wait=this.call(this.exports.get('Java_game_destiniaeng_GameThread_jniRun'),[ENV,16,this.screen,this.frame++]);this.finishOfflinePurchase();this.processNetwork();return wait>=1000?100:wait;}
   monsterFacts(p){const game=this.exports.get('Game'),file=`m${this.get16(game+0x4870)}_${this.get16(game+0x4872)}.mpd`;return {maxHP:this.get32(p+0x24),level:this.get16(p+0x10),elite:!!this.get32(p+0x4c),location:{file,name:this.monsterMetadata?.maps.get(file)||file}};}
@@ -256,7 +261,7 @@ export class DestiniaWeb {
   codexDetailsPage(direction){const pages=Math.max(1,this.codexDetailData()?.sections?.length||1),next=Math.max(0,Math.min(pages-1,this.codexDetailPage+direction));if(next!==this.codexDetailPage)this.codexDetailScroll=0;this.codexDetailPage=next;}
   codexScrollDetails(direction){const lists=detailListPages(this.codexDetailData()?.sections?.[this.codexDetailPage]).length;this.codexDetailScroll=Math.max(0,Math.min(lists-1,this.codexDetailScroll+direction));}
 
-  framebuffer(){const pixels=this.arrays.get(this.screen).slice();if(!this.codexOpen)this.combatPower.paint(pixels);this.lootQol.paint(pixels);this.inventory.paint(pixels);this.nativeCodex.paint(pixels);return pixels;}
+  framebuffer(){const pixels=this.arrays.get(this.screen).slice();if(!this.codexOpen)this.combatPower.paint(pixels);this.bossMage.paint(pixels);this.lootQol.paint(pixels);this.inventory.paint(pixels);this.nativeCodex.paint(pixels);return pixels;}
   codexMenuVisible(){const game=this.exports.get('Game'),ui=this.exports.get('GameUI');if(!game||!ui)return false;const state=this.get32(ui+0x7c);return this.get16(game+0x4854)===16&&this.get16(ui+0x76)>=2&&(state&0x0fffffff)<=1&&(state>>>28)<=8;}
   codexChangePage(direction){const count=this.codex.catalog(this.codexFilter).length,page=Math.max(0,Math.min(Math.max(0,Math.ceil(count/entriesPerPage)-1),this.codexPage+direction));this.codexSelection=Math.min(count-1,page*entriesPerPage+this.codexSelection%entriesPerPage);this.codexPage=page;}
   codexMoveSelection(delta){const count=this.codex.catalog(this.codexFilter).length;this.codexSelection=Math.max(0,Math.min(count-1,this.codexSelection+delta));this.codexPage=Math.floor(this.codexSelection/entriesPerPage);}
@@ -279,9 +284,9 @@ export class DestiniaWeb {
    }
    if(key===5&&state===0||key===7&&(state===0x80000000||state===0x80000001)){if(state===0x80000001&&!this.codexSelectNativeTab(8))return false;this.codexOpenMenu();this.codexOpen=false;return true;}return false;
   }
-  codexBarTouch(x,y){const p=nativeTransform(this.uiScale).inverse(x,y);return this.codexMenuVisible()&&nativeTabHit(p.x,p.y)>=0;}
+  codexBarTouch(x,y){const p=nativeTransform(this.uiScale,this.width,this.height).inverse(x,y);return this.codexMenuVisible()&&nativeTabHit(p.x,p.y,this.width,this.height)>=0;}
   codexMenuTouch(x,y,phase){
-    const point=nativeTransform(this.uiScale).inverse(x,y);x=point.x;y=point.y;
+    const point=nativeTransform(this.uiScale,this.width,this.height).inverse(x,y);x=point.x-Math.floor((this.width-400)/2);y=point.y-Math.floor((this.height-240)/2);
    if(this.codexTouchCaptured&&phase!==0){if(phase===1)this.codexTouchCaptured=false;return true;}
    if(this.codexOpen&&this.nativeTouchDown&&phase!==0)return false;
    if(phase===0&&(this.codexOpen||this.codexMenuVisible())){const tab=nativeTabHit(x,y);if(tab>=0){this.codexTouchCaptured=true;if(tab===9)this.codexOpenMenu();else{this.codexOpen=false;this.codexDetailsOpen=false;this.codexTabSelected=false;this.codexSelectNativeTab(tab);}return true;}}

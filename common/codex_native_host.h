@@ -22,11 +22,24 @@ public:
    if(skin.empty()){std::vector<uint8_t> originalUi(12088),before(32056),after(32056),blank(FB_BYTES);rd(ui,originalUi.data(),originalUi.size());rd(g,before.data(),before.size());wr(pixels,blank.data(),blank.size());wr32(ui+0x7c,0);uint16_t anim=16;wr(ui+0x76,&anim,2);const auto touch=exportsMap.at("MMain")+0x3920;uint16_t pointerMode=rd16(touch),hidden=2;wr(touch,&hidden,2);try{call("GameUI_drawMainMenu",{4});}catch(...){wr(touch,&pointerMode,2);wr(ui,originalUi.data(),originalUi.size());throw;}wr(touch,&pointerMode,2);wr(ui,originalUi.data(),originalUi.size());rd(g,after.data(),after.size());if(before!=after){wr(g,before.data(),before.size());throw std::runtime_error("Desenho nativo alterou personagem");}skin.resize(FB_BYTES);rd(pixels,skin.data(),skin.size());}
    if(hand.pixels.empty()){const auto ptr=exportsMap.at("MMain")+12;hand.width=rd16(ptr+8);hand.height=rd16(ptr+10);handAnchorX=int16_t(rd16(ptr+12));handAnchorY=int16_t(rd16(ptr+14));if(hand.width<=0||hand.height<=0||hand.width>128||hand.height>128)throw std::runtime_error("Cursor nativo invalido");fill(0,0,SCREEN_W,SCREEN_H,0xf81f);call("Grp_drawWImage",{4,u32(ox+200),u32(oy+80),ptr});std::vector<uint8_t> sprite(FB_BYTES);rd(pixels,sprite.data(),sprite.size());hand.pixels.resize(hand.width*hand.height);for(int y=0;y<hand.height;y++)for(int x=0;x<hand.width;x++){const int sx=ox+200-handAnchorX+x,sy=oy+80-handAnchorY+y;if(sx<0||sy<0||sx>=SCREEN_W||sy>=SCREEN_H)throw std::runtime_error("Cursor fora do raster");const auto at=(sy*SCREEN_W+sx)*2;const uint16_t c=sprite[at]|sprite[at+1]<<8;hand.pixels[y*hand.width+x]=c==0xf81f?0:0x10000u|c;}}
    wr(pixels,skin.data(),skin.size());const int selected=preview?9:int(rd32(ui+0x7c)>>28);
-   // Stretch native empty background; relocate the original right cap by 23px.
+   // Expand the original frame symmetrically; all ten icons use the hit cells.
    std::vector<uint8_t> bar(FB_BYTES);rd(pixels,bar.data(),bar.size());
-   for(int y=0;y<25;y++)for(int x=preview?87:304;x<339;x++){const auto src=((oy+y)*SCREEN_W+ox+(x>=332?x-23:304))*2,dst=((oy+y)*SCREEN_W+ox+x)*2;bar[dst]=skin[src];bar[dst+1]=skin[src+1];}wr(pixels,bar.data(),bar.size());
-   if(preview)for(int i=0;i<9;i++){call("Grp_setDrawOpVal",{8,0xffffffff});call("Grp_setDrawOpVal",{1,204});call("Grp_drawWImage",{4,u32(ox+98+23*i),u32(oy+2),ui+0x24fc+20*u32(i)});}
-   if(selected!=9){call("Grp_setDrawOpVal",{8,0xffffffff});call("Grp_setDrawOpVal",{1,204});}else call("Grp_setDrawOpVal",{0,0xffffffff});call("Grp_drawWImage",{4,u32(ox+305),u32(oy+2),ui+0x24fc+20*7});call("Grp_setDrawOpVal",{0,0xffffffff});
+   const auto barRect=destinia::nativeCodexBarRect(SCREEN_W,SCREEN_H);
+   for(int y=0;y<25;y++)for(int x=0;x<barRect.w;x++){
+    const int sx=x<14?84+x:x>=249?309+x-249:304;
+    const auto src=((oy+y)*SCREEN_W+ox+sx)*2,dst=((barRect.y+y)*SCREEN_W+barRect.x+x)*2;
+    bar[dst]=skin[src];bar[dst+1]=skin[src+1];
+   }
+   wr(pixels,bar.data(),bar.size());
+   for(int i=0;i<10;++i){
+    const auto ptr=ui+0x24fc+20*u32(i==9?7:i);const auto cell=destinia::nativeCodexTabRect(i,SCREEN_W,SCREEN_H);
+    const int x=cell.x+(cell.w-int(rd16(ptr+8)))/2+int16_t(rd16(ptr+12));
+    const int y=cell.y+(cell.h-int(rd16(ptr+10)))/2+int16_t(rd16(ptr+14));
+    call("Grp_setDrawOpVal",{0,0xffffffff});
+    if(i!=selected){call("Grp_setDrawOpVal",{8,0xffffffff});call("Grp_setDrawOpVal",{1,204});}
+    call("Grp_drawWImage",{4,u32(x),u32(y),ptr});
+   }
+   call("Grp_setDrawOpVal",{0,0xffffffff});
    std::vector<std::pair<int,destinia::CodexRect>> portraits;std::vector<std::pair<int,std::string>> names(codex.names.begin(),codex.names.end());
    if(preview){fill(ox+90,oy+49,220,183,dark);fill(ox+94,oy+31,212,16,0);text(ox+97,oy+33,codexDetailsOpen?"CODEX - DETALHES":"CODEX - MONSTROS",gold,170);text(ox+274,oy+33,"SAIR",white,29);const bool valid=codexSelection<names.size();const int id=valid?names[codexSelection].first:-1;const bool found=character!=codex.entries.end()&&character->second.count(id);const std::string name=found?names[codexSelection].second:"??????",kills=std::to_string(found?character->second.at(id).kills:0);
     if(!codexDetailsOpen){for(size_t i=0;i<32&&codexPage*32+i<names.size();i++){const auto at=codexPage*32+i;auto b=destinia::nativeCodexCell(i,SCREEN_W,SCREEN_H);box(b,at==codexSelection);if(character!=codex.entries.end()&&character->second.count(names[at].first))portraits.push_back({names[at].first,b});else text(b.x+9,b.y+6,"?",gold,12);}text(ox+96,oy+160,name,gold,208);text(ox+96,oy+174,found?"ENCONTRADO":"???????",white,208);text(ox+96,oy+189,"MORTOS: "+kills,white,138);button(rect(238,189,69,20),"INFO");button(rect(92,215,62,20),"ANTERIOR",codexPage>0);button(rect(249,215,58,20),"PROXIMO",(codexPage+1)*32<names.size());text(ox+173,oy+221,std::to_string(codexPage+1)+"/"+std::to_string(std::max<size_t>(1,(names.size()+31)/32)),white,65);
@@ -36,9 +49,19 @@ public:
   }catch(...){restore();throw;}
  }
  const bool keepHand=!preview&&(rd32(ui+0x7c)&15)==0&&rd16(exportsMap.at("MMain")+0x3920)<=1;const int motion=rd16(ui+0x4e),weight=motion==2?4:motion==1?7:8;
- const int hx=((ox+116+23*int(rd32(ui+0x7c)>>28))*weight+rd16(ui+0x4a)*(8-weight))/8-handAnchorX,hy=((oy+19)*weight+rd16(ui+0x4c)*(8-weight))/8-std::min<int>(rd16(ui+0x50),2)-handAnchorY;
- const auto transform=destinia::nativeCodexTransform(SCREEN_W,SCREEN_H,preferences.uiScale);for(int y=oy;y<oy+(preview?240:25);y++)for(int x=ox+84;x<ox+339;x++){if((y>=oy+25&&x>=ox+316)||(!preview&&x<ox+304))continue;if(keepHand&&x>=hx&&y>=hy&&x<hx+hand.width&&y<hy+hand.height&&(hand.pixels[(y-hy)*hand.width+x-hx]&0x10000u))continue;const auto box=transform.rect(x,y,1,1);const auto at=(y*SCREEN_W+x)*2;for(int yy=std::max(0,box.y);yy<std::min(SCREEN_H,box.y+box.h);yy++)for(int xx=std::max(0,box.x);xx<std::min(SCREEN_W,box.x+box.w);xx++){const auto dest=(yy*SCREEN_W+xx)*2;output[dest]=image[at];output[dest+1]=image[at+1];}}
- if(preview){const int handX=323;for(int y=0;y<hand.height;y++)for(int x=0;x<hand.width;x++){const auto c=hand.pixels[y*hand.width+x];if(!(c&0x10000))continue;const auto b=transform.rect(ox+handX-handAnchorX+x,oy+19-handAnchorY+y,1,1);for(int yy=std::max(0,b.y);yy<std::min(SCREEN_H,b.y+b.h);yy++)for(int xx=std::max(0,b.x);xx<std::min(SCREEN_W,b.x+b.w);xx++){auto at=(yy*SCREEN_W+xx)*2;output[at]=c&255;output[at+1]=(c>>8)&255;}}}
+ const auto transform=destinia::nativeCodexTransform(SCREEN_W,SCREEN_H,preferences.uiScale);
+ const auto barRect=destinia::nativeCodexBarRect(SCREEN_W,SCREEN_H);
+ for(int y=oy;y<oy+(preview?240:25);y++)for(int x=barRect.x;x<barRect.x+barRect.w;x++){
+  if(y>=oy+25&&(x<ox+84||x>=ox+316))continue;
+  const auto box=transform.rect(x,y,1,1);const auto at=(y*SCREEN_W+x)*2;
+  for(int yy=std::max(0,box.y);yy<std::min(SCREEN_H,box.y+box.h);yy++)for(int xx=std::max(0,box.x);xx<std::min(SCREEN_W,box.x+box.w);xx++){const auto dest=(yy*SCREEN_W+xx)*2;output[dest]=image[at];output[dest+1]=image[at+1];}
+ }
+ if(preview||keepHand){
+  const int handX=preview?ox+311:((ox+116+23*int(rd32(ui+0x7c)>>28))*weight+rd16(ui+0x4a)*(8-weight))/8-12;
+  const int handY=preview?oy+19:((oy+19)*weight+rd16(ui+0x4c)*(8-weight))/8-std::min<int>(rd16(ui+0x50),2);
+  for(int y=0;y<hand.height;y++)for(int x=0;x<hand.width;x++){const auto c=hand.pixels[y*hand.width+x];if(!(c&0x10000))continue;const auto b=transform.rect(handX-handAnchorX+x,handY-handAnchorY+y,1,1);for(int yy=std::max(0,b.y);yy<std::min(SCREEN_H,b.y+b.h);yy++)for(int xx=std::max(0,b.x);xx<std::min(SCREEN_W,b.x+b.w);xx++){auto at=(yy*SCREEN_W+xx)*2;output[at]=c&255;output[at+1]=(c>>8)&255;}}
+ }
+
 
  }
 };

@@ -6,6 +6,9 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 
 ## Em preparação — META 0.10 / Frente 1
 
+- Barra superior: dez ícones centralizados, desenho/cursor/hitboxes compartilhados nos dois tamanhos e escalas; superfície/toque web800 corrigidos sem criar estados ARM extras.
+- Mago Boss Rush: paleta azul/branco/sombra isolada sobre mon6_0 e shadow originais, NPC host-side em posição livre de Lagrant, ação nativa manual com evento openBossRushMenu diferido para a UI externa. Pools, colisões, assets e saves preservados; ver docs/BOSS_MAGE.md para contrato e identificação pendente de Icarus.
+
 > **Beta em desenvolvimento: integração ARM/HUD e validação física pendentes.**
 
 - Novo núcleo puro C++/web para NV1–999: XP u64/BigInt com a curva original estendida, 14 ranks canônicos, status u32 parametrizados e guardas contra overflow/truncamento ARM (u16/i16/u32).

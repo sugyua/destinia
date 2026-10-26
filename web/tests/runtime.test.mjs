@@ -43,7 +43,7 @@ test('Códex abre pelo menu original, congela o jogo e volta sem alterar Craft/P
   r.key(5,true);r.key(17,true);assert.equal(r.codexOpen,true);
   assert.equal(r.get16(r.exports.get('MMain')+0x390c),0,'Soltar o toque nativo ao abrir o Códex');
   r.touch(200,100,1);r.key(10,true);r.key(7,true);
-  const state=r.get32(ui+0x7c);r.touch(320,12,0);r.touch(320,12,1);
+  const state=r.get32(ui+0x7c);r.touch(303,12,0);r.touch(303,12,1);
   assert.equal(r.codexOpen,true,'O livro no menu original deve abrir o Códex');
   const before=r.read(game,32056),menuBefore=r.read(ui,12088);for(let i=0;i<3;i++)r.step();
   assert.deepEqual(r.read(game,32056),before,'Combate e progresso não podem avançar durante a consulta');
@@ -57,8 +57,8 @@ test('Códex abre pelo menu original, congela o jogo e volta sem alterar Craft/P
   r.key(17,true);r.touch(290,35,0);assert.equal(r.codexOpen,false);assert.equal(r.codexTouchCaptured,true);r.touch(290,35,1);assert.equal(r.codexTouchCaptured,false);
 
   // The new entry must not hijack other tabs, submenus, title screens or gameplay.
-  r.put32(ui+0x7c,0x50000002);r.touch(320,12,0);r.touch(320,12,1);assert.equal(r.codexOpen,false);
-  r.write(game+0x4854,new Uint8Array(2));r.touch(320,12,0);r.touch(320,12,1);assert.equal(r.codexOpen,false);
+  r.put32(ui+0x7c,0x50000002);r.touch(303,12,0);r.touch(303,12,1);assert.equal(r.codexOpen,false);
+  r.write(game+0x4854,new Uint8Array(2));r.touch(303,12,0);r.touch(303,12,1);assert.equal(r.codexOpen,false);
  } finally {r.close();}
 });
 test('miniaturas reais e paginas do Codex nao alteram memoria ARM nem contadores',async()=>{
@@ -320,10 +320,10 @@ test('filtros internos preservam ARM, toque escalado e alvos reais de equipar/ve
   assert.ok(r.inventory.choose());call('MainMenu_mKeyPressed',[6]);assert.equal(r.get32(ui+0x2e0),g+0x433e);call('MainMenu_mKeyPressed',[27]);assert.equal(call('getMyGold'),20000);call('MainMenu_mKeyPressed',[6]);call('MainMenu_mKeyPressed',[6]);assert.equal(call('getMyGold'),20030);assert.equal(r.read(g+0x2e0c+a,1)[0],0);assert.equal(r.get32(g+0x4584),pointer);call('MainMenu_mKeyPressed',[6]);assert.ok(r.inventory.enter());assert.ok(!r.inventory.panel.items.some(i=>i.pool===a));assert.equal(r.inventory.panel.selectedPool,-1);r.inventory.open=false;
  }finally{r.close();}
 });
-test('dez abas usam navegacao nativa sem substituir Craft ou Pets',()=>{const r=make();try{r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);r.call(r.exports.get('openMainmenu'),[0]);const u=r.exports.get('GameUI');r.write(u+0x76,new Uint8Array([16,0]));for(let i=0;i<9;i++){r.codexMenuTouch(113+23*i,12,0);r.codexMenuTouch(113+23*i,12,1);assert.equal(r.get32(u+0x7c)>>>28,i,'Aba '+i);}const at=(x,y)=>(y*400+x)*2;const original=new Uint8Array(400*240*2).fill(0x35);r.nativeCodex.paint(original);assert.equal(original[at(110,12)],0x35,'Cursor original nao deve ser coberto');r.key(7,true);assert.equal(r.codexTabSelected,true);const preview=new Uint8Array(400*240*2).fill(0x35);r.nativeCodex.paint(preview);assert.notEqual(preview[at(91,50)],0x35,'Previa deve aparecer antes da confirmacao');assert.ok(r.nativeCodex.hand.pixels.some(c=>c&0x10000),'Sprite original da mao precisa estar disponivel');r.codexMenuTouch(320,12,0);r.codexMenuTouch(320,12,1);assert.equal(r.codexOpen,true);}finally{r.close();}});
+test('dez abas usam navegacao nativa sem substituir Craft ou Pets',()=>{const r=make();try{r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);r.call(r.exports.get('openMainmenu'),[0]);const u=r.exports.get('GameUI');r.write(u+0x76,new Uint8Array([16,0]));for(let i=0;i<9;i++){r.codexMenuTouch(96+23*i,12,0);r.codexMenuTouch(96+23*i,12,1);assert.equal(r.get32(u+0x7c)>>>28,i,'Aba '+i);}const at=(x,y)=>(y*400+x)*2;const original=new Uint8Array(400*240*2).fill(0x35);r.nativeCodex.paint(original);assert.notEqual(original[at(96,12)],0x35,'Barra inteira deve usar a geometria centralizada');r.key(7,true);assert.equal(r.codexTabSelected,true);const preview=new Uint8Array(400*240*2).fill(0x35);r.nativeCodex.paint(preview);assert.notEqual(preview[at(91,50)],0x35,'Previa deve aparecer antes da confirmacao');assert.ok(r.nativeCodex.hand.pixels.some(c=>c&0x10000),'Sprite original da mao precisa estar disponivel');r.codexMenuTouch(303,12,0);r.codexMenuTouch(303,12,1);assert.equal(r.codexOpen,true);}finally{r.close();}});
 test('moldura e fonte originais do Codex preservam Game UI graficos e descobertas',async()=>{const r=make({uiScale:75});try{r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);await r.prepareCodexPortraits();r.call(r.exports.get('openMainmenu'),[0]);r.write(r.exports.get('GameUI')+0x76,new Uint8Array([16,0]));r.codexOpenMenu();r.codex.observe(10,61,true);r.codexSelection=60;r.codexPage=1;const addresses=[['Game',32056],['GameUI',12088],['MMain',14632],['Grp',124],['frameBuffer',20]],before=addresses.map(([n,size])=>r.read(r.exports.get(n),size)),rows=r.codex.rows();const first=r.framebuffer(),heap=r.heap;assert.ok(first.some(v=>v));assert.deepEqual(r.framebuffer(),first);assert.equal(r.heap,heap,'Cache evita trabalho ARM e novas alocacoes por quadro');r.key(6,true);r.framebuffer();for(let i=0;i<addresses.length;i++)assert.deepEqual(r.read(r.exports.get(addresses[i][0]),addresses[i][1]),before[i],addresses[i][0]);assert.deepEqual(r.codex.rows(),rows);assert.equal(r.uiRenderer.percent,75);}finally{r.close();}});
 
-test('Codex abre pela aba dentro do inventario e preserva contexto ao voltar',()=>{const r=make();try{r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);r.call(r.exports.get('openMainmenu'),[0]);const u=r.exports.get('GameUI');r.write(u+0x76,new Uint8Array([16,0]));for(const state of [0x10000001,0x20000001]){r.codexOpen=r.codexTabSelected=false;r.put32(u+0x7c,state);const before=r.read(r.exports.get('Game'),32056);r.touch(320,12,0);r.touch(320,12,1);assert.equal(r.codexOpen,true);r.framebuffer();assert.deepEqual(r.read(r.exports.get('Game'),32056),before);r.key(10,true);assert.equal(r.get32(u+0x7c),state);assert.equal(r.codexSelectNativeTab(0),true);assert.equal(r.get32(u+0x7c),0);}}finally{r.close();}});
+test('Codex abre pela aba dentro do inventario e preserva contexto ao voltar',()=>{const r=make();try{r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);r.call(r.exports.get('openMainmenu'),[0]);const u=r.exports.get('GameUI');r.write(u+0x76,new Uint8Array([16,0]));for(const state of [0x10000001,0x20000001]){r.codexOpen=r.codexTabSelected=false;r.put32(u+0x7c,state);const before=r.read(r.exports.get('Game'),32056);r.touch(303,12,0);r.touch(303,12,1);assert.equal(r.codexOpen,true);r.framebuffer();assert.deepEqual(r.read(r.exports.get('Game'),32056),before);r.key(10,true);assert.equal(r.get32(u+0x7c),state);assert.equal(r.codexSelectNativeTab(0),true);assert.equal(r.get32(u+0x7c),0);}}finally{r.close();}});
 
 test('toque na previa do Codex ativa INFO sem atravessar para a aba nativa',()=>{const r=make();try{r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);r.call(r.exports.get('openMainmenu'),[0]);r.write(r.exports.get('GameUI')+0x76,new Uint8Array([16,0]));r.key(5,true);assert.equal(r.codexTabSelected,true);assert.equal(r.codexOpen,false);r.touch(270,199,0);r.touch(270,199,1);assert.equal(r.codexOpen,true);assert.equal(r.codexDetailsOpen,true);}finally{r.close();}});
 
@@ -344,15 +344,34 @@ test('Seta direita no corpo de Sistema seleciona Codex sem abrir submenu origina
  }finally{r.close();}
 });
 
+test('Mago sintetico usa ARM original sem tocar pools e chama UI fora da emulacao',async()=>{
+ for(const width of [400,800]){const r=make({width,height:width===400?240:480});try{
+  r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();await r.bossMage.prepared;
+  r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);r.call(r.exports.get('Map_loadData'),[0,65,1]);const g=r.exports.get('Game'),sh=(p,n)=>r.write(p,new Uint8Array([n&255,n>>>8&255]));
+  r.put32(r.get32(0x10044240),r.exports.get('GameCanvas'));sh(g+0x4854,0);sh(g+0x4866,0);const site=r.bossMage.visibleSite();assert.deepEqual(site,{area:0,map:65,x:328,y:344});
+  sh(g+0x4890,site.x);sh(g+0x4892,site.y+16);sh(g+0x4898,2);sh(g+0x4878,site.x-width/2);sh(g+0x487a,site.y-r.height/2);r.write(g+0x3e76,new Uint8Array(20));
+  let opens=0;r.bossMage.menu.opener=()=>{opens++;r.call(r.exports.get('getMyGold'));};const before=r.read(g,32056),saved=[...r.saved];
+  r.call(r.exports.get('GameCanvas_mKeyPressed'),[17]);assert.equal(opens,1);r.call(r.exports.get('GameCanvas_mKeyPressed'),[17]);assert.equal(opens,1);r.call(r.exports.get('GameCanvas_mKeyReleased'),[17]);assert.deepEqual(r.read(g,32056),before);
+  const pixels=new Uint8Array(width*r.height*2+32).fill(0x35);r.bossMage.paint(pixels.subarray(16,-16));assert(pixels.subarray(16,-16).some(c=>c!==0x35));assert(pixels.subarray(0,16).every(c=>c===0x35)&&pixels.subarray(-16).every(c=>c===0x35));assert.deepEqual(r.read(g,32056),before);assert.deepEqual([...r.saved],saved);
+  r.lootQol.autoTarget=0;r.call(r.exports.get('GameCanvas_mKeyPressed'),[6]);r.lootQol.autoTarget=-1;assert.equal(opens,1);r.write(g,before);
+  sh(g+0x1fac,site.x);sh(g+0x1fae,site.y);assert.equal(r.bossMage.visibleSite(),null);r.write(g,before);
+  r.bossMage.menu.opener=null;r.call(r.exports.get('GameCanvas_mKeyPressed'),[17]);assert(r.bossMage.menu.pending);r.call(r.exports.get('Map_loadData'),[0,62,1]);assert.equal(r.bossMage.visibleSite(),null);assert.equal(r.bossMage.menu.pending,false);
+  r.call(r.exports.get('openMainmenu'),[0]);const ui=r.exports.get('GameUI');sh(ui+0x76,16);
+  for(const scale of [75,100,125]){r.uiScale=scale;const {nativeTransform,nativeTabRect}=await import('../dist/codex-native.mjs');const t=nativeTransform(scale,width,r.height);
+   for(let i=0;i<10;i++){const b=nativeTabRect(i,width,r.height),p=t.point(b.x+11,b.y+12);r.touch(p.x,p.y,0);r.touch(p.x,p.y,1);if(i===9){assert(r.codexOpen);r.framebuffer();r.key(10,true);}else assert.equal(r.get32(ui+0x7c)>>>28,i);}
+  }
+ }finally{r.close();}}
+});
+
 test('Barra inclui livro inteiro e uma unica moldura nativa antes de selecionar Codex',()=>{
  const r=make();try{
   r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);r.call(r.exports.get('openMainmenu'),[0]);r.write(r.exports.get('GameUI')+0x76,new Uint8Array([16,0]));
   const handle=r.get32(r.exports.get('Grp')+4);r.call(r.exports.get('GameUI_drawMainMenu'),[handle]);const ptr=r.call(r.exports.get('MC_GRP_GET_FRAME_BUFFER_POINTER'),[handle]),before=r.read(ptr,192000),out=before.slice();r.nativeCodex.paint(out);
   const raster=r.nativeCodex.cache.values().next().value,at=(x,y)=>(y*400+x)*2;
-  for(let y=2;y<19;y++)for(let x=307;x<325;x++)assert.deepEqual(out.slice(at(x,y),at(x,y)+2),raster.slice(at(x,y),at(x,y)+2),'Livro nao pode ser recortado pela borda antiga');
-  for(let y=0;y<25;y++)for(let x=332;x<339;x++)assert.deepEqual(out.slice(at(x,y),at(x,y)+2),r.nativeCodex.base.slice(at(x-23,y),at(x-23,y)+2),'Fechamento deve reutilizar a moldura original deslocada');
-  for(let y=0;y<19;y++)for(let x=84;x<304;x++)assert.deepEqual(out.slice(at(x,y),at(x,y)+2),before.slice(at(x,y),at(x,y)+2),'Nove icones nativos preservados');
-  for(let x=307;x<325;x++){r.codexOpen=false;r.codexTabSelected=false;r.touch(x,12,0);r.touch(x,12,1);assert.equal(r.codexOpen,true,'Todo o livro visivel deve ser clicavel');}
+  for(let y=2;y<19;y++)for(let x=294;x<312;x++)assert.deepEqual(out.slice(at(x,y),at(x,y)+2),raster.slice(at(x,y),at(x,y)+2),'Livro nao pode ser recortado pela borda antiga');
+  for(let y=0;y<25;y++)for(let x=321;x<328;x++)assert.deepEqual(out.slice(at(x,y),at(x,y)+2),r.nativeCodex.base.slice(at(x-12,y),at(x-12,y)+2),'Fechamento deve reutilizar a moldura original deslocada');
+  for(let y=40;y<240;y++)for(let x=84;x<316;x++)assert.deepEqual(out.slice(at(x,y),at(x,y)+2),before.slice(at(x,y),at(x,y)+2),'Corpo nativo preservado ao centralizar a barra');
+  for(let x=294;x<312;x++){r.codexOpen=false;r.codexTabSelected=false;r.touch(x,12,0);r.touch(x,12,1);assert.equal(r.codexOpen,true,'Todo o livro visivel deve ser clicavel');}
  }finally{r.close();}
 });
 

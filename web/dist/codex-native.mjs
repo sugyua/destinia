@@ -1,9 +1,11 @@
 import {UiTransform} from './ui-transform.mjs';
 import {detailListPages} from './codex-ui.mjs';
 export const nativePanel=(sw=400,sh=240)=>{const ox=Math.floor((sw-400)/2),oy=Math.floor((sh-240)/2);return {x:ox+84,y:oy+25,w:232,h:215};};
-export const nativeTransform=(percent=100,sw=400,sh=240)=>{const ox=Math.floor((sw-400)/2),oy=Math.floor((sh-240)/2);return new UiTransform(sw,sh,percent,'Center',255,240,ox+84,oy);};
+export const nativeBarRect=(sw=400,sh=240)=>({x:Math.floor((sw-256)/2),y:Math.floor((sh-240)/2),w:256,h:25});
+export const nativeTabRect=(i,sw=400,sh=240)=>({x:Math.floor((sw-230)/2)+23*i,y:Math.floor((sh-240)/2),w:23,h:24});
+export const nativeTransform=(percent=100,sw=400,sh=240)=>{const b=nativeBarRect(sw,sh);return new UiTransform(sw,sh,percent,'Center',256,240,b.x,b.y);};
 export const nativeCell=(i,sw=400,sh=240)=>{const ox=Math.floor((sw-400)/2),oy=Math.floor((sh-240)/2);return {x:ox+96+i%8*26,y:oy+52+Math.floor(i/8)*26,w:24,h:24};};
-export const nativeTabHit=(x,y,sw=400,sh=240)=>{const ox=Math.floor((sw-400)/2),oy=Math.floor((sh-240)/2);x-=ox;y-=oy;return x>=86&&x<339&&y>=0&&y<24?(x>=304?9:Math.max(0,Math.min(8,Math.floor((x-102)/23)))):-1;};
+export const nativeTabHit=(x,y,sw=400,sh=240)=>{for(let i=0;i<10;i++){const b=nativeTabRect(i,sw,sh);if(x>=b.x&&x<b.x+b.w&&y>=b.y&&y<b.y+b.h)return i;}return -1;};
 export const nativeBack=(sw=400,sh=240)=>{const ox=Math.floor((sw-400)/2),oy=Math.floor((sh-240)/2);return {x:ox+272,y:oy+29,w:34,h:18};};
 export const nativePrevious=(sw=400,sh=240)=>{const ox=Math.floor((sw-400)/2),oy=Math.floor((sh-240)/2);return {x:ox+92,y:oy+215,w:62,h:20};};
 export const nativeNext=(sw=400,sh=240)=>{const ox=Math.floor((sw-400)/2),oy=Math.floor((sh-240)/2);return {x:ox+249,y:oy+215,w:58,h:20};};
@@ -27,19 +29,19 @@ const colors={gold:0xffc0,white:0xffff,muted:0x8c51,dark:0x0841,border:0x528a};
 export class NativeCodex {
  constructor(r){this.r=r;this.descriptor=r.malloc(12);this.pixels=r.malloc(192000);this.string=r.malloc(1024);r.put32(this.descriptor,400);r.put32(this.descriptor+4,240);r.put32(this.descriptor+8,this.pixels);this.cache=new Map();this.hand=null;}
  call(name,args=[]){return this.r.call(this.r.exports.get(name),args);}
- surface(fn){const r=this.r,table=r.exports.get('frameBuffer')+16,slot=r.get32(table),grp=r.exports.get('Grp'),state=r.read(grp,124),font=r.get32(r.exports.get('Font')),scale=r.uiRenderer.percent;r.put32(table,this.descriptor);r.uiRenderer.percent=100;try{return fn();}finally{r.uiRenderer.percent=scale;r.write(grp,state);r.put32(r.exports.get('Font'),font);r.put32(table,slot);}}
+ surface(fn){const r=this.r,table=r.exports.get('frameBuffer')+16,slot=r.get32(table),grp=r.exports.get('Grp'),state=r.read(grp,124),font=r.get32(r.exports.get('Font')),scale=r.uiRenderer.percent;r.put32(table,this.descriptor);r.write(grp+92,new Uint8Array([144,1,240,0]));r.uiRenderer.percent=100;try{return fn();}finally{r.uiRenderer.percent=scale;r.write(grp,state);r.put32(r.exports.get('Font'),font);r.put32(table,slot);}}
  skin(){if(this.base)return;const r=this.r,u=r.exports.get('GameUI'),g=r.exports.get('Game'),ui=r.read(u,12088),game=r.read(g,32056);const touch=r.exports.get("MMain")+0x3920,mode=r.get16(touch);try{r.write(touch,new Uint8Array([2,0]));r.put32(u+0x7c,0);r.write(u+0x76,new Uint8Array([16,0]));r.write(this.pixels,new Uint8Array(192000));this.call('GameUI_drawMainMenu',[4]);this.base=r.read(this.pixels,192000);}finally{r.write(touch,new Uint8Array([mode&255,mode>>>8]));r.write(u,ui);}if(!r.read(g,32056).every((v,i)=>v===game[i])){r.write(g,game);this.base=null;throw Error('Desenho nativo alterou personagem; Códex interrompido.');}}
  fill(x,y,w,h,c){this.call('Grp_setDrawOpVal',[0,0xffffffff]);this.call('Grp_setColorPixel',[c]);this.call('Grp_fillRect',[4,x,y,w,h]);}
  box(b,selected=false,boss=false){this.fill(b.x,b.y,b.w,b.h,colors.dark);this.call('Grp_setColorPixel',[selected?colors.gold:boss?0xf800:colors.border]);this.call('Grp_drawRoundRect',[4,b.x,b.y,b.w,b.h,2]);}
  text(x,y,text,c=colors.white,width=214){text=String(text).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\x20-\x7e]/g,'?');this.r.text(this.string,text.slice(0,160));this.call('Font_setColorPixel',[c]);this.call('Font_drawStringChar',[4,this.string,x,y,width,12,1,0x11]);}
  button(b,label,active=true){this.box(b);this.text(b.x+3,b.y+4,label,active?colors.gold:colors.muted,b.w-6);}
  handSprite(){if(this.hand)return;const r=this.r,p=r.exports.get('MMain')+12,w=r.get16(p+8),h=r.get16(p+10),ax=r.get16(p+12,true),ay=r.get16(p+14,true);if(!w||!h||w>128||h>128)throw Error('Cursor nativo invalido');this.fill(0,0,400,240,0xf81f);this.call('Grp_drawWImage',[4,200,80,p]);const image=r.read(this.pixels,192000),pixels=new Uint32Array(w*h);for(let y=0;y<h;y++)for(let x=0;x<w;x++){const sx=200-ax+x,sy=80-ay+y;if(sx<0||sy<0||sx>=400||sy>=240)throw Error('Cursor fora do raster');const at=(sy*400+sx)*2,c=image[at]|image[at+1]<<8;pixels[y*w+x]=c===0xf81f?0:0x10000|c;}this.hand={w,h,ax,ay,pixels};}
- bar(selected,preview){const u=this.r.exports.get('GameUI'),image=this.r.read(this.pixels,192000);
- for(let y=0;y<25;y++)for(let x=preview?87:304;x<339;x++){const src=(y*400+(x>=332?x-23:304))*2,dst=(y*400+x)*2;image[dst]=this.base[src];image[dst+1]=this.base[src+1];}
- this.r.write(this.pixels,image);
- if(preview)for(let i=0;i<9;i++){this.call('Grp_setDrawOpVal',[8,0xffffffff]);this.call('Grp_setDrawOpVal',[1,204]);this.call('Grp_drawWImage',[4,98+23*i,2,u+0x24fc+20*i]);}
- if(selected!==9){this.call('Grp_setDrawOpVal',[8,0xffffffff]);this.call('Grp_setDrawOpVal',[1,204]);}else this.call('Grp_setDrawOpVal',[0,0xffffffff]);
- this.call('Grp_drawWImage',[4,305,2,u+0x24fc+20*7]);this.call('Grp_setDrawOpVal',[0,0xffffffff]);}
+ bar(selected,preview){const r=this.r,u=r.exports.get('GameUI'),image=r.read(this.pixels,192000),bar=nativeBarRect();
+ for(let y=0;y<25;y++)for(let x=0;x<bar.w;x++){const sx=x<14?84+x:x>=249?309+x-249:304,src=(y*400+sx)*2,dst=(y*400+bar.x+x)*2;image[dst]=this.base[src];image[dst+1]=this.base[src+1];}
+ r.write(this.pixels,image);
+ for(let i=0;i<10;i++){const ptr=u+0x24fc+20*(i===9?7:i),cell=nativeTabRect(i),x=cell.x+Math.floor((cell.w-r.get16(ptr+8))/2)+r.get16(ptr+12,true),y=cell.y+Math.floor((cell.h-r.get16(ptr+10))/2)+r.get16(ptr+14,true);
+ this.call('Grp_setDrawOpVal',[0,0xffffffff]);if(i!==selected){this.call('Grp_setDrawOpVal',[8,0xffffffff]);this.call('Grp_setDrawOpVal',[1,204]);}this.call('Grp_drawWImage',[4,x,y,ptr]);}
+ this.call('Grp_setDrawOpVal',[0,0xffffffff]);}
 
  portrait(image,row,b,portraits){const art=row?.found?portraits.get(row.id):null;if(!art?.width||!art?.height)return;const side=Math.min(b.w,b.h)-4,dw=Math.max(1,Math.floor(side*art.width/Math.max(art.width,art.height))),dh=Math.max(1,Math.floor(side*art.height/Math.max(art.width,art.height))),left=b.x+Math.floor((b.w-dw)/2),top=b.y+Math.floor((b.h-dh)/2);for(let y=0;y<dh;y++)for(let x=0;x<dw;x++){const c=art.pixels[Math.floor(y*art.height/dh)*art.width+Math.floor(x*art.width/dw)];if(c&0x10000){const at=((top+y)*400+left+x)*2;image[at]=c&255;image[at+1]=c>>>8&255;}}}
  paint(pixels){const r=this.r,open=r.codexOpen,visible=r.codexMenuVisible();if(!open&&!visible)return;const preview=open||(r.codexTabSelected&&visible);const rows=preview?r.codex.catalog(r.codexFilter||0):[],info=open&&r.codexDetailsOpen?r.codexDetailData():null,selected=open||r.codexTabSelected?9:r.get32(r.exports.get('GameUI')+0x7c)>>>28,key=JSON.stringify([open,selected,r.codexFilter||0,r.codexPage,r.codexSelection,r.codexDetailsOpen,r.codexDetailPage,r.codexDetailScroll,rows,info,r.portraits.size]);let image=this.cache.get(key);if(!image){image=this.surface(()=>{this.skin();this.handSprite();r.write(this.pixels,this.base);this.bar(selected,preview);if(preview){this.fill(90,49,220,183,colors.dark);this.fill(94,31,212,16,0);this.text(97,33,r.codexDetailsOpen?'CODEX - DETALHES':'CODEX',colors.gold,40);if(!r.codexDetailsOpen){for(let f=0;f<3;f++)this.button(nativeFilterTab(f),['TODOS','COMUNS','CHEFES'][f],(r.codexFilter||0)===f);}this.text(274,33,'SAIR',colors.white,29);const row=rows[r.codexSelection],found=row?.found,portraits=[];
@@ -47,16 +49,16 @@ export class NativeCodex {
  }else{const b={x:96,y:52,w:44,h:44};this.box(b);if(found)portraits.push([row,b]);else this.text(112,66,'?',colors.gold,12);const isBoss=row?.isBoss||row?.id>=100;this.text(146,54,found?(isBoss?'[CHEFE] ':'')+row.name:'??????',isBoss?colors.gold:colors.white,158);this.text(146,68,'HP: '+(found?info?.hp||'??????':'??????'),colors.white,158);this.text(146,82,'MORTOS: '+(found?row.kills:0),colors.white,158);const sections=found?info?.sections:null,section=sections?.[r.codexDetailPage]||{title:'INFORMACOES',lines:['MONSTRO NAO ENCONTRADO']},lists=detailListPages(section),list=lists[Math.min(r.codexDetailScroll,lists.length-1)];this.text(96,101,section.title+(list.title?' / '+list.title:''),colors.gold,208);list.rows.forEach((line,i)=>this.text(96,116+i*10,typeof line==='object'?line.text:line,typeof line==='object'?line.color??colors.white:colors.white,208));if(lists.length>1){this.button(nativeDetailUp(),'SUBIR',r.codexDetailScroll>0);this.button(nativeDetailDown(),'DESCER',r.codexDetailScroll+1<lists.length);this.text(165,198,`${r.codexDetailScroll+1}/${lists.length}`,colors.white,74);}this.button(nativePrevious(),'ANTERIOR',r.codexDetailPage>0);this.button(nativeNext(),'PROXIMO',r.codexDetailPage+1<(sections?.length||1));this.text(173,221,`${r.codexDetailPage+1}/${sections?.length||1}`,colors.white,65);}
  const out=r.read(this.pixels,192000);for(const [entry,b]of portraits)this.portrait(out,entry,b,r.portraits);return out;}return r.read(this.pixels,192000);});if(this.cache.size>=8)this.cache.clear();this.cache.set(key,image);}
  const u=r.exports.get('GameUI'),h=this.hand,keepHand=!preview&&(r.get32(u+0x7c)&15)===0&&r.get16(r.exports.get('MMain')+0x3920)<=1,k=r.get16(u+0x4e),weight=k===2?4:k===1?7:8;
- const hx=Math.floor(((116+23*selected)*weight+r.get16(u+0x4a)*(8-weight))/8)-h.ax,hy=Math.floor((19*weight+r.get16(u+0x4c)*(8-weight))/8)-Math.min(r.get16(u+0x50),2)-h.ay;
  const sw=pixels.length>=768000?800:400,sh=pixels.length>=768000?480:240,ox=Math.floor((sw-400)/2),oy=Math.floor((sh-240)/2);
- const t=nativeTransform(r.uiScale,sw,sh),bottom=preview?240:25;
- for(let y=0;y<bottom;y++)for(let x=84;x<339;x++){
-  if((y>=25&&x>=316)||(!preview&&x<304))continue;
-  if(keepHand&&x>=hx&&y>=hy&&x<hx+h.w&&y<hy+h.h&&(h.pixels[(y-hy)*h.w+x-hx]&0x10000))continue;
+ const t=nativeTransform(r.uiScale,sw,sh),bottom=preview?240:25,bar=nativeBarRect();
+ for(let y=0;y<bottom;y++)for(let x=bar.x;x<bar.x+bar.w;x++){
+  if(y>=25&&(x<84||x>=316))continue;
   const b=t.rect(x+ox,y+oy,1,1),at=(y*400+x)*2;
   for(let yy=Math.max(0,b.y);yy<Math.min(sh,b.y+b.h);yy++)for(let xx=Math.max(0,b.x);xx<Math.min(sw,b.x+b.w);xx++){const out=(yy*sw+xx)*2;pixels[out]=image[at];pixels[out+1]=image[at+1];}
  }
- if(preview){const h=this.hand,handX=323;for(let y=0;y<h.h;y++)for(let x=0;x<h.w;x++){const c=h.pixels[y*h.w+x];if(!(c&0x10000))continue;const b=t.rect(ox+handX-h.ax+x,oy+19-h.ay+y,1,1);for(let yy=Math.max(0,b.y);yy<Math.min(sh,b.y+b.h);yy++)for(let xx=Math.max(0,b.x);xx<Math.min(sw,b.x+b.w);xx++){const at=(yy*sw+xx)*2;pixels[at]=c&255;pixels[at+1]=c>>>8&255;}}}
+ if(preview||keepHand){const handX=preview?311:Math.floor(((116+23*selected)*weight+(r.get16(u+0x4a)-ox)*(8-weight))/8)-12,handY=preview?19:Math.floor((19*weight+(r.get16(u+0x4c)-oy)*(8-weight))/8)-Math.min(r.get16(u+0x50),2);
+ for(let y=0;y<h.h;y++)for(let x=0;x<h.w;x++){const c=h.pixels[y*h.w+x];if(!(c&0x10000))continue;const b=t.rect(ox+handX-h.ax+x,oy+handY-h.ay+y,1,1);for(let yy=Math.max(0,b.y);yy<Math.min(sh,b.y+b.h);yy++)for(let xx=Math.max(0,b.x);xx<Math.min(sw,b.x+b.w);xx++){const at=(yy*sw+xx)*2;pixels[at]=c&255;pixels[at+1]=c>>>8&255;}}}
+
  return pixels;
  }
 }
