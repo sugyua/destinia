@@ -8,6 +8,20 @@
 
 **[Jogar a versão web no navegador](http://localhost:8000/)** — teste local na porta 8000 (ou na rede LAN em `http://192.168.1.11:8000/` ou Tailscale em `http://100.108.92.19:8000/`). A versão web foi atualizada com as 3 grandes novidades da 0.11.0 (Catálogo F4, Baú Compartilhado F5 e Bounties F8) e hotfix mobile com 16 FPS no Safari iOS. O deployment no site externo (`chatgpt.site`) permanece pendente de credenciais de publicação.
 
+## Novidades da Versão 0.12.0 — Modo Abissal Supremo e Título Senhor do Abismo
+
+- **Modo Abissal Hardcore Completo**:
+  - **100% Aura de Elite:** Todos os monstros do mapa passam a nascer compulsoriamente como elites (`monster+0x4c = 1`), transformando toda a campanha no desafio definitivo.
+  - **Escalonamento Brutal:** 6.0x de Vida e 6.0x de Dano base em relação ao modo normal.
+  - **Zero Bônus de Drop:** Tabela de recompensas e raridades preservadas nos valores idênticos aos da campanha normal, servindo puramente como teste definitivo de teoria de builds e reflexos.
+- **Título Lendário "Senhor do Abismo"**:
+  - Desbloqueado ao derrotar Diablo (`species 108`) no Modo Abissal.
+  - Concede **+150% em todos os status principais** (ATK, DEF, PV, PM).
+  - Persistência isolada no sidecar `titles-v1.txt` (PC) e `localStorage` (Web).
+- **Aba de Títulos no Mago dos Bosses (5ª Aba: [TITULOS])**:
+  - 5 abas integradas ([CHEFES], [TORRE], [MASCOTES], [SANTUARIO], [TITULOS]).
+  - Gerenciamento completo de títulos desbloqueados com aplicação imediata dos buffs no herói.
+
 ## Novidades da Versão 0.11.0 Beta — Catálogo de Armamentos, Baú Compartilhado e Contratos Offline (Bounties)
 
 - **Catálogo Completo de Equipamentos e Complecionista (F4)**:
@@ -47,6 +61,20 @@
 - **Persistência Transacional Segura**:
   - Saves binários originais `save*.dat` 100% preservados. Desbloqueios e configurações gravados atomicamente no sidecar `difficulty-unlocks-v1.txt`.
   - Homologado em testes nativos nos dois hosts e auditado pelo Sentinel (Score 10/10).
+
+## Novidades da Versão 0.12.0 — Modo Abissal Supremo e Título Senhor do Abismo
+
+- **Modo Abissal Hardcore Completo**:
+  - **100% Aura de Elite:** Todos os monstros do mapa passam a nascer compulsoriamente como elites (`monster+0x4c = 1`), transformando toda a campanha no desafio definitivo.
+  - **Escalonamento Brutal:** 6.0x de Vida e 6.0x de Dano base em relação ao modo normal.
+  - **Zero Bônus de Drop:** Tabela de recompensas e raridades preservadas nos valores idênticos aos da campanha normal, servindo puramente como teste definitivo de teoria de builds e reflexos.
+- **Título Lendário "Senhor do Abismo"**:
+  - Desbloqueado ao derrotar Diablo (`species 108`) no Modo Abissal.
+  - Concede **+150% em todos os status principais** (ATK, DEF, PV, PM).
+  - Persistência isolada no sidecar `titles-v1.txt` (PC) e `localStorage` (Web).
+- **Aba de Títulos no Mago dos Bosses (5ª Aba: [TITULOS])**:
+  - 5 abas integradas ([CHEFES], [TORRE], [MASCOTES], [SANTUARIO], [TITULOS]).
+  - Gerenciamento completo de títulos desbloqueados com aplicação imediata dos buffs no herói.
 
 ## Novidades da Versão 0.11.0 — Expansão Completa de Conteúdo, Suporte Integral a Controles USB e QoL
 

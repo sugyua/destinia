@@ -16,7 +16,8 @@ enum class TitleId : uint32_t {
   Veterano = 3,
   MestreDoCombate = 4,
   MatadorDeBosses = 5,
-  Complecionista = 6
+  Complecionista = 6,
+  SenhorDoAbismo = 7
 };
 
 struct TitleDef {
@@ -37,7 +38,8 @@ inline const std::vector<TitleDef>& allTitles() {
     { TitleId::Veterano, "Veterano", "Atingiu nível de prestígio em combate.", 10, 8, 10, 10 },
     { TitleId::MestreDoCombate, "Mestre do Combate", "Domínio avançado das artes bélicas.", 15, 15, 15, 15 },
     { TitleId::MatadorDeBosses, "Matador de Chefes", "Eliminou os grandes líderes do continente.", 25, 20, 20, 20 },
-    { TitleId::Complecionista, "Complecionista", "100% do Códex concluído. Força absoluta de Destinia.", 100, 100, 100, 100 }
+    { TitleId::Complecionista, "Complecionista", "100% do Códex concluído. Força absoluta de Destinia.", 100, 100, 100, 100 },
+    { TitleId::SenhorDoAbismo, "Senhor do Abismo", "Derrotou Diablo no Modo Abissal. O ápice do poder absoluto.", 150, 150, 150, 150 }
   };
   return list;
 }
@@ -148,6 +150,27 @@ public:
       }
     }
     return true;
+  }
+
+  bool load(const fs::path& dir) {
+    fs::path p = dir / "titles-v1.txt";
+    if (!fs::exists(p)) return false;
+    std::ifstream in(p);
+    if (!in.is_open()) return false;
+    std::string content((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+    return decode(content);
+  }
+
+  bool save(const fs::path& dir) const {
+    fs::path p = dir / "titles-v1.txt";
+    fs::path tmp = dir / "titles-v1.txt.tmp";
+    std::ofstream out(tmp);
+    if (!out.is_open()) return false;
+    out << encode();
+    out.close();
+    std::error_code ec;
+    fs::rename(tmp, p, ec);
+    return !ec;
   }
 };
 

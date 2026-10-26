@@ -47,3 +47,20 @@ test('persistencia sidecar de titulos isolada de saves nativos', () => {
   assert.equal(loaded.isUnlocked(0, TitleId.Complecionista), true);
   assert.equal(loaded.getEquipped(0), TitleId.Complecionista);
 });
+
+test('sistema de titulos 0.12.0: busca e atributos do Senhor do Abismo (+150%)', () => {
+  const sa = findTitle(TitleId.SenhorDoAbismo);
+  assert.equal(sa.nome, 'Senhor do Abismo');
+  assert.equal(sa.atk, 150);
+  assert.equal(sa.def, 150);
+  assert.equal(sa.hp, 150);
+  assert.equal(sa.mp, 150);
+
+  const baseStats = [0, 0, 0, 0, 0, 5000, 2000, 1500, 800, 100, 100, 50, 50];
+  const buffed = applyTitleBuffs(baseStats, TitleId.SenhorDoAbismo);
+
+  assert.equal(buffed[5], 12500, 'HP deve aumentar +150%');
+  assert.equal(buffed[6], 5000, 'MP deve aumentar +150%');
+  assert.equal(buffed[7], 3750, 'ATK deve aumentar +150%');
+  assert.equal(buffed[8], 2000, 'DEF deve aumentar +150%');
+});

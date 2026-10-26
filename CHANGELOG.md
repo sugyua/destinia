@@ -4,6 +4,20 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.12.0 Beta — 26/10/2026
+
+- **Modo Abissal Hardcore Completo**:
+  - **100% Aura de Elite:** Todos os monstros do mapa nascem compulsoriamente como monstros Elites em `common/difficulty_arm.h`, garantindo o desafio supremo para heróis no Nível 999.
+  - **Escalonamento Brutal:** Multiplicadores nativos de 6.0x de Vida e 6.0x de Dano base em relação ao modo normal.
+  - **Zero Bônus de Drop:** Tabela de recompensas e raridades preservada idêntica à da campanha normal sem facilitação, servindo puramente como teste definitivo de maestria.
+- **Título Lendário "Senhor do Abismo"**:
+  - Título honorífico exclusivo concedido ao derrotar Diablo (`species 108`) no Modo Abissal.
+  - Concede **+150% em todos os atributos principais** (ATK, DEF, PV, PM).
+  - Persistência isolada no sidecar `titles-v1.txt` (PC) e `localStorage` (Web).
+- **Aba de Títulos no Mago dos Bosses (5ª Aba: [TITULOS])**:
+  - O Mago dos Bosses agora conta com 5 abas ([CHEFES], [TORRE], [MASCOTES], [SANTUARIO], [TITULOS]).
+  - Lista de 8 títulos com descrição de requisitos, badges [EQUIPADO], [LIBERADO] ou [BLOQUEADO], e acionamento por botão/toque para equipar.
+
 ## 0.11.0 Beta — 26/10/2026
 
 - **Suporte Integral a Controles USB / Gamepads (PC e Web)**:

@@ -4,6 +4,7 @@
 #include "abyss_tower.h"
 #include "stat_reset.h"
 #include "new_game_plus.h"
+#include "titles.h"
 #include <string>
 #include <vector>
 #include <functional>
@@ -58,6 +59,7 @@ public:
 
   PetsManager pets;
   AbyssTowerManager abyss;
+  TitlesStore titlesStore;
 
   void openMenu() {
     open = true;
@@ -68,6 +70,7 @@ public:
     if (!saveDir.empty()) {
       pets.load(saveDir);
       abyss.load(saveDir);
+      titlesStore.load(saveDir);
     }
   }
 
@@ -81,6 +84,7 @@ public:
     if (currentTab == 1) return abyss.maxUnlockedFloor;
     if (currentTab == 2) return 4;
     if (currentTab == 3) return 3; // Reset Atributos, Reset Habilidades, Avancar Novo Jogo+
+    if (currentTab == 4) return int(allTitles().size());
     return 0;
   }
 
@@ -90,14 +94,14 @@ public:
 
     // Alternar abas: Esquerda (5), Direita (7)
     if (key == 5) {
-      currentTab = (currentTab - 1 + 4) % 4;
+      currentTab = (currentTab - 1 + 5) % 5;
       selectedIndex = 0;
       scrollOffset = 0;
       statusMessage.clear();
       return true;
     }
     if (key == 7) {
-      currentTab = (currentTab + 1) % 4;
+      currentTab = (currentTab + 1) % 5;
       selectedIndex = 0;
       scrollOffset = 0;
       statusMessage.clear();
@@ -184,6 +188,20 @@ public:
           auto res = NewGamePlusManager::advanceCycle(currentSlot, saveDir, teleport);
           statusMessage = res.message;
           if (res.success) closeMenu();
+        }
+      } else if (currentTab == 4) {
+        // Tab 4: Titulos & Conquistas (0.12.0)
+        const auto& tList = allTitles();
+        if (selectedIndex >= 0 && selectedIndex < int(tList.size())) {
+          const auto& t = tList[selectedIndex];
+          if (titlesStore.isUnlocked(currentSlot, t.id)) {
+            titlesStore.setEquipped(currentSlot, t.id);
+            titlesStore.save(saveDir);
+            statusMessage = "TITULO EQUIPADO COM SUCESSO!";
+            if (calcHeroStat) calcHeroStat();
+          } else {
+            statusMessage = "TITULO BLOQUEADO! COMPLETE O REQUISITO.";
+          }
         }
       }
       return true;
@@ -274,9 +292,9 @@ public:
     paintOverlayText(pixels, width, height, px + pw - 24, py + 6, "[X]", 0xf800);
 
     // Barra de Abas
-    static const char* tabNames[4] = {"[CHEFES]", "[TORRE]", "[MASCOTES]", "[SANTUARIO]"};
-    int tabW = (pw - 16) / 4;
-    for (int t = 0; t < 4; ++t) {
+    static const char* tabNames[5] = {"[CHEFES]", "[TORRE]", "[MASCOTES]", "[SANTUARIO]", "[TITULOS]"};
+    int tabW = (pw - 16) / 5;
+    for (int t = 0; t < 5; ++t) {
       int tx = px + 8 + t * tabW;
       bool selTab = (t == currentTab);
       uint16_t tabCol = selTab ? 0x07e0 : 0x8c51;
@@ -399,6 +417,33 @@ public:
         paintOverlayText(pixels, width, height, px + 12, rowY, line, sel ? 0xffff : 0xce59);
         paintOverlayText(pixels, width, height, px + 12, rowY + 11, sub, 0xa510);
         rowY += 24;
+      }
+    } else if (currentTab == 4) {
+      // TAB 4: Titulos & Conquistas (0.12.0)
+      const auto& tList = allTitles();
+      TitleId equipped = titlesStore.getEquipped(currentSlot);
+      for (int i = scrollOffset; i < int(tList.size()) && i < scrollOffset + 7; i++) {
+        const auto& t = tList[i];
+        const bool sel = (i == selectedIndex);
+        const bool unlocked = titlesStore.isUnlocked(currentSlot, t.id);
+        const bool isEquipped = (equipped == t.id);
+        if (sel) {
+          for (int y = rowY - 1; y < rowY + 13; ++y) {
+            for (int x = px + 8; x < px + pw - 8; ++x) {
+              const size_t at = (size_t(y) * width + x) * 2;
+              uint16_t c = pixels[at] | (pixels[at + 1] << 8);
+              uint16_t hl = ((c >> 1) & 0x7BEF) + 0x2104;
+              pixels[at] = uint8_t(hl); pixels[at + 1] = uint8_t(hl >> 8);
+            }
+          }
+        }
+        std::string badge = isEquipped ? "[EQUIPADO] " : (unlocked ? "[LIBERADO] " : "[BLOQUEADO] ");
+        std::string line = (sel ? "> " : "  ") + badge + t.nome;
+        std::string bonus = t.atkBonusPct > 0 ? ("+" + std::to_string(t.atkBonusPct) + "% ALL") : "-";
+        uint16_t col = isEquipped ? 0xd7bf : (unlocked ? (sel ? 0xffff : 0xce59) : 0x7bef);
+        paintOverlayText(pixels, width, height, px + 12, rowY, line, col);
+        paintOverlayText(pixels, width, height, px + pw - 16 - overlayTextWidth(bonus), rowY, bonus, unlocked ? 0x07e0 : 0x7bef);
+        rowY += 15;
       }
     }
 

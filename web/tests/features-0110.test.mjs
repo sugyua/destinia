@@ -180,9 +180,13 @@ test('Mago dos Bosses 0.11: 4 Abas (Chefes, Torre Abissal, Mascotes, Santuario)'
   assert.equal(ui.currentTab, 2);
   assert.equal(ui.getItemsCount(), 4); // 4 mascotes
 
-  ui.handleKey(7, true); // Aba 3: Santuário
+  ui.handleKey(7, true); // Aba 3: Santuario
   assert.equal(ui.currentTab, 3);
   assert.equal(ui.getItemsCount(), 3); // Reset Atributos, Reset Skills, NG+
+
+  ui.handleKey(7, true); // Aba 4: Titulos (0.12.0)
+  assert.equal(ui.currentTab, 4);
+  assert.equal(ui.getItemsCount(), 8); // 8 titulos
 
   ui.handleKey(7, true); // Volta para Aba 0: Chefes
   assert.equal(ui.currentTab, 0);

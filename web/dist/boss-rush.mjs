@@ -1,3 +1,4 @@
+import { ALL_TITLES, TitlesStorage, TitleId } from './titles.mjs';
 import {overlayGlyph} from './overlay-font.mjs';
 
 export const BOSS_RUSH_LIST = [
@@ -46,6 +47,7 @@ export class BossRushUI {
     this.maxUnlockedFloor = 5;
     this.activePetId = 0;
     this.ngCycle = 0;
+    this.titlesStore = new TitlesStorage();
   }
 
   rd16(addr) {
@@ -79,6 +81,7 @@ export class BossRushUI {
     if (this.currentTab === 1) return this.maxUnlockedFloor;
     if (this.currentTab === 2) return PETS_LIST.length;
     if (this.currentTab === 3) return 3;
+    if (this.currentTab === 4) return ALL_TITLES.length;
     return 0;
   }
 
@@ -88,14 +91,14 @@ export class BossRushUI {
 
     // Tabs: 5 (Left), 7 (Right)
     if (key === 5) {
-      this.currentTab = (this.currentTab - 1 + 4) % 4;
+      this.currentTab = (this.currentTab - 1 + 5) % 5;
       this.selectedIndex = 0;
       this.scrollOffset = 0;
       this.statusMessage = "";
       return true;
     }
     if (key === 7) {
-      this.currentTab = (this.currentTab + 1) % 4;
+      this.currentTab = (this.currentTab + 1) % 5;
       this.selectedIndex = 0;
       this.scrollOffset = 0;
       this.statusMessage = "";
@@ -292,7 +295,7 @@ export class BossRushUI {
     this.drawText(fb, width, height, px + pw - 24, py + 6, "[X]", 0xf800);
 
     // Abas
-    const tabNames = ["[CHEFES]", "[TORRE]", "[MASCOTES]", "[SANTUARIO]"];
+    const tabNames = ["[CHEFES]", "[TORRE]", "[MASCOTES]", "[SANTUARIO]", "[TITULOS]"];
     const tabW = Math.floor((pw - 16) / 4);
     for (let t = 0; t < 4; t++) {
       const tx = px + 8 + t * tabW;

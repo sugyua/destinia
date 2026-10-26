@@ -1,6 +1,7 @@
 #pragma once
 // Included after native menu adapters. All disk writes happen outside ARM hooks.
 #include "difficulty.h"
+#include "titles.h"
 static destinia::DifficultyProgress difficultyProgress;
 static bool difficultyReady=false,difficultyOpen=false,difficultyButton=false,difficultyTouchHeld=false;
 static int difficultySelected=0,difficultyRequest=-1,difficultyRequestSlot=-1;
@@ -15,7 +16,21 @@ static void difficultyNewMap(){difficultyDeaths.clear();}
 static void difficultyRespawn(u32 p){for(auto i=difficultyDeaths.begin();i!=difficultyDeaths.end();)if(i->second==p)i=difficultyDeaths.erase(i);else ++i;}
 static bool difficultySystem(){return difficultyReady&&!codexOpen&&!codexTabSelected&&codexMenuVisible()&&(rd32(exportsMap.at("GameUI")+0x7c)>>28)==8;}
 static unsigned difficultySlot(){return rd16(exportsMap.at("Game")+0x4886);}
-static void difficultyBossDefeated(unsigned slot,int species,u32 p){if(difficultyReady&&slot<10&&species==108&&difficultyDeaths.emplace(slot,p).second){const auto tier=difficultyArm.deathDifficulty(p);difficultyKills.emplace(slot,tier?*tier:difficultyProgress.current(slot));}}
+static void difficultyBossDefeated(unsigned slot,int species,u32 p){
+ if(difficultyReady&&slot<10&&species==108&&difficultyDeaths.emplace(slot,p).second){
+  const auto tier=difficultyArm.deathDifficulty(p);
+  const unsigned deadTier=tier?*tier:difficultyProgress.current(slot);
+  difficultyKills.emplace(slot,deadTier);
+  if(deadTier>=4){
+   try{
+    destinia::TitlesStore ts;
+    ts.load(fs::path(saveDir));
+    ts.unlock(slot,destinia::TitleId::SenhorDoAbismo);
+    ts.save(fs::path(saveDir));
+   }catch(...){}
+  }
+ }
+}
 static int difficultySaveSlot(const std::string& path){const auto n=fs::path(path).filename().string();return n.size()==9&&n.substr(0,4)=="save"&&n[4]>='0'&&n[4]<='9'&&n.substr(5)==".dat"?n[4]-'0':-1;}
 // Reset extended progress in the very transaction deleting the original slot.
 static void difficultyPrepareRemoval(const std::string& path){

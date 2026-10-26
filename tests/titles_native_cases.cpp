@@ -55,6 +55,21 @@ int main() {
   assert(loaded.isUnlocked(0, TitleId::Complecionista));
   assert(loaded.getEquipped(0) == TitleId::Complecionista);
 
+
+  // Teste 5: atributos e buffs do titulo Senhor do Abismo (0.12.0)
+  const TitleDef* sa = findTitle(TitleId::SenhorDoAbismo);
+  assert(sa != nullptr);
+  assert(sa->atkBonusPct == 150);
+  assert(sa->defBonusPct == 150);
+  assert(sa->hpBonusPct == 150);
+  assert(sa->mpBonusPct == 150);
+
+  CombatStats abyssalBuffed = applyTitleBuffs(baseStats, TitleId::SenhorDoAbismo);
+  assert(abyssalBuffed[5] == 12500); // 5000 + 150% = 12500
+  assert(abyssalBuffed[6] == 5000);  // 2000 + 150% = 5000
+  assert(abyssalBuffed[7] == 3750);  // 1500 + 150% = 3750
+  assert(abyssalBuffed[8] == 2000);  // 800 + 150% = 2000
+
   std::cout << "TITLES_NATIVE_CASES_PASS\n";
   return 0;
 }

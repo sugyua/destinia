@@ -7,7 +7,8 @@ export const TitleId = {
   Veterano: 3,
   MestreDoCombate: 4,
   MatadorDeBosses: 5,
-  Complecionista: 6
+  Complecionista: 6,
+  SenhorDoAbismo: 7
 };
 
 export const ALL_TITLES = [
@@ -17,7 +18,8 @@ export const ALL_TITLES = [
   { id: TitleId.Veterano, nome: 'Veterano', descricao: 'Atingiu nível de prestígio em combate.', atk: 10, def: 8, hp: 10, mp: 10 },
   { id: TitleId.MestreDoCombate, nome: 'Mestre do Combate', descricao: 'Domínio avançado das artes bélicas.', atk: 15, def: 15, hp: 15, mp: 15 },
   { id: TitleId.MatadorDeBosses, nome: 'Matador de Chefes', descricao: 'Eliminou os grandes líderes do continente.', atk: 25, def: 20, hp: 20, mp: 20 },
-  { id: TitleId.Complecionista, nome: 'Complecionista', descricao: '100% do Códex concluído. Força absoluta de Destinia.', atk: 100, def: 100, hp: 100, mp: 100 }
+  { id: TitleId.Complecionista, nome: 'Complecionista', descricao: '100% do Códex concluído. Força absoluta de Destinia.', atk: 100, def: 100, hp: 100, mp: 100 },
+  { id: TitleId.SenhorDoAbismo, nome: 'Senhor do Abismo', descricao: 'Derrotou Diablo no Modo Abissal. O ápice do poder absoluto.', atk: 150, def: 150, hp: 150, mp: 150 }
 ];
 
 export function findTitle(id) {
