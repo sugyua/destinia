@@ -4,6 +4,8 @@
 #include "../common/drop_names.h"
 #include "../common/loot_qol_runtime.h"
 static destinia::LootQolRuntime lootQol;
+#include "../common/boss_mage_runtime.h"
+static destinia::BossMageRuntime bossMage;
 static destinia::DropNamesRenderer dropNamesRenderer;
 static destinia::UiRenderer uiRenderer;
 // destinia_host - executa a libdestinia_jni.so ORIGINAL (ARM 32 bits) no PC.
@@ -918,6 +920,8 @@ static bool callFn(u32 addr, std::initializer_list<u32> args, u32* ret) {
   if (ret) *ret = R(0);
   try {saveCall.commit();for(const auto& path:saveTransaction.committedRemovals())codexFileRemoved(path.string());}
   catch(const std::exception& error) {hostReport("[host] Save nao publicado: %s\n",error.what());executionFailed=true;return false;}
+  if(!bossMage.error.empty()){hostReport("[mago] Erro ARM: %s\n",bossMage.error.c_str());executionFailed=true;return false;}
+  bossMage.dispatch();
   return codexDrainNativeMenu();
 }
 
@@ -1278,6 +1282,7 @@ static int runHost(int argc, char** argv) {
   uiRenderer.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,preferences.uiScale,false,soPath);
   dropNamesRenderer.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,soPath);
   {std::vector<uint8_t> table;if(!readFile(assetsDir+"/item_en.gdt",table))throw std::runtime_error("Tabela de loot ausente");lootQol.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,soPath,table);lootQol.options=preferences.loot;}
+  try{bossMage.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,assetsDir,soPath,[]{return lootQol.autoTarget<0;});}catch(const std::exception& error){hostReport("[mago] Desativado: %s\n",error.what());}
   fcInstall();
   u32 fnRun = exportsMap["Java_game_destiniaeng_GameThread_jniRun"];
   u32 fnTouch = exportsMap["Java_game_destiniaeng_GameThread_jniTouch"];
@@ -1510,6 +1515,7 @@ static int runHost(int argc, char** argv) {
     const auto runStart = std::chrono::steady_clock::now();
     traceViewportFrame = frame;
     dropNamesRenderer.enabled=controls.dropNamesHeld;
+    bossMage.focused=controls.focused&&!controls.paused();
     if(!lootQol.collect(uint64_t(frame),controls.focused,[&](u32 fn){return callFn(fn,{6});})){executionFailed=true;break;}
     inventoryBeginFrame();
     fcBeginFrame();
@@ -1553,6 +1559,7 @@ static int runHost(int argc, char** argv) {
     }
     if(preferences.uiScale==100?hudScale!=0:uiRenderer.statusDrawn){std::array<destinia::SkillHintRect,4> hints{};for(size_t i=0;i<hints.size();++i){int16_t r[4]{};if(rd(exportsMap.at("MMain")+0x11a+u32(i)*8,r,8))hints[i]={r[0],r[1],r[2],r[3]};}destinia::paintSkillHints(frameBuffer.data(),SCREEN_W,SCREEN_H,preferences,controls.lastInputDevice(),hints,preferences.uiScale);}
     if(!codexOpen)fcPaint(frameBuffer.data(),preferences.uiScale);
+    bossMage.paint(frameBuffer.data());
     lootQol.paint(frameBuffer.data());
     inventoryPaint(frameBuffer.data());
     nativeCodexPainter.paint(frameBuffer.data());

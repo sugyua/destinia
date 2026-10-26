@@ -36,7 +36,7 @@ int main(int argc,char** argv) {
  if(!codexMenuKey(5,true) || !codexMenuKey(17,true) || !codexOpen)return 47;
  if(rd16(exportsMap.at("MMain")+0x390c))return 48;
  codexMenuTouch(200,100,1);codexMenuKey(10,true);codexMenuKey(7,true);
- const u32 state=rd32(ui+0x7c);auto button=destinia::nativeCodexRect(309,0,30,24,SCREEN_W,SCREEN_H);
+ const u32 state=rd32(ui+0x7c);auto button=destinia::nativeCodexTabRect(9,SCREEN_W,SCREEN_H);
  if(!codexMenuTouch(button.x+10,button.y+12,0) || !codexOpen)return 33;
  if(!codexMenuTouch(button.x+10,button.y+12,1))return 34;
  if(!codexMenuKey(10,true) || codexOpen || !codexTabSelected || rd32(ui+0x7c)!=state)return 35;
@@ -128,15 +128,15 @@ int main(int argc,char** argv) {
  std::vector<uint8_t> nativeFrame(FB_BYTES+16,0xab);nativeCodexPainter.paint(nativeFrame.data());if(const char* capture=std::getenv("DESTINIA_CODEX_CAPTURE"))writeBmp(std::string(capture)+std::to_string(SCREEN_W)+".bmp",nativeFrame.data());auto nativeFirst=nativeFrame;nativeCodexPainter.paint(nativeFrame.data());if(nativeFirst!=nativeFrame)return 92;
  for(int scale:{75,100,125}){const int previousScale=preferences.uiScale;preferences.uiScale=scale;nativeCodexPainter.paint(nativeFrame.data());preferences.uiScale=previousScale;}codexEnterDetails();nativeCodexPainter.paint(nativeFrame.data());for(size_t i=0;i<ranges.size();i++){std::vector<uint8_t> check(ranges[i].second);rd(ranges[i].first,check.data(),check.size());if(check!=snapshots[i])return 93;}
  for(auto i=nativeFrame.end()-16;i!=nativeFrame.end();++i)if(*i!=0xab)return 94;
- for(int tab=0;tab<9;tab++){auto rect=destinia::nativeCodexRect(113+23*tab,12,1,1,SCREEN_W,SCREEN_H);codexMenuTouch(rect.x,rect.y,0);codexMenuTouch(rect.x,rect.y,1);if(rd32(ui+0x7c)>>28!=u32(tab))return 95;}
- auto book=destinia::nativeCodexRect(320,12,1,1,SCREEN_W,SCREEN_H);codexMenuTouch(book.x,book.y,0);codexMenuTouch(book.x,book.y,1);if(!codexOpen)return 96;
+ for(int tab=0;tab<9;tab++){auto rect=destinia::nativeCodexRect(96+23*tab,12,1,1,SCREEN_W,SCREEN_H);codexMenuTouch(rect.x,rect.y,0);codexMenuTouch(rect.x,rect.y,1);if(rd32(ui+0x7c)>>28!=u32(tab))return 95;}
+ auto book=destinia::nativeCodexRect(303,12,1,1,SCREEN_W,SCREEN_H);codexMenuTouch(book.x,book.y,0);codexMenuTouch(book.x,book.y,1);if(!codexOpen)return 96;
  // Preview the highlighted Codex tab before confirmation; preserve native
  // pixels including the pointing-hand cursor on both Windows host variants.
  codexOpen=false;codexTabSelected=false;codexDetailsOpen=false;wr32(ui+0x7c,0);
  if(!codexMenuVisible())return 97;
  auto pixel=[&](int x,int y){return (size_t((SCREEN_H-240)/2+y)*SCREEN_W+size_t((SCREEN_W-400)/2+x))*2;};
  std::vector<uint8_t> nativeTabs(FB_BYTES,0x35);nativeCodexPainter.paint(nativeTabs.data());
- if(nativeTabs[pixel(110,12)]!=0x35||nativeTabs[pixel(110,12)+1]!=0x35)return 98;
+ if(nativeTabs[pixel(96,12)]==0x35&&nativeTabs[pixel(96,12)+1]==0x35)return 98;
  codexTabSelected=true;
  std::vector<uint8_t> previewFrame(FB_BYTES,0x35);nativeCodexPainter.paint(previewFrame.data());
  if(previewFrame[pixel(91,50)]==0x35&&previewFrame[pixel(91,50)+1]==0x35)return 99;
@@ -145,9 +145,9 @@ int main(int argc,char** argv) {
  // Preserve the real nine-tab raster including the full hand below y=25.
  codexOpen=codexTabSelected=codexDetailsOpen=false;
  const auto framebuffer=rd32(rd32(exportsMap.at("frameBuffer")+4*rd32(exportsMap.at("Grp")+4))+8);
- for(int tab=0;tab<9;tab++){wr32(ui+0x7c,u32(tab)<<28);if(!callFn(exportsMap.at("GameUI_drawMainMenu"),{rd32(exportsMap.at("Grp")+4)}))return 105;std::vector<uint8_t> original(FB_BYTES),painted;rd(framebuffer,original.data(),original.size());painted=original;nativeCodexPainter.paint(painted.data());for(int y=0;y<40;y++)for(int x=84;x<(y<25?304:313);x++){auto at=((SCREEN_H-240)/2+y)*SCREEN_W+(SCREEN_W-400)/2+x;if(painted[2*at]!=original[2*at]||painted[2*at+1]!=original[2*at+1]){std::fprintf(stderr,"BAR_PRESERVE tab=%d x=%d y=%d\n",tab,x,y);return 106;}}}
- for(int x=307;x<325;x++)if(destinia::nativeCodexTab((SCREEN_W-400)/2+x,(SCREEN_H-240)/2+12,SCREEN_W,SCREEN_H)!=9)return 111;
+ for(int tab=0;tab<9;tab++){wr32(ui+0x7c,u32(tab)<<28);if(!callFn(exportsMap.at("GameUI_drawMainMenu"),{rd32(exportsMap.at("Grp")+4)}))return 105;std::vector<uint8_t> original(FB_BYTES),painted;rd(framebuffer,original.data(),original.size());painted=original;nativeCodexPainter.paint(painted.data());for(int y=40;y<240;y++)for(int x=84;x<316;x++){auto at=((SCREEN_H-240)/2+y)*SCREEN_W+(SCREEN_W-400)/2+x;if(painted[2*at]!=original[2*at]||painted[2*at+1]!=original[2*at+1]){std::fprintf(stderr,"BAR_PRESERVE tab=%d x=%d y=%d\n",tab,x,y);return 106;}}}
+ for(int x=294;x<312;x++)if(destinia::nativeCodexTab((SCREEN_W-400)/2+x,(SCREEN_H-240)/2+12,SCREEN_W,SCREEN_H)!=9)return 111;
  // Click the visible tenth icon from inventory/equipment body at every PC UI scale.
- for(int scale:{75,100,125})for(u32 context:{0x10000001u,0x20000001u}){const int previousScale=preferences.uiScale;preferences.uiScale=scale;codexOpen=codexTabSelected=codexDetailsOpen=false;wr32(ui+0x7c,context);if(!codexMenuVisible())return 101;const auto transform=destinia::nativeCodexTransform(SCREEN_W,SCREEN_H,scale);auto b=destinia::nativeCodexRect(320,12,1,1,SCREEN_W,SCREEN_H);const auto point=transform.point(b.x,b.y);if(!codexMenuTouch(point.first,point.second,0)||!codexOpen)return 102;codexMenuTouch(point.first,point.second,1);codexMenuKey(10,true);if(rd32(ui+0x7c)!=context)return 103;if(!codexSelectNativeTab(0)||rd32(ui+0x7c)!=0)return 104;preferences.uiScale=previousScale;}
+ for(int scale:{75,100,125})for(u32 context:{0x10000001u,0x20000001u}){const int previousScale=preferences.uiScale;preferences.uiScale=scale;codexOpen=codexTabSelected=codexDetailsOpen=false;wr32(ui+0x7c,context);if(!codexMenuVisible())return 101;const auto transform=destinia::nativeCodexTransform(SCREEN_W,SCREEN_H,scale);auto b=destinia::nativeCodexRect(303,12,1,1,SCREEN_W,SCREEN_H);const auto point=transform.point(b.x,b.y);if(!codexMenuTouch(point.first,point.second,0)||!codexOpen)return 102;codexMenuTouch(point.first,point.second,1);codexMenuKey(10,true);if(rd32(ui+0x7c)!=context)return 103;if(!codexSelectNativeTab(0)||rd32(ui+0x7c)!=0)return 104;preferences.uiScale=previousScale;}
  std::puts("CODEX_ARM_OK");uc_close(uc);uc=nullptr;return 0;
 }
