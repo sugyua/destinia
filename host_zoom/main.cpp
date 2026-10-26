@@ -6,6 +6,8 @@
 static destinia::LootQolRuntime lootQol;
 #include "../common/boss_mage_runtime.h"
 static destinia::BossMageRuntime bossMage;
+#include "../common/difficulty_arm.h"
+static destinia::DifficultyArmRuntime difficultyArm;
 #include "../common/boss_rush_ui.h"
 static destinia::BossRushUI bossRushUI;
 static destinia::DropNamesRenderer dropNamesRenderer;
@@ -907,7 +909,7 @@ static void stubHook(uc_engine*, uint64_t address, uint32_t, void*) {
 
 static bool codexDrainNativeMenu();
 static bool callFn(u32 addr, std::initializer_list<u32> args, u32* ret) {
-  struct DifficultyCallGuard{~DifficultyCallGuard(){difficultyEndCall();}} difficultyGuard;
+  struct DifficultyCallGuard{~DifficultyCallGuard(){difficultyEndCall();difficultyArm.endCall();}} difficultyGuard;
   destinia::SaveCall saveCall(saveTransaction);
   std::vector<u32> a(args);
   u32 sp = STACK_BASE + STACK_SIZE - 0x100;
@@ -919,6 +921,7 @@ static bool callFn(u32 addr, std::initializer_list<u32> args, u32* ret) {
   u32 lr = MAGIC_RET; uc_reg_write(uc, UC_ARM_REG_LR, &lr);
   hitMagic = false; fatal = false;
   uc_err e = uc_emu_start(uc, addr, MAGIC_RET, 5 * 1000 * 1000 /*5 s*/, 0);
+  if(!difficultyArm.error.empty()){hostReport("[dificuldade ARM] %s\n",difficultyArm.error.c_str());executionFailed=true;return false;}
   if (e != UC_ERR_OK) { dumpState(uc_strerror(e)); executionFailed=true; destinia::sessionLog.write("ERRO de emulacao",true); return false; }
   if (fatal) { dumpState("chamada fatal"); executionFailed=true; destinia::sessionLog.write("ERRO de emulacao",true); return false; }
   if (!hitMagic && (regPC() & ~1u) == MAGIC_RET) hitMagic = true;  // o Unicorn para ANTES de executar o endereco final
@@ -1320,6 +1323,8 @@ static int runHost(int argc, char** argv) {
   if (traceViewport) traceViewportDimensions("after-init");
   installCodex();
   installDifficulty();
+  if(!difficultyReady){hostReport("[dificuldade ARM] Inicializacao recusada; progresso preservado.\n");return 1;}
+  difficultyArm.install(uc,SO_BASE,exportsMap,soPath,[](unsigned slot){return difficultyProgress.current(slot);});
   installInventoryProtection();
   destinia::initLootEconomy(saveDir);
   hostReport("[host] initGame ok em %dx%d. Rodando o jogo...\n", SCREEN_W, SCREEN_H);

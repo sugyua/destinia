@@ -15,7 +15,7 @@ static void difficultyNewMap(){difficultyDeaths.clear();}
 static void difficultyRespawn(u32 p){for(auto i=difficultyDeaths.begin();i!=difficultyDeaths.end();)if(i->second==p)i=difficultyDeaths.erase(i);else ++i;}
 static bool difficultySystem(){return difficultyReady&&!codexOpen&&!codexTabSelected&&codexMenuVisible()&&(rd32(exportsMap.at("GameUI")+0x7c)>>28)==8;}
 static unsigned difficultySlot(){return rd16(exportsMap.at("Game")+0x4886);}
-static void difficultyBossDefeated(unsigned slot,int species,u32 p){if(difficultyReady&&slot<10&&species==108&&difficultyDeaths.emplace(slot,p).second)difficultyKills.emplace(slot,difficultyProgress.current(slot));}
+static void difficultyBossDefeated(unsigned slot,int species,u32 p){if(difficultyReady&&slot<10&&species==108&&difficultyDeaths.emplace(slot,p).second){const auto tier=difficultyArm.deathDifficulty(p);difficultyKills.emplace(slot,tier?*tier:difficultyProgress.current(slot));}}
 static int difficultySaveSlot(const std::string& path){const auto n=fs::path(path).filename().string();return n.size()==9&&n.substr(0,4)=="save"&&n[4]>='0'&&n[4]<='9'&&n.substr(5)==".dat"?n[4]-'0':-1;}
 // Reset extended progress in the very transaction deleting the original slot.
 static void difficultyPrepareRemoval(const std::string& path){
@@ -30,10 +30,10 @@ static void difficultyFlush(){
  if(!difficultyReady)return;if(difficultyRetry>0){--difficultyRetry;return;}
  if(difficultyKills.empty()&&difficultyRequest<0)return;
  try{auto next=destinia::loadDifficulty(fs::path(saveDir),difficultyProgress.book.mode);bool changed=false;
-  for(const auto& kill:difficultyKills)if(next.current(kill.first)==kill.second)changed=next.defeated(kill.first,108)||changed;
+  for(const auto& kill:difficultyKills)changed=next.defeatedAt(kill.first,kill.second)||changed;
   if(difficultyRequest>=0){const auto slot=difficultySlot();if(int(slot)!=difficultyRequestSlot||slot>=10||!next.change(slot,unsigned(difficultyRequest)))throw std::runtime_error("DIFICULDADE BLOQUEADA");changed=true;}
-  if(changed)destinia::saveDifficulty(fs::path(saveDir),next);
-  difficultyProgress=std::move(next);difficultyStatus="DIFICULDADE SALVA";difficultyKills.clear();
+  if(changed){const auto slot=difficultySlot();if(slot<10)difficultyArm.validateProfile(slot,destinia::progression::multipliers(destinia::progression::Difficulty(next.current(slot)),0));destinia::saveDifficulty(fs::path(saveDir),next);}
+  difficultyProgress=std::move(next);difficultyArm.refresh();difficultyStatus="DIFICULDADE SALVA";difficultyKills.clear();
  }catch(const std::exception& e){difficultyStatus="FALHA AO SALVAR - TENTE NOVAMENTE";difficultyRetry=60;hostReport("[dificuldade] %s\n",e.what());}
  difficultyRequest=-1;
 }

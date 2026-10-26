@@ -1,9 +1,11 @@
-# Destinia 0.10.3 Beta — primeira parte, não publicada
+# Destinia 0.10.3 Beta — Partes 1 e 2, não publicada
 
 > Beta: pode apresentar bugs. Faça backup dos saves.
 
-UI e persistência de dificuldade nos dois hosts PC; liberação sequencial ao matar Diablo (108), indicador nos slots salvos, gravação transacional e limpeza na exclusão.
+Parte 1: UI/persistência da dificuldade, desbloqueio sequencial via Diablo (108) e indicador junto da classe nos saves existentes.
 
-Este checkpoint não é uma release distribuída. Sem mudança de balanceamento ARM ou da web nesta parte. Gameplay físico pendente. Dependências permanecem as documentadas em README/INSTALL; nenhum ativo original, save pessoal, DLL ou BAT pessoal foi adicionado ao commit.
+Parte 2: hooks ARM nos dois hosts para HP/dano/XP/ouro canônicos; Abissal 6x/6x/4x/4x, com taxa padrão de itens. Sem acumular HP em respawns, multiplicar ouro novamente na coleta ou inflar missões. Troca tardia no menu não altera recompensas/desbloqueio da dificuldade em que o monstro morreu. Pets, PvP e crescimento NG+ preservados.
 
-Resultados: `docs/VERIFICACAO_0.10.3_PARTE1.md`.
+Este checkpoint segue para revisão do Sentinel; não é uma release distribuída. Gameplay físico pendente; web preservada, sem deployment. Dependências em README/INSTALL. Nenhum save pessoal, ativo original, DLL ou BAT pessoal adicionado.
+
+Resultados e limites: `docs/VERIFICACAO_0.10.3_PARTE1.md` e `docs/VERIFICACAO_0.10.3_PARTE2.md`.

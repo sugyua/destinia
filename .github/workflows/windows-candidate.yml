@@ -48,7 +48,7 @@ jobs:
           SDL_AUDIODRIVER: dummy
         run: |
           set -eu
-          for pattern in test_runtime.py test_preferences.py test_preferences_host.py test_package_windows.py; do
+          for pattern in test_runtime.py test_preferences.py test_preferences_host.py test_difficulty.py test_difficulty_arm.py test_package_windows.py; do
             python -m unittest discover -s tests -p "$pattern" -v
           done
           for target in host host_zoom; do

@@ -1,6 +1,6 @@
 {
   "version": "0.10.3",
-  "base_commit": "d82b7ac4eff8d323391b3cf0ae5f9c79ea085610",
+  "base_commit": "161667fa8089ae7f004f785ade5188a47d716993",
   "files": [
     ".gitignore",
     "AGENTS.md",
@@ -256,6 +256,11 @@
     "tests/test_difficulty.py",
     "docs/superpowers/plans/2026-10-26-difficulty-ui.md",
     "docs/VERIFICACAO_0.10.3_PARTE1.md",
-    "release/NOTAS_0.10.3.md"
+    "release/NOTAS_0.10.3.md",
+    "common/difficulty_arm.h",
+    "tests/difficulty_arm_native.cpp",
+    "tests/test_difficulty_arm.py",
+    "docs/VERIFICACAO_0.10.3_PARTE2.md",
+    "docs/superpowers/plans/2026-10-26-difficulty-arm.md"
   ]
 }

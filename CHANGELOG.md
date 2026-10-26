@@ -4,6 +4,15 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.10.3 Beta — Parte 2, não publicada — 26/10/2026
+
+- Conecta a dificuldade ativa do slot aos perfis canônicos de HP/dano/XP/ouro nos dois hosts, com hooks exclusivos da biblioteca ARM original verificada. Normal permanece 1x.
+- HP por base original, sem acumular em respawns/reloads; troca de dificuldade preserva vida proporcional e não revive mortos. Limites nativos são verificados antes de conversões.
+- Dano final ao herói no ponto comum de monsterHitProc, respeitando defesa, bloqueios, críticos e variação originais.
+- XP de abate e valor do ouro gerado; não multiplica novamente missões, coleta ou setMyGold. Perfis são congelados na morte, inclusive para desbloquear a próxima dificuldade de Diablo.
+- Abissal mantém a taxa padrão de itens, sem bônus de quantidade/qualidade/drop. Teste determinístico de 256 seeds por host compara registros de itens, flags e estado RNG Normal/Abissal.
+- Adiciona provas ARM de gameplay à candidata Windows. Este checkpoint PC é para revisão do Sentinel; sem tag, release ou deployment web. Detalhes em `docs/VERIFICACAO_0.10.3_PARTE2.md`.
+
 ## 0.10.3 Beta — primeira parte, não publicada — 26/10/2026
 
 - Menu Sistema preserva as cinco ações originais e acrescenta Mudar Dificuldade, com cinco opções, cinza para bloqueadas e navegação por teclas/controle/toque.

@@ -8,7 +8,8 @@ struct DifficultyProgress {
  unsigned current(unsigned slot)const{if(slot>=10)throw std::invalid_argument("invalid slot");auto i=book.characters.find(slot);return i==book.characters.end()?0:unsigned(i->second.difficulty);}
  bool allowed(unsigned slot,unsigned d)const{return slot<10&&d<5&&(d<=unlocked[slot]||d==current(slot));}
  bool change(unsigned slot,unsigned d){if(!allowed(slot,d))return false;book.characters[slot].difficulty=progression::Difficulty(d);return true;}
- bool defeated(unsigned slot,int species){if(slot>=10||species!=108)return false;const auto d=current(slot);if(d>=4||d!=unlocked[slot])return false;unlocked[slot]=d+1;return true;}
+ bool defeatedAt(unsigned slot,unsigned d){if(slot>=10||d>=4||d!=unlocked[slot])return false;unlocked[slot]=d+1;return true;}
+ bool defeated(unsigned slot,int species){return slot<10&&species==108&&defeatedAt(slot,current(slot));}
  void erase(unsigned slot){if(slot>=10)throw std::invalid_argument("invalid slot");book.characters.erase(slot);unlocked[slot]=0;}
 };
 inline std::optional<std::string> readDifficultyUnlocks(const fs::path& directory){const auto path=directory/"difficulty-unlocks-v1.txt";if(isLink(directory)||isLink(path))throw std::runtime_error("linked difficulty file");if(!fs::exists(path))return std::nullopt;if(!fs::is_regular_file(path)||fs::file_size(path)>1024)throw std::runtime_error("invalid difficulty file");std::ifstream in(path,std::ios::binary);if(!in)throw std::runtime_error("cannot read difficulty");std::string text{std::istreambuf_iterator<char>(in),{}};if(in.bad())throw std::runtime_error("cannot read difficulty");return text;}
