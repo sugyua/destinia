@@ -10,3 +10,5 @@ Escopo confirmado pelo proprietário: núcleo matemático e sidecar, desacoplado
 6. Atualizar README/CHANGELOG/allowlist e contrato dos hooks; executar suites, registrar central e enviar commit/push para revisão do Sentinel/Maestro. Não alegar gameplay NV999 nem deployment nesta etapa.
 
 Decisão configurável, explicitada ao Maestro: NG+ linear de +25% HP/ATK e +10% XP/ouro por ciclo como padrão inicial; nenhum reset de campanha ou nível é executado pelo módulo. Dificuldades conforme tabela aprovada. Não existe fórmula nativa de status nova presumida: o chamador fornece a curva.
+
+Aditivo autorizado pelo proprietário: estruturas de cinco incrementos para sets (2..6 peças), soma cumulativa dos patamares atingidos, composição em pontos-base com dificuldade/NG+ e escala de status verificada. Testes C++/Node escritos e observados falhando antes dos helpers; ampliar paridade para todos os patamares. Não alterar codec progression-v1 nem inferir valores de balanceamento dos sets.

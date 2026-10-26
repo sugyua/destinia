@@ -46,6 +46,16 @@ Curvas de status são **parametrizadas**, não substituem a fórmula nativa. Nã
 
 Padrão inicial de NG+ explicitado à orquestração: crescimento **linear por ciclo** de +25% HP/ATK e +10% XP/ouro; configurável em `Rules.ngGrowth` / `defaultRules().ngGrowth`, persistido no sidecar. O multiplicador final é `floor(dificuldade * (10000 + ciclo*crescimento) / 10000)`. Normal/NG+0 permanece exatamente 1x; Normal 1x é validado mesmo em regras customizadas. Não há reset, unlock ou avanço automático de campanha. Ciclos são u32; combinações cujo multiplicador exceda u32 são rejeitadas, não truncadas. O balanceamento de endgame exige validação posterior em gameplay.
 
+## Sets cumulativos de 2 a 6 peças
+
+`SetCurve.bonusBps` contém **cinco incrementos** na ordem 2, 3, 4, 5, 6 peças. `setMultiplier(pieces,curve)` calcula `10000 + soma(incrementos dos patamares atingidos)`. Zero/uma peça retorna 1x; contagem fora de 0..6 é rejeitada. Exemplo apenas de teste: `[500,300,700,1000,1500]` produz 1,05x/1,08x/1,15x/1,25x/1,40x em 2/3/4/5/6 peças. **Não são valores de balanceamento aprovados de nenhum set.**
+
+`SetBonusTable.bonusBps` é o equivalente com cinco entradas `{hp,attack,xp,gold}`; `setMultipliers(pieces,table)` soma os incrementos por campo. No C++ o construtor começa com todos os bônus zero; JS usa `defaultSetBonusTable()`. `SetCurve` é genérico e permite aplicar a mesma matemática a DEF, STR, VIT ou outros status definidos pelo consumidor. Não existe detecção de equipamento/set nem acesso a pools neste núcleo.
+
+`composeMultiplier(a,b)` calcula `floor(a*b/10000)` com resultado u32 verificado; `composeMultipliers(a,b)` aplica isso aos quatro campos. `scaledStat(base,bps)` escala um status u32 e rejeita resultado fora de u32. Uso: calcular a curva base, obter bônus cumulativo do set, compor com `multipliers(dificuldade,ciclo,regras)` e aplicar uma única vez. XP/ouro usam `scale` com u64/BigInt. A precisão canônica é um ponto-base: a composição arredonda para baixo antes da aplicação ao valor; com várias composições, manter ordem explícita, sem presumir associatividade após arredondamento.
+
+Todos os coeficientes são inteiros não negativos; acúmulo, composição e aplicação têm verificações de overflow, sem saturação/truncamento silencioso. As tabelas de sets são entradas puras do chamador, **não alteram o formato ou os bytes do sidecar progression-v1**, nem gravam `save*.dat`. Não são novos campos persistentes desta versão.
+
 ## Fronteira ARM: consultas e conversões, sem escrita
 
 Mapeamento confirmado no código existente e inspeção estática do ELF original local (não distribuído):
@@ -98,3 +108,7 @@ Nenhuma tag/release ou publicação web da 0.10 foi feita aqui. `VERSION` perman
 Checkpoint automatizado local de 26/10/2026: runner C++/Node de progressão aprovado (6 casos Node, sem skips, incluindo paridade); suíte Node completa 94 aprovados, 1 skip da paridade por variável `PROGRESSION_CPP` ausente nessa execução geral, coberta pelo runner dedicado; 7 testes do empacotador aprovados e pacote temporário de fontes com 232 entradas validado, sem saves ou sidecar de usuário. A primeira execução geral Node falhou por ausência da variável `DESTINIA_GAME_ROOT` nos testes legados; repetida com o caminho local correto e aprovada. Compilação C++ com `-Wall -Wextra` mostra somente avisos preexistentes de indentação em `common/safe_save.h:171–172`, arquivo não modificado.
 
 Regressão adicional: `DESTINIA_NATIVE_TESTS=1 py -3 -m unittest discover -s tests -p test_safe_save.py` aprovou os 2 casos, sem skips, incluindo teste ARM nos dois hosts. O skip da execução inicial dessa regressão era a opção `DESTINIA_NATIVE_TESTS` desativada; não indicava ausência de binário.
+
+Aditivo de sets: runner C++/Node repetido após a implementação, com 7 casos Node aprovados, sem skips. Paridade ampliada para contagens 0..6, soma cumulativa, composição com Abissal/NG+3 e aplicação ao status de NV999. Casos inválidos e overflow de soma/composição/status são rejeitados; armazenamento/codec progression-v1 permanecem os mesmos.
+
+Revisão Sentinel do núcleo `5986c91`: aprovado, sem falhas reportadas. Pergunta de integração sobre recriação de personagens: antes de acoplar, é necessário vincular uma geração/UUID do sidecar aos eventos explícitos de criar/excluir/importar personagem. O formato atual não contém UUID e não deve ser reinterpretado silenciosamente; a evolução de identidade exigirá schema/migração explícitos na integração futura. Um fingerprint nativo pode corroborar o vínculo, mas não prova identidade em recriações idênticas. Substituição externa/Drive ambígua deve interromper a associação automática e exigir reconciliação explícita. Nenhuma identidade nativa imutável foi confirmada nesta frente.

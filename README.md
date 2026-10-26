@@ -11,7 +11,7 @@
 
 ## META 0.10 — Frente 1 em preparação
 
-Núcleo canônico disponível em [`common/progression.h`](common/progression.h) e [`web/dist/progression.mjs`](web/dist/progression.mjs): curva de XP até NV999 em u64/BigInt, 14 patentes, status parametrizados e cinco dificuldades/NG+ configurável, com verificações de overflow e conversões ARM. Persistência separada em `progression-v1.txt`, com validação, lock e compare-and-swap; **nenhum `save*.dat` é alterado pelo módulo**. [Contrato/API, limites e testes](docs/PROGRESSION_CORE.md).
+Núcleo canônico disponível em [`common/progression.h`](common/progression.h) e [`web/dist/progression.mjs`](web/dist/progression.mjs): curva de XP até NV999 em u64/BigInt, 14 patentes, status parametrizados, cinco dificuldades/NG+ configurável e matemática de bônus cumulativos de sets para 2–6 peças, com composição e verificações de overflow/conversões ARM. Persistência separada em `progression-v1.txt`, com validação, lock e compare-and-swap; **nenhum `save*.dat` é alterado pelo módulo**. [Contrato/API, limites e testes](docs/PROGRESSION_CORE.md).
 
 Esta frente permanece desacoplada de ARM/HUD/combate e **não habilita NV999 no jogo nesta etapa**. `VERSION` continua 0.9.9 até a integração pela orquestração; não há release 0.10 publicada por esta branch. **Web:** módulo atualizado e testado localmente, sem deployment desta revisão. URL existente: https://destinia-web-experimental.leafyheron257.chatgpt.site/; nenhuma versão 0.10 nesse endereço foi confirmada por esta entrega.
 

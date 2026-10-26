@@ -10,6 +10,7 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 
 - Novo núcleo puro C++/web para NV1–999: XP u64/BigInt com a curva original estendida, 14 ranks canônicos, status u32 parametrizados e guardas contra overflow/truncamento ARM (u16/i16/u32).
 - Cinco dificuldades com multiplicadores aprovados e NG+ linear configurável; Normal/NG+0 permanece 1x. Não há reset automático de nível ou campanha.
+- Estruturas puras para bônus incrementais de sets em 2, 3, 4, 5 e 6 peças, acumulados até o patamar equipado; composição com dificuldade/NG+ e aplicação a status/XP/ouro com overflow verificado. Valores dos bônus são fornecidos pelo consumidor; tabelas padrão neutras. Formato do sidecar progression-v1 preservado.
 - Sidecar versionado `progression-v1.txt` por modo/slot, codec C++/JS idêntico, parser estrito, lock/CAS e substituição atômica nativa; adaptador web exige Web Locks e confirmação de gravação. Arquivos `save*.dat` e pools/memória ARM intactos.
 - Testes unitários C++ e Node verificam todos os níveis, paridade, overflow, corrupção, falha de persistência, concorrência e preservação de save sintético. Nenhuma promessa de NV999 em gameplay: hooks, HUD, combate e ponte worker permanecem para integração. Sem release/deployment 0.10 nesta frente.
 
