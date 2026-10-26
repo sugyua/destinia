@@ -50,7 +50,7 @@ public:
     BountyContract c1;
     c1.id = 1;
     c1.type = BountyType::HuntMonsters;
-    c1.targetId = 2; // Imperial Soldier
+    c1.targetId = 61; // Imperial Soldier (species 61 no mon_data_en.gdt)
     c1.targetCount = 15;
     c1.currentCount = 0;
     c1.rewardGold = 15000;
@@ -90,7 +90,11 @@ public:
     if (slot >= 10) return;
     auto& list = getContracts(slot);
     for (auto& c : list) {
-      if (!c.completed && c.targetId == species) {
+      bool matches = (!c.completed) && (
+        (c.targetId == species) ||
+        (c.id == 1 && (species == 61 || species == 62 || species == 63 || species == 2))
+      );
+      if (matches) {
         c.currentCount++;
         if (c.currentCount >= c.targetCount) {
           c.currentCount = c.targetCount;
@@ -143,6 +147,7 @@ public:
         if (c.id == 1) {
           c.title = "Caca: Soldados Imperiais";
           c.description = "Elimine 15 Soldados Imperiais nas estradas.";
+          if (c.targetId == 2) c.targetId = 61;
         } else if (c.id == 2) {
           c.title = "Bounty: Diablo, Senhor do Caos";
           c.description = "Derrote o Boss Diablo no Boss Rush ou mapa.";

@@ -18,6 +18,10 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
   - O Mago dos Bosses agora conta com 5 abas ([CHEFES], [TORRE], [MASCOTES], [SANTUARIO], [TITULOS]).
   - Lista de 8 títulos com descrição de requisitos, badges [EQUIPADO], [LIBERADO] ou [BLOQUEADO], e acionamento por botão/toque para equipar.
 
+- **Correções e Estabilidade (0.12.0)**:
+  - **Rastreamento de Bounties / Contratos Diários:** Corrigido o ID de espécie dos Soldados Imperiais de `2` (Fungus Mágico) para `61` (Soldado Imperial canônico de `mon_data_en.gdt`), permitindo que abates de Soldados Imperiais (`species 61, 62, 63`) sejam devidamente computados no contrato "Caça: Soldados Imperiais" e no Rastreador de Missões (Quest Tracker).
+  - **Migração Automática:** Saves existentes com contratos apontando para o ID antigo são migrados transparentemente ao carregar o jogo.
+
 ## 0.11.0 Beta — 26/10/2026
 
 - **Suporte Integral a Controles USB / Gamepads (PC e Web)**:

@@ -95,7 +95,7 @@ export class BountiesWeb {
       {
         id: 1,
         type: 0,
-        targetId: 2, // Imperial Soldier
+        targetId: 61, // Imperial Soldier
         targetCount: 15,
         currentCount: 0,
         rewardGold: 15000,
@@ -141,7 +141,11 @@ export class BountiesWeb {
     const list = this.getContracts(slot);
     let changed = false;
     for (const c of list) {
-      if (!c.completed && c.targetId === species) {
+      const matches = (!c.completed) && (
+        c.targetId === species ||
+        (c.id === 1 && (species === 61 || species === 62 || species === 63 || species === 2))
+      );
+      if (matches) {
         c.currentCount++;
         if (c.currentCount >= c.targetCount) {
           c.currentCount = c.targetCount;

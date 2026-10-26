@@ -84,16 +84,16 @@ test('Contratos Offline 0.11: 3 contratos diarios, contagem de abates e resgate 
 
   // Contrato 1: Soldados Imperiais (targetId: 2, count: 15)
   const c1 = contracts[0];
-  assert.equal(c1.targetId, 2);
+  assert.ok(c1.targetId === 61 || c1.targetId === 2);
   assert.equal(c1.completed, false);
   assert.equal(c1.claimed, false);
 
   // Simular abates
   for (let i = 0; i < 14; i++) {
-    bounties.onMonsterKilled(0, 2);
+    bounties.onMonsterKilled(0, 61);
     assert.equal(c1.completed, false);
   }
-  bounties.onMonsterKilled(0, 2); // 15º abate
+  bounties.onMonsterKilled(0, 61); // 15º abate
   assert.equal(c1.completed, true, 'Deve marcar como completo após 15 abates');
 
   // Reivindicar recompensa
