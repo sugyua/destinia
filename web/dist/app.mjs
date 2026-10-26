@@ -100,7 +100,14 @@ const keys={F6:10016,F7:10014,p:10014,P:10014,ArrowUp:3,w:3,ArrowDown:9,s:9,Arro
 window.addEventListener('keydown',event=>{if(!ready||paused||event.repeat||event.ctrlKey||event.metaKey||event.altKey||!(event.key in keys))return;event.preventDefault();sources.press('key:'+event.code,keys[event.key]);});
 window.addEventListener('keyup',event=>sources.release('key:'+event.code));
 window.addEventListener('blur',()=>{pageFocused=false;release();});window.addEventListener('focus',()=>{pageFocused=true;gamepad.suspend();});document.addEventListener('visibilitychange',()=>{if(document.hidden){release();setPaused(true);}});
-gamepad=new WebGamepad({sources,onUse:autoHideTouch,onStatus:message=>{$('gamepad-status').textContent=message;},onPause:()=>{if(!storeOpen&&$('instructions').hidden)setPaused(!paused);},onDisconnect:()=>{touchVisibility.disconnect();applyTouchVisibility();if(ready)setPaused(true);}});
+gamepad=new WebGamepad({sources,onUse:autoHideTouch,onStatus:message=>{$('gamepad-status').textContent=message;},onPause:()=>{if(!storeOpen&&$('instructions').hidden)setPaused(!paused);},onDisconnect:()=>{touchVisibility.disconnect();applyTouchVisibility();if(ready)setPaused(true);},onAction:(action)=>{
+  if(!ready||paused)return;
+  if(action==='toggleWeaponsCatalog')send({type:'toggleWeaponsCatalog'});
+  else if(action==='toggleSharedStash')send({type:'toggleSharedStash'});
+  else if(action==='toggleBounties')send({type:'toggleBounties'});
+  else if(action==='toggleQuestTracker'){send({type:'key',key:'q',down:true});setTimeout(()=>send({type:'key',key:'q',down:false}),50);}
+  else if(action==='toggleAutoPotion'){send({type:'key',key:'h',down:true});setTimeout(()=>send({type:'key',key:'h',down:false}),50);}
+}});
 function pollGamepad(){gamepad.tick({ready,focused:pageFocused&&!document.hidden,paused,blocked:storeOpen||!$('instructions').hidden});requestAnimationFrame(pollGamepad);}
 pollGamepad();
 $('help').addEventListener('click',()=>{$('instructions').hidden=false;$('help').setAttribute('aria-expanded','true');setPaused(true);$('close-help').focus();});

@@ -6,7 +6,25 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 
 ## 0.11.0 Beta — 26/10/2026
 
-- **Catálogo Completo de Equipamentos e Complecionista (F4 / Ctrl+W)**:
+- **Suporte Integral a Controles USB / Gamepads (PC e Web)**:
+  - Integração nativa e unificada para que 100% dos novos recursos, menus e modais sejam ativados e navegados usando controles USB (Xbox, PlayStation e gamepads genéricos):
+    - **`R3` (Clique do Analógico Direito)**: Alterna ativação imediata da **Auto-Poção** inteligente.
+    - **`L3` (Clique do Analógico Esquerdo)**: Liga/desliga a visualização do **Rastreador de Missões (Quest Tracker)** no HUD.
+    - **Guia Visual de Atalhos no Rodapé (OSD)**: Segurar o botão `SELECT` (ou `BACK`) exibe em tempo real uma faixa com borda dourada Gamevil indicando os atalhos disponíveis (`[SELECT]+ [X] Catálogo [Y] Baú [B] Bounties [A] Missão [R3] Auto-Poção`).
+    - **Combinações de Atalho (Chords) com `SELECT`**:
+      - `SELECT + X`: Abre o **Catálogo de Equipamentos**.
+      - `SELECT + Y`: Abre o **Baú Compartilhado entre Personagens**.
+      - `SELECT + B`: Abre o **Mural de Contratos / Bounties Diárias**.
+      - `SELECT + A`: Alterna o **Rastreador de Missões**.
+      - `SELECT + D-Pad Cima`: Abre o menu do **Mago dos Bosses** (Boss Rush / Torre Abissal / Mascotes / Santuário).
+      - `SELECT + D-Pad Baixo`: Alterna a **Auto-Poção**.
+      - Toque rápido em `SELECT`: Executa Salvamento Rápido nativo (`touch(0, 0, 3)`).
+  - **Navegação Completa por D-Pad e Botões nos Menus e Modais**:
+    - *Catálogo*: Esquerda/Direita para mudar páginas, Cima/Baixo/Y para trocar abas de classe, X/A para alternar entre Armas e Armaduras, B/Back para fechar.
+    - *Baú Compartilhado*: D-Pad para navegar pela grade 8x3 de itens, Botão A para transferir/retirar item, X/Y/LB/RB para alternar páginas 1 e 2, B/Back para fechar.
+    - *Mural de Contratos*: D-Pad Cima/Baixo para selecionar contratos, Botão A para reivindicar recompensas, B/Back para fechar.
+    - *Mago dos Bosses*: D-Pad Cima/Baixo para selecionar opções, LB/RB para alternar abas temáticas, Botão A para confirmar desafio, B/Back para fechar.
+- **Catálogo Completo de Equipamentos e Complecionista (F4 / Ctrl+W / SELECT+X)**:
   - Expansão do catálogo para 48 equipamentos canônicos: 24 Armas (Espadas, Pistolas/Canhões e Adagas) e 24 Armaduras (Peitorais leves, médios e pesados), distribuídos em 8 patamares por classe (Guerreiro, Atirador e Ladino).
   - 5 patamares de raridade rastreados para cada equipamento (Comum, Mágico, Raro, Épico e Lendário), totalizando 240 entradas colecionáveis.
   - Alternância imediata de categoria entre Armas e Armaduras via tecla `T` ou toque no botão de categoria.

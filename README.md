@@ -48,6 +48,60 @@
   - Saves binários originais `save*.dat` 100% preservados. Desbloqueios e configurações gravados atomicamente no sidecar `difficulty-unlocks-v1.txt`.
   - Homologado em testes nativos nos dois hosts e auditado pelo Sentinel (Score 10/10).
 
+## Novidades da Versão 0.11.0 — Expansão Completa de Conteúdo, Suporte Integral a Controles USB e QoL
+
+- **Suporte Integral a Controles USB / Gamepads (PC e Web)**:
+  - Todas as funcionalidades, telas secundárias e recursos de QoL agora possuem integração nativa e completa com controles USB/gamepads convencionais (Xbox, PlayStation, genéricos D-Input/X-Input):
+    - **Guia Visual no Rodapé (OSD)**: Segurar o botão `SELECT` (ou `BACK`) exibe em tempo real uma faixa translúcida no estilo Gamevil indicando todos os atalhos disponíveis.
+    - **`R3` (Clique do Analógico Direito)**: Alterna ativação imediata da **Auto-Poção** inteligente.
+    - **`L3` (Clique do Analógico Esquerdo)**: Liga/desliga o **Rastreador de Missões (Quest Tracker)** no HUD.
+    - **`SELECT + X`**: Abre o **Catálogo Completo de Equipamentos**.
+    - **`SELECT + Y`**: Abre o **Baú Compartilhado entre Personagens (Shared Stash)**.
+    - **`SELECT + B`**: Abre o **Mural de Contratos / Bounties Diárias**.
+    - **`SELECT + A`**: Alterna o **Rastreador de Missões**.
+    - **`SELECT + D-Pad Cima`**: Abre o menu do **Mago dos Bosses** (Boss Rush / Torre Abissal / Mascotes / Santuário).
+    - **`SELECT + D-Pad Baixo`**: Alterna a **Auto-Poção**.
+    - **Toque rápido em `SELECT`**: Executa o Salvamento Rápido nativo (`touch(0, 0, 3)`).
+  - **Navegação Integral por D-Pad e Botões nos Menus**:
+    - *Catálogo*: Esquerda/Direita para mudar de página, Cima/Baixo/Y para alternar abas de classe, X/A para alternar entre Armas e Armaduras, B/Back para fechar.
+    - *Baú Compartilhado*: D-Pad para percorrer os 24 slots da grade, Botão A para transferir/retirar item, X/Y/LB/RB para trocar entre as Páginas 1 e 2, B/Back para fechar.
+    - *Mural de Contratos*: D-Pad Cima/Baixo para selecionar contratos, Botão A para resgatar recompensas, B/Back para fechar.
+    - *Mago dos Bosses*: D-Pad Cima/Baixo para navegar, LB/RB para trocar de aba, Botão A para confirmar desafio, B/Back para fechar.
+
+- **Catálogo Completo de Equipamentos e Título Complecionista (F4 / Ctrl+W / SELECT+X)**:
+  - Expansão do catálogo para 48 equipamentos canônicos (24 armas e 24 armaduras) em 8 patamares por classe (Guerreiro, Atirador, Ladino).
+  - Rastreamento de 5 patamares de raridade por item (Comum, Mágico, Raro, Épico e Lendário) em um total de 240 entradas colecionáveis.
+  - Sinergia direta com o título `Complecionista`: desbloqueio concede buff épico de +100% em todos os status principais (ATK, DEF, PV, PM).
+  - Persistência atômica no sidecar `weapons-catalog-v1.txt` (PC) e `localStorage` (Web).
+
+- **Baú Compartilhado entre Personagens / Shared Stash (F5 / B / SELECT+Y)**:
+  - 48 slots divididos em 2 páginas de 24 slots, permitindo compartilhar armas, armaduras e consumíveis entre todos os saves locais com isolamento absoluto em `shared-stash-v1.txt`.
+
+- **Mural de Bounties / Contratos Offline Repetíveis (F8 / C / SELECT+B)**:
+  - 3 contratos diários gerados por slot de personagem com contagem nativa via hooks ARM e recompensas balanceadas em Ouro e Cash offline.
+
+- **Rastreador de Missões no HUD / Quest Tracker (Q / L3 / SELECT+A)**:
+  - Widget retrátil no canto superior direito do HUD com moldura Gamevil, pergaminho dourado pixel-art e atualização dinâmica da missão ativa e contagem de alvos.
+
+- **Arena Gauntlet / Boss Rush de Sobrevivência (Mago dos Bosses)**:
+  - 11ª opção no Mago dos Bosses (`species 999`), desafiando o jogador a derrotar em sequência todos os 10 chefes de Destinia por 10.000 G.
+
+- **Auto-Potion QoL / Consumo Inteligente (H / R3 / SELECT+D-Pad Baixo)**:
+  - Monitoramento contínuo de PV (< 35%) e PM (< 25%), consumindo automaticamente com intervalo seguro de cooldown de 60 frames.
+
+- **Reset de Atributos & Habilidades Offline (Santuário do Poder)**:
+  - Devolução integral de pontos acumulados por 5.000 G de ouro no Mago dos Bosses e recálculo seguro no motor ARM nativo (`GameUI_calcHeroStat`).
+
+- **Mascotes & Companheiros Canônicos + Torre Abissal (50 Andares)**:
+  - 4 mascotes canônicos (Lobo Glacial, Fênix Ígnea, Golem de Pedra, Mini-Diablo) com buffs passivos e sprite com flutuação e sombra suave desenhado ao lado do herói.
+  - Torre Abissal de 50 andares com chefes a cada 5 andares e recompensas escalonadas salvas em `abyss-v1.txt`.
+
+- **Ciclo Novo Jogo+ (NG+1 a NG+5)**:
+  - Reinício de campanha preservando atributos, nível, mascotes e baú compartilhado com escalonamento de dificuldade e recompensas.
+
+- **Otimização Crítica e Performance Web (Mobile / Safari iOS)**:
+  - Framebuffer acelerado via LUT RGB565 -> RGBA32 de 256 KB (~0.35ms de render), 16 FPS contínuos e auto-avanço das telas de logos.
+
 ## Novidades da Versão 0.10.2 — Mago dos Bosses Completo nas 5 Cidades e Teleporte Ativo
 
 - **Mago dos Bosses em Todas as 5 Cidades (Safe Zones com Lojas)**: Presente em todos os mapas que cumprem os requisitos estritos de Safe Zone (bloqueio de ataque/dash) e presença simultânea do Ferreiro e do Vendedor de Poções: Acampamento da Resistência (61), Bergheim (62), Acampamento dos Refugiados (63), Fermion (64) e Lagrant (65).

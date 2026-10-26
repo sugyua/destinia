@@ -4,9 +4,22 @@
 
 ---
 
-## Destaques da Versão 0.11.0 Beta — Os 3 Pilares
+## Destaques da Versão 0.11.0 Beta
 
-### 1. Catálogo Completo de Equipamentos & Complecionista (F4)
+### 0. Suporte Completo e Nativo a Controles USB / Gamepads (PC e Web)
+* **Atalhos Rápidos nos Analógicos:** `R3` alterna Auto-Poção e `L3` alterna Rastreador de Missões (Quest Tracker).
+* **Guia OSD Visual no Rodapé:** Segurar `SELECT` (ou `BACK`) exibe guia translúcido com os atalhos.
+* **Chords com SELECT:**
+  - `SELECT + X`: Catálogo Completo de Equipamentos.
+  - `SELECT + Y`: Baú Compartilhado entre Personagens.
+  - `SELECT + B`: Mural de Contratos / Bounties.
+  - `SELECT + A`: Rastreador de Missões.
+  - `SELECT + D-Pad Cima`: Menu do Mago dos Bosses (Boss Rush / Torre / Mascotes / Santuário).
+  - `SELECT + D-Pad Baixo`: Auto-Poção.
+  - Toque em `SELECT`: Quick Save nativo.
+* **Navegação 100% por D-Pad e Botões:** Todos os menus secundários (Catálogo, Baú Compartilhado, Bounties e Mago dos Bosses) possuem navegação completa por D-Pad, LB/RB e botões A/B.
+
+### 1. Catálogo Completo de Equipamentos & Complecionista (F4 / SELECT+X)
 * **48 Equipamentos Canônicos:** 24 Armas e 24 Armaduras (Peitorais) rigorosamente calibrados em 8 tiers de progressão para as 3 classes (Guerreiro, Atirador e Ladino).
 * **5 Patamares de Raridade:** Cada item rastreia 5 qualidades (Comum, Mágico, Raro, Épico e Lendário), totalizando 240 entradas colecionáveis.
 * **Alternância de Categoria:** Navegação imediata entre Armas e Armaduras pelo atalho `T` ou clique/toque no botão da categoria.

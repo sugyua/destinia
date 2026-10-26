@@ -205,3 +205,68 @@ test('Mascotes / Companheiros: 4 mascotes canonicos com buffs', () => {
   assert.equal(PETS_LIST[2].namePt, 'Golem de Pedra');
   assert.equal(PETS_LIST[3].namePt, 'Mini-Diablo');
 });
+
+test('Suporte a Controles USB 0.11: Chords com Select e Botoes L3/R3', async () => {
+  const { WebGamepad } = await import('../dist/gamepad.mjs');
+  const triggered = [];
+  const pad = {
+    index: 0,
+    id: 'USB Gamepad Test',
+    connected: true,
+    mapping: 'standard',
+    axes: [0, 0, 0, 0],
+    buttons: Array.from({ length: 17 }, () => ({ pressed: false, value: 0 }))
+  };
+
+  const gamepad = new WebGamepad({
+    sources: { press: () => {}, release: () => {} },
+    read: () => [pad],
+    onAction: (act) => triggered.push(act)
+  });
+
+  const active = { ready: true, focused: true, paused: false, blocked: false };
+
+  // Primeiro tick neutro para armar o gamepad
+  gamepad.tick(active);
+
+  // 1. R3 (Botão 11) -> toggleAutoPotion
+  pad.buttons[11].pressed = true;
+  gamepad.tick(active);
+  assert.deepEqual(triggered, ['toggleAutoPotion']);
+  pad.buttons[11].pressed = false;
+  gamepad.tick(active);
+
+  // 2. L3 (Botão 10) -> toggleQuestTracker
+  pad.buttons[10].pressed = true;
+  gamepad.tick(active);
+  assert.deepEqual(triggered, ['toggleAutoPotion', 'toggleQuestTracker']);
+  pad.buttons[10].pressed = false;
+  gamepad.tick(active);
+
+  // 3. SELECT + X (Botão 8 + Botão 2) -> toggleWeaponsCatalog
+  pad.buttons[8].pressed = true;
+  pad.buttons[2].pressed = true;
+  gamepad.tick(active);
+  assert.deepEqual(triggered, ['toggleAutoPotion', 'toggleQuestTracker', 'toggleWeaponsCatalog']);
+  pad.buttons[2].pressed = false;
+  pad.buttons[8].pressed = false;
+  gamepad.tick(active);
+
+  // 4. SELECT + Y (Botão 8 + Botão 3) -> toggleSharedStash
+  pad.buttons[8].pressed = true;
+  pad.buttons[3].pressed = true;
+  gamepad.tick(active);
+  assert.deepEqual(triggered, ['toggleAutoPotion', 'toggleQuestTracker', 'toggleWeaponsCatalog', 'toggleSharedStash']);
+  pad.buttons[3].pressed = false;
+  pad.buttons[8].pressed = false;
+  gamepad.tick(active);
+
+  // 5. SELECT + B (Botão 8 + Botão 1) -> toggleBounties
+  pad.buttons[8].pressed = true;
+  pad.buttons[1].pressed = true;
+  gamepad.tick(active);
+  assert.deepEqual(triggered, ['toggleAutoPotion', 'toggleQuestTracker', 'toggleWeaponsCatalog', 'toggleSharedStash', 'toggleBounties']);
+  pad.buttons[1].pressed = false;
+  pad.buttons[8].pressed = false;
+  gamepad.tick(active);
+});
