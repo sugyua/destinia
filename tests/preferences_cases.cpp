@@ -14,7 +14,7 @@ int main(int argc,char** argv) {
   {
     auto p=destinia::Preferences::load(config,"host_zoom");
     assert(p.fullscreen && p.width==800 && p.height==480);
-    assert(!p.loot.visual&&!p.loot.autoGold&&!p.loot.autoMaterials&&p.loot.categories==31&&p.loot.minRank==0&&p.loot.radius==19);assert(p.virtualControls);assert(p.uiScale==100);assert(p.language=="pt");
+    assert(!p.loot.visual&&p.loot.autoGold&&!p.loot.autoMaterials&&p.loot.categories==31&&p.loot.minRank==0&&p.loot.radius==19);assert(p.virtualControls);assert(p.uiScale==100);assert(p.language=="pt");
     std::ofstream(config)<<"idioma=en\n";assert(destinia::Preferences::load(config,"host_zoom").language=="en");
     std::ofstream(config)<<"idioma=pt\n";assert(destinia::Preferences::load(config,"host_zoom").language=="pt");
     std::ofstream(config)<<"idioma=invalid\n";bool invalidLanguage=false;try{destinia::Preferences::load(config,"host_zoom");}catch(...){invalidLanguage=true;}assert(invalidLanguage);fs::remove(config);
@@ -28,6 +28,7 @@ int main(int argc,char** argv) {
   }
   std::ofstream(config)<<"drops.filtro_visual=1\ndrops.categorias=6\ndrops.rank_minimo=3\ncoleta.ouro=1\ncoleta.materiais=1\ncoleta.raio=12\n";
   auto loot=destinia::Preferences::load(config,"host");assert(loot.loot.visual&&loot.loot.categories==6&&loot.loot.minRank==3&&loot.loot.autoGold&&loot.loot.autoMaterials&&loot.loot.radius==12);destinia::saveWindowPreferences(config,"host",800,480,false);assert(destinia::Preferences::load(config,"host").loot.autoMaterials);
+  std::ofstream(config)<<"coleta.ouro=0\n";assert(!destinia::Preferences::load(config,"host").loot.autoGold);
   for(const auto& bad:std::vector<std::string>{"coleta.raio=20\n","drops.categorias=32\n","drops.rank_minimo=5\n","coleta.ouro=2\n"}){std::ofstream(config)<<bad;bool failed=false;try{destinia::Preferences::load(config,"host");}catch(...){failed=true;}assert(failed);}
   std::ofstream(config)<<"perfil.padrao.tecla.ataque=V\n";auto reused=destinia::Preferences::load(config,"host");assert(reused.keys.at(SDLK_v)==destinia::Action::Attack);
   std::ofstream(config)<<"perfil.padrao.tecla.ataque=V\nperfil.padrao.tecla.nomes_drops=V\n";bool dropConflict=false;try{destinia::Preferences::load(config,"host");}catch(...){dropConflict=true;}assert(dropConflict);

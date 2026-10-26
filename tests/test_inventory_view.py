@@ -31,6 +31,18 @@ class InventoryViewTests(unittest.TestCase):
     run=subprocess.run([str(exe),'--game',str(ROOT/'game'),'--settings',str(case/'config.ini'),'--save',str(case/'save'),'--reports',str(case/'reports'),'--headless','1','--out',str(case/'frames'),'--mute','--no-save-preferences'],env=env,capture_output=True,text=True,timeout=60)
     self.assertEqual(run.returncode,0,run.stdout+run.stderr);self.assertIn('INVENTORY_SELECTION_ARM_OK',run.stdout)
 
+ @unittest.skipUnless(os.environ.get('DESTINIA_NATIVE_TESTS')=='1','Requer ARM/SDL/Unicorn')
+ def test_direct_protection_and_green_upgrade_icons(self):
+  flags=[f for f in shlex.split(subprocess.check_output(['pkg-config','--cflags','--libs','sdl2','unicorn','zlib'],text=True)) if f!='-mwindows']
+  with tempfile.TemporaryDirectory(prefix='destinia upgrade ARM ') as folder:
+   for host in ('host','host_zoom'):
+    case=pathlib.Path(folder)/host;case.mkdir();exe=case/('probe.exe' if os.name=='nt' else 'probe')
+    cmd=['g++','-std=c++17','-O0',str(ROOT/'tests/inventory_upgrade_native.cpp'),'-o',str(exe)]+(['-DDESTINIA_TEST_ZOOM'] if host=='host_zoom' else [])+flags
+    built=subprocess.run(cmd,capture_output=True,text=True);self.assertEqual(built.returncode,0,built.stderr)
+    env=dict(os.environ,SDL_VIDEODRIVER='dummy',SDL_AUDIODRIVER='dummy')
+    run=subprocess.run([str(exe),'--game',str(ROOT/'game'),'--settings',str(case/'config.ini'),'--save',str(case/'save'),'--reports',str(case/'reports'),'--headless','1','--out',str(case/'frames'),'--mute','--no-save-preferences'],env=env,capture_output=True,text=True,timeout=60)
+    self.assertEqual(run.returncode,0,run.stdout+run.stderr);self.assertIn('INVENTORY_UPGRADE_HOTKEY_ARM_OK',run.stdout)
+
  def test_panel_filters_keys_and_scaled_hitboxes(self):
   with tempfile.TemporaryDirectory(prefix='destinia inventory panel ') as folder:
    exe=pathlib.Path(folder)/('panel.exe' if os.name=='nt' else 'panel')

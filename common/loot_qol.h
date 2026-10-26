@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <vector>
 namespace destinia {
-struct LootOptions {bool visual=false,autoGold=false,autoMaterials=false;int categories=31,minRank=0,radius=19;};
+struct LootOptions {bool visual=false,autoGold=true,autoMaterials=false;int categories=31,minRank=0,radius=19;};
 struct LootDrop {int type=0,id=0,category=16,rank=0;};
 inline void validateLootOptions(const LootOptions& o){if(o.categories<0||o.categories>31||o.minRank<0||o.minRank>4||o.radius<1||o.radius>19)throw std::runtime_error("Preferencias de loot invalidas");}
 inline std::map<int,int> lootMaterialTypes(const std::vector<uint8_t>& bytes){

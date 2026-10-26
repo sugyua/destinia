@@ -64,7 +64,7 @@ public:
       else{text(panel.x+4,panel.y+16,"FC "+std::to_string(info.current)+" > "+std::to_string(info.projected),0xffff,150);text(panel.x+158,panel.y+16,destinia::signedPower(info.delta()),color(info.delta()),56);
        int row=0;for(const auto& label:std::array<std::pair<int,const char*>,5>{{{7,"ATK"},{8,"DEF"},{5,"PV"},{6,"PM"},{11,"CRI"}}}){const int n=info.after[label.first]-info.before[label.first];const std::string value=label.first==11?std::string(n<0?"-":n>0?"+":"")+std::to_string(std::abs(n)/10)+"."+std::to_string(std::abs(n)%10)+"%":destinia::signedPower(n);text(panel.x+4+row%2*108,panel.y+28+row/2*12,std::string(!pt&&label.first==5?"HP":!pt&&label.first==6?"MP":label.second)+" "+value,color(n),104);++row;}}
      }
-     text(panel.x+10,panel.y+71,"ITEM",kind==1?0xffc0:0x8c51,60);text(panel.x+88,panel.y+71,preferences.keys.count(SDLK_F6)?"RS":"F6/RS",0x8c51,40);text(panel.x+154,panel.y+71,pt?"COMPARAR":"COMPARE",kind==2?0xffc0:0x8c51,60);
+     text(panel.x+10,panel.y+71,"ITEM",kind==1?0xffc0:0x8c51,60);text(panel.x+88,panel.y+71,"RS",0x8c51,40);text(panel.x+154,panel.y+71,pt?"COMPARAR":"COMPARE",kind==2?0xffc0:0x8c51,60);
     }
     std::vector<uint8_t> full(FB_BYTES);rd(pixels,full.data(),full.size());raster.data.resize(size_t(area.w)*area.h*2);for(int y=0;y<area.h;y++)std::memcpy(raster.data.data()+y*area.w*2,full.data()+((area.y+y)*SCREEN_W+area.x)*2,area.w*2);restore();
    }catch(...){restore();throw;}

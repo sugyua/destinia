@@ -2,7 +2,7 @@
 
 ## Contrato implementado
 
-- Painel FILTROS: PROT/DESPROT, F7 livre e ação extra do controle alternam a marca do equipamento selecionado e visível. `[P]` e nome dourado indicam proteção. VOLTAR/Esc fecha; escolher equipamento protegido para equipar continua permitido.
+- Candidata0.9.9: F7/P alternam a proteção diretamente no item do cursor nativo, sem abrir painel; F6/clique/X abrem FILTROS. Dentro do painel, PROT/DESPROT, F7/P e ação extra alternam a marca do selecionado visível. `[P]` e nome dourado indicam proteção. VOLTAR/Esc fecha; escolher equipamento protegido para equipar continua permitido.
 - Em `GameUI.state = 0x91040004`, bloqueia a escolha pelo painel e as confirmações `6/17` na entrada ARM `MainMenu_mKeyPressed`. Inclui comandos gerados internamente pelo toque. Não remove/reordena slots ou pools nativos. Item permanece visível; o badge informa PROTEGIDO ao bloquear.
 - A guarda não chama a engine recursivamente: lê o alvo atual e desvia PC para LR antes da confirmação. Nenhuma escrita em Game nem em `save*.dat` foi introduzida pela funcionalidade.
 
@@ -28,3 +28,8 @@ Web: definir `DESTINIA_GAME_ROOT` para a pasta local `game` e executar `node --t
 Proteção cobre especificamente `0x91040004`; não promete cobertura de outras rotinas de descarte/desmanche. Fingerprint alterado invalida a marca. Destruição/recriação perfeitamente idêntica no mesmo pool entre observações é indistinguível, podendo herdar a proteção; o comportamento conservador impede venda acidental. Versões antigas ignoram sidecar/guarda. Copiar/restaurar só o save original não transporta automaticamente as marcas.
 
 Gameplay físico Windows/iPhone/controle USB e campanha não foram validados. Não houve CI no SHA desta branch, empacotamento, release nem deployment web por esta frente. VERSION/manifesto globais e publicação da 0.9.8 ficam com o Maestro/Frente 3 após integrar todas as frentes. Web existente: https://destinia-web-experimental.leafyheron257.chatgpt.site/ (mesma audiência; não atualizada por esta branch).
+
+
+### Janela/worker da web — confirmação de gravação
+
+O worker recebe o snapshot do sidecar local da janela e solicita gravação por mensagem. A janela valida formato, modo e conteúdo anterior antes de gravar no localStorage; só o ACK de sucesso confirma a marca ativa. Durante a gravação, venda/seleção destrutiva ficam bloqueadas. Quota, alteração concorrente ou falha não confirmam o toggle. Timeout/transporte ambíguo exige recarregar e mantém venda bloqueada. Nada passa pelo shim de save ARM ou pelo Drive. Testes cobrem o protocolo e a engine real, mais um worker real via Portal com gravação/ACK/releitura, restaurando os metadados de teste ao final.

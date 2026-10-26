@@ -1023,8 +1023,8 @@ static int runHost(int argc, char** argv) {
         else if(ev.type==SDL_KEYDOWN || ev.type==SDL_KEYUP) {
           if(ev.key.repeat) continue;
           const bool down=ev.type==SDL_KEYDOWN;
-          if(ev.key.keysym.sym==SDLK_F6 && !preferences.keys.count(SDLK_F6) && !inventoryOpen && fcComparisonVisible()){if(down)fcMenuKey(10015,true);continue;}
-          if(ev.key.keysym.sym==SDLK_F7 && !preferences.keys.count(SDLK_F7) && (inventoryOpen || inventoryVisible())){if(down){controls.release();if(inventoryOpen)inventoryToggleProtection();else inventoryEnter();}continue;}
+          if(ev.key.keysym.sym==SDLK_F6 && !preferences.keys.count(SDLK_F6) && (inventoryOpen||inventoryVisible())){if(down){controls.release();inventoryMenuKey(10016,true);}continue;}
+          if(((ev.key.keysym.sym==SDLK_F7&&!preferences.keys.count(SDLK_F7))||(ev.key.keysym.sym==SDLK_p&&!preferences.keys.count(SDLK_p))) && (inventoryOpen||inventoryVisible())){if(down){controls.release();inventoryMenuKey(10014,true);}continue;}
           if(codexOpen && ev.key.keysym.sym!=SDLK_F11) {
             if(down) {
               if(ev.key.keysym.sym==SDLK_ESCAPE)codexMenuKey(10,true);
@@ -1097,6 +1097,7 @@ static int runHost(int argc, char** argv) {
     auto tEmul0 = std::chrono::steady_clock::now();
     dropNamesRenderer.enabled=controls.dropNamesHeld;
     if(!lootQol.collect(uint64_t(frame),controls.focused,[&](u32 fn){return callFn(fn,{6});})){executionFailed=true;break;}
+    inventoryBeginFrame();
     fcBeginFrame();
     uiRenderer.beginFrame();
     if (!callFn(fnRun, {ENV_OBJ, 0x10, hScreen, (u32)frame}, &wait)) break;

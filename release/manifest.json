@@ -219,6 +219,10 @@
     "tests/test_loot_qol.py",
     "web/dist/loot-qol.mjs",
     "web/tests/loot-qol.test.mjs",
-    "web/tests/loot-qol-arm.test.mjs"
+    "web/tests/loot-qol-arm.test.mjs",
+    "tests/inventory_upgrade_native.cpp",
+    "web/tests/inventory-upgrade.test.mjs",
+    "web/dist/inventory-storage.mjs",
+    "web/tests/inventory-storage.test.mjs"
   ]
 }

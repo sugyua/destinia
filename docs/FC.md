@@ -2,7 +2,7 @@
 
 O FC aparece na aba Status com a fonte original do jogo. No inventário e na seleção de equipamento próprio, o rodapé da caixa de descrição alterna entre **Item** (texto original) e **Comparar** (FC atual, FC previsto, diferença e ATK/DEF/PV/PM máximos/crítico). O nome usa a cor da raridade; ganhos são verdes, perdas vermelhas e valores iguais cinza.
 
-Use clique/toque nos rótulos, **F6** ou o analógico direito (esquerda=Item, direita=Comparar). No PC, F6 não substitui uma tecla já remapeada; nesse caso use o mouse/analógico. F7/filtros e os comandos originais de equipar continuam independentes. A página escolhida é mantida na sessão, sem alterar preferências ou o formato dos saves.
+Use clique/toque nos rótulos ou o analógico direito (esquerda=Item, direita=Comparar). Na candidata0.9.9, F6 abre FILTROS e F7/P protegem diretamente o equipamento selecionado; os comandos originais de equipar permanecem independentes. A bolinha verde no canto superior direito do ícone indica ganho válido de FC naquele slot. A página escolhida é mantida na sessão, sem alterar preferências ou o formato dos saves.
 
 A previsão não equipa o item. Itens de outra classe, sem nível suficiente ou não identificados exibem o motivo; ofertas/estruturas não reconhecidas não recebem estimativa inventada. A 0.9.7 muda a apresentação, mantendo os cálculos anteriores.
 

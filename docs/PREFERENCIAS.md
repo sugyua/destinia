@@ -73,4 +73,4 @@ PT-BR é o padrão quando não há idioma configurado; inglês explícito é pre
 
 ## QoL de loot — candidata 0.9.9
 
-As opções `drops.filtro_visual`, `drops.categorias`, `drops.rank_minimo`, `coleta.ouro`, `coleta.materiais` e `coleta.raio` são globais para os dois hosts. Defaults: 0, 31, 0, 0, 0 e 19. Mescle no config.ini existente com o jogo fechado; `--check-settings ARQUIVO` valida limites. O reset de preferências remove essas chaves e preserva save_dir e chaves desconhecidas. BAT pessoal não foi alterado. [Uso e limites](LOOT_QOL.md).
+As opções `drops.filtro_visual`, `drops.categorias`, `drops.rank_minimo`, `coleta.ouro`, `coleta.materiais` e `coleta.raio` são globais para os dois hosts. Defaults: 0, 31, 0, 1, 0 e 19 (ouro automático ativo, materiais desligados). Mescle no config.ini existente com o jogo fechado; `--check-settings ARQUIVO` valida limites. O reset de preferências remove essas chaves e preserva save_dir e chaves desconhecidas. BAT pessoal não foi alterado. [Uso e limites](LOOT_QOL.md).

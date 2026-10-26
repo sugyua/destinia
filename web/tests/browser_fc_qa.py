@@ -38,7 +38,7 @@ async def run(url):
   await tap(270,232);await page.wait_for_timeout(100);assert await worker.evaluate('engine.combatPower.comparison')
   await tap(115,232);await tap(270,232);await tap(115,232)
   assert await worker.evaluate('!engine.combatPower.comparison&&!engine.combatPower.captured')
-  await page.keyboard.press('F6');await page.wait_for_timeout(100);assert await worker.evaluate('engine.combatPower.comparison')
+  await worker.evaluate('engine.combatPower.key(10015,true)');await page.wait_for_timeout(100);assert await worker.evaluate('engine.combatPower.comparison')
   assert ui_before==await worker.evaluate("JSON.stringify({indices:Array.from(engine.read(engine.exports.get('GameUI')+0x52,20)),state:engine.get32(engine.exports.get('GameUI')+0x7c)})")
   result=await worker.evaluate('(()=>{const p=engine.combatPower.calculate(self.fcCandidate);return {current:p.current,projected:p.projected,valid:p.valid,gold:engine.call(engine.exports.get("getMyGold"))}})()')
   assert result=={'current':488,'projected':608,'valid':True,'gold':20000},result
@@ -49,7 +49,7 @@ async def run(url):
   await page.evaluate('fcPad.axes[2]=0');await page.wait_for_timeout(100)
   await page.evaluate('fcPad.axes[2]=1');await page.wait_for_timeout(160);assert await worker.evaluate('engine.combatPower.comparison')
   await page.evaluate('fcPad.axes[2]=0');await page.wait_for_timeout(100)
-  await page.keyboard.press('F7');await page.wait_for_timeout(100);assert await worker.evaluate('engine.inventory.open')
+  await page.keyboard.press('F6');await page.wait_for_timeout(100);assert await worker.evaluate('engine.inventory.open')
   await page.keyboard.press('Escape');await page.wait_for_timeout(100);assert await worker.evaluate('!engine.inventory.open')
   assert ui_before==await worker.evaluate("JSON.stringify({indices:Array.from(engine.read(engine.exports.get('GameUI')+0x52,20)),state:engine.get32(engine.exports.get('GameUI')+0x7c)})")
   assert not errors,errors

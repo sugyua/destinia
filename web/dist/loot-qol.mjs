@@ -1,6 +1,6 @@
 const BASE=0x10000000,RETURN=0x60902000;
 export function lootOptions(value={}){
- const out={visual:false,autoGold:false,autoMaterials:false,categories:31,minRank:0,radius:19,...value};
+ const out={visual:false,autoGold:true,autoMaterials:false,categories:31,minRank:0,radius:19,...value};
  for(const k of ['visual','autoGold','autoMaterials'])if(typeof out[k]!=='boolean')throw Error('Preferencia de loot invalida');
  for(const [k,lo,hi] of [['categories',0,31],['minRank',0,4],['radius',1,19]])if(!Number.isInteger(out[k])||out[k]<lo||out[k]>hi)throw Error('Preferencia de loot fora dos limites');return out;
 }

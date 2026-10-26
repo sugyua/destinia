@@ -104,7 +104,7 @@ struct Preferences {
     p.loot.visual=preferenceInt(values,"drops.filtro_visual",0,0,1)!=0;
     p.loot.categories=preferenceInt(values,"drops.categorias",31,0,31);
     p.loot.minRank=preferenceInt(values,"drops.rank_minimo",0,0,4);
-    p.loot.autoGold=preferenceInt(values,"coleta.ouro",0,0,1)!=0;
+    p.loot.autoGold=preferenceInt(values,"coleta.ouro",1,0,1)!=0;
     p.loot.autoMaterials=preferenceInt(values,"coleta.materiais",0,0,1)!=0;
     p.loot.radius=preferenceInt(values,"coleta.raio",19,1,19);
     p.music=preferenceInt(values,"audio.musica",100,0,100);

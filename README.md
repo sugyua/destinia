@@ -11,7 +11,9 @@
 
 ## Candidata 0.9.9 — Frente 4: filtro visual e coleta opcional
 
-O **filtro visual de drops** destaca equipamentos com as cores do rank, materiais em ciano, ouro em amarelo e itens de missão em laranja. Categorias e rank mínimo de equipamento podem ser ocultados **apenas no desenho**, sem apagar drops ou mudar a coleta manual. A coleta automática de **ouro e materiais de fabricação** é opcional, desligada por padrão e independente do filtro visual. Mantém o alcance original (até 19 pixels por eixo), usa as verificações nativas de capacidade e não coleta equipamentos, poções, receitas ou itens de missão. A mochila cheia conserva o material no chão; tentativas malsucedidas têm intervalo para evitar repetição de mensagens.
+O **filtro visual de drops** destaca equipamentos com as cores do rank, materiais em ciano, ouro em amarelo e itens de missão em laranja. Categorias e rank mínimo de equipamento podem ser ocultados **apenas no desenho**, sem apagar drops ou mudar a coleta manual. A coleta automática de **ouro e materiais de fabricação** tem opções independentes do filtro visual: ouro ativo por padrão, materiais desligados por padrão. Mantém o alcance original (até 19 pixels por eixo), usa as verificações nativas de capacidade e não coleta equipamentos, poções, receitas ou itens de missão. A mochila cheia conserva o material no chão; tentativas malsucedidas têm intervalo para evitar repetição de mensagens.
+
+**Atalhos atuais:** F7 ou P protegem/desprotegem diretamente o equipamento do cursor, sem abrir FILTROS. F6, clique em FILTROS ou X/ação extra abrem o painel. Item/Comparar continuam por clique/controle (RS), sem ocupar F6. Uma bolinha verde no canto superior direito do ícone indica ganho confirmado de FC para aquele slot, respeitando os requisitos do comparador e sem equipar.
 
 **PC:** com o jogo fechado, mescle as chaves abaixo no `config.ini` existente em `%LOCALAPPDATA%\Destinia` (ou o arquivo passado em `--settings`), preservando `save_dir` e as demais preferências. Reinicie para aplicar. Os dois hosts compartilham estas opções; não é preciso alterar o BAT pessoal.
 
@@ -19,12 +21,12 @@ O **filtro visual de drops** destaca equipamentos com as cores do rank, materiai
 drops.filtro_visual=1
 drops.categorias=31
 drops.rank_minimo=0
-coleta.ouro=0
+coleta.ouro=1
 coleta.materiais=0
 coleta.raio=19
 ```
 
-`drops.categorias` soma **1 equipamentos + 2 materiais + 4 ouro + 8 missão + 16 outros**; 31 mostra todos e 0 oculta todos quando o filtro está ativo. `drops.rank_minimo` aceita 0–4 e só filtra equipamentos. `coleta.raio` aceita 1–19, nunca amplia a distância nativa. Ative ouro/materiais com 1; volte a 0 para coleta manual. Opções são gravadas fora dos `save*.dat`; itens coletados entram na memória do jogo pelo coletor original e serão salvos pelo fluxo normal quando o jogador salvar, sem mudar o formato.
+`drops.categorias` soma **1 equipamentos + 2 materiais + 4 ouro + 8 missão + 16 outros**; 31 mostra todos e 0 oculta todos quando o filtro está ativo. `drops.rank_minimo` aceita 0–4 e só filtra equipamentos. `coleta.raio` aceita 1–19, nunca amplia a distância nativa. O padrão sem configuração é ouro=1 e materiais=0; opções explícitas anteriores são respeitadas. Use 0 para desativar o autoloot de ouro ou 1 para ativar materiais. Opções são gravadas fora dos `save*.dat`; itens coletados entram na memória do jogo pelo coletor original e serão salvos pelo fluxo normal quando o jogador salvar, sem mudar o formato.
 
 **Web:** abra **Itens no chão e coleta** para ajustar as mesmas opções; as preferências ficam neste navegador, separadas dos saves/Google Drive. Pausa, menus/transições e perda de foco suspendem a assistência. **Fontes web da candidata 0.9.9 atualizadas e testadas localmente; deployment não realizado por esta frente.** URL existente: [teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site/). Release, VERSION/manifesto da nova versão e deployment pertencem à integração do Maestro após revisão do Sentinel; nenhuma publicação 0.9.9 é declarada aqui. [Testes, contrato ARM e limites](docs/LOOT_QOL.md).
 
@@ -83,7 +85,7 @@ O ZIP Windows da Release contém os quatro executáveis: os dois lançadores na 
 
 O **Códex ocupa a décima aba da barra original**, usando a moldura, fonte e ícones do jogo, nos dois hosts e na web. Abra Menu e toque no último ícone dourado (pergaminho); selecione um monstro e use **INFO/ação**. SAIR/Voltar retorna à grade/menu, e as outras nove abas continuam disponíveis. Descobertas, retratos frontais, mortes e detalhes por categoria preservados. **Na web, somente100%**, sem seletor75/125 ou reaplicar essa preferência antiga; escalas do PC permanecem independentes. [Uso e limites](docs/CODEX_NATIVO_0.9.1.md).
 
-Painel **dentro do jogo**, na aba de equipamentos, mochila e venda do vendedor local. Abra **FILTROS**, **F7** livre ou **X/ação extra** do controle. Filtre por tipo/rank/faixas de nível e preço; ordene por tipo/rank/nível/preço, crescente ou decrescente. Toque ou navegue com as setas; escolha **VOLTAR AO ITEM SELECIONADO** e confirme equipar/vender na tela original. A visualização não reordena os itens e não escolhe outro automaticamente se o selecionado desaparecer.
+Painel **dentro do jogo**, na aba de equipamentos, mochila e venda do vendedor local. Abra **FILTROS**, **F6** livre ou **X/ação extra** do controle. Filtre por tipo/rank/faixas de nível e preço; ordene por tipo/rank/nível/preço, crescente ou decrescente. Toque ou navegue com as setas; escolha **VOLTAR AO ITEM SELECIONADO** e confirme equipar/vender na tela original. A visualização não reordena os itens e não escolhe outro automaticamente se o selecionado desaparecer.
 
 **Escopo dos filtros: equipamentos do contexto/bolsa atual.** Consumíveis e itens de missão permanecem na interface original. O ZIP0.9.1 inclui os filtros, que ainda usam seu painel próprio; esta revisão visual muda o Códex. [Uso, controles e limites](docs/INVENTARIO_0.9.1.md). Favoritos, proteções, assistência e reset continuam pendentes; esta release não os declara entregues.
 
