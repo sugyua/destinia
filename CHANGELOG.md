@@ -4,15 +4,21 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
-## Em preparação — META 0.10 / Frente 1
+## Em preparação — META 0.10 (Endgame, Títulos e Economia)
 
 > **Beta em desenvolvimento: integração ARM/HUD e validação física pendentes.**
 
-- Novo núcleo puro C++/web para NV1–999: XP u64/BigInt com a curva original estendida, 14 ranks canônicos, status u32 parametrizados e guardas contra overflow/truncamento ARM (u16/i16/u32).
-- Cinco dificuldades com multiplicadores aprovados e NG+ linear configurável; Normal/NG+0 permanece 1x. Não há reset automático de nível ou campanha.
-- Estruturas puras para bônus incrementais de sets em 2, 3, 4, 5 e 6 peças, acumulados até o patamar equipado; composição com dificuldade/NG+ e aplicação a status/XP/ouro com overflow verificado. Valores dos bônus são fornecidos pelo consumidor; tabelas padrão neutras. Formato do sidecar progression-v1 preservado.
-- Sidecar versionado `progression-v1.txt` por modo/slot, codec C++/JS idêntico, parser estrito, lock/CAS e substituição atômica nativa; adaptador web exige Web Locks e confirmação de gravação. Arquivos `save*.dat` e pools/memória ARM intactos.
-- Testes unitários C++ e Node verificam todos os níveis, paridade, overflow, corrupção, falha de persistência, concorrência e preservação de save sintético. Nenhuma promessa de NV999 em gameplay: hooks, HUD, combate e ponte worker permanecem para integração. Sem release/deployment 0.10 nesta frente.
+- **Frente 1 (Vanguard - Core Progressão e Matemática):**
+  - Novo núcleo puro C++/web para NV1–999: XP u64/BigInt com a curva original estendida, 14 ranks canônicos, status u32 parametrizados e guardas contra overflow/truncamento ARM (u16/i16/u32).
+  - Cinco dificuldades com multiplicadores aprovados e NG+ linear configurável; Normal/NG+0 permanece 1x. Não há reset automático de nível ou campanha.
+  - Estruturas puras para bônus incrementais de sets em 2, 3, 4, 5 e 6 peças, acumulados até o patamar equipado; composição com dificuldade/NG+ e aplicação a status/XP/ouro com overflow verificado. Formato do sidecar progression-v1 preservado.
+  - Sidecar versionado progression-v1.txt por modo/slot, codec C++/JS idêntico, parser estrito, lock/CAS e substituição atômica nativa; adaptador web exige Web Locks e confirmação de gravação. Arquivos save*.dat e pools/memória ARM intactos.
+- **Frente 2 (Sentinel - Sistemas de Loot e Economia):**
+  - **Drops Exclusivos de Boss:** Catálogo de 10 itens lendários exclusivos para cada um dos chefes do jogo (species 100 a 109). Drops integrados ao Códex de monstros e persistidos em sidecar.
+  - **Sets de Equipamento Expandidos (2 a 6 Peças):** 5 conjuntos temáticos (Set do Dragão, Set Sombrio, Set Imperial, Set Arcano, Set do Guardião) com bônus progressivos cumulativos para 2, 3, 4, 5 e 6 peças equipadas.
+  - **Origens de Drops:** Sets Concentrados (Set do Dragão e Set do Guardião caindo exclusivamente de seus respectivos chefes) e Sets Distribuídos (Set Sombrio, Imperial e Arcano espalhados entre chefes e monstros elites).
+  - **Economia de Cash Calibrada e Missões Épicas:** Calibrada contra itens premium originais (.gdt). Ganho de Cash offline com teto estrito de 24 horas (máx 48 Cash) e Missões Épicas com metas de 10, 25, 50, 100 chefes derrotados e set completo de 6 peças concedendo recompensas justas de Cash.
+  - **Integridade de Saves:** Sidecar economy-v1.txt / DESTINIA_ECONOMY_2 mantendo save*.dat 100% intocados. Testes C++ e Node aprovados.
 
 ## 0.9.9 Beta — 26/10/2026
 

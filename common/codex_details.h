@@ -184,6 +184,14 @@ public:
   auto found=monsters.find(species);
   if(found!=monsters.end()) {
    addEquipment(drops,level,equipmentOnly);if(!equipmentOnly)addItems(drops,level,found->second.quest);
+    if(species>=100){
+     const auto* bossDrop=findBossDrop(species);
+     if(bossDrop){
+      auto& exclusive=add(drops,"boss-exclusive","DROP EXCLUSIVO DE CHEFE");
+      exclusive.rows.push_back({bossDrop->namePt+" [LENDARIO]",color(4)});
+      exclusive.rows.push_back({bossDrop->descPt,0xffff});
+     }
+    }
   }else rules.rows.push_back({"METADADOS INDISPONIVEIS"});
   auto& legend=add(drops,"rarities","CORES DE RARIDADE");
   for(int grade=equipmentOnly?2:0;grade<=(level?maxGrade(std::min(level,100)+2):4);++grade)legend.rows.push_back({rarity(grade),color(grade)});

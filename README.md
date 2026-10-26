@@ -430,3 +430,12 @@ Pacotes oficiais e histórico detalhado ficam em [Releases](https://github.com/s
 O ZIP curado não inclui biblioteca original, APK, DEX, assets, áudio, saves ou DLLs de terceiros. Consulte [THIRD_PARTY.md](THIRD_PARTY.md). Não foi definida uma licença para o código do host nesta etapa.
 
 Se quiser ajudar no projeto, entre em contato comigo pelo WhatsApp: [+55 21 97468-6880](https://wa.me/5521974686880).
+
+
+### Sistemas de Loot e Economia (Meta 0.10 — Frente 2)
+
+- **Drops Exclusivos de Boss:** 10 itens lendários exclusivos para cada chefe (species >= 100), integrados aos detalhes do Códex e registrados em sidecar.
+- **Sets de Equipamento Expandidos:** 5 conjuntos temáticos com bônus progressivos cumulativos para **2, 3, 4, 5 e 6 peças equipadas** (2: ATK/DEF, 3: DEF/HP, 4: HP/CritDmg/Resistências, 5: Crítico/Evasão/Atributos, 6: Bônus Supremo de Set).
+- **Origens de Drops:** Categorização em **Sets Concentrados** (ex: Set do Dragão em Diablo/Lava Guardian e Set do Guardião no Dungeon Guardian) e **Sets Distribuídos** (peças espalhadas entre chefes regionais e monstros elites do mapa).
+- **Economia de Cash e Missões Épicas:** Ganho automático de 1 Cash a cada 30 minutos offline (teto de 24h = 48 Cash) e recompensas de Cash por Missões Épicas de marcos de chefes e conjunto completo (10, 25, 50 e 100 boss kills, set de 6 peças), calibradas com a loja original (item_en.gdt ~20 Cash por item premium).
+- **Saves:** Saves originais save*.dat 100% intocados (persistência atômica segura no sidecar DESTINIA_ECONOMY_2 / economy-v1.txt). Detalhes em [LOOT_ECONOMY.md](docs/LOOT_ECONOMY.md).

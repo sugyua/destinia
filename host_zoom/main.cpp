@@ -1299,6 +1299,7 @@ static int runHost(int argc, char** argv) {
   if (traceViewport) traceViewportDimensions("after-init");
   installCodex();
   installInventoryProtection();
+  destinia::initLootEconomy(saveDir);
   hostReport("[host] initGame ok em %dx%d. Rodando o jogo...\n", SCREEN_W, SCREEN_H);
   hostReport("[host] zoom out: mapas pequenos centralizados; fundo cinza; UI nativa.\n");
   if (portugueseTextTest) hostReport("[host] traducao PT ativa: itens, equipamentos, habilidades, menus, Fabricacao e Missoes.\n");
@@ -1530,6 +1531,8 @@ static int runHost(int argc, char** argv) {
     frame++;
     runtimeLogTick(frame,runMs);
     if(frame%16==0) codexFlush();
+    destinia::lootEconomyProcessOffline(saveDir, fnGetCash, fnSetCash, callFn);
+    destinia::lootEconomyPeriodicSave(saveDir, frame);
     probeTick(frame);
     cameraTick(frame);
     if (traceViewportRecording &&
@@ -1610,6 +1613,7 @@ static int runHost(int argc, char** argv) {
     try { destinia::saveWindowPreferences(settingsPath,"host_zoom",windowWidth,windowHeight,fullscreen); }
     catch(const std::exception& e) { hostReport("[host] Aviso: %s\n",e.what()); }
   }
+  if(destinia::lootEconomyReady){destinia::lootEconomy.lastTimestamp=int64_t(std::time(nullptr));try{destinia::saveLootEconomy(fs::path(saveDir),destinia::lootEconomy);}catch(...){}}
   return executionFailed ? 2 : 0;
 }
 
