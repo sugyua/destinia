@@ -1,6 +1,6 @@
 # Sistemas de Loot e Economia — Meta 0.10 (Frente 2)
 
-Este documento descreve os três pilares implementados na **Frente 2 da Meta 0.10** do Destinia para PC e Web: **Drops Exclusivos de Boss**, **Sets de Equipamento** e **Ganho de Cash Offline**.
+Este documento descreve os quatro pilares implementados na **Frente 2 da Meta 0.10** do Destinia para PC e Web: **Drops Exclusivos de Boss**, **Sets de Equipamento Expandidos (2 a 6 Peças)**, **Origens de Drops (Concentradas vs Distribuídas)** e **Economia de Cash (Tempo Offline e Missões Épicas)**.
 
 ---
 
@@ -22,56 +22,93 @@ Cada um dos dez chefes originais do Destinia (`species` 100 a 109) possui um **d
 | **109** | **Lava Guardian** | Magma Primordial do Guardião<br>*Guardian's Primeval Magma* | +250 HP, +45 Defesa, +20 Vitalidade |
 
 ### Persistência e Códex
-- As derrotas de chefes e o registro dos drops são contabilizados atomicamente no sidecar `economy-v1.txt` (ou `localStorage` na Web), mantendo os arquivos de save originais `save*.dat` 100% intocados.
+- As contagens de derrotas de chefes e o histórico de drops são contabilizados atomicamente no sidecar `economy-v1.txt` (ou `localStorage` na Web via cabeçalho `DESTINIA_ECONOMY_2`).
+- Os arquivos de save originais `save*.dat` permanecem **100% intocados**.
 - Os drops exclusivos e suas descrições completas são integrados e exibidos na tela de detalhes do **Códex de Monstros**.
 
 ---
 
-## 2. Sets de Equipamento (Bônus Únicos de 2 e 4 Peças)
+## 2. Sets de Equipamento Expandidos (2, 3, 4, 5 e 6 Peças)
 
-Foram implementados 5 conjuntos temáticos que concedem bônus progressivos cumulativos ao equipar 2 ou 4 peças do mesmo conjunto:
+O sistema de conjuntos foi expandido para suportar bônus progressivos cumulativos para **2, 3, 4, 5 e 6 peças equipadas**, abrangendo todo o inventário do herói (Armas, Elmo, Armadura, Luvas, Botas e Anel):
 
-### 1. Set do Dragão (*Dragon Set*)
-- **Palavras-chave:** Itens contendo `dragao` ou `dragon` no nome.
-- **2 Peças (Fúria Dracônica Menor):** +25 Ataque, +15 Força.
-- **4 Peças (Poder Dracônico Ancestral):** +60 Ataque, +30 Força, +10% Dano Crítico, +200 HP Máximo.
+### 1. Set do Dragão (*Dragon Set*) — **Drop Concentrado**
+- **Origem:** Boss 108 (*Diablo*) e Boss 109 (*Lava Guardian*). Todas as 6 peças caem exclusivamente destes dois chefes.
+- **2 Peças (Garras Dracônicas):** +30 Ataque, +20 Força.
+- **3 Peças (Escamas de Dragão):** +35 Defesa, +150 HP.
+- **4 Peças (Coração Dracônico):** +300 HP, +15% Dano Crítico.
+- **5 Peças (Olhar do Dragão):** +10% Chance Crítica, +35 Força.
+- **6 Peças (Fúria Dracônica Suprema):** +100 Ataque, +50 Força, +25% Dano Crítico, +500 HP Máximo.
 
-### 2. Set Sombrio (*Shadow Set*)
-- **Palavras-chave:** Itens contendo `sombri`, `shadow` ou `sombra`.
-- **2 Peças (Manto Noturno):** +20 Evasão, +15 Destreza.
-- **4 Peças (Mestre das Sombras):** +40 Evasão, +30 Destreza, +12% Chance de Crítico, +10% Vampirismo.
+### 2. Set Sombrio (*Shadow Set*) — **Drop Distribuído**
+- **Origem:** Distribuído entre Defcan (101), Defcan Desperto (103), Salas (102), Sileth (104) e Monstros Elites do mapa.
+- **2 Peças (Passos Silenciosos):** +25 Evasão, +20 Destreza.
+- **3 Peças (Véu Noturno):** +30 Defesa, +15 Evasão.
+- **4 Peças (Golpe das Sombras):** +40 Destreza, +12% Chance Crítica, +10% Vampirismo.
+- **5 Peças (Dança da Morte):** +15% Evasão, +20% Dano Crítico.
+- **6 Peças (Mestre das Sombras Supremo):** +80 Evasão, +60 Destreza, +20% Vampirismo, +350 HP.
 
-### 3. Set Imperial (*Imperial Set*)
-- **Palavras-chave:** Itens contendo `imperial` ou `kaiser`.
-- **2 Peças (Vontade de Ferro):** +30 Defesa, +15 Vitalidade.
-- **4 Peças (Soberania Absoluta):** +70 Defesa, +35 Vitalidade, +350 HP Máximo, +15% Redução de Dano.
+### 3. Set Imperial (*Imperial Set*) — **Drop Distribuído**
+- **Origem:** Distribuído entre Kaiser (106), Baramos (107) e Masmorras de Alto Nível.
+- **2 Peças (Decreto Real):** +35 Defesa, +20 Vitalidade.
+- **3 Peças (Guarda do Imperador):** +40 Defesa, +200 HP.
+- **4 Peças (Soberania de Kaiser):** +80 Defesa, +40 Vitalidade, +400 HP Máximo.
+- **5 Peças (Aura Conquistadora):** +30 Ataque, +10% Redução de Dano Físico.
+- **6 Peças (Imperador Supremo):** +120 Defesa, +60 Vitalidade, +700 HP, +20% Redução Geral de Dano.
 
-### 4. Set Arcano (*Arcane Set*)
-- **Palavras-chave:** Itens contendo `arcan`, `arcane`, `mago` ou `mage`.
-- **2 Peças (Fluxo Etéreo):** +30 Inteligência, +120 MP Máximo.
-- **4 Peças (Conhecimento Primordial):** +65 Inteligência, +250 MP Máximo, -20% Custo de MP em Habilidades.
+### 4. Set Arcano (*Arcane Set*) — **Drop Distribuído**
+- **Origem:** Distribuído entre Salas (102), Defcan Desperto (103), Tamur (105) e Criaturas Místicas.
+- **2 Peças (Mente Iluminada):** +35 Inteligência, +150 MP Máximo.
+- **3 Peças (Ressonância Mágica):** +20 Defesa, +150 HP, +100 MP.
+- **4 Peças (Canalizador Etéreo):** +70 Inteligência, +300 MP, -20% Custo de MP.
+- **5 Peças (Foco Prismático):** +12% Chance Crítica Mágica, +40 Inteligência.
+- **6 Peças (Arquimago Supremo):** +80 Inteligência, +500 MP, -35% Custo de MP em Habilidades.
 
-### 5. Set do Guardião (*Guardian Set*)
-- **Palavras-chave:** Itens contendo `guardiao` ou `guardian`.
-- **2 Peças (Bastião Protetor):** +25 Defesa, +150 HP Máximo.
-- **4 Peças (Fortaleza Viva):** +60 Defesa, +300 HP Máximo, +20% Resistência a Atordoamento.
+### 5. Set do Guardião (*Guardian Set*) — **Drop Concentrado**
+- **Origem:** Boss 100 (*Dungeon Guardian*). Todas as 6 peças caem 100% exclusivamente da masmorra deste chefe.
+- **2 Peças (Muralha de Pedra):** +35 Defesa, +200 HP.
+- **3 Peças (Escudo de Granito):** +30 Defesa, +20 Vitalidade.
+- **4 Peças (Corpo de Rocha):** +450 HP, +20% Resistência a Atordoamento.
+- **5 Peças (Força da Terra):** +50 Defesa, +25 Regeneração de HP.
+- **6 Peças (Colosso Inabalável):** +90 Defesa, +600 HP, +30% Resistência Geral, +30 Regeneração de HP.
 
 ---
 
-## 3. Sistema de Cash Offline (Teto Estrito de 24h)
+## 3. Origens dos Drops (Concentrados vs Distribuídos)
 
-Para incentivar a progressão sem depender de microtransações, o sistema recompensa o tempo em que o jogo esteve fechado:
-
-- **Mecanismo:** Abertura e encerramento gravam o timestamp UNIX (segundos desde a época) no sidecar `economy-v1.txt`.
-- **Taxa de Ganho:** 1 Crédito de Cash a cada **1.800 segundos (30 minutos)** offline.
-- **Teto Estrito:** O acúmulo é limitado a **no máximo 86.400 segundos (24 horas)**, gerando no máximo **48 Cash** por período inativo. Tempos maiores (ex: 48h, 7 dias, 1 mês) permanecem rigorosamente travados no teto de 48 Cash.
-- **Proteção Anti-Cheat:** Relógio do sistema manipulado para trás não credita valores negativos nem inválidos.
-- **Crédito no Motor Nativo:** O valor calculado é creditado diretamente via chamada nativa ARM à função exportada `setMyCash(novo_saldo)`.
+Para enriquecer as rotas de farm e o endgame:
+- **Sets Concentrados:** Destinados ao jogador que deseja focar em um chefe específico para completar todo o equipamento (ex: Set do Dragão em Diablo/Lava Guardian e Set do Guardião no Dungeon Guardian).
+- **Sets Distribuídos:** Peças divididas entre chefes regionais e monstros elites espalhados pelo mundo, estimulando a exploração e a caça por todo o mapa.
 
 ---
 
-## 4. Garantia de Saves e Assets
+## 4. Economia de Cash Calibrada e Missões Épicas
 
-- **Saves `save*.dat` 100% Intocados:** Nenhum byte dos arquivos binários originais é modificado para a economia, mantendo a compatibilidade plena com o Google Drive e versões anteriores.
-- **Assets 100% Originais:** Nenhuma textura ou sprite externa é exigida.
-- **Compatibilidade Multiplataforma:** As implementações em C++ e JavaScript/ESM são espelhadas e validadas por suítes completas de testes automatizados.
+### Calibração com a Loja Original (`item_en.gdt`)
+Na loja nativa do Destinia, itens premium (`f12 == 0`, como Celestial Backpacks, Baús Raros, Pedras de Forja e Pergaminhos de Reset) custam exatamente **20 Cash**. A economia foi calibrada para permitir a conquista justa destes utilitários pelo gameplay:
+
+### 1. Ganho de Cash Offline (Teto Estrito de 24h)
+- **Taxa:** 1 Cash a cada **1.800 segundos (30 minutos)** offline.
+- **Teto Estrito de 24 Horas:** Máximo absoluto de **48 Cash por ciclo** (equivalente a comprar ~2 itens da loja premium por dia de ausência).
+- **Proteção Anti-Fraude:** Proteção contra manipulação de relógio do sistema.
+
+### 2. Missões Épicas de Cash (Marcos de Conquista)
+Recompensas pontuais por conquistas lendárias na conta:
+
+| ID da Missão | Título | Objetivo | Recompensa | Poder de Compra na Loja |
+| :--- | :--- | :--- | :---: | :--- |
+| `boss_slayer_10` | **Matador de Chefes I** | Derrotar 10 chefes de masmorras | **25 Cash** | 1 item premium (ex: Mochila) |
+| `boss_slayer_25` | **Matador de Chefes II** | Derrotar 25 chefes em sua jornada | **50 Cash** | 2 itens premium |
+| `boss_slayer_50` | **Conquistador de Masmorras** | Derrotar 50 chefes lendários | **75 Cash** | 3 itens premium |
+| `boss_slayer_100` | **Lenda dos Chefes** | Derrotar 100 chefes supremos | **100 Cash** | 5 itens premium de reset/baús |
+| `full_set_equipped` | **Conjunto Perfeito** | Equipar as 6 peças de um set lendário | **50 Cash** | 2 itens premium |
+
+O total de Cash resgatável através de Missões Épicas é de **300 Cash**, além do fluxo diário offline.
+
+---
+
+## 5. Garantia de Saves, Integridade e Retrocompatibilidade
+
+- **Saves Binários Intocados:** Nenhum arquivo `save*.dat` é tocado.
+- **Codec DESTINIA_ECONOMY_2:** Armazena timestamps, cash offline concedido, cash de missões, drops e kills por chefe de forma atômica e segura.
+- **Retrocompatibilidade:** O leitor aceita tanto o formato legado `DESTINIA_ECONOMY_1` quanto o atualizado `DESTINIA_ECONOMY_2`.

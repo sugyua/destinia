@@ -1,5 +1,5 @@
 // Meta 0.10 - Frente 2: Sistemas de Loot e Economia
-// Drops de Boss exclusivos, Sets de Equipamento e Cash Offline
+// Drops de Boss exclusivos, Sets de Equipamento (2..6 peças), Origens de Drop e Economia de Cash por Missões
 
 export const MAX_OFFLINE_SECONDS = 86400; // 24 Horas Estritas (60*60*24)
 export const DEFAULT_OFFLINE_CASH_INTERVAL = 1800; // 1 Cash a cada 30 min (máx 48 Cash em 24h)
@@ -151,132 +151,96 @@ export function findBossDrop(species) {
   return bossDropCatalog.find(b => b.species === species) || null;
 }
 
+export const SetDropSourceType = Object.freeze({
+  Concentrated: 'Concentrated',
+  Distributed: 'Distributed'
+});
+
 export const equipmentSetCatalog = [
   {
     id: 'dragon',
     namePt: 'Set do Dragao',
     nameEn: 'Dragon Set',
     patterns: ['dragao', 'dragon'],
-    bonus2: {
-      piecesRequired: 2,
-      namePt: 'Furia Draconica Menor',
-      nameEn: 'Lesser Dragon Fury',
-      descPt: '+25 Ataque, +15 Forca',
-      descEn: '+25 Attack, +15 Strength',
-      atk: 25,
-      str: 15
-    },
-    bonus4: {
-      piecesRequired: 4,
-      namePt: 'Poder Draconico Ancestral',
-      nameEn: 'Ancient Dragon Power',
-      descPt: '+60 Ataque, +30 Forca, +10% Dano Critico, +200 HP',
-      descEn: '+60 Attack, +30 Strength, +10% Crit Damage, +200 HP',
-      atk: 60,
-      str: 30,
-      critDmg: 10,
-      hp: 200
-    }
+    dropType: 'Concentrated',
+    primaryBoss: 108,
+    bossSources: [108, 109],
+    eliteSource: false,
+    farmRoutePt: 'Drop Concentrado: As 6 pecas caem exclusivamente de Diablo e Lava Guardian.',
+    farmRouteEn: 'Concentrated Drop: All 6 pieces drop exclusively from Diablo and Lava Guardian.',
+    bonus2: { piecesRequired: 2, namePt: 'Garras Draconicas', nameEn: 'Dragon Claws', descPt: '+30 Ataque, +20 Forca', descEn: '+30 Attack, +20 Strength', atk: 30, str: 20 },
+    bonus3: { piecesRequired: 3, namePt: 'Escamas de Dragao', nameEn: 'Dragon Scales', descPt: '+35 Defesa, +150 HP', descEn: '+35 Defense, +150 HP', def: 35, hp: 150 },
+    bonus4: { piecesRequired: 4, namePt: 'Coracao Draconico', nameEn: 'Dragon Heart', descPt: '+300 HP, +15% Dano Critico', descEn: '+300 HP, +15% Crit Damage', hp: 300, critDmg: 15 },
+    bonus5: { piecesRequired: 5, namePt: 'Olhar do Dragao', nameEn: 'Dragon Gaze', descPt: '+10% Chance Critica, +35 Forca', descEn: '+10% Crit Chance, +35 Strength', str: 35, critChance: 10 },
+    bonus6: { piecesRequired: 6, namePt: 'Furia Draconica Suprema', nameEn: 'Supreme Dragon Fury', descPt: '+100 Ataque, +50 Forca, +25% Dano Critico, +500 HP', descEn: '+100 Attack, +50 Strength, +25% Crit Damage, +500 HP', atk: 100, str: 50, critDmg: 25, hp: 500 }
   },
   {
     id: 'shadow',
     namePt: 'Set Sombrio',
     nameEn: 'Shadow Set',
     patterns: ['sombri', 'shadow', 'sombra'],
-    bonus2: {
-      piecesRequired: 2,
-      namePt: 'Manto Noturno',
-      nameEn: 'Night Shroud',
-      descPt: '+20 Evasao, +15 Destreza',
-      descEn: '+20 Evasion, +15 Dexterity',
-      evasion: 20,
-      dex: 15
-    },
-    bonus4: {
-      piecesRequired: 4,
-      namePt: 'Mestre das Sombras',
-      nameEn: 'Shadow Master',
-      descPt: '+40 Evasao, +30 Destreza, +12% Critico, +10% Vampirismo',
-      descEn: '+40 Evasion, +30 Dexterity, +12% Crit, +10% Lifesteal',
-      evasion: 40,
-      dex: 30,
-      critChance: 12,
-      lifeSteal: 10
-    }
+    dropType: 'Distributed',
+    primaryBoss: -1,
+    bossSources: [101, 102, 103, 104],
+    eliteSource: true,
+    farmRoutePt: 'Drop Distribuido: Pecas espalhadas entre Defcan, Salas, Sileth e Monstros Elites.',
+    farmRouteEn: 'Distributed Drop: Pieces spread across Defcan, Salas, Sileth and Elite Monsters.',
+    bonus2: { piecesRequired: 2, namePt: 'Passos das Sombras', nameEn: 'Shadow Steps', descPt: '+25 Evasao, +20 Destreza', descEn: '+25 Evasion, +20 Dexterity', evasion: 25, dex: 20 },
+    bonus3: { piecesRequired: 3, namePt: 'Capa da Meia-Noite', nameEn: 'Midnight Cloak', descPt: '+25 Defesa, +15 Destreza', descEn: '+25 Defense, +15 Dexterity', def: 25, dex: 15 },
+    bonus4: { piecesRequired: 4, namePt: 'Golpe Furtivo', nameEn: 'Stealth Strike', descPt: '+250 HP, +10% Chance Critica', descEn: '+250 HP, +10% Crit Chance', hp: 250, critChance: 10 },
+    bonus5: { piecesRequired: 5, namePt: 'Lamina Oculta', nameEn: 'Hidden Blade', descPt: '+20% Dano Critico, +10% Vampirismo', descEn: '+20% Crit Damage, +10% Lifesteal', critDmg: 20, lifeSteal: 10 },
+    bonus6: { piecesRequired: 6, namePt: 'Avatar das Sombras', nameEn: 'Shadow Avatar', descPt: '+60 Evasao, +50 Destreza, +15% Critico, +15% Vampirismo', descEn: '+60 Evasion, +50 Dexterity, +15% Crit, +15% Lifesteal', evasion: 60, dex: 50, critChance: 15, lifeSteal: 15 }
   },
   {
     id: 'imperial',
     namePt: 'Set Imperial',
     nameEn: 'Imperial Set',
     patterns: ['imperial', 'kaiser'],
-    bonus2: {
-      piecesRequired: 2,
-      namePt: 'Vontade de Ferro',
-      nameEn: 'Iron Will',
-      descPt: '+30 Defesa, +15 Vitalidade',
-      descEn: '+30 Defense, +15 Vitality',
-      def: 30,
-      vit: 15
-    },
-    bonus4: {
-      piecesRequired: 4,
-      namePt: 'Soberania Absoluta',
-      nameEn: 'Absolute Sovereignty',
-      descPt: '+70 Defesa, +35 Vitalidade, +350 HP, +15% Reducao de Dano',
-      descEn: '+70 Defense, +35 Vitality, +350 HP, +15% Damage Reduction',
-      def: 70,
-      vit: 35,
-      hp: 350
-    }
+    dropType: 'Distributed',
+    primaryBoss: -1,
+    bossSources: [106, 107],
+    eliteSource: true,
+    farmRoutePt: 'Drop Distribuido: Pecas obtidas de Kaiser, Baramos e Masmorras de Elite.',
+    farmRouteEn: 'Distributed Drop: Pieces obtained from Kaiser, Baramos and Elite Dungeons.',
+    bonus2: { piecesRequired: 2, namePt: 'Vontade Soberana', nameEn: 'Sovereign Will', descPt: '+35 Defesa, +20 Vitalidade', descEn: '+35 Defense, +20 Vitality', def: 35, vit: 20 },
+    bonus3: { piecesRequired: 3, namePt: 'Guarda Imperial', nameEn: 'Imperial Guard', descPt: '+30 Defesa, +200 HP', descEn: '+30 Defense, +200 HP', def: 30, hp: 200 },
+    bonus4: { piecesRequired: 4, namePt: 'Bastiao Imperial', nameEn: 'Imperial Bastion', descPt: '+400 HP, +15% Reducao de Dano', descEn: '+400 HP, +15% Damage Reduction', def: 40, hp: 400 },
+    bonus5: { piecesRequired: 5, namePt: 'Linhagem Real', nameEn: 'Royal Lineage', descPt: '+35 Vitalidade, +20 Regeneracao de HP', descEn: '+35 Vitality, +20 HP Regen', vit: 35, hp: 200 },
+    bonus6: { piecesRequired: 6, namePt: 'Soberania Absoluta', nameEn: 'Absolute Sovereignty', descPt: '+100 Defesa, +50 Vitalidade, +600 HP, +25% Reducao de Dano', descEn: '+100 Defense, +50 Vitality, +600 HP, +25% Damage Reduction', def: 100, vit: 50, hp: 600 }
   },
   {
     id: 'arcane',
     namePt: 'Set Arcano',
     nameEn: 'Arcane Set',
     patterns: ['arcan', 'arcane', 'mago', 'mage'],
-    bonus2: {
-      piecesRequired: 2,
-      namePt: 'Fluxo Etereo',
-      nameEn: 'Ethereal Flow',
-      descPt: '+30 Inteligencia, +120 MP',
-      descEn: '+30 Intelligence, +120 MP',
-      intStat: 30,
-      mp: 120
-    },
-    bonus4: {
-      piecesRequired: 4,
-      namePt: 'Conhecimento Primordial',
-      nameEn: 'Primordial Knowledge',
-      descPt: '+65 Inteligencia, +250 MP, -20% Custo MP',
-      descEn: '+65 Intelligence, +250 MP, -20% MP Cost',
-      intStat: 65,
-      mp: 250,
-      mpCostReduction: 20
-    }
+    dropType: 'Distributed',
+    primaryBoss: -1,
+    bossSources: [103, 104],
+    eliteSource: true,
+    farmRoutePt: 'Drop Distribuido: Pecas dropadas por Defcan Desperto, Sileth e Elites Magicos.',
+    farmRouteEn: 'Distributed Drop: Pieces dropped by Awakened Defcan, Sileth and Magic Elites.',
+    bonus2: { piecesRequired: 2, namePt: 'Chama Arcana', nameEn: 'Arcane Flame', descPt: '+35 Inteligencia, +150 MP', descEn: '+35 Intelligence, +150 MP', intStat: 35, mp: 150 },
+    bonus3: { piecesRequired: 3, namePt: 'Escudo Magico', nameEn: 'Magic Shield', descPt: '+25 Defesa, +150 MP', descEn: '+25 Defense, +150 MP', def: 25, mp: 150 },
+    bonus4: { piecesRequired: 4, namePt: 'Mente Transcendente', nameEn: 'Transcendent Mind', descPt: '+350 MP, -20% Custo de MP', descEn: '+350 MP, -20% MP Cost', mp: 350, mpCostReduction: 20 },
+    bonus5: { piecesRequired: 5, namePt: 'Foco Prismatico', nameEn: 'Prismatic Focus', descPt: '+12% Chance Critica Magica, +40 Inteligencia', descEn: '+12% Magic Crit Chance, +40 Intelligence', intStat: 40, critChance: 12 },
+    bonus6: { piecesRequired: 6, namePt: 'Arquimago Supremo', nameEn: 'Supreme Archmage', descPt: '+80 Inteligencia, +500 MP, -35% Custo de MP em Habilidades', descEn: '+80 Intelligence, +500 MP, -35% MP Cost on Skills', intStat: 80, mp: 500, mpCostReduction: 35 }
   },
   {
     id: 'guardian',
     namePt: 'Set do Guardiao',
     nameEn: 'Guardian Set',
     patterns: ['guardiao', 'guardian'],
-    bonus2: {
-      piecesRequired: 2,
-      namePt: 'Bastiao Protetor',
-      nameEn: 'Protective Bastion',
-      descPt: '+25 Defesa, +150 HP',
-      descEn: '+25 Defense, +150 HP',
-      def: 25,
-      hp: 150
-    },
-    bonus4: {
-      piecesRequired: 4,
-      namePt: 'Fortaleza Viva',
-      nameEn: 'Living Fortress',
-      descPt: '+60 Defesa, +300 HP, +20% Resistencia',
-      descEn: '+60 Defense, +300 HP, +20% Resistance',
-      def: 60,
-      hp: 300
-    }
+    dropType: 'Concentrated',
+    primaryBoss: 100,
+    bossSources: [100],
+    eliteSource: false,
+    farmRoutePt: 'Drop Concentrado: As 6 pecas caem 100% exclusivamente do Dungeon Guardian.',
+    farmRouteEn: 'Concentrated Drop: All 6 pieces drop 100% exclusively from Dungeon Guardian.',
+    bonus2: { piecesRequired: 2, namePt: 'Muralha de Pedra', nameEn: 'Stone Wall', descPt: '+35 Defesa, +200 HP', descEn: '+35 Defense, +200 HP', def: 35, hp: 200 },
+    bonus3: { piecesRequired: 3, namePt: 'Escudo de Granito', nameEn: 'Granite Shield', descPt: '+30 Defesa, +20 Vitalidade', descEn: '+30 Defense, +20 Vitality', def: 30, vit: 20 },
+    bonus4: { piecesRequired: 4, namePt: 'Corpo de Rocha', nameEn: 'Body of Rock', descPt: '+450 HP, +20% Resistencia a Atordoamento', descEn: '+450 HP, +20% Stun Resistance', hp: 450 },
+    bonus5: { piecesRequired: 5, namePt: 'Forca da Terra', nameEn: 'Strength of Earth', descPt: '+50 Defesa, +25 Regeneracao de HP', descEn: '+50 Defense, +25 HP Regen', def: 50, hp: 150 },
+    bonus6: { piecesRequired: 6, namePt: 'Colosso Inabalavel', nameEn: 'Unshakable Colossus', descPt: '+90 Defesa, +600 HP, +30% Resistencia Geral, +30 Regeneracao de HP', descEn: '+90 Defense, +600 HP, +30% Overall Resistance, +30 HP Regen', def: 90, hp: 600 }
   }
 ];
 
@@ -303,19 +267,26 @@ export function evaluateActiveSets(equippedNames) {
     const count = counts[i];
     if (count >= 2) {
       const set = equipmentSetCatalog[i];
-      const activeBonuses = [set.bonus2];
-      let bonus4Active = false;
-      if (count >= 4) {
-        bonus4Active = true;
-        activeBonuses.push(set.bonus4);
-      }
+      const activeBonuses = [];
+      let bonus2Active = false, bonus3Active = false, bonus4Active = false, bonus5Active = false, bonus6Active = false;
+      if (count >= 2) { bonus2Active = true; activeBonuses.push(set.bonus2); }
+      if (count >= 3) { bonus3Active = true; activeBonuses.push(set.bonus3); }
+      if (count >= 4) { bonus4Active = true; activeBonuses.push(set.bonus4); }
+      if (count >= 5) { bonus5Active = true; activeBonuses.push(set.bonus5); }
+      if (count >= 6) { bonus6Active = true; activeBonuses.push(set.bonus6); }
       summaries.push({
         setId: set.id,
         setNamePt: set.namePt,
         setNameEn: set.nameEn,
+        dropType: set.dropType,
+        farmRoutePt: set.farmRoutePt,
+        farmRouteEn: set.farmRouteEn,
         piecesEquipped: count,
-        bonus2Active: true,
+        bonus2Active,
+        bonus3Active,
         bonus4Active,
+        bonus5Active,
+        bonus6Active,
         activeBonuses
       });
     }
@@ -334,12 +305,68 @@ export function calculateOfflineCash(lastTimestamp, currentTimestamp, intervalSe
   return { cashToCredit, elapsedSeconds, cappedSeconds, capped };
 }
 
+export const epicMissionsCatalog = [
+  {
+    id: 'boss_slayer_10',
+    titlePt: 'Matador de Chefes I',
+    titleEn: 'Boss Slayer I',
+    descPt: 'Derrote 10 chefes de qualquer masmorra.',
+    descEn: 'Defeat 10 dungeon bosses.',
+    targetType: 'BossKills',
+    targetCount: 10,
+    cashReward: 25
+  },
+  {
+    id: 'boss_slayer_25',
+    titlePt: 'Matador de Chefes II',
+    titleEn: 'Boss Slayer II',
+    descPt: 'Derrote 25 chefes em sua jornada.',
+    descEn: 'Defeat 25 dungeon bosses.',
+    targetType: 'BossKills',
+    targetCount: 25,
+    cashReward: 50
+  },
+  {
+    id: 'boss_slayer_50',
+    titlePt: 'Conquistador de Masmorras',
+    titleEn: 'Dungeon Conqueror',
+    descPt: 'Derrote 50 chefes lendarios.',
+    descEn: 'Defeat 50 legendary bosses.',
+    targetType: 'BossKills',
+    targetCount: 50,
+    cashReward: 75
+  },
+  {
+    id: 'boss_slayer_100',
+    titlePt: 'Lenda dos Chefes',
+    titleEn: 'Boss Legend',
+    descPt: 'Derrote 100 chefes supremos do jogo.',
+    descEn: 'Defeat 100 supreme bosses of the game.',
+    targetType: 'BossKills',
+    targetCount: 100,
+    cashReward: 100
+  },
+  {
+    id: 'full_set_equipped',
+    titlePt: 'Conjunto Perfeito',
+    titleEn: 'Flawless Set',
+    descPt: 'Equipe as 6 pecas de um conjunto de equipamento lendario.',
+    descEn: 'Equip all 6 pieces of a legendary equipment set.',
+    targetType: 'FullSetEquipped',
+    targetCount: 6,
+    cashReward: 50
+  }
+];
+
 export class LootEconomy {
   constructor() {
     this.characterSlot = 0;
     this.lastTimestamp = 0;
     this.totalOfflineCashAwarded = 0;
+    this.totalMissionCashAwarded = 0;
     this.bossDrops = new Map(); // `${slot}:${species}` -> count
+    this.bossKills = new Map(); // `${slot}:${species}` -> count
+    this.completedMissions = new Set(); // `${slot}:${missionId}`
   }
 
   select(slot) {
@@ -351,11 +378,45 @@ export class LootEconomy {
     if (slot < 0 || slot > 9) throw Error('PERSONAGEM INVALIDO');
     if (species < 100 || species > 109) return;
     const key = `${slot}:${species}`;
+    this.bossKills.set(key, (this.bossKills.get(key) || 0) + 1);
     this.bossDrops.set(key, (this.bossDrops.get(key) || 0) + 1);
   }
 
   getBossDropCount(slot, species) {
     return this.bossDrops.get(`${slot}:${species}`) || 0;
+  }
+
+  getBossKillCount(slot, species) {
+    return this.bossKills.get(`${slot}:${species}`) || 0;
+  }
+
+  getTotalBossKills(slot) {
+    let total = 0;
+    for (let sp = 100; sp <= 109; sp++) {
+      total += this.bossKills.get(`${slot}:${sp}`) || 0;
+    }
+    return total;
+  }
+
+  checkAndClaimEpicMissions(slot, maxSetPiecesEquipped = 0) {
+    let claimedCash = 0;
+    const kills = this.getTotalBossKills(slot);
+    for (const mission of epicMissionsCatalog) {
+      const key = `${slot}:${mission.id}`;
+      if (this.completedMissions.has(key)) continue;
+      let completed = false;
+      if (mission.targetType === 'BossKills') {
+        completed = kills >= mission.targetCount;
+      } else if (mission.targetType === 'FullSetEquipped') {
+        completed = maxSetPiecesEquipped >= mission.targetCount;
+      }
+      if (completed) {
+        this.completedMissions.add(key);
+        claimedCash += mission.cashReward;
+        this.totalMissionCashAwarded += mission.cashReward;
+      }
+    }
+    return claimedCash;
   }
 
   processOfflineCash(nowTimestamp, intervalSeconds = DEFAULT_OFFLINE_CASH_INTERVAL) {
@@ -368,12 +429,21 @@ export class LootEconomy {
   }
 
   encode() {
-    let out = 'DESTINIA_ECONOMY_1\n';
+    let out = 'DESTINIA_ECONOMY_2\n';
     out += `timestamp ${this.lastTimestamp}\n`;
-    out += `total_cash ${this.totalOfflineCashAwarded}\n`;
+    out += `total_offline_cash ${this.totalOfflineCashAwarded}\n`;
+    out += `total_mission_cash ${this.totalMissionCashAwarded}\n`;
     for (const [key, count] of this.bossDrops.entries()) {
       const [slot, species] = key.split(':');
       out += `drop ${slot} ${species} ${count}\n`;
+    }
+    for (const [key, count] of this.bossKills.entries()) {
+      const [slot, species] = key.split(':');
+      out += `kill ${slot} ${species} ${count}\n`;
+    }
+    for (const key of this.completedMissions) {
+      const [slot, missionId] = key.split(':');
+      out += `mission ${slot} ${missionId}\n`;
     }
     return out;
   }
@@ -383,12 +453,16 @@ export class LootEconomy {
       throw Error('SIDECAR INVALIDO');
     }
     const lines = text.split(/\r?\n/);
-    if (lines[0] !== 'DESTINIA_ECONOMY_1') {
+    if (lines[0] !== 'DESTINIA_ECONOMY_1' && lines[0] !== 'DESTINIA_ECONOMY_2') {
       throw Error('FORMATO DE ECONOMIA DESCONHECIDO');
     }
     let nextTimestamp = 0;
-    let nextCash = 0;
+    let nextOfflineCash = 0;
+    let nextMissionCash = 0;
     const nextDrops = new Map();
+    const nextKills = new Map();
+    const nextMissions = new Set();
+
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) continue;
@@ -396,8 +470,10 @@ export class LootEconomy {
       const tag = parts[0];
       if (tag === 'timestamp') {
         nextTimestamp = parseInt(parts[1], 10) || 0;
-      } else if (tag === 'total_cash') {
-        nextCash = parseInt(parts[1], 10) || 0;
+      } else if (tag === 'total_cash' || tag === 'total_offline_cash') {
+        nextOfflineCash = parseInt(parts[1], 10) || 0;
+      } else if (tag === 'total_mission_cash') {
+        nextMissionCash = parseInt(parts[1], 10) || 0;
       } else if (tag === 'drop') {
         const slot = parseInt(parts[1], 10);
         const species = parseInt(parts[2], 10);
@@ -405,10 +481,26 @@ export class LootEconomy {
         if (slot >= 0 && slot <= 9 && species >= 100 && species <= 109 && count >= 0) {
           nextDrops.set(`${slot}:${species}`, count);
         }
+      } else if (tag === 'kill') {
+        const slot = parseInt(parts[1], 10);
+        const species = parseInt(parts[2], 10);
+        const count = parseInt(parts[3], 10);
+        if (slot >= 0 && slot <= 9 && species >= 100 && species <= 109 && count >= 0) {
+          nextKills.set(`${slot}:${species}`, count);
+        }
+      } else if (tag === 'mission') {
+        const slot = parseInt(parts[1], 10);
+        const missionId = parts[2];
+        if (slot >= 0 && slot <= 9 && missionId) {
+          nextMissions.add(`${slot}:${missionId}`);
+        }
       }
     }
     this.lastTimestamp = nextTimestamp;
-    this.totalOfflineCashAwarded = nextCash;
+    this.totalOfflineCashAwarded = nextOfflineCash;
+    this.totalMissionCashAwarded = nextMissionCash;
     this.bossDrops = nextDrops;
+    this.bossKills = nextKills;
+    this.completedMissions = nextMissions;
   }
 }

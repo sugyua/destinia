@@ -428,7 +428,8 @@ Se quiser ajudar no projeto, entre em contato comigo pelo WhatsApp: [+55 21 9746
 
 ### Sistemas de Loot e Economia (Meta 0.10 — Frente 2)
 
-- **Drops Exclusivos de Boss:** 10 itens lendários exclusivos para cada chefe (`species >= 100`), integrados aos detalhes do Códex e registrados em sidecar.
-- **Sets de Equipamento:** 5 conjuntos (Dragão, Sombrio, Imperial, Arcano, Guardião) com bônus ao equipar 2 e 4 peças.
-- **Cash Offline:** Ganho automático de 1 Cash a cada 30 minutos offline via timestamp, com teto máximo estrito de 24 horas (48 Cash).
-- **Saves:** Saves originais `save*.dat` 100% intocados (persistência atômica em `economy-v1.txt`). Detalhes em [LOOT_ECONOMY.md](docs/LOOT_ECONOMY.md).
+- **Drops Exclusivos de Boss:** 10 itens lendários exclusivos para cada chefe (species >= 100), integrados aos detalhes do Códex e registrados em sidecar.
+- **Sets de Equipamento Expandidos:** 5 conjuntos temáticos com bônus progressivos cumulativos para **2, 3, 4, 5 e 6 peças equipadas** (2: ATK/DEF, 3: DEF/HP, 4: HP/CritDmg/Resistências, 5: Crítico/Evasão/Atributos, 6: Bônus Supremo de Set).
+- **Origens de Drops:** Categorização em **Sets Concentrados** (ex: Set do Dragão em Diablo/Lava Guardian e Set do Guardião no Dungeon Guardian) e **Sets Distribuídos** (peças espalhadas entre chefes regionais e monstros elites do mapa).
+- **Economia de Cash e Missões Épicas:** Ganho automático de 1 Cash a cada 30 minutos offline (teto de 24h = 48 Cash) e recompensas de Cash por Missões Épicas de marcos de chefes e conjunto completo (10, 25, 50 e 100 boss kills, set de 6 peças), calibradas com a loja original (item_en.gdt ~20 Cash por item premium).
+- **Saves:** Saves originais save*.dat 100% intocados (persistência atômica segura no sidecar DESTINIA_ECONOMY_2 / economy-v1.txt). Detalhes em [LOOT_ECONOMY.md](docs/LOOT_ECONOMY.md).

@@ -20,7 +20,13 @@ inline void initLootEconomy(const std::string& directory) {
   }
 }
 
-inline void lootEconomyOnBossKilled(const std::string& directory, int slot, int species) {
+inline void lootEconomyOnBossKilled(
+    const std::string& directory,
+    int slot,
+    int species,
+    u32 fnGetCash = 0,
+    u32 fnSetCash = 0,
+    const std::function<bool(u32, const std::vector<u32>&, u32*)>& callFn = nullptr) {
   if (species < 100 || species > 109) return;
   lootEconomy.recordBossKill(slot, species);
   const auto* drop = findBossDrop(species);
@@ -28,10 +34,21 @@ inline void lootEconomyOnBossKilled(const std::string& directory, int slot, int 
     hostReport("[boss drop] Chefe derrotado: %s (species %d)! Drop exclusivo: %s\n",
                drop->bossName.c_str(), species, drop->namePt.c_str());
   }
+  // Avaliar Missões Épicas de Cash
+  int missionCash = lootEconomy.checkAndClaimEpicMissions(slot);
+  if (missionCash > 0 && fnGetCash && fnSetCash && callFn) {
+    u32 cur = 0;
+    if (callFn(fnGetCash, {}, &cur)) {
+      u32 nextCash = cur + u32(missionCash);
+      callFn(fnSetCash, {nextCash}, nullptr);
+      hostReport("[economia] Missao Epica concluida! +%d Cash creditados (novo saldo: %u Cash).\n",
+                 missionCash, nextCash);
+    }
+  }
   try {
     saveLootEconomy(fs::path(directory), lootEconomy);
   } catch (const std::exception& e) {
-    hostReport("[economia] Erro salvando boss drop: %s\n", e.what());
+    hostReport("[economia] Erro salvando boss drop / missoes: %s\n", e.what());
   }
 }
 
