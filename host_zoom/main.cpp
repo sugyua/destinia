@@ -1251,6 +1251,22 @@ static int runHost(int argc, char** argv) {
   if(saveDir.empty()) saveDir=destinia::modeSaveDir(destinia::configuredSaveDir(),preferences.gameMode).string();
   saveDir=fs::absolute(saveDir).lexically_normal().string();
   hostReport("[host] Save compartilhado: %s\n",saveDir.c_str());
+  if (!fs::exists(gameDir + "/lib/armeabi/libdestinia_jni.so")) {
+    if (fs::exists("game/lib/armeabi/libdestinia_jni.so")) {
+      gameDir = "game";
+    } else if (fs::exists("./game/lib/armeabi/libdestinia_jni.so")) {
+      gameDir = "./game";
+    } else if (fs::exists("../game/lib/armeabi/libdestinia_jni.so")) {
+      gameDir = "../game";
+    } else if (argc > 0 && argv[0]) {
+      fs::path exeDir = fs::absolute(argv[0]).parent_path();
+      if (fs::exists(exeDir / "game" / "lib" / "armeabi" / "libdestinia_jni.so")) {
+        gameDir = (exeDir / "game").string();
+      } else if (fs::exists(exeDir / ".." / "game" / "lib" / "armeabi" / "libdestinia_jni.so")) {
+        gameDir = (exeDir / ".." / "game").string();
+      }
+    }
+  }
   if (soPath.empty()) soPath = gameDir + "/lib/armeabi/libdestinia_jni.so";
   assetsDir = gameDir + "/assets";
   fs::create_directories(saveDir);

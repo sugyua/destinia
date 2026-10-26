@@ -31,4 +31,9 @@ for target in "${targets[@]}"; do
     result=$?; printf 'Falha na compilacao de %s. Confira o erro acima.\n' "$target" >&2; exit "$result"
   fi
   printf 'Compilacao concluida: %s/build/destinia_host.exe\n' "$target"
+  if [[ "$target" == "host" ]]; then
+    cp -f host/build/destinia_host.exe Destinia.exe 2>/dev/null || true
+  elif [[ "$target" == "host_zoom" ]]; then
+    cp -f host_zoom/build/destinia_host.exe "Destinia Zoom.exe" 2>/dev/null || true
+  fi
 done
