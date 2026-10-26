@@ -57,6 +57,28 @@ inline uint32_t statAtLevel(uint32_t level,const StatCurve& curve){
  return checkedU32(checkedAdd(checkedAdd(curve.base,checkedMul(curve.linear,n)),checkedMul(curve.quadratic,n*n)/curve.divisor));
 }
 struct Multipliers {uint32_t hp=Basis,attack=Basis,xp=Basis,gold=Basis;};
+// Incremental bonus at 2,3,4,5,6 pieces, respectively. Zero configuration is neutral.
+// SetCurve is generic: callers can use it for DEF/STR/VIT/etc. as well as HP.
+struct SetCurve {std::array<uint32_t,5> bonusBps{};};
+struct SetBonusTable {
+ std::array<Multipliers,5> bonusBps;
+ SetBonusTable(){for(auto& tier:bonusBps)tier={0,0,0,0};}
+};
+inline uint32_t setMultiplier(uint32_t equippedPieces,const SetCurve& curve){
+ require(equippedPieces<=6,"set pieces outside 0..6");uint64_t result=Basis;
+ for(uint32_t threshold=2;threshold<=equippedPieces;++threshold)result=checkedAdd(result,curve.bonusBps[threshold-2]);
+ return checkedU32(result);
+}
+inline Multipliers setMultipliers(uint32_t equippedPieces,const SetBonusTable& table){
+ SetCurve hp,attack,xp,gold;
+ for(unsigned i=0;i<5;++i){hp.bonusBps[i]=table.bonusBps[i].hp;attack.bonusBps[i]=table.bonusBps[i].attack;xp.bonusBps[i]=table.bonusBps[i].xp;gold.bonusBps[i]=table.bonusBps[i].gold;}
+ return {setMultiplier(equippedPieces,hp),setMultiplier(equippedPieces,attack),setMultiplier(equippedPieces,xp),setMultiplier(equippedPieces,gold)};
+}
+inline uint32_t composeMultiplier(uint32_t left,uint32_t right){return checkedU32(scale(left,right));}
+inline Multipliers composeMultipliers(const Multipliers& left,const Multipliers& right){
+ return {composeMultiplier(left.hp,right.hp),composeMultiplier(left.attack,right.attack),composeMultiplier(left.xp,right.xp),composeMultiplier(left.gold,right.gold)};
+}
+inline uint32_t scaledStat(uint32_t base,uint32_t basisPoints){return checkedU32(scale(base,basisPoints));}
 struct Rules {
  std::array<Multipliers,5> profiles{{{10000,10000,10000,10000},{15000,15000,13000,13000},{25000,25000,18000,18000},{40000,40000,25000,25000},{60000,60000,40000,40000}}};
  // Linear growth per cycle, configurable; no campaign reset is performed here.

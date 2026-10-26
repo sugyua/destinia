@@ -28,6 +28,21 @@ export function statAtLevel(value,{base=0,linear=0,quadratic=0,divisor=1}={}){
  const result=checkedAdd(checkedAdd(BigInt(base),checkedMul(BigInt(linear),n)),checkedMul(BigInt(quadratic),n*n)/BigInt(divisor));require(result<=0xffffffffn,'stat uint32 overflow');return Number(result);
 }
 const fields=['hp','attack','xp','gold'];
+// Tier entries are incremental bonus basis points at 2,3,4,5,6 pieces.
+export function defaultSetBonusTable(){return {bonusBps:Array.from({length:5},()=>({hp:0,attack:0,xp:0,gold:0}))};}
+export function setMultiplier(equippedPieces,curve){
+ u32(equippedPieces);require(equippedPieces<=6,'set pieces outside 0..6');
+ require(curve&&Array.isArray(curve.bonusBps)&&curve.bonusBps.length===5,'expected five set tiers');for(const bonus of curve.bonusBps)u32(bonus);
+ let result=10000n;for(let threshold=2;threshold<=equippedPieces;++threshold)result=checkedAdd(result,BigInt(curve.bonusBps[threshold-2]));
+ require(result<=0xffffffffn,'set multiplier uint32 overflow');return Number(result);
+}
+export function setMultipliers(equippedPieces,table){
+ require(table&&Array.isArray(table.bonusBps)&&table.bonusBps.length===5,'expected five set tiers');const result={};
+ for(const f of fields)result[f]=setMultiplier(equippedPieces,{bonusBps:table.bonusBps.map(tier=>tier?.[f])});return result;
+}
+export function composeMultiplier(left,right){u32(left);u32(right);const value=scale(BigInt(left),right);require(value<=0xffffffffn,'composed multiplier uint32 overflow');return Number(value);}
+export function composeMultipliers(left,right){return Object.fromEntries(fields.map(f=>[f,composeMultiplier(left[f],right[f])]));}
+export function scaledStat(base,basisPoints){u32(base);const value=scale(BigInt(base),basisPoints);require(value<=0xffffffffn,'stat uint32 overflow');return Number(value);}
 export function defaultRules(){return {profiles:[[10000,10000],[15000,13000],[25000,18000],[40000,25000],[60000,40000]].map(([hp,xp])=>({hp,attack:hp,xp,gold:xp})),ngGrowth:{hp:2500,attack:2500,xp:1000,gold:1000}};}
 function validateRules(rules){
  require(rules&&Array.isArray(rules.profiles)&&rules.profiles.length===5&&rules.ngGrowth,'invalid rules');

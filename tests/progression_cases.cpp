@@ -9,6 +9,8 @@ int main(int argc,char** argv){
   for(uint32_t n=1;n<=999;++n)std::cout<<n<<' '<<unsigned(rankForLevel(n))<<' '<<xpForNextLevel(n)<<' '<<xpToReachLevel(n)<<' '<<statAtLevel(n,{100,3,1,10})<<'\n';
   for(unsigned d=0;d<5;++d)for(uint32_t cycle:{0u,1u,2u,1000u}){auto m=multipliers(Difficulty(d),cycle);std::cout<<d<<' '<<cycle<<' '<<m.hp<<' '<<m.attack<<' '<<m.xp<<' '<<m.gold<<'\n';}
   for(auto value:{uint64_t(0),uint64_t(1),uint64_t(UINT32_MAX),uint64_t(UINT64_MAX)})for(uint32_t bps:{0u,1u,9999u,10000u})std::cout<<value<<' '<<bps<<' '<<scale(value,bps)<<'\n';
+  SetBonusTable sets;for(unsigned i=0;i<5;++i)sets.bonusBps[i]={100u*(i+1),200u*(i+1),50u*(i+1),30u*(i+1)};
+  for(uint32_t pieces=0;pieces<=6;++pieces){const auto m=composeMultipliers(setMultipliers(pieces,sets),multipliers(Difficulty::Abissal,3));std::cout<<pieces<<' '<<setMultiplier(pieces,SetCurve{{500,300,700,1000,1500}})<<' '<<m.hp<<' '<<m.attack<<' '<<m.xp<<' '<<m.gold<<' '<<scaledStat(statAtLevel(999,{100,3,1,10}),m.hp)<<'\n';}
   Ledger sample;sample.characters.emplace(3,Character{xpToReachLevel(999),2,Difficulty::Abissal});std::cout<<encode(sample);return 0;
  }
  assert(xpForNextLevel(1)==29 && xpForNextLevel(99)==1168581);
@@ -37,6 +39,19 @@ int main(int argc,char** argv){
  assert(checkedArmXp(UINT32_MAX)==UINT32_MAX);rejects([]{checkedArmXp(uint64_t(UINT32_MAX)+1);});
  assert(nativeLevelCompatible(99)&&!nativeLevelCompatible(100));
  rejects([]{checkedArmLevel(999);});
+ SetCurve setCurve{{500,300,700,1000,1500}};
+ const uint32_t expectedSet[]={10000,10000,10500,10800,11500,12500,14000};
+ for(uint32_t pieces=0;pieces<=6;++pieces)assert(setMultiplier(pieces,setCurve)==expectedSet[pieces]);
+ rejects([&]{setMultiplier(7,setCurve);});
+ rejects([]{setMultiplier(6,SetCurve{{UINT32_MAX,1,0,0,0}});});
+ assert(setMultiplier(6,SetCurve{})==10000);
+ SetBonusTable setTable;setTable.bonusBps[0]={500,1000,0,0};setTable.bonusBps[4]={1500,2000,100,200};
+ auto set6=setMultipliers(6,setTable);assert(set6.hp==12000&&set6.attack==13000&&set6.xp==10100&&set6.gold==10200);
+ auto composed=composeMultipliers(set6,multipliers(Difficulty::Dificil,2));assert(composed.hp==27000&&composed.attack==29250);
+ assert(scaledStat(statAtLevel(10,{100,10,0,1}),composed.hp)==513);
+ assert(scale(100,composed.xp)==157);
+ assert(composeMultiplier(10000,10000)==10000);
+ rejects([]{composeMultiplier(UINT32_MAX,UINT32_MAX);});rejects([]{scaledStat(UINT32_MAX,10001);});
  assert(importNative(2,1)==xpToReachLevel(2)+1);rejects([]{importNative(100,0);});rejects([]{importNative(99,1);});
  Ledger book;book.mode=Mode::Expanded;book.rules=rules;book.characters.emplace(3,Character{total,2,Difficulty::Abissal});
  const auto encoded=encode(book);assert(encode(decode(encoded,Mode::Expanded))==encoded);

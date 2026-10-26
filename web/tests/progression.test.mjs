@@ -27,6 +27,19 @@ test('versioned sidecar codec: exact decimal integers, strict schema, mode isola
  assert.throws(()=>p.encode({...book,characters:[book.characters[0],book.characters[0]]}));
  assert.throws(()=>p.decode(text.replace(/character 3 /,'character -1 '),'expanded'));
 });
+test('sets accumulate thresholds 2..6 and compose with NG+, rewards and status safely',()=>{
+ const curve={bonusBps:[500,300,700,1000,1500]};
+ assert.deepEqual(Array.from({length:7},(_,pieces)=>p.setMultiplier(pieces,curve)),[10000,10000,10500,10800,11500,12500,14000]);
+ assert.equal(p.setMultiplier(6,{bonusBps:[0,0,0,0,0]}),10000);
+ for(const pieces of [-1,7,2.5,NaN])assert.throws(()=>p.setMultiplier(pieces,curve));
+ for(const bad of [[0,0],[0,0,0,0,0,0],Array(5),[-1,0,0,0,0],[0xffffffff,1,0,0,0]])assert.throws(()=>p.setMultiplier(6,{bonusBps:bad}));
+ const table=p.defaultSetBonusTable();table.bonusBps[0]={hp:500,attack:1000,xp:0,gold:0};table.bonusBps[4]={hp:1500,attack:2000,xp:100,gold:200};
+ const set6=p.setMultipliers(6,table);assert.deepEqual(set6,{hp:12000,attack:13000,xp:10100,gold:10200});
+ const composed=p.composeMultipliers(set6,p.multipliers(p.Difficulty.Dificil,2));assert.equal(composed.hp,27000);assert.equal(composed.attack,29250);
+ assert.equal(p.scaledStat(p.statAtLevel(10,{base:100,linear:10}),composed.hp),513);assert.equal(p.scale(100n,composed.xp),157n);
+ assert.equal(p.composeMultiplier(10000,10000),10000);assert.throws(()=>p.composeMultiplier(0xffffffff,0xffffffff));assert.throws(()=>p.scaledStat(0xffffffff,10001));
+ assert.deepEqual(p.setMultipliers(6,p.defaultSetBonusTable()),{hp:10000,attack:10000,xp:10000,gold:10000});
+});
 test('storage commits require lock, reject stale snapshots and propagate quota errors',async()=>{
  const data=new Map(),storage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};
  let queue=Promise.resolve();const locks={request(_key,fn){const result=queue.then(fn);queue=result.catch(()=>{});return result;}};
@@ -49,6 +62,8 @@ test('C++ and web match all levels, profiles, large integer scaling and serializ
  const lines=[];for(let n=1;n<=999;++n)lines.push(`${n} ${p.rankForLevel(n)} ${p.xpForNextLevel(n)} ${p.xpToReachLevel(n)} ${p.statAtLevel(n,{base:100,linear:3,quadratic:1,divisor:10})}`);
  for(let d=0;d<5;++d)for(const cycle of [0,1,2,1000]){const m=p.multipliers(d,cycle);lines.push(`${d} ${cycle} ${m.hp} ${m.attack} ${m.xp} ${m.gold}`);}
  for(const value of [0n,1n,0xffffffffn,p.U64_MAX])for(const bps of [0,1,9999,10000])lines.push(`${value} ${bps} ${p.scale(value,bps)}`);
+ const sets={bonusBps:Array.from({length:5},(_,i)=>({hp:100*(i+1),attack:200*(i+1),xp:50*(i+1),gold:30*(i+1)}))};
+ for(let pieces=0;pieces<=6;++pieces){const m=p.composeMultipliers(p.setMultipliers(pieces,sets),p.multipliers(p.Difficulty.Abissal,3));lines.push(`${pieces} ${p.setMultiplier(pieces,{bonusBps:[500,300,700,1000,1500]})} ${m.hp} ${m.attack} ${m.xp} ${m.gold} ${p.scaledStat(p.statAtLevel(999,{base:100,linear:3,quadratic:1,divisor:10}),m.hp)}`);}
  const book={mode:'expanded',rules:p.defaultRules(),characters:[{slot:3,totalXp:p.xpToReachLevel(999),ngCycle:2,difficulty:4}]};
  const expected=lines.join('\n')+'\n'+p.encode(book),actual=execFileSync(process.env.PROGRESSION_CPP,['--parity'],{encoding:'utf8'}).replaceAll('\r\n','\n');assert.equal(actual,expected);
 });
