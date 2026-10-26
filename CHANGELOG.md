@@ -4,6 +4,15 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.9.8 Beta — 25/10/2026
+
+- Sistema de Favoritar/Proteger equipamentos (item 15 do backlog): permite alternar status de proteção do equipamento selecionado via botão dedicado ou atalho, com indicador visual claro no painel de filtros e inventário.
+- Blindagem e guarda de confirmação nativa no estado de venda rápida e desmanche (`0x91040004`): itens protegidos são ocultados da lista ou bloqueados para seleção e confirmação, evitando perdas acidentais. Persistência sidecar preserva o save original intacto (`save*.dat`) e a compatibilidade total com o Google Drive.
+- Códex com separação entre Monstros Comuns e Chefes/Bosses: adicionadas abas de navegação [TODOS], [COMUNS] (`species < 100`) e [CHEFES] (`species >= 100`), com filtro de exibição na grade 8x4 e identificador visual destacado para chefes nos dois hosts PC e na versão Web.
+- Bateria de testes automatizados dedicados em C++ e Node (`tests/inventory_favorite_cases.cpp`, `web/tests/inventory-favorite.test.mjs`, `web/tests/codex*.test.mjs`) validando alternância, integridade de memória ARM, bloqueio de transação no vendedor e filtros do Códex.
+- Formato de saves originais, atributos, catálogo de drops, taxas e rotinas ARM nativas 100% preservados. Validação automatizada em ARM e Chromium; testes manuais com controle físico no Windows/iPhone pendentes.
+
+
 ## 0.9.7 Beta — 25/10/2026
 
 - FC na aba Status desenhado com a fonte original do jogo e fundo preservado, substituindo a faixa azul.
