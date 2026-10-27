@@ -4,6 +4,13 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.12.1 Beta — 27/10/2026
+
+- Corrigidos atalhos F4/F5/F8 no teclado Web, com press/release, proteção contra repetição e F5 durante pausa. Tab e comandos anteriores preservados.
+- Notas do pacote Windows selecionadas por VERSION; ausência interrompe o empacotamento. DLLs externas excluídas conforme diretriz do autor.
+- README, manifesto, banner e roadmap histórico alinhados. Web 0.12.1 em fontes; deployment externo não concluído por ferramenta indisponível.
+- [Verificação e limites](docs/VERIFICACAO_0.12.1.md). Demais itens da Issue #5 não implementados neste lote.
+
 ## 0.12.0 Beta — 26/10/2026
 
 - **Modo Abissal Hardcore Completo**:

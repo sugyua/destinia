@@ -1,4 +1,8 @@
-# Destinia 0.9.3 Beta — navegador
+# Destinia 0.12.1 Beta — fontes do navegador
+
+**Atalhos:** F4 Catálogo, F5 Baú, F8 Bounties. Press/release sem repetição; F5 protegido em partida carregada/pausada. Tab preservado.
+
+**Deployment 0.12.1 não concluído:** ferramenta Sites indisponível nesta sessão. A revisão do site não foi confirmada; os registros de funcionalidades abaixo incluem histórico.
 
 Teste privado: https://destinia-web-experimental.leafyheron257.chatgpt.site/
 
@@ -13,6 +17,8 @@ Saves/Códex web permanecem temporários nesta sessão; não substituem o save P
 ## Fontes e dependências
 
 HTML/JS estáticos em dist, sem compilação. Python3 para tools/pack_game.py; Node para npm test; Chromium/Playwright somente para QA. Não é necessário instalar nada para visitar o site.
+
+O pacote de fontes/export da tag 0.12.1 exclui a biblioteca externa `dist/vendor/unicorn_arm.js`; origem e patch da ponte estão em `dist/vendor/ORIGEM.txt` e `BRIDGE-PATCH.txt`. Forneça a dependência revisada separadamente antes de executar o jogo ou os testes ARM/WASM. O repositório de desenvolvimento mantém o arquivo; isso não significa deployment.
 
 Os dados originais não acompanham o espelho GitHub: forneça o APK extraído compatível e execute `python tools/pack_game.py --game /caminho/game --out dist/game`. Biblioteca revisada SHA-256 f12f1d20ab42646ef81df27516851acccb9fffe7be07a054db83890d992df7e9. Respeite as licenças/direitos dos recursos. Emulador Unicorn.js2.1.4 e licença em dist/vendor, origem e alterações documentadas ali.
 

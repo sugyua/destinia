@@ -2,6 +2,14 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs. Faça backup dos saves antes de atualizar.**
 
+## Estado atual — 27/10/2026
+
+Release anterior: 0.12.0 Beta. Candidata 0.12.1: coerência da distribuição e atalhos Web F4/F5/F8, conforme Issue #5. Demais itens (CI Web, saves/hooks, profiling, licenças, acessibilidade e fuzz) permanecem pendentes. A frente 0.13.0 está fora deste lote. Testes automatizados não encerram validação física.
+
+## Histórico de planejamento
+
+As metas e contagens abaixo são registros históricos de 21/10; não são uma contagem atual de entregas.
+
 Planejamento autorizado pelo autor em **21/10/2026**: **44 melhorias aprovadas**, das quais **14 concluídas** na 0.5–0.8 e **30 ainda não concluídas**, incluindo o Códex entregue parcialmente, da 0.8 em diante. A publicação da **0.6 Beta** foi aprovada pelo autor. Testes automáticos passaram; campanha e inspeção manual no Windows continuam pendentes.
 
 ## Melhorias concluídas com sucesso

@@ -5,6 +5,7 @@ import {TouchVisibility,toggleFullscreen} from './display.mjs';
 import {WebGamepad} from './gamepad.mjs';
 import {preferredLanguage} from './language.mjs';
 import {mapPoint,InputSources} from './input.mjs';
+import {installKeyboard,panelShortcuts} from './keyboard.mjs';
 const $=id=>document.getElementById(id),canvas=$('game'),context=canvas.getContext('2d',{alpha:false}),image=context.createImageData(800,480);
 const lut=new Uint32Array(65536);for(let p=0;p<65536;p++){const r=(p>>11)&31,g=(p>>5)&63,b=p&31;lut[p]=0xff000000|(((b<<3)|(b>>2))<<16)|(((g<<2)|(g>>4))<<8)|((r<<3)|(r>>2));}
 const image32=new Uint32Array(image.data.buffer);
@@ -96,9 +97,8 @@ canvas.addEventListener('pointerdown',event=>{if(!ready||paused||surfacePointer!
 canvas.addEventListener('pointermove',event=>{if(event.pointerId!==surfacePointer)return;lastPoint=mapPoint(event.clientX,event.clientY,canvas.getBoundingClientRect());send({type:'touch',...lastPoint,phase:2});});
 for(const type of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(type,event=>{if(event.pointerId!==surfacePointer)return;send({type:'touch',...lastPoint,phase:1});surfacePointer=null;});
 canvas.addEventListener('contextmenu',event=>event.preventDefault());
-const keys={F6:10016,F7:10014,p:10014,P:10014,ArrowUp:3,w:3,ArrowDown:9,s:9,ArrowLeft:5,a:5,ArrowRight:7,d:7,Enter:17,' ':17,z:17,Escape:10,x:10,i:27,c:27,'1':2,'2':11,'3':4,'4':8};
-window.addEventListener('keydown',event=>{if(!ready||paused||event.repeat||event.ctrlKey||event.metaKey||event.altKey||!(event.key in keys))return;event.preventDefault();sources.press('key:'+event.code,keys[event.key]);});
-window.addEventListener('keyup',event=>sources.release('key:'+event.code));
+for(const shortcut of panelShortcuts)$(shortcut.id).textContent=`${shortcut.label} (${shortcut.key})`;
+installKeyboard(window,sources,()=>({ready,paused}));
 window.addEventListener('blur',()=>{pageFocused=false;release();});window.addEventListener('focus',()=>{pageFocused=true;gamepad.suspend();});document.addEventListener('visibilitychange',()=>{if(document.hidden){release();setPaused(true);}});
 gamepad=new WebGamepad({sources,onUse:autoHideTouch,onStatus:message=>{$('gamepad-status').textContent=message;},onPause:()=>{if(!storeOpen&&$('instructions').hidden)setPaused(!paused);},onDisconnect:()=>{touchVisibility.disconnect();applyTouchVisibility();if(ready)setPaused(true);},onAction:(action)=>{
   if(!ready||paused)return;

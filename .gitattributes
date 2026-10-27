@@ -1,5 +1,6 @@
 # Dados originais permanecem no repositorio, mas nao nos arquivos da tag.
 /game export-ignore
+/web/dist/vendor/unicorn_arm.js export-ignore
 /Claude export-ignore
 /relatorios export-ignore
 /.vscode export-ignore

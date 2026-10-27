@@ -10,6 +10,8 @@ Esta preparação não estabelece autorização de redistribuição desses dados
 
 ## Bibliotecas do host
 
+Na 0.12.1, o ZIP Windows e os fontes curados não distribuem DLLs nem `web/dist/vendor/unicorn_arm.js`. A exportação automática da tag também exclui esse JavaScript. O arquivo permanece no repositório de desenvolvimento; origem, licença e alterações da ponte constam em `web/dist/vendor/ORIGEM.txt`, `UNICORN-LICENSE.txt` e `BRIDGE-PATCH.txt`. A reprodução da Web exige fornecer essa dependência local separadamente, além dos dados originais. Releases antigas não foram alteradas.
+
 | Componente | Uso |
 | --- | --- |
 | SDL2 | Janela, framebuffer, entradas e inicialização de áudio |

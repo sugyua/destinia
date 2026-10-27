@@ -1,6 +1,6 @@
 {
-  "version": "0.11.0",
-  "base_commit": "ebef40c4ac3d3f1d1b8352cd7910da6faa1dd139",
+  "version": "0.12.1",
+  "base_commit": "c0c1566f8a295265b2034dec23c8ee2da5c43efb",
   "files": [
     ".gitignore",
     "AGENTS.md",
@@ -172,7 +172,6 @@
     "web/dist/vendor/BRIDGE-PATCH.txt",
     "web/dist/vendor/ORIGEM.txt",
     "web/dist/vendor/UNICORN-LICENSE.txt",
-    "web/dist/vendor/unicorn_arm.js",
     "web/dist/worker.js",
     "web/package.json",
     "web/tests/browser_fc_qa.py",
@@ -278,6 +277,26 @@
     "web/dist/bounties.mjs",
     "common/quest_tracker_ui.h",
     "web/dist/quest-tracker.mjs",
-    "web/tests/features-0110.test.mjs"
+    "web/tests/features-0110.test.mjs",
+    "release/NOTAS_0.12.0.md",
+    "release/NOTAS_0.12.1.md",
+    "docs/PLANO_0.12.1.md",
+    "docs/VERIFICACAO_0.12.1.md",
+    "web/dist/keyboard.mjs",
+    "web/tests/keyboard.test.mjs",
+    "tests/test_release_coherence.py",
+    "web/tests/browser_keyboard_qa.py",
+    "common/abyss_tower.h",
+    "common/auto_potion.h",
+    "common/inventory_protection.h",
+    "common/inventory_protection_store.h",
+    "common/loot_economy.h",
+    "common/loot_economy_host.h",
+    "common/loot_economy_store.h",
+    "common/new_game_plus.h",
+    "common/pets_expansion.h",
+    "common/stat_reset.h",
+    "common/titles.h",
+    "web/tests/browser_keyboard_events_qa.py"
   ]
 }

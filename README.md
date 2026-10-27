@@ -1,12 +1,19 @@
-# Destinia 0.11.0 Beta
+# Destinia 0.12.1 Beta
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.11.0 Beta — Catálogo de Equipamentos, Baú Compartilhado e Bounties Offline](https://github.com/sugyua/destinia/releases/tag/v0.11.0-beta)** — ZIP Windows com executáveis standalone portáteis (16 DLLs inclusas), dois inicializadores GUI na raiz, os dois hosts, fontes e checksums. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**. [Release anterior 0.10.3 Beta](https://github.com/sugyua/destinia/releases/tag/v0.10.3-beta).
+**[Destinia 0.12.1 Beta — atalhos Web e distribuição](https://github.com/sugyua/destinia/releases/tag/v0.12.1-beta)** — Pacotes e estado de publicação no link da release. Dois inicializadores GUI, dois hosts, fontes e checksums. DLLs e dados originais não incluídos; consulte **Dependências**. [Release anterior 0.12.0 Beta](https://github.com/sugyua/destinia/releases/tag/v0.12.0-beta).
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
-**[Jogar a versão web no navegador](http://localhost:8000/)** — teste local na porta 8000 (ou na rede LAN em `http://192.168.1.11:8000/` ou Tailscale em `http://100.108.92.19:8000/`). A versão web foi atualizada com as 3 grandes novidades da 0.11.0 (Catálogo F4, Baú Compartilhado F5 e Bounties F8) e hotfix mobile com 16 FPS no Safari iOS. O deployment no site externo (`chatgpt.site`) permanece pendente de credenciais de publicação.
+**Web — fontes 0.12.1 Beta:** F4 abre Catálogo, F5 abre Baú e F8 abre Bounties. F5 não recarrega uma partida carregada, inclusive em pausa. Tab permanece para navegação de foco. [Site privado existente](https://destinia-web-experimental.leafyheron257.chatgpt.site/): **deployment desta revisão não concluído**; a ferramenta Sites está indisponível nesta sessão. O banner local não comprova a versão publicada. Não há sincronização automática PC/Web.
+
+## Correções da 0.12.1 Beta
+
+- Atalhos Web F4/F5/F8 encaminhados ao jogo com proteção de repetição e F5 durante pausa.
+- Notas atuais obrigatórias no pacote; VERSION, manifesto e documentação alinhados.
+- DLLs externas excluídas do novo pacote. Releases anteriores preservadas.
+- [Validação e limitações](docs/VERIFICACAO_0.12.1.md) · [Notas](release/NOTAS_0.12.1.md).
 
 ## Novidades da Versão 0.12.0 — Modo Abissal Supremo e Título Senhor do Abismo
 
@@ -148,9 +155,11 @@
 - **Correção Crítica de Viewport Web 800x480**: Eliminação de duplicação do mapa e recuperação de 7 FPS para os 16 FPS originais via centralização de câmera (`Game+18552/18554`), limpeza de bordas com cinza médio (`0x8410`) e descarte imediato de tiles fora do mapa (`0x4000`/`fastReject`).
 - **Saves Nativos 100% Intocados**: Todos os dados estendidos residem em sidecars versionados com CAS (`progression-v1.txt`, `economy-v1.txt`, `titles-v1.txt`).
 
-### Roadmap Oficial do Projeto (Cronograma de Versões)
+### Histórico do roadmap (0.10–0.12)
 
-#### Versão 0.10.3 (Próxima — UI de Dificuldade & Polimento da Meta 0.10)
+Estado atual: correções 0.12.1 da [Issue #5](https://github.com/sugyua/destinia/issues/5). Demais propostas continuam pendentes; ver [roadmap](docs/ROADMAP.md).
+
+#### Versão 0.10.3 (Histórico entregue — UI de Dificuldade & Polimento da Meta 0.10)
 
 1. **Troca de Dificuldade no Menu Sistema**:
    - Novo botão "Mudar Dificuldade" no menu Sistema.
@@ -195,7 +204,7 @@ Núcleo canônico disponível em [`common/progression.h`](common/progression.h) 
 
 **Barra e Mago Boss Rush:** dez ícones centralizados com hitboxes correspondentes em400×240/800×480; NPC sintético em Lagrant, arte original mon6_0 recolorida em memória e evento diferido para a UI do OpenCodes. [Contrato e testes](docs/BOSS_MAGE.md). Correspondência de Icarus e ligação do opener real da UI ficam explícitas nesse contrato; nenhum save/asset original foi modificado.
 
-Esta frente permanece desacoplada de ARM/HUD/combate e **não habilita NV999 no jogo nesta etapa**. `VERSION` continua 0.9.9 até a integração pela orquestração; não há release 0.10 publicada por esta branch. **Web:** módulo atualizado e testado localmente, sem deployment desta revisão. URL existente: https://destinia-web-experimental.leafyheron257.chatgpt.site/; nenhuma versão 0.10 nesse endereço foi confirmada por esta entrega.
+Registro histórico da preparação do núcleo na 0.9.9, anterior à integração 0.10 descrita acima; não representa o estado atual. **Web:** módulo atualizado e testado localmente, sem deployment desta revisão. URL existente: https://destinia-web-experimental.leafyheron257.chatgpt.site/; nenhuma versão 0.10 nesse endereço foi confirmada por esta entrega.
 
 ## Novidades da Versão 0.9.9 — Filtro Visual, Autoloot e QoL de Inventário
 
@@ -365,6 +374,7 @@ As dependências externas devem ser instaladas separadamente no PC do usuário. 
 | SDL2_mixer e suporte OGG/MP3 | Áudio, quando habilitado na compilação |
 | Compilador C++17, CMake ≥ 3.16, Ninja e pkg-config/pkgconf | Somente para quem compilar os fontes |
 | Python ≥ 3.10 | Somente para testar ou gerar pacotes |
+| Unicorn.js com a ponte revisada | Somente para executar/testar a Web a partir dos fontes: excluído do ZIP e export da tag 0.12.1. [Origem, patch e restauração](web/README.md#fontes-e-dependências) |
 | Windows PowerShell 5.1 | Inicializadores (validacao de VERSION), diagnóstico e configuradores; normalmente já acompanha o Windows |
 
 Instale o MSYS2 pela [página oficial](https://www.msys2.org/) e use o gerenciador de pacotes desse ambiente. Consulte [INSTALL.md](INSTALL.md) para verificar os pacotes e compilar. O pacote Windows exige também o SDL2_mixer, pois os EXEs são compilados com áudio. Instale seus pacotes e dependências transitivas pelo MSYS2; não copie DLLs avulsas.
@@ -383,7 +393,7 @@ Para testar uma instalação existente, execute **[Testar Destinia.bat](Testar%2
 
 O relatório é salvo ao longo da sessão e informa quando está parcial. Após cada execução, o diagnóstico também destaca compras observadas, alterações de cash e a rede aguardando resposta; esses avisos não significam que o problema da loja foi corrigido.
 
-Para esta versão, use o diagnóstico incluído no pacote completo de fontes 0.9, com EXEs da mesma versão. Não sobreponha os auxiliares antigos da main: eles podem não incluir as proteções de preferências da 0.6.
+Para esta versão, use o diagnóstico incluído no pacote completo de fontes da mesma versão, com EXEs da mesma versão. Não sobreponha os auxiliares antigos da main: eles podem não incluir as proteções de preferências da 0.6.
 
 Consulte [INSTALL.md](INSTALL.md) para compilar e executar com dados próprios compatíveis. Os launchers existentes continuam voltados ao ambiente de desenvolvimento MSYS2 em `C:\msys64\ucrt64\bin`; não são launchers portáteis.
 
@@ -391,14 +401,16 @@ Para verificar o empacotador, com Python 3.10 ou superior:
 
 ```sh
 python -m unittest discover -s tests -v
-python scripts/package_release.py --out dist/release-0.9
+python scripts/package_release.py --out dist/release-0.12.1
 ```
 
 No Linux, o comando pode ser `python3`. O empacotador cria ZIP e SHA-256, não compila executáveis. Não sobrescreve artefatos existentes. A reprodução byte a byte foi verificada com a mesma versão de Python/zlib; outras versões podem mudar a compressão.
 
-O [manifesto](release/manifest.json) identifica a base e os arquivos da 0.9. O workflow Windows compila/testa os EXEs e gera um pacote separado; o empacotador de fontes não compila executáveis. Consulte o [roadmap](docs/ROADMAP.md) para as etapas seguintes.
+O [manifesto](release/manifest.json) identifica a base e os arquivos da 0.12.1. O workflow Windows compila/testa os EXEs e gera um pacote separado; o empacotador de fontes não compila executáveis. Consulte o [roadmap](docs/ROADMAP.md) para as etapas seguintes.
 
-## Atualizações futuras
+## Planejamento histórico e pendências
+
+As listas abaixo foram registradas em versões anteriores; contagens antigas não representam auditoria atual. Prioridades atuais: [Issue #5](https://github.com/sugyua/destinia/issues/5).
 
 Das melhorias aprovadas, **29 ainda não estão concluídas**, incluindo o Códex entregue parcialmente, nas próximas versões. As versões abaixo são metas provisórias, sem datas garantidas, e dependem de investigação e testes.
 
@@ -601,7 +613,7 @@ As associações **Necromante → foice** e **Granadeiro → granadas** já esta
 
 Quando uma correção ou funcionalidade do Destinia estiver **implementada e validada**, ela deverá ser comunicada no README e no CHANGELOG, registrada na [central das IAs](https://github.com/sugyua/ai-progress-shared/issues/4) e publicada como **nova versão em [GitHub Releases](https://github.com/sugyua/destinia/releases)**, com arquivos Windows pertinentes, fontes e checksums. Código experimental em branch ou PR **não é** uma versão jogável publicada. As Releases anteriores permanecem disponíveis; testes automatizados e testes reais são identificados separadamente.
 
-**Versão web local:** disponível em `http://localhost:8000/` e na LAN em `http://192.168.1.11:8000/` (revisão `c850181`, com 5 Dificuldades, Hotfix Abissal e Catálogo de Armas F4). O deployment no domínio externo [chatgpt.site](https://destinia-web-experimental.leafyheron257.chatgpt.site/) permanece na revisão estável anterior por ausência de ferramenta remota de deployment configurada. O progresso do personagem na web ainda não é persistente após recarregar/fechar. A cada mudança futura na web, atualizar aqui a revisão/deployment e as novidades **somente depois da publicação confirmada**; se a versão web estiver pendente, informar explicitamente.
+**Estado Web atual:** consulte a versão/revisão e o status de deployment no início deste README; referências antigas abaixo são históricas.
 
 **Correção visual em preparação:** a prévia da décima aba e a mão apontadora do menu estão em [PR #3 (rascunho)](https://github.com/sugyua/destinia/pull/3), **não incluído na 0.9.1 Beta publicada** e não implantado na web. Precisa de testes e release própria antes de ser anunciado como corrigido.
 
