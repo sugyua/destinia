@@ -1,0 +1,4 @@
+Repositorio: https://github.com/sugyua/destinia
+Commit base: b1a68a3d0831b6c5b82cb7546fc1d30453e9390a
+Versao dos fontes: 0.9 Beta.
+Inclui alteracoes posteriores ao commit base; nao e um checkout integral desse commit.

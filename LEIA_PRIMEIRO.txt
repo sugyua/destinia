@@ -1,0 +1,7 @@
+Destinia 0.9.8 Beta - pode apresentar bugs.
+Este pacote e portatil (standalone) e contem as DLLs necessarias para execucao no Windows x64.
+Nao e necessario instalar MSYS2 para jogar.
+Coloque seus dados originais em game/lib/armeabi/libdestinia_jni.so, game/assets e game/res/raw.
+Abra Destinia.exe ou Destinia Zoom.exe na raiz (sem BAT). BATs ficam para diagnostico.
+Configurar Destinia.bat ajusta video, audio, pausas e comandos.
+Progresso compartilhado: LOCALAPPDATA/Destinia/save ou a pasta global configurada.
