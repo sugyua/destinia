@@ -74,10 +74,12 @@ jobs:
         shell: powershell
         run: |
           $ErrorActionPreference='Stop'
-          foreach($name in @('test_diagnostic.ps1','test_camera_mode.ps1','test_save_configuration.ps1','test_game_preferences.ps1','test_configurator_native.ps1','test_launchers.ps1','test_root_executables.ps1','test_prompt.ps1','test_update_0130.ps1')) {
+          foreach($name in @('test_diagnostic.ps1','test_camera_mode.ps1','test_save_configuration.ps1','test_game_preferences.ps1','test_configurator_native.ps1','test_launchers.ps1','test_root_executables.ps1','test_prompt.ps1')) {
             & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path 'tests' $name)
             if($LASTEXITCODE -ne 0) {throw "Falhou: $name"}
           }
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path 'scripts' 'test_update_0130.ps1')
+          if($LASTEXITCODE -ne 0) {throw 'Falhou: scripts/test_update_0130.ps1'}
       - name: Empacotar fontes EXEs e checksums sem dependencias externas
         shell: msys2 {0}
         run: |

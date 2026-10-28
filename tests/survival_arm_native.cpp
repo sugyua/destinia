@@ -11,7 +11,12 @@ static uc_err keepSurvivalTestEngine(uc_engine*){return UC_ERR_OK;}
 #undef uc_close
 #include <cassert>
 int main(int argc,char**argv){
- setvbuf(stdout,nullptr,_IONBF,0);if(int rc=originalSurvivalMain(argc,argv))return rc;
+ setvbuf(stdout,nullptr,_IONBF,0);
+ std::string temporarySave;std::vector<std::string> isolatedArgs;std::vector<char*> isolatedArgv;
+ bool hasSave=false;for(int i=1;i<argc;++i)if(std::string(argv[i])=="--save")hasSave=true;
+ int hostArgc=argc;char** hostArgv=argv;
+ if(!hasSave){temporarySave=(fs::temp_directory_path()/("destinia-survival-arm-"+std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()))).string();fs::create_directories(temporarySave);for(int i=0;i<argc;++i)isolatedArgs.emplace_back(argv[i]);isolatedArgs.emplace_back("--save");isolatedArgs.push_back(temporarySave);for(auto&arg:isolatedArgs)isolatedArgv.push_back(arg.data());hostArgc=int(isolatedArgv.size());hostArgv=isolatedArgv.data();}
+ if(int rc=originalSurvivalMain(hostArgc,hostArgv)){if(!temporarySave.empty())fs::remove_all(temporarySave);return rc;}
  assert(survivalHost.ready);const auto g=exportsMap.at("Game");
  assert(callFn(exportsMap.at("GameCanvas_init"),{exportsMap.at("GameCanvas")}));
  // Match the stable arena fixture used by update_0130_native: map 61 has a
@@ -40,5 +45,5 @@ int main(int argc,char**argv){
  survivalHost.combat.elixirMs=9000;survivalHost.combat.cooldownMs=120000;survivalHost.combat.immuneMs=2000;
  sh(g+0x4886,1);survivalHost.tick(0);
  assert(survivalHost.combat.enabled&&survivalHost.combat.elixirMs==0&&survivalHost.combat.cooldownMs==0&&survivalHost.combat.immuneMs==0);
- printf("SURVIVAL_ARM_OK waves=51 last_stand=2s title=20 atomic_record=51 slot_reset=ok\n");return 0;
+ printf("SURVIVAL_ARM_OK waves=51 last_stand=2s title=20 atomic_record=51 slot_reset=ok\n");if(!temporarySave.empty())fs::remove_all(temporarySave);return 0;
 }
