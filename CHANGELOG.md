@@ -4,6 +4,11 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.14.0 Beta - 28/10/2026
+
+- Hosts PC normal e Zoom: painel F12 mostra FPS, tempo medio de emulacao e memoria de trabalho do processo. A coleta ocorre somente enquanto o painel esta visivel.
+- Verificacao: teste focado e builds Release CMake/Ninja dos dois hosts aprovados.
+
 ## 0.13.0 Beta - 28/10/2026
 
 - Arena infinita em PC e Web com ate 12 inimigos simultaneos, chefe a cada 5 ondas, elite a cada 3 e recordes por personagem.
