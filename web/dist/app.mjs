@@ -1,3 +1,4 @@
+import {writeFeatureStorage} from './features-storage.mjs';
 if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>{for(const r of rs)r.unregister();});caches.keys().then(ks=>ks.forEach(k=>caches.delete(k)));}
 import {writeInventoryProtection} from './inventory-storage.mjs';
 import {lootOptions as validateLootOptions} from './loot-qol.mjs';
@@ -57,10 +58,11 @@ function showError(message){ready=false;release();$('loading').hidden=true;$('er
 function setPaused(value){if(!ready)return;release();paused=value;fpsFrames=0;fpsStart=performance.now();send({type:'pause',value});$('paused').hidden=!value||storeOpen;$('pause').textContent=value?'Continuar':'Pausar';$('status').textContent=value?'Pausado · progresso somente nesta aba':'Experimental · progresso temporário · sem som';}
 function boot(){
  if(worker)worker.terminate();storeOpen=false;$('store-notice').hidden=true;release();ready=false;paused=false;surfacePointer=null;document.body.classList.add('running');$('welcome').hidden=true;$('error').hidden=true;$('paused').hidden=true;$('controls').hidden=true;$('loading').hidden=false;$('loading-text').textContent='Carregando o jogo…';$('pause').disabled=true;$('pause').setAttribute('aria-pressed','false');$('restart').disabled=true;$('virtual-controls').disabled=true;$('drop-names').disabled=true;
- worker=new Worker('./worker.js?v=0.10.3-hotfix1');loadTimer=setTimeout(()=>{$('loading-text').textContent='Ainda carregando. Mantenha esta aba aberta…';$('restart').disabled=false;},20000);
+ worker=new Worker('./worker.js?v=0.13.0');loadTimer=setTimeout(()=>{$('loading-text').textContent='Ainda carregando. Mantenha esta aba aberta…';$('restart').disabled=false;},20000);
  worker.onerror=event=>{clearTimeout(loadTimer);showError(event.message||'O navegador não conseguiu iniciar este teste.');};
  worker.onmessage=event=>{const data=event.data;
   if(data.type==='ready'){clearTimeout(loadTimer);ready=true;$('virtual-controls').disabled=false;$('drop-names').disabled=false;if($('weapons-catalog')) $('weapons-catalog').disabled=false; if($('shared-stash')) $('shared-stash').disabled=false; if($('bounties-btn')) $('bounties-btn').disabled=false; if($('difficulty-btn')) $('difficulty-btn').disabled=false;lastFrame=performance.now();fpsStart=lastFrame;fpsFrames=0;$('loading').hidden=true;applyTouchVisibility();$('pause').disabled=false;$('restart').disabled=false;$('pause').textContent='Pausar';$('status').textContent='Experimental · progresso temporário · sem som';}
+  else if(data.type==='featuresStorageWrite'){event.target.postMessage(writeFeatureStorage(localStorage,gameMode,data));}
   else if(data.type==='inventoryProtectionWrite'){let ack;try{ack=writeInventoryProtection(localStorage,gameMode,data);}catch(error){ack={type:'inventoryProtectionAck',id:data.id,ok:false,text:null,error:error.message};}event.target.postMessage(ack);}
   else if(data.type==='status')$('loading-text').textContent=data.message;
   else if(data.type==='frame'){lastFrame=performance.now();const b16=new Uint16Array(data.pixels.buffer,data.pixels.byteOffset,384000);for(let i=0;i<384000;i++)image32[i]=lut[b16[i]];context.putImageData(image,0,0);canvas.dataset.frame=String(data.frame);if(!paused){fpsFrames++;if(lastFrame-fpsStart>=1000){const fps=(fpsFrames*1000/(lastFrame-fpsStart)).toFixed(1);canvas.dataset.fps=fps;$('status').textContent=fps+' FPS · meta 16 · progresso temporário · sem som';fpsStart=lastFrame;fpsFrames=0;}const delay=Math.max(0,Math.max(1000/16,data.wait||60)-(data.elapsed||15));setTimeout(()=>send({type:'nextFrame'}),delay);}}
@@ -70,7 +72,8 @@ function boot(){
   else if(data.type==='ended'){$('status').textContent='O jogo encerrou. Use Reiniciar para outro teste.';ready=false;release();}
  };
  let inventoryProtection;try{inventoryProtection={text:localStorage.getItem('destinia:inventory-protect-v1:'+gameMode)};}catch(error){inventoryProtection={error:error.message};}
- worker.postMessage({type:'start',virtualControls:touchVisibility.gameVisible,gameMode,uiScale,language,lootOptions,inventoryProtection,lootFocused:document.hasFocus()});
+ let featuresSnapshot;try{featuresSnapshot={text:localStorage.getItem('destinia:features0130:'+gameMode)};}catch(error){featuresSnapshot={error:error.message};}
+ worker.postMessage({type:'start',featuresSnapshot,virtualControls:touchVisibility.gameVisible,gameMode,uiScale,language,lootOptions,inventoryProtection,lootFocused:document.hasFocus()});
 }
 $('virtual-controls').addEventListener('click',()=>{
  if(!ready)return;release();virtualControls=!virtualControls;
@@ -122,3 +125,7 @@ $('weapons-catalog')?.addEventListener('click', () => { if (ready && !paused) se
 $('shared-stash')?.addEventListener('click', () => { if (ready && !paused) send({ type: 'toggleSharedStash' }); });
 $('bounties-btn')?.addEventListener('click', () => { if (ready && !paused) send({ type: 'toggleBounties' }); });
 $('difficulty-btn')?.addEventListener('click', () => { if (ready && !paused) send({ type: 'toggleDifficulty' }); });
+
+const features0130Button=document.createElement('button');features0130Button.id='features-0130';features0130Button.textContent='Arena / Refinamento (F9)';features0130Button.addEventListener('click',()=>{if(ready&&!paused){release();send({type:'toggleFeatures0130'});}});$('pause').parentElement.append(features0130Button);
+
+window.addEventListener('keydown',event=>{if(event.key==='F9'&&ready&&!paused&&!event.repeat&&!event.ctrlKey&&!event.metaKey&&!event.altKey){event.preventDefault();release();send({type:'toggleFeatures0130'});}});

@@ -9,8 +9,8 @@ namespace destinia {
 // position as identity. Revalidate pool ownership/fingerprint before actions.
 struct InventoryItem {
  int bag,slot,pool,type,rank,level,price;
- bool protectedItem=false,upgrade=false;
- bool operator==(const InventoryItem& o)const{return bag==o.bag&&slot==o.slot&&pool==o.pool&&type==o.type&&rank==o.rank&&level==o.level&&price==o.price;}
+ bool protectedItem=false,upgrade=false,equipped=false,batchCandidate=false;
+ bool operator==(const InventoryItem& o)const{return bag==o.bag&&slot==o.slot&&pool==o.pool&&type==o.type&&rank==o.rank&&level==o.level&&price==o.price&&equipped==o.equipped;}
 };
 enum class InventorySort {Original,Type,Rank,Level,Price};
 struct InventoryQuery {int type=-1,rank=-1,minLevel=0,maxLevel=65535;InventorySort sort=InventorySort::Original;bool descending=false;int minPrice=0,maxPrice=2147483647;};

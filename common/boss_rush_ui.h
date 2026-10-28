@@ -47,6 +47,8 @@ public:
   int scrollOffset = 0;
   std::string statusMessage;
   
+  std::function<std::string(int)> survivalAction;
+  std::function<std::vector<std::string>()> survivalRows;
   std::function<int()> getGold;
   std::function<void(int)> setGold;
   std::function<void(int, int, int)> teleport; // area, map, entry
@@ -85,6 +87,7 @@ public:
     if (currentTab == 2) return 4;
     if (currentTab == 3) return 3; // Reset Atributos, Reset Habilidades, Avancar Novo Jogo+
     if (currentTab == 4) return int(allTitles().size());
+    if (currentTab == 5) return survivalRows?int(survivalRows().size()):0;
     return 0;
   }
 
@@ -94,14 +97,14 @@ public:
 
     // Alternar abas: Esquerda (5), Direita (7)
     if (key == 5) {
-      currentTab = (currentTab - 1 + 5) % 5;
+      currentTab = (currentTab - 1 + 6) % 6;
       selectedIndex = 0;
       scrollOffset = 0;
       statusMessage.clear();
       return true;
     }
     if (key == 7) {
-      currentTab = (currentTab + 1) % 5;
+      currentTab = (currentTab + 1) % 6;
       selectedIndex = 0;
       scrollOffset = 0;
       statusMessage.clear();
@@ -138,6 +141,7 @@ public:
     if (key == 6 || key == 17) {
       int curGold = getGold ? getGold() : 999999;
 
+      if(currentTab==5){if(survivalAction)statusMessage=survivalAction(selectedIndex);return true;}
       if (currentTab == 0) {
         // Tab 0: Boss Rush
         const auto& list = getBossRushList();
@@ -226,11 +230,11 @@ public:
     }
 
     // Abas no topo: py + 22 a py + 36
-    if (y >= py + 22 && y <= py + 36) {
+    if (y >= py + 20 && y < py + 52) {
       if (type == 0) {
-        int tabW = (pw - 16) / 4;
-        int t = (x - (px + 8)) / tabW;
-        if (t >= 0 && t < 4) {
+        int tabW = (pw - 16) / 3;
+        int t = (x - (px + 8)) / tabW + (y>=py+36?3:0);
+        if (x>=px+8 && t >= 0 && t < 6) {
           currentTab = t;
           selectedIndex = 0;
           scrollOffset = 0;
@@ -241,7 +245,7 @@ public:
     }
 
     // Linhas da lista
-    int rowY = py + 44;
+    int rowY = py + 60;
     const int count = getItemsCountInCurrentTab();
     for (int i = scrollOffset; i < count && i < scrollOffset + 7; i++) {
       if (y >= rowY - 2 && y < rowY + 14) {
@@ -292,33 +296,35 @@ public:
     paintOverlayText(pixels, width, height, px + pw - 24, py + 6, "[X]", 0xf800);
 
     // Barra de Abas
-    static const char* tabNames[5] = {"[CHEFES]", "[TORRE]", "[MASCOTES]", "[SANTUARIO]", "[TITULOS]"};
-    int tabW = (pw - 16) / 5;
-    for (int t = 0; t < 5; ++t) {
-      int tx = px + 8 + t * tabW;
+    static const char* tabNames[6] = {"[CHEFES]", "[TORRE]", "[MASCOTES]", "[SANTUARIO]", "[TITULOS]", "[SOBREVIVENCIA]"};
+    int tabW = (pw - 16) / 3;
+    for (int t = 0; t < 6; ++t) {
+      int tx = px + 8 + (t%3) * tabW;
+      int tabY=py+(t<3?20:36);
       bool selTab = (t == currentTab);
       uint16_t tabCol = selTab ? 0x07e0 : 0x8c51;
       if (selTab) {
-        for (int y = py + 20; y < py + 34; ++y) {
+        for (int y = tabY; y < tabY + 14; ++y) {
           for (int x = tx; x < tx + tabW - 2; ++x) {
             size_t at = (size_t(y) * width + x) * 2;
             pixels[at] = 0x20; pixels[at + 1] = 0x20;
           }
         }
       }
-      paintOverlayText(pixels, width, height, tx + 4, py + 22, tabNames[t], tabCol);
+      paintOverlayText(pixels, width, height, tx + 4, tabY + 2, tabNames[t], tabCol);
     }
 
     // Linha divisória
     for (int x = px + 8; x < px + pw - 8; ++x) {
-      const size_t at = (size_t(py + 36) * width + x) * 2;
+      const size_t at = (size_t(py + 54) * width + x) * 2;
       pixels[at] = 0xbf; pixels[at + 1] = 0xd7;
     }
 
     // Renderizar conteúdo da aba ativa
-    int rowY = py + 42;
+    int rowY = py + 60;
 
-    if (currentTab == 0) {
+    if(currentTab==5&&survivalRows){const auto rows=survivalRows();for(int i=scrollOffset;i<int(rows.size())&&i<scrollOffset+7;++i){paintOverlayText(pixels,width,height,px+12,rowY,(i==selectedIndex?"> ":"  ")+rows[i],i==selectedIndex?0xffff:0xd7bf);rowY+=16;}}
+    else if (currentTab == 0) {
       // TAB 0: Chefes
       const auto& list = getBossRushList();
       for (int i = scrollOffset; i < int(list.size()) && i < scrollOffset + 7; i++) {

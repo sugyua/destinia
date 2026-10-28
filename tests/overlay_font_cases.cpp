@@ -12,6 +12,7 @@ int main() {
  paintOverlayText(accent.data(),64,16,0,0,"AÇÃO",0xffff);
  assert(plain!=accent);
  // A composed UTF-8 glyph occupies one cell; no phantom extra glyph per byte.
+ assert(overlayGlyph(U'%')!=overlayGlyph(U'?'));
  auto bits=overlayGlyph(U'Ã');assert(bits!=overlayGlyph(U'A'));
  bool hasAccent=false;for(auto column:bits)hasAccent|=(column&3)!=0;assert(hasAccent);
  for(const auto letter:U"ÁÀÂÃÉÊÍÓÔÕÚÜÇáàâãéêíóôõúüç")if(letter)assert(overlayGlyph(letter)!=overlayGlyph(U'?'));

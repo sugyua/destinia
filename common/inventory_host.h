@@ -1,6 +1,7 @@
 // Shared by both hosts after ARM helpers, Codex and FC declarations.
 #include "inventory_panel.h"
 #include "inventory_protection_store.h"
+#include "salvage_policy.h"
 static destinia::InventoryPanel inventoryPanel;
 static destinia::InventoryProtection inventoryProtection;
 static bool inventoryProtectionReady=false;
@@ -12,6 +13,9 @@ struct InventoryIcon {u32 pointer;int x,y;};
 static std::vector<InventoryIcon> inventoryIcons;
 static std::vector<uint8_t> inventoryUpgradeState;
 static std::map<u32,bool> inventoryUpgradeCache;
+struct InventoryBatchTarget {destinia::InventoryItem item;std::array<uint8_t,20> fingerprint;};
+static std::vector<InventoryBatchTarget> inventoryBatchTargets;
+static void inventoryCancelBatch();
 static void inventoryBeginFrame(){inventoryIcons.clear();}
 static void inventoryRefreshUpgrades(){
  const auto g=exportsMap.at("Game"),ui=exportsMap.at("GameUI");std::vector<uint8_t> state(32056+24);
@@ -40,7 +44,8 @@ static bool inventoryRead(destinia::InventoryPanel& panel,std::vector<std::array
   auto record=g+0x433e + b*0x92+6*slot;if(!rd16(record+4)||rd16(record)!=0)continue;int pool=rd16(record+2);if(pool>=200||uint8_t(rd16(g+0x2e0c+pool)&255)==0)return false;if(bag<0&&!equipmentList.count(pool))continue;
   std::array<uint8_t,20> fingerprint{};if(!rd(g+0x2ed6+20*pool,fingerprint.data(),fingerprint.size()))return false;int header=rd16(g+0x2ed6+20*pool),rank=(header>>8)&7;if(rank>4)return false;u32 level=0,price=0;
   if(!callFn(exportsMap.at("GameUI_getEquipMinLv"),{u32(header),1},&level)||!callFn(exportsMap.at("GameUI_getItemPrice"),{0,u32(pool)},&price)||!callFn(exportsMap.at("GameUI_getEquipName"),{inventoryNameBuffer,g+0x2ed6+20*pool}))return false;
-  int nativeIndex=bag<0?equipmentList.at(pool):slot;panel.items.push_back({b,slot,pool,(header>>5)&7,rank,int(level),int(state==0x91040004u?price/5:price),inventoryProtection.has(pool,fingerprint),inventoryIsUpgrade(g+0x2ed6+20*pool)});panel.names.push_back(cstr(inventoryNameBuffer,512));fingerprints.push_back(fingerprint);indices.push_back(nativeIndex);if(nativeIndex==cursor)selected=pool;
+  bool equipped=false;for(int worn=0;worn<6;worn++)if(rd32(g+0x4584+4*worn)==g+0x2ed6+20*pool)equipped=true;
+  int nativeIndex=bag<0?equipmentList.at(pool):slot;panel.items.push_back({b,slot,pool,(header>>5)&7,rank,int(level),int(state==0x91040004u?price/5:price),inventoryProtection.has(pool,fingerprint),inventoryIsUpgrade(g+0x2ed6+20*pool),equipped});panel.names.push_back(cstr(inventoryNameBuffer,512)+refinementHost.suffix(g+0x2ed6+20*pool));fingerprints.push_back(fingerprint);indices.push_back(nativeIndex);if(nativeIndex==cursor)selected=pool;
  }}
  panel.rebuild();return true;
 }
@@ -85,11 +90,12 @@ static bool inventoryToggleNativeProtection(){
 // Only reads Game; returning to LR suppresses this confirmation, not navigation.
 static bool inventoryNativeBlocked(int key){
  if(key!=6&&key!=17)return false;
- const auto ui=exportsMap.at("GameUI"),g=exportsMap.at("Game");if(rd32(ui+0x7c)!=0x91040004u)return false;
+ const auto ui=exportsMap.at("GameUI"),g=exportsMap.at("Game");const auto state=rd32(ui+0x7c);
+ const bool sale=state==0x91040004u,dismantle=state==0x20030003u;if(!sale&&!dismantle)return false;
  if(!inventoryRefreshProtection())return true;if(inventoryProtection.empty())return false;
- inventoryProtection.select(rd16(g+0x4886));const int bag=rd16(ui+0x58),slot=rd16(ui+0x5a);if(bag>=4)return true;
+ inventoryProtection.select(rd16(g+0x4886));const int bag=rd16(ui+(sale?0x58:0x54)),slot=rd16(ui+(sale?0x5a:0x56));if(bag>=4)return true;
  const int count=rd16(g+0x433c+bag*0x92);if(count>24||slot>=count)return true;
- if(rd32(ui+0x2d8)!=g+0x433c)return true;
+ if(sale&&rd32(ui+0x2d8)!=g+0x433c)return true;
  const auto record=g+0x433e + bag*0x92+6*slot;
  if(!rd16(record+4)||rd16(record)!=0)return false;
  const int pool=rd16(record+2);if(pool>=200)return true;
@@ -100,7 +106,7 @@ static bool inventoryNativeBlocked(int key){
 }
 static void inventoryProtectionHook(uc_engine*,uint64_t,uint32_t,void* reset){
  try{
-  if(reset){if(reinterpret_cast<uintptr_t>(reset)==1)inventoryProtection.select(int(R(0)));inventoryOpen=false;inventoryPanel.items.clear();inventoryPanel.view.clear();return;}
+  if(reset){inventoryCancelBatch();if(reinterpret_cast<uintptr_t>(reset)==1)inventoryProtection.select(int(R(0)));inventoryOpen=false;inventoryPanel.items.clear();inventoryPanel.view.clear();return;}
   if(!inventoryNativeBlocked(int(R(0))))return;
   u32 lr=0;uc_reg_read(uc,UC_ARM_REG_LR,&lr);uc_reg_write(uc,UC_ARM_REG_PC,&lr);
  }catch(const std::exception& e){hostReport("[inventario] Guarda falhou: %s\n",e.what());fatal=true;uc_emu_stop(uc);}
@@ -116,10 +122,63 @@ static void installInventoryProtection(){
  try{destinia::loadInventoryProtection(fs::path(saveDir),inventoryProtection);inventoryProtectionReady=true;}
  catch(const std::exception& e){inventoryPanel.error="SIDECAR INVALIDO - PROTECAO INDISPONIVEL";hostReport("[inventario] %s; sidecar preservado.\n",e.what());}
 }
-static void inventoryEvent(destinia::InventoryEvent event){if(event==destinia::InventoryEvent::Protect)inventoryToggleProtection();else if(event==destinia::InventoryEvent::Close)inventoryOpen=false;else if(event==destinia::InventoryEvent::Choose)inventoryChoose();}
+static std::set<int> inventoryEquippedPools(){
+ std::set<int> pools;const auto g=exportsMap.at("Game");
+ for(int slot=0;slot<6;slot++){const u32 pointer=rd32(g+0x4584+4*slot);if(pointer>=g+0x2ed6&&pointer<g+0x2ed6+200*20&&(pointer-(g+0x2ed6))%20==0)pools.insert(int((pointer-(g+0x2ed6))/20));}
+ return pools;
+}
+static void inventoryCancelBatch(){inventoryBatchTargets.clear();inventoryPanel.batchPreview=false;inventoryPanel.batchMore=false;inventoryPanel.batchCount=inventoryPanel.batchProtected=inventoryPanel.batchEquipped=0;for(auto& item:inventoryPanel.items)item.batchCandidate=false;}
+static bool inventoryPrepareBatch(){
+ try{
+  const auto ui=exportsMap.at("GameUI");if(!inventoryOpen||rd32(ui+0x7c)!=0x20000002u||inventoryContext!=0x20000002u)throw std::runtime_error("ABRA A MOCHILA PARA DESMONTAR");
+  auto fresh=inventoryPanel;std::vector<std::array<uint8_t,20>> prints;std::vector<int> indices;int selected=-1;
+  if(!inventoryRead(fresh,prints,indices,selected)||!inventoryProtectionReady)throw std::runtime_error("INVENTARIO/PROTECAO INDISPONIVEL");
+  const auto equipped=inventoryEquippedPools();size_t protectedCount=0,equippedCount=0,eligibleCount=0;
+  for(const auto at:fresh.view){const auto& item=fresh.items[at];if(item.protectedItem)protectedCount++;else if(item.equipped||equipped.count(item.pool))equippedCount++;else eligibleCount++;}
+  auto candidates=destinia::inventorySalvageCandidates(fresh.items,fresh.view,equipped,destinia::kMaxSalvageBatch);
+  if(candidates.empty())throw std::runtime_error("SEM ITENS ELEGIVEIS NO FILTRO");
+  inventoryBatchTargets.clear();for(const auto at:candidates){if(at>=prints.size())throw std::runtime_error("FINGERPRINT DO LOTE INDISPONIVEL");fresh.items[at].batchCandidate=true;inventoryBatchTargets.push_back({fresh.items[at],prints[at]});}
+  inventoryPanel.items=std::move(fresh.items);inventoryPanel.names=std::move(fresh.names);inventoryPanel.view=std::move(fresh.view);
+  inventoryPanel.batchPreview=true;inventoryPanel.batchMore=eligibleCount>inventoryBatchTargets.size();inventoryPanel.batchCount=inventoryBatchTargets.size();inventoryPanel.batchProtected=protectedCount;inventoryPanel.batchEquipped=equippedCount;inventoryPanel.error.clear();return true;
+ }catch(const std::exception& e){inventoryCancelBatch();inventoryPanel.error=e.what();return false;}
+}
+static bool inventoryBatchItemStillSafe(const InventoryBatchTarget& target,uint32_t expectedState=0x20000002u){
+ const auto g=exportsMap.at("Game"),ui=exportsMap.at("GameUI");const auto& item=target.item;
+ if(rd32(ui+0x7c)!=expectedState||item.bag<0||item.bag>=4||item.slot<0||item.slot>=24||item.pool<0||item.pool>=200)return false;
+ if(!inventoryProtectionReady||!inventoryRefreshProtection())return false;inventoryProtection.select(rd16(g+0x4886));
+ const int count=rd16(g+0x433c+item.bag*0x92);if(count>24||item.slot>=count)return false;
+ const auto record=g+0x433e + item.bag*0x92+6*item.slot;
+ if(rd16(record)!=0||rd16(record+2)!=item.pool||rd16(record+4)==0||!(rd16(g+0x2e0c+item.pool)&255))return false;
+ std::array<uint8_t,20> fingerprint{};if(!rd(g+0x2ed6+20*item.pool,fingerprint.data(),fingerprint.size())||fingerprint!=target.fingerprint)return false;
+ if(inventoryProtection.has(item.pool,fingerprint)||inventoryEquippedPools().count(item.pool))return false;
+ return true;
+}
+static bool inventoryRunBatch(){
+ const auto ui=exportsMap.at("GameUI"),g=exportsMap.at("Game");const size_t total=inventoryBatchTargets.size();size_t completed=0;std::string failure;
+ for(const auto& target:inventoryBatchTargets){
+  if(!inventoryBatchItemStillSafe(target)){failure="LOTE INTERROMPIDO: INVENTARIO MUDOU/ITEM PROTEGIDO";break;}
+  const uint16_t bag=uint16_t(target.item.bag),slot=uint16_t(target.item.slot);wr(ui+0x54,&bag,2);wr(ui+0x56,&slot,2);
+  if(!callFn(exportsMap.at("GameUI_drawMainMenu"),{rd32(exportsMap.at("Grp")+4)})||!callFn(exportsMap.at("MainMenu_mKeyPressed"),{6})||rd32(ui+0x7c)!=0x20000003u){failure="LOTE INTERROMPIDO: MENU NATIVO INDISPONIVEL";break;}
+  int option=-1;for(int i=0;i<4;i++)if(rd16(ui+0x326+2*i)==2){if(option!=-1){option=-2;break;}option=i;}
+  if(option<0){callFn(exportsMap.at("MainMenu_mKeyPressed"),{27});failure="LOTE INTERROMPIDO: ACAO NATIVA AMBIGUA";break;}
+  const uint16_t choice=uint16_t(option);wr(ui+0x58,&choice,2);
+  if(!callFn(exportsMap.at("MainMenu_mKeyPressed"),{17})||rd32(ui+0x7c)!=0x20030003u){if(rd32(ui+0x7c)==0x20000003u||rd32(ui+0x7c)==0x20030003u)callFn(exportsMap.at("MainMenu_mKeyPressed"),{27});failure="LOTE INTERROMPIDO: PREVIA NATIVA NAO CONFIRMADA";break;}
+  if(!inventoryBatchItemStillSafe(target,0x20030003u)){callFn(exportsMap.at("MainMenu_mKeyPressed"),{27});failure="LOTE INTERROMPIDO: ITEM MUDOU ANTES DA ACAO";break;}
+  const bool invoked=callFn(exportsMap.at("MainMenu_mKeyPressed"),{17});const auto resultState=rd32(ui+0x7c);
+  if(!invoked||resultState!=0x20030004u){if(resultState==0x20030003u)callFn(exportsMap.at("MainMenu_mKeyPressed"),{27});failure="LOTE INTERROMPIDO: DESMONTAGEM NATIVA NAO CONFIRMADA";break;}
+  if(uint8_t(rd16(g+0x2e0c+target.item.pool)&255)!=0){callFn(exportsMap.at("MainMenu_mKeyPressed"),{17});failure="LOTE INTERROMPIDO: ITEM CONTINUA ATIVO";break;}
+  completed++;
+  if(!callFn(exportsMap.at("MainMenu_mKeyPressed"),{17})||rd32(ui+0x7c)!=0x20000002u){failure="LOTE INTERROMPIDO: MENU NAO RETORNOU AO INVENTARIO";break;}
+ }
+ inventoryCancelBatch();if(!failure.empty())inventoryPanel.error="DESMONTADOS "+std::to_string(completed)+"/"+std::to_string(total)+"; "+failure;else inventoryPanel.error="LOTE CONCLUIDO: "+std::to_string(completed)+" ITENS";
+ try{auto fresh=inventoryPanel;std::vector<std::array<uint8_t,20>> prints;std::vector<int> indices;int selected=-1;if(inventoryRead(fresh,prints,indices,selected)){const auto message=inventoryPanel.error;inventoryPanel=std::move(fresh);inventoryPanel.error=message;inventoryFingerprints=std::move(prints);inventoryNativeIndices=std::move(indices);}}catch(...){}
+ return failure.empty();
+}
+static void inventoryEvent(destinia::InventoryEvent event){if(event==destinia::InventoryEvent::Protect)inventoryToggleProtection();else if(event==destinia::InventoryEvent::Close){inventoryCancelBatch();inventoryOpen=false;}else if(event==destinia::InventoryEvent::Choose)inventoryChoose();else if(event==destinia::InventoryEvent::BatchPreview)inventoryPrepareBatch();else if(event==destinia::InventoryEvent::BatchCancel)inventoryCancelBatch();else if(event==destinia::InventoryEvent::BatchConfirm)inventoryRunBatch();}
 static bool inventoryMenuKey(int key,bool down){
  if(key==10014){if(down){if(inventoryOpen)inventoryToggleProtection();else inventoryToggleNativeProtection();}return true;}
- if(key==10016){if(down&&inventoryVisible()){if(inventoryOpen)inventoryOpen=false;else inventoryEnter();}return true;}
+ if(key==10016){if(down&&inventoryVisible()){if(inventoryOpen){inventoryCancelBatch();inventoryOpen=false;}else inventoryEnter();}return true;}
+ if(key==10018){if(down&&inventoryOpen)inventoryEvent(inventoryPanel.batchPreview?destinia::InventoryEvent::BatchConfirm:destinia::InventoryEvent::BatchPreview);return true;}
  if(!down)return false;if(inventoryOpen){inventoryEvent(inventoryPanel.key(key,rd16(exportsMap.at("Game")+0x48fa)));return true;}if(key==12&&inventoryVisible())return inventoryEnter();return false;
 }
 static bool inventoryMenuTouch(int x,int y,int phase){if(inventoryTouchCaptured&&phase!=0){if(phase==1)inventoryTouchCaptured=false;return true;}if(!inventoryOpen&&!inventoryVisible())return false;int hit=destinia::inventoryHit(x,y,SCREEN_W,SCREEN_H,preferences.uiScale,inventoryOpen);if(inventoryOpen){if(phase==0){inventoryTouchCaptured=true;inventoryEvent(inventoryPanel.hit(hit,rd16(exportsMap.at("Game")+0x48fa)));}return true;}if(phase==0&&hit==20){inventoryTouchCaptured=inventoryEnter();return inventoryTouchCaptured;}return false;}
