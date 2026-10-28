@@ -34,7 +34,12 @@ int main(int argc,char** argv) {
   auto v=metadata.view(species);assert(v.sections.size()==3);
   assert(v.sections[0].id=="drops" && v.sections[1].id=="spawns" && v.sections[2].id=="variants");
   assert(!section(v,"drops").groups.empty());assert(!section(v,"variants").groups.empty());
-  for(const auto& g:section(v,"drops").groups)for(const auto& r:g.rows)assert(r.text.size()<=55);
+  for(const auto& g:section(v,"drops").groups)for(const auto& r:g.rows) {
+   if(r.text.size()>55) {
+    std::fprintf(stderr,"species=%d group=%s size=%zu text=%s\n",species,g.id.c_str(),r.text.size(),r.text.c_str());
+    return 1;
+   }
+  }
  }
  // Effective equipment levels include observed level +0..2, including rarity boundaries.
  for(const auto& boundary:std::vector<std::pair<int,int>>{{37,2},{38,3},{77,3},{78,4}}) {

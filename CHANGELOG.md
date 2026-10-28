@@ -11,6 +11,12 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 - README, manifesto, banner e roadmap histórico alinhados. Web 0.12.1 em fontes; deployment externo não concluído por ferramenta indisponível.
 - [Verificação e limites](docs/VERIFICACAO_0.12.1.md). Demais itens da Issue #5 não implementados neste lote.
 
+## Correções em revisão após 0.12.1 — 28/10/2026
+
+- Descrições dos drops exclusivos dos chefes foram compactadas para caber integralmente na linha do Códex; atributos e valores dos itens permanecem iguais.
+- Adicionado workflow de CI para executar os testes Web em mudanças de `web/`, pull requests e execução manual.
+- Ainda não publicado; execução remota depende do envio desta branch. A validação local do Códex, dos drops e da interface passou.
+
 ## 0.12.0 Beta — 26/10/2026
 
 - **Modo Abissal Hardcore Completo**:
