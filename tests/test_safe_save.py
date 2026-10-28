@@ -44,5 +44,5 @@ class SafeSaveHostTests(unittest.TestCase):
     exe=base/(variant+'.exe');command=['g++','-std=c++17',str(ROOT/'tests/safe_save_host_cases.cpp'),'-o',str(exe)]
     if variant=='host_zoom':command+=['-DDESTINIA_TEST_ZOOM']
     built=subprocess.run(command+flags,capture_output=True,text=True);self.assertEqual(built.returncode,0,built.stderr)
-    run=subprocess.run([str(exe),str(base/variant)],capture_output=True,text=True,timeout=120)
+    run=subprocess.run([str(exe),str(base/variant)],capture_output=True,text=True,timeout=30)
     self.assertEqual(run.returncode,0,run.stdout+run.stderr);self.assertIn('SAFE_SAVE_HOST_OK',run.stdout)
