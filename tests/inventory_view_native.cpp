@@ -14,9 +14,12 @@ static uc_err keepEngine(uc_engine*){return UC_ERR_OK;}
 #include "../common/inventory_view.h"
 #undef main
 #undef uc_close
+static int breakItemCalls=0;static uint32_t breakItemR0=0,breakItemR1=0;
+static void captureBreakItem(uc_engine* engine,uint64_t,uint32_t,void*){++breakItemCalls;uc_reg_read(engine,UC_ARM_REG_R0,&breakItemR0);uc_reg_read(engine,UC_ARM_REG_R1,&breakItemR1);}
 int main(int argc,char**argv){
  setvbuf(stdout,nullptr,_IONBF,0);
  if(int rc=originalMain(argc,argv))return rc;
+ uc_hook breakHook=0;const auto breakEntry=exportsMap.at("_breakItem")&~1u;assert(uc_hook_add(uc,&breakHook,UC_HOOK_CODE,reinterpret_cast<void*>(captureBreakItem),nullptr,breakEntry,breakEntry)==UC_ERR_OK);
  auto g=exportsMap.at("Game");assert(callFn(exportsMap.at("GameCanvas_init"),{exportsMap.at("GameCanvas")}));
  u32 ids[3]={};int encoded[3]={2,1,33};for(int i=0;i<3;i++)assert(callFn(exportsMap.at("GameUI_getNewEquipByIdx"),{u32(encoded[i])},ids+i));
  for(int b=0;b<4;b++){uint16_t header[3]={4,0,uint16_t(b?0:3)};wr(g+0x4338+b*0x92,header,6);}
@@ -160,5 +163,46 @@ int main(int argc,char**argv){
  assert(rd32(ui+0x7c)==0x91040106u);
  u32 guardedGold=0;assert(callFn(exportsMap.at("getMyGold"),{},&guardedGold));assert(guardedGold==gold);
  assert(rd32(g+0x4584)==expected && uint8_t(rd16(g+0x2e0c+duplicate)&255)!=0);
+ assert(callFn(exportsMap.at("openMainmenu"),{0}));wr(ui+0x76,&anim,2);
+ for(int key:{7,7,9,6,9})assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{u32(key)}));
+ assert(rd32(ui+0x7c)==0x20000002u);
+ int salvageSlot=-1;for(int slot=0;slot<rd16(g+0x433c);++slot)if(rd16(g+0x433e + 6*slot + 4)&&rd16(g+0x433e + 6*slot + 2)==ids[1])salvageSlot=slot;
+ assert(salvageSlot>=0);const uint16_t bag=0,slot=uint16_t(salvageSlot);wr(ui+0x54,&bag,2);wr(ui+0x56,&slot,2);
+ inventoryProtection.select(rd16(g+0x4886));std::array<uint8_t,20> salvageFingerprint{};assert(rd(g+0x2ed6+20*ids[1],salvageFingerprint.data(),salvageFingerprint.size()));assert(inventoryProtection.toggle(ids[1],salvageFingerprint));destinia::saveInventoryProtection(fs::path(saveDir),inventoryProtection);assert(inventoryRefreshProtection());
+ assert(callFn(exportsMap.at("GameUI_drawMainMenu"),{rd32(exportsMap.at("Grp")+4)}));
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{6}));assert(rd32(ui+0x7c)==0x20000003u);
+ printf("BREAK_MENU options=%u,%u,%u,%u cursor=%u\n",rd16(ui+0x326),rd16(ui+0x328),rd16(ui+0x32a),rd16(ui+0x32c),rd16(ui+0x58));
+ const uint16_t dismantleOption=1;wr(ui+0x58,&dismantleOption,2);
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{17}));
+ printf("BREAK_CONFIRM state=%08x calls=%d count=%u\n",rd32(ui+0x7c),breakItemCalls,rd16(g+0x433c));
+ assert(rd32(ui+0x7c)==0x20030003u&&breakItemCalls==0);
+ const auto protectedCount=rd16(g+0x433c);assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{17}));
+ assert(breakItemCalls==0&&rd32(ui+0x7c)==0x20030003u&&rd16(g+0x433c)==protectedCount);
+ assert(rd16(g+0x433e + 6*salvageSlot + 2)==ids[1]&&rd16(g+0x433e + 6*salvageSlot + 4)==1);
+ assert(!inventoryProtection.toggle(ids[1],salvageFingerprint));destinia::saveInventoryProtection(fs::path(saveDir),inventoryProtection);assert(inventoryRefreshProtection());
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{17}));
+ printf("BREAK_RESULT state=%08x calls=%d args=%u,%u count=%u active=%u rows=",rd32(ui+0x7c),breakItemCalls,breakItemR0,breakItemR1,rd16(g+0x433c),uint8_t(rd16(g+0x2e0c+ids[1])&255));
+ for(int slot=0;slot<rd16(g+0x433c);++slot)printf("[%u,%u,%u]",rd16(g+0x433e + 6*slot),rd16(g+0x433e + 6*slot + 2),rd16(g+0x433e + 6*slot + 4));puts("");
+ assert(breakItemCalls==1&&breakItemR0==0&&breakItemR1==uint32_t(salvageSlot));
+ assert(uint8_t(rd16(g+0x2e0c+ids[1])&255)==0);
+ bool materialReward=false;for(int slot=0;slot<rd16(g+0x433c);++slot){auto record=g+0x433e + 6*slot;if(rd16(record)==1&&rd16(record+4)>0)materialReward=true;}assert(materialReward);
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{17}));printf("BREAK_ACK state=%08x\n",rd32(ui+0x7c));assert(rd32(ui+0x7c)==0x20000002u);
+ int secondSalvageSlot=-1;for(int at=0;at<rd16(g+0x433c);++at)if(rd16(g+0x433e + 6*at + 4)&&rd16(g+0x433e + 6*at + 2)==ids[2])secondSalvageSlot=at;assert(secondSalvageSlot>=0);
+ const uint16_t secondBag=0,secondSlot=uint16_t(secondSalvageSlot);wr(ui+0x54,&secondBag,2);wr(ui+0x56,&secondSlot,2);assert(callFn(exportsMap.at("GameUI_drawMainMenu"),{rd32(exportsMap.at("Grp")+4)}));
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{6}));const uint16_t secondDismantle=1;wr(ui+0x58,&secondDismantle,2);
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{17})&&rd32(ui+0x7c)==0x20030003u);
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{17}));assert(breakItemCalls==2&&breakItemR0==0&&breakItemR1==uint32_t(secondSalvageSlot));assert(uint8_t(rd16(g+0x2e0c+ids[2])&255)==0);
+ assert(callFn(exportsMap.at("MainMenu_mKeyPressed"),{17})&&rd32(ui+0x7c)==0x20000002u);
+ u32 protectedBatchPool=0,salvageBatchPool=0;assert(callFn(exportsMap.at("GameUI_getNewEquipByIdx"),{2},&protectedBatchPool));assert(callFn(exportsMap.at("GameUI_getNewEquipByIdx"),{33},&salvageBatchPool));assert(protectedBatchPool!=salvageBatchPool);
+ const uint16_t batchCount=6;wr(g+0x433c,&batchCount,2);uint16_t protectedRecord[3]={0,uint16_t(protectedBatchPool),1},salvageRecord[3]={0,uint16_t(salvageBatchPool),1};wr(g+0x433e + 24,protectedRecord,6);wr(g+0x433e + 30,salvageRecord,6);
+ std::array<uint8_t,20> protectedBatchFingerprint{};assert(rd(g+0x2ed6+20*protectedBatchPool,protectedBatchFingerprint.data(),protectedBatchFingerprint.size()));inventoryProtection.select(rd16(g+0x4886));assert(inventoryProtection.toggle(protectedBatchPool,protectedBatchFingerprint));destinia::saveInventoryProtection(fs::path(saveDir),inventoryProtection);assert(inventoryRefreshProtection());
+ inventoryOpen=false;assert(inventoryEnter());inventoryPanel.reset();const auto batchEvent=inventoryPanel.hit(13,rd16(g+0x48fa));assert(batchEvent==destinia::InventoryEvent::BatchPreview);inventoryEvent(batchEvent);
+ assert(inventoryPanel.batchPreview&&inventoryPanel.batchCount==1&&inventoryPanel.batchProtected==1&&inventoryPanel.batchEquipped==1);
+ rd(g,before.data(),before.size());inventoryEvent(destinia::InventoryEvent::BatchCancel);rd(g,after.data(),after.size());assert(before==after&&!inventoryPanel.batchPreview&&inventoryBatchTargets.empty());
+ inventoryEvent(inventoryPanel.hit(13,rd16(g+0x48fa)));assert(inventoryPanel.batchPreview&&inventoryPanel.batchCount==1);
+ const auto materialBefore=rd16(g+0x433e + 4);const auto equippedPool=duplicate;
+ const bool batchRan=inventoryRunBatch();printf("BATCH_RESULT ok=%d count=%zu msg=%s\n",batchRan,inventoryPanel.batchCount,inventoryPanel.error.c_str());assert(batchRan);assert(!inventoryPanel.batchPreview&&inventoryPanel.error=="LOTE CONCLUIDO: 1 ITENS");
+ assert(uint8_t(rd16(g+0x2e0c+protectedBatchPool)&255)!=0&&uint8_t(rd16(g+0x2e0c+salvageBatchPool)&255)==0&&uint8_t(rd16(g+0x2e0c+equippedPool)&255)!=0);
+ assert(rd16(g+0x433e + 4)>materialBefore);
  puts("INVENTORY_SELECTION_ARM_OK");
 }

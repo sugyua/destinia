@@ -4,6 +4,13 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.16.0 Beta - 28/10/2026
+
+- Desmontagem em lote nos hosts normal e Zoom, com previa baseada nos filtros ativos e confirmacao separada.
+- Limite de 50 itens; itens protegidos/equipados ou alterados apos a previa sao excluidos. Cada alvo e revalidado e usa o menu ARM original.
+- F8 inicia/confirma o lote; Esc cancela a previa. Uma inconsistencia interrompe a sequencia e mostra quantos itens foram concluidos.
+- Verificacao: testes de politica, painel e ARM nos dois hosts aprovados; builds Release CMake/Ninja dos hosts aprovados.
+
 ## 0.15.0 Beta - 28/10/2026
 
 - Ctrl+F3 abre uma ficha somente leitura com PV/PM maximos, ATK, DEF, HIT, EVA, CRI e BLD, lidos do calculo nativo ativo.
