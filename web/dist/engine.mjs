@@ -179,6 +179,7 @@ export class DestiniaWeb {
       const json=await res.json();
       if(!json?.ok||!json.saves)return;
       for(const [file,b64] of Object.entries(json.saves)){
+        if(this.preservedFeatureSaveNames?.has(file.split(/[\\/]/).pop()))continue;
         const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
         this.saved.set(file,bin);
         this.saved.set('/data/data/game.destiniaeng/files/'+file,bin);

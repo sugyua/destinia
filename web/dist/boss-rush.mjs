@@ -233,12 +233,14 @@ export class BossRushUI {
       return true;
     }
 
-    // Abas: py + 20 a py + 36
-    if (y >= py + 20 && y <= py + 36) {
+    // Duas linhas de abas: py + 20 a py + 52.
+    if (y >= py + 20 && y < py + 52) {
       if (phase === 0) {
         const tabW = Math.floor((pw - 16) / 3);
-        const t = Math.floor((x - (px + 8)) / tabW)+(y>=py+36?3:0);
-        if (x>=px+8 && t >= 0 && t < 6) {
+        const row = y >= py + 36 ? 1 : 0;
+        const col = Math.floor((x - (px + 8)) / tabW);
+        const t = row * 3 + col;
+        if (x >= px + 8 && x < px + pw - 8 && col >= 0 && col < 3) {
           this.currentTab = t;
           this.selectedIndex = 0;
           this.scrollOffset = 0;
@@ -307,7 +309,7 @@ export class BossRushUI {
 
     // Linha divisória
     for (let x = px + 8; x < px + pw - 8; x++) {
-      const at = ((py + 36) * width + x) * 2;
+      const at = ((py + 52) * width + x) * 2;
       fb[at] = 0xbf; fb[at + 1] = 0xd7;
     }
 

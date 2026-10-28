@@ -1,6 +1,7 @@
 ﻿import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Features0130} from '../dist/features-0130.mjs';
+import {BossRushUI} from '../dist/boss-rush.mjs';
 test('failed or incomplete spawn aborts with no rewards',()=>{
  const f=new Features0130({},{spawnWave:()=>[{instance:1,species:1}]});
  assert.equal(f.start(0,4),false);assert.equal(f.arena.active,false);assert.equal(f.arena.ledger.slots[0].pendingGold,0);
@@ -68,6 +69,8 @@ test('pending reward is cleared only after backend confirms credit; title equip 
 });
 
 test('active arena credits rewards automatically and rejects refining',()=>{let claims=0;const f=new Features0130({}, {creditRewards:()=>{claims++;return true;},context:()=>({slot:0,map:1})});f.arena.active=true;f.arena.ledger.slots[0].pendingGold=500;f.settle();assert.equal(claims,1);assert.equal(f.upgradeSelected(),false);f.arena.active=false;f.settle();assert.equal(claims,1);});
+test('touch selects both tabs in the second row',()=>{const ui=new BossRushUI({width:800,height:480});ui.openMenu();const pw=360,px=220,py=130,tabW=Math.floor((pw-16)/3);ui.handleTouch(px+8+tabW+5,py+44,0);assert.equal(ui.currentTab,4);ui.handleTouch(px+8+tabW*2+5,py+44,0);assert.equal(ui.currentTab,5);});
+test('feature sidecar marks restored native saves as authoritative over cloud copies',()=>{const features=new Features0130({}),payload=JSON.stringify({version:1,mode:'classico',features:features.snapshot(),saves:[['./save0.dat',[9,8]]]});const engine={gameMode:'classico',saved:new Map(),log(){}};const backend=new NativeFeatures0130Backend(engine,{storage:{getItem:()=>payload}});backend.attach(features);assert.deepEqual([...engine.saved.get('./save0.dat')],[9,8]);assert.equal(engine.preservedFeatureSaveNames.has('save0.dat'),true);});
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -78,9 +81,9 @@ test('original ARM feature pipeline spawns registered arena, defers checkpoint s
  const root=process.env.DESTINIA_GAME_ROOT||(fs.existsSync('game/assets')?'game':'../game');if(!fs.existsSync(root+'/assets'))return;
  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'destinia-feature-test-'));
  let r;try{fs.copyFileSync(new URL('../dist/vendor/unicorn_arm.js',import.meta.url),path.join(temp,'unicorn.cjs'));const factory=createRequire(import.meta.url)(path.join(temp,'unicorn.cjs')),uc=await factory();const assets=new Map(fs.readdirSync(root+'/assets').map(n=>[n,new Uint8Array(fs.readFileSync(root+'/assets/'+n))]));
- r=new DestiniaWeb(uc,assets,{width:400,height:240,language:'en'});const storage=new Map(),backend=new NativeFeatures0130Backend(r,{storage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)}});r.featureBackendOption=backend;r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);const g=r.exports.get('Game'),put16=(a,v)=>r.write(a,Uint8Array.of(v&255,v>>>8));put16(g+0x48f4,100);put16(g+0x48fa,10);put16(g+0x4886,0);
- const context=backend.context();assert.equal(r.features0130.start(0,context.map),true);assert.equal(r.features0130.arena.members.size,4);
+ r=new DestiniaWeb(uc,assets,{width:400,height:240,language:'en'});const storage=new Map(),backend=new NativeFeatures0130Backend(r,{storage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)}}),freed=[];const call=backend.call.bind(backend);backend.call=(name,args)=>{if(name==='Monster_freeMonster')freed.push(args[0]);return call(name,args);};r.featureBackendOption=backend;r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);const g=r.exports.get('Game'),put16=(a,v)=>r.write(a,Uint8Array.of(v&255,v>>>8));put16(g+0x48f4,100);put16(g+0x48fa,10);put16(g+0x4886,0);
+ const context=backend.context();assert.equal(r.features0130.start(0,context.map),true);assert.equal(r.features0130.arena.members.size,4);freed.length=0;
  const savedBefore=Array.from(r.saved,([k,v])=>[k,Array.from(v)]),first=g+0x14fc;r.put32(first+0x20,0);r.call(r.exports.get('checkQuestMonster'),[first]);assert.equal(r.features0130.arena.remaining,3,JSON.stringify({context:backend.context(),slot:r.features0130.arena.slot,map:r.features0130.arena.arenaMap,instance:backend.instanceId(first),species:r.get16(first+8),hp:r.get32(first+0x20),active:r.features0130.arena.active}));r.call(r.exports.get('checkQuestMonster'),[first]);assert.equal(r.features0130.arena.remaining,3);
- r.features0130.changed();await backend.flush();assert.deepEqual(Array.from(r.saved,([k,v])=>[k,Array.from(v)]),savedBefore);assert.ok(storage.size);r.features0130.abort();
+ r.features0130.changed();await backend.flush();assert.deepEqual(Array.from(r.saved,([k,v])=>[k,Array.from(v)]),savedBefore);assert.ok(storage.size);r.features0130.abort();assert.equal(r.features0130.arena.active,false);assert.deepEqual(freed,Array.from({length:21},(_,i)=>i),'arena monsters must be freed before restoring the campaign map');
  }finally{r?.close();fs.rmSync(temp,{recursive:true,force:true});}
 });

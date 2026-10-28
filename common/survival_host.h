@@ -64,7 +64,7 @@ class SurvivalHost {
   write<U>(game+0x1f9c,plan.count);
   for(U i=0;i<plan.count;++i){U p=game+0x14fc+136*i;unsigned species=i==0&&plan.bossSpecies?plan.bossSpecies:1;
    write<uint16_t>(p+8,uint16_t(species));write<uint16_t>(p+0xa,uint16_t(species>=100?species:0));
-   write<uint16_t>(p+0x10,uint16_t(std::max(1u,std::min(99u,unsigned(read<uint16_t>(game+0x48fa))))));
+   write<uint16_t>(p+0x10,uint16_t(std::max(1u,std::min(99u,unsigned(read<uint16_t>(game+0x48fa))+plan.number-1))));
    write<uint16_t>(p+0x16,uint16_t(points[i].first));write<uint16_t>(p+0x18,uint16_t(points[i].second));
   }
   call("Mon_createMonster");
@@ -94,10 +94,11 @@ public:
   if(!ready||arena.active||!error.empty())return false;const auto s=slot();
   if(s>=10||!alive()||read<int16_t>(game+0x4854)!=0){message="ENTRE NO JOGO PRIMEIRO";return false;}
   originalArea=read<uint16_t>(game+0x4870);originalMap=read<uint16_t>(game+0x4872);originalX=read<uint16_t>(game+0x4890);originalY=read<uint16_t>(game+0x4892);owner=s;ownedMap=true;
-  try{if(!arena.start(s,++runSequence,0))return false;spawn();flush();return true;}catch(const std::exception&e){message=e.what();stop(true);return false;}
+  try{if(!arena.start(s,++runSequence,1))return false;spawn();flush();return true;}catch(const std::exception&e){message=e.what();stop(true);return false;}
  }
+ void clearArenaMonsters(){if(map()!=arenaMap)return;for(U i=0;i<=20;++i)call("Monster_freeMonster",{i});call("Monster_freeBoss");instances.clear();}
  void stop(bool restore){
-  arena.abort();instances.clear();dirty=true;
+  arena.abort();if(ownedMap)clearArenaMonsters();instances.clear();dirty=true;
   if(restore&&ownedMap&&slot()==owner&&map()==arenaMap){call("Map_freeData");call("Map_freeTile");call("Map_loadData",{originalArea,originalMap,1});call("Map_loadTile",{0});write<uint16_t>(game+0x4890,uint16_t(originalX));write<uint16_t>(game+0x4892,uint16_t(originalY));}
   ownedMap=false;
  }
@@ -112,7 +113,7 @@ public:
    if(arena.active){
     if(s!=owner||map()!=arenaMap||!alive()){stop(false);flush();return;}
 
-    for(auto entry:instances)if(read<int32_t>(entry.first+0x20)<=0&&arena.observeKill(arena.runId,entry.second,0,int(s)))dirty=true;
+    for(auto entry:instances)if(read<int32_t>(entry.first+0x20)<=0&&arena.observeKill(arena.runId,entry.second,arenaMap,int(s)))dirty=true;
     if(arena.clearedWave()){credit();if(arena.beginNextWave()){spawn();unlock();}else stop(true);}
 
    }flush();

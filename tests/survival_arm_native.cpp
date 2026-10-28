@@ -23,7 +23,7 @@ int main(int argc,char**argv){
  assert(survivalHost.start());
  for(unsigned n=1;n<=51;n++){
   auto w=destinia::survival::wave(n);assert(survivalHost.arena.currentWave==n&&survivalHost.arena.remaining==w.count);
-  for(unsigned j=0;j<w.count;j++){auto p=g+0x14fc+j*136;assert(rd32(p+0x20)>0&&rd32(p+0x24)>0);if(w.elite)assert(rd32(p+0x4c)==1);wr32(p+0x20,0);}
+  for(unsigned j=0;j<w.count;j++){auto p=g+0x14fc+j*136;assert(rd32(p+0x20)>0&&rd32(p+0x24)>0);assert(rd16(p+0x10)==std::min(99u,20+n-1));if(w.elite)assert(rd32(p+0x4c)==1);wr32(p+0x20,0);}
   survivalHost.tick(1000);
   if(!survivalHost.error.empty()){printf("ARENA_ERROR %s\n",survivalHost.error.c_str());return 8;}
  }
@@ -35,6 +35,7 @@ int main(int argc,char**argv){
  assert(survivalHost.combat.immuneMs==2000&&rd16(g+0x48f4)==1);
  assert(callFn(exportsMap.at("monsterHitProc"),{p,0}));assert(rd16(g+0x48f4)==1);
  survivalHost.stop(true);survivalHost.flush();
+ assert(rd32(g+0x1f9c)==0);
  assert(destinia::survival::load(fs::path(saveDir))->slots[0].bestWave==51);
  survivalHost.combat.elixirMs=9000;survivalHost.combat.cooldownMs=120000;survivalHost.combat.immuneMs=2000;
  sh(g+0x4886,1);survivalHost.tick(0);
