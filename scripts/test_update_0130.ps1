@@ -35,6 +35,17 @@ try {
       & $executable --game game --save "$case/save" --settings "$case/config.ini" --reports "$case/reports" --headless 1 --mute --no-save-preferences --out "$case/frames"
       if ($LASTEXITCODE) { throw "Teste ARM falhou: $variant" }
     }
+    foreach ($variant in @('host','host_zoom')) {
+      $case = Join-Path $scratch ($variant + '-survival')
+      New-Item -ItemType Directory -Path $case | Out-Null
+      $executable = Join-Path $case 'survival-arm.exe'
+      $options = @('-std=c++17','-O0',"-I$msys/ucrt64/include/SDL2",'tests/survival_arm_native.cpp','-o',$executable,'-lSDL2','-lunicorn','-lz','-lwinmm','-limm32','-lole32','-loleaut32','-lversion','-lsetupapi','-lgdi32')
+      if ($variant -eq 'host_zoom') { $options += '-DDESTINIA_TEST_ZOOM' }
+      & g++ @options
+      if ($LASTEXITCODE) { throw "Compilacao de sobrevivencia ARM falhou: $variant" }
+      & $executable --game game --save "$case/save" --settings "$case/config.ini" --reports "$case/reports" --headless 1 --mute --no-save-preferences --out "$case/frames"
+      if ($LASTEXITCODE) { throw "Teste de sobrevivencia ARM falhou: $variant" }
+    }
   }
   Write-Output "UPDATE_0130_CHECKS_OK: $scratch"
 } catch {

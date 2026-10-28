@@ -1,8 +1,8 @@
-# Destinia 0.12.1 Beta — fontes do navegador
+# Destinia 0.13.0 Beta — fontes do navegador
 
 **Atalhos:** F4 Catálogo, F5 Baú, F8 Bounties. Press/release sem repetição; F5 protegido em partida carregada/pausada. Tab preservado.
 
-**Deployment 0.12.1 não concluído:** ferramenta Sites indisponível nesta sessão. A revisão do site não foi confirmada; os registros de funcionalidades abaixo incluem histórico.
+**Deployment 0.13.0 publicado no Site privado existente:** arena e refinamento +15; acesso permanece restrito ao proprietario. O repositorio nao contem dados pessoais do jogo.
 
 Teste privado: https://destinia-web-experimental.leafyheron257.chatgpt.site/
 

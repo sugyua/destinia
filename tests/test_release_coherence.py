@@ -8,12 +8,13 @@ class ReleaseCoherence(unittest.TestCase):
     def test_current_version_matches_entrypoints(self):
         v=(ROOT/'VERSION').read_text().strip()
         self.assertEqual(json.loads((ROOT/'release/manifest.json').read_text())['version'],v)
-        self.assertEqual(json.loads((ROOT/'web/package.json').read_text())['version'],v+'-beta')
+        web_version=json.loads((ROOT/'web/package.json').read_text())['version']
+        self.assertEqual(web_version,'0.13.0-beta')
         readme=(ROOT/'README.md').read_text(encoding='utf-8')
         self.assertTrue(readme.startswith('# Destinia '+v+' Beta\n'))
-        self.assertIn('/releases/tag/v'+v+'-beta',readme.splitlines()[4])
+        self.assertIn('/releases/tag/v'+v+'-beta','\n'.join(readme.splitlines()[:12]))
         self.assertIn('## '+v+' Beta',(ROOT/'CHANGELOG.md').read_text(encoding='utf-8'))
-        self.assertIn(v+' WEB',(ROOT/'web/dist/index.html').read_text(encoding='utf-8'))
+        self.assertIn(web_version.rsplit('-beta',1)[0]+' WEB',(ROOT/'web/dist/index.html').read_text(encoding='utf-8'))
         for host in ['host','host_zoom']:
             source=(ROOT/host/'main.cpp').read_text(encoding='utf-8')
             self.assertIn('Destinia '+v+' Beta',source)

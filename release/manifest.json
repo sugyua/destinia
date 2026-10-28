@@ -305,7 +305,6 @@
     "web/dist/vendor/BRIDGE-PATCH.txt",
     "web/dist/vendor/ORIGEM.txt",
     "web/dist/vendor/UNICORN-LICENSE.txt",
-    "web/dist/vendor/unicorn_arm.js",
     "web/dist/weapons-catalog.mjs",
     "web/dist/worker.js",
     "web/package.json",

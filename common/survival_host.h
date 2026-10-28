@@ -104,7 +104,7 @@ public:
  void tick(unsigned ms){
   if(!ready)return;
   try{
-   const auto s=slot();if(s!=owner&&!arena.active){owner=s;}
+   const auto s=slot();if(s!=owner&&!arena.active){owner=s;combat.reset();}
    if(arena.active&&(s!=owner||map()!=arenaMap||!alive())){stop(s==owner&&map()==arenaMap);flush();return;}
    if(read<int16_t>(game+0x4854)!=0)return;
    combat.tick(ms);const auto oldBestTime=arena.slot>=0?arena.ledger.slots[arena.slot].bestTimeSeconds:0;arena.tick(ms);if(arena.slot>=0&&arena.ledger.slots[arena.slot].bestTimeSeconds!=oldBestTime)dirty=true;

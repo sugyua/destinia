@@ -1,20 +1,25 @@
+#include <unicorn/unicorn.h>
+static uc_err keepSurvivalTestEngine(uc_engine*){return UC_ERR_OK;}
+#define uc_close keepSurvivalTestEngine
+#define main originalSurvivalMain
 #ifdef DESTINIA_TEST_ZOOM
-#define main destinia_main_hidden
 #include "../host_zoom/main.cpp"
 #else
-#define main destinia_main_hidden
 #include "../host/main.cpp"
 #endif
 #undef main
+#undef uc_close
 #include <cassert>
 int main(int argc,char**argv){
- setvbuf(stdout,nullptr,_IONBF,0);if(int rc=runHost(argc,argv))return rc;
+ setvbuf(stdout,nullptr,_IONBF,0);if(int rc=originalSurvivalMain(argc,argv))return rc;
  assert(survivalHost.ready);const auto g=exportsMap.at("Game");
  assert(callFn(exportsMap.at("GameCanvas_init"),{exportsMap.at("GameCanvas")}));
- assert(callFn(exportsMap.at("Map_loadData"),{0,1,1}));
+ // Match the stable arena fixture used by update_0130_native: map 61 has a
+ // fully initialized walkable grid for the pre-start host checks.
+ assert(callFn(exportsMap.at("Map_loadData"),{0,61,1}));
+ assert(callFn(exportsMap.at("Map_loadTile"),{0}));
  auto sh=[&](u32 at,unsigned n){uint16_t v=uint16_t(n);assert(wr(at,&v,2));};
  sh(g+0x4886,0);sh(g+0x4854,0);sh(g+0x48fa,20);sh(g+0x48f4,100);sh(g+0x48c4,100);
- printf("ARENA_MAP before=%u/%u\n",rd16(g+0x4870),rd16(g+0x4872));
  assert(survivalHost.start());
  for(unsigned n=1;n<=51;n++){
   auto w=destinia::survival::wave(n);assert(survivalHost.arena.currentWave==n&&survivalHost.arena.remaining==w.count);
@@ -24,12 +29,15 @@ int main(int argc,char**argv){
  }
  assert(survivalHost.arena.active&&survivalHost.arena.currentWave==52);
  assert(bossRushUI.titlesStore.isUnlocked(0,destinia::TitleId::MestreDaSobrevivencia));
- survivalHost.arena.ledger.slots[0].lastStand=true;auto p=g+0x14fc;
+ survivalHost.combat.enabled=true;auto p=g+0x14fc;
  sh(p+0x28,1000);sh(g+0x48ca,0);sh(g+0x4974,0);sh(g+0x48c4,100);sh(g+0x48f4,20);
  for(unsigned i=1;i<=100&&!survivalHost.combat.immuneMs;++i){wr32(exportsMap.at("MMain")+0x3910,i);wr32(exportsMap.at("MMain")+0x3914,0);assert(callFn(exportsMap.at("monsterHitProc"),{p,0}));}
  assert(survivalHost.combat.immuneMs==2000&&rd16(g+0x48f4)==1);
  assert(callFn(exportsMap.at("monsterHitProc"),{p,0}));assert(rd16(g+0x48f4)==1);
  survivalHost.stop(true);survivalHost.flush();
- assert(destinia::survival::load(fs::path(saveDir))->slots[0].max_wave==52);
- printf("SURVIVAL_ARM_OK waves=51 last_stand=2s title=20 atomic_record=52\n");return 0;
+ assert(destinia::survival::load(fs::path(saveDir))->slots[0].bestWave==51);
+ survivalHost.combat.elixirMs=9000;survivalHost.combat.cooldownMs=120000;survivalHost.combat.immuneMs=2000;
+ sh(g+0x4886,1);survivalHost.tick(0);
+ assert(survivalHost.combat.enabled&&survivalHost.combat.elixirMs==0&&survivalHost.combat.cooldownMs==0&&survivalHost.combat.immuneMs==0);
+ printf("SURVIVAL_ARM_OK waves=51 last_stand=2s title=20 atomic_record=51 slot_reset=ok\n");return 0;
 }

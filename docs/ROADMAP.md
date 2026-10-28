@@ -2,7 +2,7 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs. Faça backup dos saves antes de atualizar.**
 
-## Estado atual — 28/10/2026
+Release publicada mais recente: 0.12.1 Beta. A branch PR #6 reune 0.13.0–0.16.0 em quatro commits ordenados. A Web privada ja tem arena e refino 0.13.0; F12, Ctrl+F3 e desmontagem em lote pertencem aos hosts PC. Permanecem pendentes contratos e recuperacao de saves, tratamento de erros de inicializacao/hooks Unicorn, profiling comparavel, revisao de licencas/dependencias, divergencia entre hosts, acessibilidade/orientacao Web e testes property/fuzz. A validacao fisica continua necessaria alem dos testes automatizados.
 
 Release atual: 0.12.1 Beta, publicada em 27/10/2026. Neste branch de continuidade, o workflow de testes Web e a correção de descrições de drops que excediam o limite visual de 55 caracteres estão em revisão local; ainda não enviados nem publicados. Permanecem pendentes os contratos e falhas de recuperação de saves, tratamento de erros de inicialização/hooks Unicorn, profiling comparável, revisão de licenças/dependências, divergência entre hosts, acessibilidade/orientação Web e testes property/fuzz. A frente 0.13.0 segue separada. Testes automatizados não encerram validação física.
 

@@ -15,6 +15,7 @@ static std::vector<uint8_t> inventoryUpgradeState;
 static std::map<u32,bool> inventoryUpgradeCache;
 struct InventoryBatchTarget {destinia::InventoryItem item;std::array<uint8_t,20> fingerprint;};
 static std::vector<InventoryBatchTarget> inventoryBatchTargets;
+static void inventoryCancelBatch();
 static void inventoryBeginFrame(){inventoryIcons.clear();}
 static void inventoryRefreshUpgrades(){
  const auto g=exportsMap.at("Game"),ui=exportsMap.at("GameUI");std::vector<uint8_t> state(32056+24);
@@ -105,7 +106,7 @@ static bool inventoryNativeBlocked(int key){
 }
 static void inventoryProtectionHook(uc_engine*,uint64_t,uint32_t,void* reset){
  try{
-  if(reset){if(reinterpret_cast<uintptr_t>(reset)==1)inventoryProtection.select(int(R(0)));inventoryOpen=false;inventoryPanel.items.clear();inventoryPanel.view.clear();return;}
+  if(reset){inventoryCancelBatch();if(reinterpret_cast<uintptr_t>(reset)==1)inventoryProtection.select(int(R(0)));inventoryOpen=false;inventoryPanel.items.clear();inventoryPanel.view.clear();return;}
   if(!inventoryNativeBlocked(int(R(0))))return;
   u32 lr=0;uc_reg_read(uc,UC_ARM_REG_LR,&lr);uc_reg_write(uc,UC_ARM_REG_PC,&lr);
  }catch(const std::exception& e){hostReport("[inventario] Guarda falhou: %s\n",e.what());fatal=true;uc_emu_stop(uc);}
@@ -176,7 +177,7 @@ static bool inventoryRunBatch(){
 static void inventoryEvent(destinia::InventoryEvent event){if(event==destinia::InventoryEvent::Protect)inventoryToggleProtection();else if(event==destinia::InventoryEvent::Close){inventoryCancelBatch();inventoryOpen=false;}else if(event==destinia::InventoryEvent::Choose)inventoryChoose();else if(event==destinia::InventoryEvent::BatchPreview)inventoryPrepareBatch();else if(event==destinia::InventoryEvent::BatchCancel)inventoryCancelBatch();else if(event==destinia::InventoryEvent::BatchConfirm)inventoryRunBatch();}
 static bool inventoryMenuKey(int key,bool down){
  if(key==10014){if(down){if(inventoryOpen)inventoryToggleProtection();else inventoryToggleNativeProtection();}return true;}
- if(key==10016){if(down&&inventoryVisible()){if(inventoryOpen)inventoryOpen=false;else inventoryEnter();}return true;}
+ if(key==10016){if(down&&inventoryVisible()){if(inventoryOpen){inventoryCancelBatch();inventoryOpen=false;}else inventoryEnter();}return true;}
  if(key==10018){if(down&&inventoryOpen)inventoryEvent(inventoryPanel.batchPreview?destinia::InventoryEvent::BatchConfirm:destinia::InventoryEvent::BatchPreview);return true;}
  if(!down)return false;if(inventoryOpen){inventoryEvent(inventoryPanel.key(key,rd16(exportsMap.at("Game")+0x48fa)));return true;}if(key==12&&inventoryVisible())return inventoryEnter();return false;
 }

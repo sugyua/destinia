@@ -198,6 +198,13 @@ int main(int argc,char**argv){
  std::array<uint8_t,20> protectedBatchFingerprint{};assert(rd(g+0x2ed6+20*protectedBatchPool,protectedBatchFingerprint.data(),protectedBatchFingerprint.size()));inventoryProtection.select(rd16(g+0x4886));assert(inventoryProtection.toggle(protectedBatchPool,protectedBatchFingerprint));destinia::saveInventoryProtection(fs::path(saveDir),inventoryProtection);assert(inventoryRefreshProtection());
  inventoryOpen=false;assert(inventoryEnter());inventoryPanel.reset();const auto batchEvent=inventoryPanel.hit(13,rd16(g+0x48fa));assert(batchEvent==destinia::InventoryEvent::BatchPreview);inventoryEvent(batchEvent);
  assert(inventoryPanel.batchPreview&&inventoryPanel.batchCount==1&&inventoryPanel.batchProtected==1&&inventoryPanel.batchEquipped==1);
+ assert(inventoryMenuKey(10016,true));assert(!inventoryOpen&&!inventoryPanel.batchPreview&&inventoryBatchTargets.empty());
+ assert(inventoryEnter());inventoryPanel.reset();inventoryEvent(inventoryPanel.hit(13,rd16(g+0x48fa)));
+ assert(inventoryPanel.batchPreview&&!inventoryBatchTargets.empty());
+ inventoryProtectionHook(nullptr,0,0,reinterpret_cast<void*>(2));
+ assert(!inventoryOpen&&!inventoryPanel.batchPreview&&inventoryBatchTargets.empty());
+ assert(inventoryEnter());inventoryPanel.reset();inventoryEvent(inventoryPanel.hit(13,rd16(g+0x48fa)));
+ assert(inventoryPanel.batchPreview&&!inventoryBatchTargets.empty());
  rd(g,before.data(),before.size());inventoryEvent(destinia::InventoryEvent::BatchCancel);rd(g,after.data(),after.size());assert(before==after&&!inventoryPanel.batchPreview&&inventoryBatchTargets.empty());
  inventoryEvent(inventoryPanel.hit(13,rd16(g+0x48fa)));assert(inventoryPanel.batchPreview&&inventoryPanel.batchCount==1);
  const auto materialBefore=rd16(g+0x433e + 4);const auto equippedPool=duplicate;

@@ -66,7 +66,7 @@ jobs:
           SDL_AUDIODRIVER: dummy
         run: |
           set -eu
-          for pattern in test_inventory_view.py test_combat_power.py test_drop_names.py test_runtime.py test_preferences.py test_preferences_host.py test_codex.py test_codex_native.py test_codex_details.py test_codex_details_ui.py test_codex_portraits.py test_zoom_camera.py test_safe_save.py test_offline_store.py test_save_modes.py test_touch_controls.py test_ui_transform.py test_text_labels.py test_package_release.py test_package_windows.py; do
+          for pattern in test_inventory_view.py test_combat_power.py test_drop_names.py test_runtime.py test_preferences.py test_preferences_host.py test_codex.py test_codex_native.py test_codex_details.py test_codex_details_ui.py test_codex_portraits.py test_zoom_camera.py test_safe_save.py test_offline_store.py test_save_modes.py test_touch_controls.py test_ui_transform.py test_text_labels.py test_release_coherence.py test_package_release.py test_package_windows.py; do
             python -m unittest discover -s tests -p "$pattern" -v
           done
           DESTINIA_ZOOM_EXE="$PWD/host_zoom/build/destinia_host.exe" python -m unittest discover -s tests -p test_zoom_render.py -v
@@ -74,7 +74,7 @@ jobs:
         shell: powershell
         run: |
           $ErrorActionPreference='Stop'
-          foreach($name in @('test_diagnostic.ps1','test_camera_mode.ps1','test_save_configuration.ps1','test_game_preferences.ps1','test_configurator_native.ps1','test_launchers.ps1','test_root_executables.ps1','test_prompt.ps1')) {
+          foreach($name in @('test_diagnostic.ps1','test_camera_mode.ps1','test_save_configuration.ps1','test_game_preferences.ps1','test_configurator_native.ps1','test_launchers.ps1','test_root_executables.ps1','test_prompt.ps1','test_update_0130.ps1')) {
             & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path 'tests' $name)
             if($LASTEXITCODE -ne 0) {throw "Falhou: $name"}
           }

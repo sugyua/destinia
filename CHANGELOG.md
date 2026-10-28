@@ -9,18 +9,18 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 - Desmontagem em lote nos hosts normal e Zoom, com previa baseada nos filtros ativos e confirmacao separada.
 - Limite de 50 itens; itens protegidos/equipados ou alterados apos a previa sao excluidos. Cada alvo e revalidado e usa o menu ARM original.
 - F8 inicia/confirma o lote; Esc cancela a previa. Uma inconsistencia interrompe a sequencia e mostra quantos itens foram concluidos.
-- Verificacao: testes de politica, painel e ARM nos dois hosts aprovados; builds Release CMake/Ninja dos hosts aprovados.
+- Verificacao: testes de politica/painel e ARM nos dois hosts aprovados; builds Release CMake/Ninja aprovados. Correcao posterior: cancelar previa tambem ao fechar o painel/resetar, com estado revalidado no teste nativo.
 
 ## 0.15.0 Beta - 28/10/2026
 
 - Ctrl+F3 abre uma ficha somente leitura com PV/PM maximos, ATK, DEF, HIT, EVA, CRI e BLD, lidos do calculo nativo ativo.
 - Os hosts normal e Zoom nao recalculam atributos nem alteram equipamento ou save.
-- Verificacao: testes de formato/renderizacao e builds Release CMake/Ninja dos dois hosts aprovados.
+- Verificacao: testes de formato/renderizacao e builds Release CMake/Ninja dos dois hosts aprovados. O glifo % foi incluído para exibir HIT/EVA/CRI/BLD corretamente.
 
 ## 0.14.0 Beta - 28/10/2026
 
 - Hosts PC normal e Zoom: painel F12 mostra FPS, tempo medio de emulacao e memoria de trabalho do processo. A coleta ocorre somente enquanto o painel esta visivel.
-- Verificacao: teste focado e builds Release CMake/Ninja dos dois hosts aprovados.
+- Verificacao: teste focado e builds Release CMake/Ninja dos dois hosts aprovados. A leitura de memoria agora substitui valores antigos tambem quando a consulta retorna zero.
 
 ## 0.13.0 Beta - 28/10/2026
 
@@ -28,7 +28,7 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 - Titulo Mestre da Sobrevivencia na onda 20 com bonus de atributos, resistencia e esquiva.
 - Ultimo Suspiro com limite de dano, 2 segundos de imunidade e 120 segundos de recarga; elixir opcional de 20% por 5 minutos.
 - Refino de armas e armaduras ate +15, pedras por faixa e progresso separado do save original.
-- Validacao: suite Web, regressao focada, smoke ARM de 51 ondas e builds Release dos dois hosts aprovados.
+- Validacao: suite Web, regressao focada, smoke ARM de 51 ondas e builds Release dos dois hosts aprovados. O teste de arena e executado explicitamente nos hosts normal e Zoom.
 
 ## 0.12.1 Beta — 27/10/2026
 

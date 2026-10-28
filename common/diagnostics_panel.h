@@ -69,7 +69,7 @@ class DiagnosticsPanel {
   const DiagnosticsStats& stats() const { return current; }
 
   void recordFrame(double frameMs, double emulationMs, uint64_t workingSetBytes) {
-    if (workingSetBytes) current.workingSetBytes = workingSetBytes;
+    current.workingSetBytes = workingSetBytes;
     if (!std::isfinite(frameMs) || !std::isfinite(emulationMs) || frameMs <= 0.0 || emulationMs < 0.0)
       return;
     windowMs += frameMs;

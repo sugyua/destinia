@@ -17,6 +17,8 @@ int main() {
   assert(std::abs(stats.fps - 60.0) < 0.1);
   assert(std::abs(stats.averageEmulationMs - 4.0) < 0.01);
   assert(stats.workingSetBytes == 2u * 1024u * 1024u);
+  panel.recordFrame(1000.0 / 60.0, 4.0, 0);
+  assert(panel.stats().workingSetBytes == 0);
   panel.recordFrame(-1.0, std::nan(""), 0);
   assert(std::abs(panel.stats().fps - 60.0) < 0.1);
   std::vector<uint8_t> pixels(400u * 240u * 2u);
