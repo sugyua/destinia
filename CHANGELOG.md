@@ -9,7 +9,9 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 - Desmontagem em lote nos hosts normal e Zoom, com previa baseada nos filtros ativos e confirmacao separada.
 - Limite de 50 itens; itens protegidos/equipados ou alterados apos a previa sao excluidos. Cada alvo e revalidado e usa o menu ARM original.
 - F8 inicia/confirma o lote; Esc cancela a previa. Uma inconsistencia interrompe a sequencia e mostra quantos itens foram concluidos.
-- Verificacao: testes de politica/painel e ARM nos dois hosts aprovados; builds Release CMake/Ninja aprovados. Correcao posterior: cancelar previa tambem ao fechar o painel/resetar, com estado revalidado no teste nativo.
+- Arena PC/Web corrigida para limpar os inimigos ao voltar, contar abates no mapa ativo e manter os níveis por onda alinhados.
+- Saves locais restaurados pelo sidecar deixam de ser substituídos por cópias antigas da nuvem; sidecars inválidos não impedem a abertura do host.
+- Verificacao: testes de politica/painel e ARM nos dois hosts aprovados; builds Release CMake/Ninja aprovados. A prévia também é cancelada ao fechar o painel ou resetar.
 
 ## 0.15.0 Beta - 28/10/2026
 
