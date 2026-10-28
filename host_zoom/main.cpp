@@ -1,5 +1,6 @@
 #include "../common/safe_save.h"
 #include "../common/diagnostics_panel.h"
+#include "../common/attribute_sheet.h"
 #include "../common/virtual_controls.h"
 #include "../common/ui_renderer.h"
 #include "../common/drop_names.h"
@@ -21,6 +22,7 @@ static bool controllerBackHeld = false;
 static bool controllerChordTriggered = false;
 static uint32_t lastAxisTick = 0;
 static destinia::DiagnosticsPanel diagnosticsPanel;
+static destinia::AttributeSheet attributeSheet;
 
 static void paintControllerGuide(uint8_t* pixels, int width, int height) {
   if (!pixels) return;
@@ -1252,7 +1254,7 @@ static int runHost(int argc, char** argv) {
   if(explicitScale) { scale=std::clamp(scale,1,10); windowWidth=400*scale; windowHeight=240*scale; }
   const fs::path reports=reportsDir.empty()?destinia::defaultReportsDir():fs::path(reportsDir);
   if(destinia::sessionLog.start(reports,"host_zoom")) hostReport("[host] Log TXT: %s\n",(destinia::sessionLog.directory()/"log.txt").string().c_str());
-  hostReport("[host] Destinia 0.14.0 Beta - host_zoom\n");
+  hostReport("[host] Destinia 0.15.0 Beta - host_zoom\n");
   if(saveDir.empty()) saveDir=destinia::modeSaveDir(destinia::configuredSaveDir(),preferences.gameMode).string();
   saveDir=fs::absolute(saveDir).lexically_normal().string();
   hostReport("[host] Save compartilhado: %s\n",saveDir.c_str());
@@ -1457,7 +1459,7 @@ static int runHost(int argc, char** argv) {
 #endif
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  // pixels nitidos
-    win = SDL_CreateWindow("Destinia 0.14.0 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
+    win = SDL_CreateWindow("Destinia 0.15.0 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
     if(!win) { hostReport("SDL_CreateWindow: %s\n",SDL_GetError()); return 1; }
     if (fullscreen) setFullscreen(true);
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_PRESENTVSYNC);
@@ -1628,6 +1630,7 @@ static int runHost(int argc, char** argv) {
         }
 
         if(ev.type==SDL_KEYDOWN && !ev.key.repeat && ev.key.keysym.sym==SDLK_F12){diagnosticsPanel.toggle();continue;}
+        if(ev.type==SDL_KEYDOWN && !ev.key.repeat && ev.key.keysym.sym==SDLK_F3 && (ev.key.keysym.mod & KMOD_CTRL)){attributeSheet.toggle();continue;}
         if(bossRushUI.open) {
           if((ev.type==SDL_KEYDOWN) && !ev.key.repeat) {
             if(ev.key.keysym.sym==SDLK_ESCAPE)bossRushUI.handleKey(10,true);
@@ -1752,7 +1755,7 @@ static int runHost(int argc, char** argv) {
       const bool paused=controls.paused();
       if(paused!=wasPaused) {
         controls.release();
-        SDL_SetWindowTitle(win,paused?"Destinia 0.14.0 Beta - PAUSADO":"Destinia 0.14.0 Beta");
+        SDL_SetWindowTitle(win,paused?"Destinia 0.15.0 Beta - PAUSADO":"Destinia 0.15.0 Beta");
         hostReport("[host] %s.\n",paused?"Pausado":"Retomado"); wasPaused=paused;
       }
       updateAudioState(controls.focused,paused);
@@ -1848,6 +1851,7 @@ static int runHost(int argc, char** argv) {
       if (controllerBackHeld) { paintControllerGuide(frameBuffer.data(), SCREEN_W, SCREEN_H); }
     }
     diagnosticsPanel.paint(frameBuffer.data(), SCREEN_W, SCREEN_H);
+    {destinia::CombatStats attributes{};for(int i=0;i<13;++i)attributes[i]=int16_t(rd16(exportsMap.at("Game")+0x48ba+2*i));attributeSheet.paint(frameBuffer.data(),SCREEN_W,SCREEN_H,attributes);}
     const uint8_t* fb = frameBuffer.data();
     if (headlessFrames) {
       if (frame == 1 || frame % 10 == 0) { char nm[64]; snprintf(nm, sizeof nm, "/frame_%05ld.bmp", frame); writeBmp(outDir + nm, fb); }
@@ -1912,7 +1916,7 @@ static int runHost(int argc, char** argv) {
 
 
 int main(int argc,char** argv) {
-  if(argc==2 && std::strcmp(argv[1],"--version")==0) { std::puts("Destinia 0.14.0 Beta"); return 0; }
+  if(argc==2 && std::strcmp(argv[1],"--version")==0) { std::puts("Destinia 0.15.0 Beta"); return 0; }
   int result=1;
   if(argc==2 && std::string(argv[1])=="--import-classic") {
     try {const auto base=destinia::configuredSaveDir();destinia::importClassicSave(base,destinia::modeSaveDir(base,"expandido"));printf("Copia criada no modo expandido; a partida classica foi preservada.\n");return 0;}

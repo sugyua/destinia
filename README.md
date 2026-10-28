@@ -1,14 +1,17 @@
-# Destinia 0.14.0 Beta
+# Destinia 0.15.0 Beta
 
-> **Versao 0.14.0 Beta (28/10/2026).** Arena/refino 0.13 e painel F12 de FPS, tempo medio de emulacao e memoria de trabalho.
+> **Versao 0.15.0 Beta (28/10/2026).** Atualiza a arena/refino, acrescenta F12 e a ficha somente leitura Ctrl+F3.
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**Destinia 0.14.0 Beta** - inclui painel F12 nos hosts PC.
+**Destinia 0.15.0 Beta** - inclui ficha de atributos Ctrl+F3.
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
-**Web 0.13:** arena e refino publicados no site privado; F12 e exclusivo dos hosts PC.
+**Web 0.13:** arena e refino publicados no site privado. F12 e Ctrl+F3 funcionam apenas nos hosts PC.
+
+## Novidade 0.15.0
+- Ctrl+F3 mostra PV/PM maximos, ATK, DEF, HIT, EVA, CRI e BLD sem alterar o personagem.
 
 ## Novidade 0.14.0
 - F12 abre o painel de diagnostico nos hosts normal e Zoom.
@@ -230,7 +233,7 @@ coleta.raio=19
 
 `drops.categorias` soma **1 equipamentos + 2 materiais + 4 ouro + 8 missão + 16 outros**; 31 mostra todos e 0 oculta todos quando o filtro está ativo. `drops.rank_minimo` aceita 0–4 e só filtra equipamentos. `coleta.raio` aceita 1–19, nunca amplia a distância nativa. O padrão sem configuração é ouro=1 e materiais=0; opções explícitas anteriores são respeitadas. Use 0 para desativar o autoloot de ouro ou 1 para ativar materiais. Opções são gravadas fora dos `save*.dat`; itens coletados entram na memória do jogo pelo coletor original e serão salvos pelo fluxo normal quando o jogador salvar, sem mudar o formato.
 
-**Web 0.13:** arena e refino publicados no site privado; F12 e exclusivo dos hosts PC.
+**Web 0.13:** arena e refino publicados no site privado. F12 e Ctrl+F3 funcionam apenas nos hosts PC.
 
 ## 0.9.8 — Proteção de equipamentos, separação de chefes no Códex e Web Destinia Zoom
 
@@ -281,7 +284,7 @@ O pacote Windows passa a incluir **`Destinia.exe`** (normal) e **`Destinia Zoom.
 
 O ZIP Windows da Release contém os quatro executáveis: os dois lançadores na raiz e os dois hosts nas respectivas subpastas. O ZIP de fontes contém `launcher/main.go` e os scripts de compilação, **não** os executáveis pré-compilados. Não são incluídos dados do jogo ou DLLs externas; veja [INSTALAÇÃO](INSTALL.md).
 
-**Web 0.13:** arena e refino publicados no site privado; F12 e exclusivo dos hosts PC.
+**Web 0.13:** arena e refino publicados no site privado. F12 e Ctrl+F3 funcionam apenas nos hosts PC.
 
 ## 0.9.1 — Códex no menu e filtros de equipamentos
 

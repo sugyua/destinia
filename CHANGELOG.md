@@ -4,6 +4,12 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.15.0 Beta - 28/10/2026
+
+- Ctrl+F3 abre uma ficha somente leitura com PV/PM maximos, ATK, DEF, HIT, EVA, CRI e BLD, lidos do calculo nativo ativo.
+- Os hosts normal e Zoom nao recalculam atributos nem alteram equipamento ou save.
+- Verificacao: testes de formato/renderizacao e builds Release CMake/Ninja dos dois hosts aprovados.
+
 ## 0.14.0 Beta - 28/10/2026
 
 - Hosts PC normal e Zoom: painel F12 mostra FPS, tempo medio de emulacao e memoria de trabalho do processo. A coleta ocorre somente enquanto o painel esta visivel.
