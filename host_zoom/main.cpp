@@ -9,7 +9,10 @@ static destinia::BossMageRuntime bossMage;
 #include "../common/difficulty_arm.h"
 static destinia::DifficultyArmRuntime difficultyArm;
 #include "../common/boss_rush_ui.h"
+#include "../common/survival_host.h"
 static destinia::BossRushUI bossRushUI;
+static destinia::SurvivalHost survivalHost;
+static destinia::RefinementHost refinementHost;
 #include "../common/auto_potion.h"
 static destinia::AutoPotionController autoPotion;
 
@@ -19,7 +22,7 @@ static uint32_t lastAxisTick = 0;
 
 static void paintControllerGuide(uint8_t* pixels, int width, int height) {
   if (!pixels) return;
-  const std::string guide = "[SELECT]+  [X] Catalogo   [Y] Bau   [B] Bounties   [A] Missao   [R3] Auto-Pocao";
+  const std::string guide = "[SELECT]+  [X] Catalogo   [Y] Bau   [B] Bounties   [A] Missao   [R3] Auto-Pocao  [CIMA] Mago/Arena";
   int tw = destinia::overlayTextWidth(guide);
   int x = (width - tw) / 2;
   int y = height - 24;
@@ -959,7 +962,7 @@ static bool callFn(u32 addr, std::initializer_list<u32> args, u32* ret) {
   if (!hitMagic && (regPC() & ~1u) == MAGIC_RET) hitMagic = true;  // o Unicorn para ANTES de executar o endereco final
   if (!hitMagic) { dumpState("tempo esgotado (a .so ficou presa num laco ou parou)"); executionFailed=true; destinia::sessionLog.write("ERRO de emulacao",true); return false; }
   if (ret) *ret = R(0);
-  try {saveCall.commit();for(const auto& path:saveTransaction.committedRemovals())codexFileRemoved(path.string());}
+  try {refinementHost.stage(saveTransaction);saveCall.commit();for(const auto& path:saveTransaction.committedRemovals())codexFileRemoved(path.string());}
   catch(const std::exception& error) {hostReport("[host] Save nao publicado: %s\n",error.what());executionFailed=true;return false;}
   if(!bossMage.error.empty()){hostReport("[mago] Erro ARM: %s\n",bossMage.error.c_str());executionFailed=true;return false;}
   bossMage.dispatch();
@@ -1247,7 +1250,7 @@ static int runHost(int argc, char** argv) {
   if(explicitScale) { scale=std::clamp(scale,1,10); windowWidth=400*scale; windowHeight=240*scale; }
   const fs::path reports=reportsDir.empty()?destinia::defaultReportsDir():fs::path(reportsDir);
   if(destinia::sessionLog.start(reports,"host_zoom")) hostReport("[host] Log TXT: %s\n",(destinia::sessionLog.directory()/"log.txt").string().c_str());
-  hostReport("[host] Destinia 0.12.1 Beta - host_zoom\n");
+  hostReport("[host] Destinia 0.13.0 Beta - host_zoom\n");
   if(saveDir.empty()) saveDir=destinia::modeSaveDir(destinia::configuredSaveDir(),preferences.gameMode).string();
   saveDir=fs::absolute(saveDir).lexically_normal().string();
   hostReport("[host] Save compartilhado: %s\n",saveDir.c_str());
@@ -1384,6 +1387,10 @@ static int runHost(int argc, char** argv) {
   installDifficulty();
   if(!difficultyReady){hostReport("[dificuldade ARM] Inicializacao recusada; progresso preservado.\n");return 1;}
   difficultyArm.install(uc,SO_BASE,exportsMap,soPath,[](unsigned slot){return difficultyProgress.current(slot);});
+  refinementHost.install(uc,SO_BASE,exportsMap,fs::path(saveDir),[](u32 at,const std::vector<u32>& args,u32* result){if(args.empty())return callFn(at,{},result);if(args.size()==1)return callFn(at,{args[0]},result);return false;});
+  bossRushUI.survivalRows=[](){const auto slot=bossRushUI.currentSlot;const auto best=slot<10?survivalHost.arena.ledger.slots[slot].bestWave:0;const auto kills=slot<10?survivalHost.arena.ledger.slots[slot].totalKills:0;return std::vector<std::string>{"INICIAR ARENA - RECORDE "+std::to_string(best),"ENCERRAR / VOLTAR A CAMPANHA","REFINAR EQUIPADO "+std::to_string(refinementHost.selectedEquipment+1)+" "+refinementHost.suffix(refinementHost.selected()),"TROCAR EQUIPAMENTO ALVO",refinementHost.summary(),std::string("ULTIMO SUSPIRO: ")+(survivalHost.combat.enabled?"ATIVO":"DESATIVADO"),"ELIXIR: 20% MITIGACAO / 5 MIN", "RECORDE: "+std::to_string(best)+" ONDAS / "+std::to_string(kills)+" ABATES"};};
+  bossRushUI.survivalAction=[](int row){try{if(row==0){if(survivalHost.start())bossRushUI.closeMenu();return survivalHost.message;}if(row==1){survivalHost.stop(true);survivalHost.credit();survivalHost.flush();return std::string("ARENA ENCERRADA");}if(row==2){if(survivalHost.arena.active)return std::string("ENCERRE A ARENA PARA REFINAR");refinementHost.upgrade();return refinementHost.message;}if(row==3){refinementHost.cycle();return refinementHost.message;}if(row==5){survivalHost.combat.enabled=!survivalHost.combat.enabled;return std::string("ULTIMO SUSPIRO ")+(survivalHost.combat.enabled?"ATIVADO":"DESATIVADO");}if(row==6){survivalHost.combat.activateElixir();return std::string("ELIXIR ATIVO POR 5 MINUTOS");}return std::string("SUCESSO 100% / SEM QUEBRA / MAX +15");}catch(const std::exception& e){return std::string(e.what());}};
+  survivalHost.install(uc,SO_BASE,exportsMap,soPath,fs::path(saveDir),bossRushUI.titlesStore,refinementHost,[](u32 at,const std::vector<u32>& args){if(args.empty())return callFn(at,{});if(args.size()==1)return callFn(at,{args[0]});if(args.size()==3)return callFn(at,{args[0],args[1],args[2]});return false;});
   installInventoryProtection();
   destinia::initLootEconomy(saveDir);
   weaponsCatalogHost.init(fs::path(saveDir));
@@ -1448,7 +1455,7 @@ static int runHost(int argc, char** argv) {
 #endif
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  // pixels nitidos
-    win = SDL_CreateWindow("Destinia 0.12.1 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
+    win = SDL_CreateWindow("Destinia 0.13.0 Beta", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
     if(!win) { hostReport("SDL_CreateWindow: %s\n",SDL_GetError()); return 1; }
     if (fullscreen) setFullscreen(true);
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_PRESENTVSYNC);
@@ -1623,6 +1630,8 @@ static int runHost(int argc, char** argv) {
             if(ev.key.keysym.sym==SDLK_ESCAPE)bossRushUI.handleKey(10,true);
             else if(ev.key.keysym.sym==SDLK_UP)bossRushUI.handleKey(3,true);
             else if(ev.key.keysym.sym==SDLK_DOWN)bossRushUI.handleKey(9,true);
+            else if(ev.key.keysym.sym==SDLK_LEFT)bossRushUI.handleKey(5,true);
+            else if(ev.key.keysym.sym==SDLK_RIGHT)bossRushUI.handleKey(7,true);
             else if(ev.key.keysym.sym==SDLK_RETURN || ev.key.keysym.sym==SDLK_SPACE)bossRushUI.handleKey(17,true);
             else {auto binding=preferences.keys.find(ev.key.keysym.sym);if(binding!=preferences.keys.end()) {const int k[]={3,9,5,7,17,10,27};int a=int(binding->second);if(a>=0 && a<7)bossRushUI.handleKey(k[a],true);}}
           }
@@ -1740,7 +1749,7 @@ static int runHost(int argc, char** argv) {
       const bool paused=controls.paused();
       if(paused!=wasPaused) {
         controls.release();
-        SDL_SetWindowTitle(win,paused?"Destinia 0.12.1 Beta - PAUSADO":"Destinia 0.12.1 Beta");
+        SDL_SetWindowTitle(win,paused?"Destinia 0.13.0 Beta - PAUSADO":"Destinia 0.13.0 Beta");
         hostReport("[host] %s.\n",paused?"Pausado":"Retomado"); wasPaused=paused;
       }
       updateAudioState(controls.focused,paused);
@@ -1779,6 +1788,8 @@ static int runHost(int argc, char** argv) {
     }
     frame++;
     runtimeLogTick(frame,runMs);
+    survivalHost.tick(unsigned(std::min(250u,wait)));
+    if(!survivalHost.error.empty()){hostReport("[sobrevivencia] %s\n",survivalHost.error.c_str());executionFailed=true;break;}
     difficultyFlush();
     if(frame%16==0) codexFlush();
     destinia::lootEconomyProcessOffline(saveDir, fnGetCash, fnSetCash, callFn);
@@ -1812,6 +1823,7 @@ static int runHost(int argc, char** argv) {
       int cY = int16_t(rd16(exportsMap.at("Game")+0x487a));
       bossRushUI.pets.paintCompanion(frameBuffer.data(), SCREEN_W, SCREEN_H, hX - cX, hY - cY, frame);
     }
+    survivalHost.paint(frameBuffer.data(),SCREEN_W,SCREEN_H);
     bossMage.paint(frameBuffer.data());
     bossRushUI.paint(frameBuffer.data(), SCREEN_W, SCREEN_H);
     lootQol.paint(frameBuffer.data());
@@ -1895,7 +1907,7 @@ static int runHost(int argc, char** argv) {
 
 
 int main(int argc,char** argv) {
-  if(argc==2 && std::strcmp(argv[1],"--version")==0) { std::puts("Destinia 0.12.1 Beta"); return 0; }
+  if(argc==2 && std::strcmp(argv[1],"--version")==0) { std::puts("Destinia 0.13.0 Beta"); return 0; }
   int result=1;
   if(argc==2 && std::string(argv[1])=="--import-classic") {
     try {const auto base=destinia::configuredSaveDir();destinia::importClassicSave(base,destinia::modeSaveDir(base,"expandido"));printf("Copia criada no modo expandido; a partida classica foi preservada.\n");return 0;}

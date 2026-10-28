@@ -166,8 +166,9 @@ test('Auto Potion QoL: consumo automatico sob threshold e respeito a cooldown', 
   assert.equal(fakeEngine.mem.get(0x1000 + 0x48f2), healedHp, 'Não deve curar em cooldown');
 });
 
-test('Mago dos Bosses 0.11: 4 Abas (Chefes, Torre Abissal, Mascotes, Santuario)', () => {
+test('Mago dos Bosses 0.13: 6 abas preservam os titulos e integram sobrevivencia', () => {
   const ui = new BossRushUI(null);
+  ui.engine = { features0130: { rows: () => ['INICIAR ARENA', 'REFINAR'] } };
   assert.equal(ui.currentTab, 0);
 
   // Alternar abas com teclas 5 (esquerda) e 7 (direita)
@@ -186,11 +187,18 @@ test('Mago dos Bosses 0.11: 4 Abas (Chefes, Torre Abissal, Mascotes, Santuario)'
 
   ui.handleKey(7, true); // Aba 4: Titulos (0.12.0)
   assert.equal(ui.currentTab, 4);
-  assert.equal(ui.getItemsCount(), 8); // 8 titulos
+  assert.equal(ui.getItemsCount(), 9); // 8 anteriores + Mestre da Sobrevivencia
+
+  ui.handleKey(7, true); // Aba 5: Sobrevivencia (0.13.0)
+  assert.equal(ui.currentTab, 5);
+  assert.equal(ui.getItemsCount(), 2);
 
   ui.handleKey(7, true); // Volta para Aba 0: Chefes
   assert.equal(ui.currentTab, 0);
   assert.equal(ui.getItemsCount(), 11);
+  ui.handleKey(5, true); // Volta para Aba 5 em sentido inverso
+  assert.equal(ui.currentTab, 5);
+  assert.equal(ui.getItemsCount(), 2);
 });
 
 test('Torre Abissal: 50 andares com chefes a cada 5 andares', () => {

@@ -4,18 +4,20 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.13.0 Beta - 28/10/2026
+
+- Arena infinita em PC e Web com ate 12 inimigos simultaneos, chefe a cada 5 ondas, elite a cada 3 e recordes por personagem.
+- Titulo Mestre da Sobrevivencia na onda 20 com bonus de atributos, resistencia e esquiva.
+- Ultimo Suspiro com limite de dano, 2 segundos de imunidade e 120 segundos de recarga; elixir opcional de 20% por 5 minutos.
+- Refino de armas e armaduras ate +15, pedras por faixa e progresso separado do save original.
+- Validacao: suite Web, regressao focada, smoke ARM de 51 ondas e builds Release dos dois hosts aprovados.
+
 ## 0.12.1 Beta — 27/10/2026
 
 - Corrigidos atalhos F4/F5/F8 no teclado Web, com press/release, proteção contra repetição e F5 durante pausa. Tab e comandos anteriores preservados.
 - Notas do pacote Windows selecionadas por VERSION; ausência interrompe o empacotamento. DLLs externas excluídas conforme diretriz do autor.
 - README, manifesto, banner e roadmap histórico alinhados. Web 0.12.1 em fontes; deployment externo não concluído por ferramenta indisponível.
 - [Verificação e limites](docs/VERIFICACAO_0.12.1.md). Demais itens da Issue #5 não implementados neste lote.
-
-## Correções em revisão após 0.12.1 — 28/10/2026
-
-- Descrições dos drops exclusivos dos chefes foram compactadas para caber integralmente na linha do Códex; atributos e valores dos itens permanecem iguais.
-- Adicionado workflow de CI para executar os testes Web em mudanças de `web/`, pull requests e execução manual.
-- Ainda não publicado; execução remota depende do envio desta branch. A validação local do Códex, dos drops e da interface passou.
 
 ## 0.12.0 Beta — 26/10/2026
 

@@ -1,12 +1,14 @@
-# Destinia 0.12.1 Beta
+# Destinia 0.13.0 Beta
+
+> **Versao 0.13.0 Beta (28/10/2026).** Inclui arena de sobrevivencia e refino +15 em PC e Web. [Verificacao](docs/VERIFICACAO_0.13.0.md).
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Destinia 0.12.1 Beta — atalhos Web e distribuição](https://github.com/sugyua/destinia/releases/tag/v0.12.1-beta)** — Pacotes e estado de publicação no link da release. Dois inicializadores GUI, dois hosts, fontes e checksums. DLLs e dados originais não incluídos; consulte **Dependências**. [Release anterior 0.12.0 Beta](https://github.com/sugyua/destinia/releases/tag/v0.12.0-beta).
+**Destinia 0.13.0 Beta** - arena de sobrevivencia e refino. Releases: https://github.com/sugyua/destinia/releases.
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
-**Web — fontes 0.12.1 Beta:** F4 abre Catálogo, F5 abre Baú e F8 abre Bounties. F5 não recarrega uma partida carregada, inclusive em pausa. Tab permanece para navegação de foco. [Site privado existente](https://destinia-web-experimental.leafyheron257.chatgpt.site/): **deployment desta revisão não concluído**; a ferramenta Sites está indisponível nesta sessão. O banner local não comprova a versão publicada. Não há sincronização automática PC/Web.
+**Web:** arena e refino 0.13 publicados no site privado existente; progresso temporario e separado do save do PC.
 
 ## Correções da 0.12.1 Beta
 
@@ -225,7 +227,7 @@ coleta.raio=19
 
 `drops.categorias` soma **1 equipamentos + 2 materiais + 4 ouro + 8 missão + 16 outros**; 31 mostra todos e 0 oculta todos quando o filtro está ativo. `drops.rank_minimo` aceita 0–4 e só filtra equipamentos. `coleta.raio` aceita 1–19, nunca amplia a distância nativa. O padrão sem configuração é ouro=1 e materiais=0; opções explícitas anteriores são respeitadas. Use 0 para desativar o autoloot de ouro ou 1 para ativar materiais. Opções são gravadas fora dos `save*.dat`; itens coletados entram na memória do jogo pelo coletor original e serão salvos pelo fluxo normal quando o jogador salvar, sem mudar o formato.
 
-**Web:** abra **Itens no chão e coleta** para ajustar as mesmas opções; as preferências ficam neste navegador, separadas dos saves/Google Drive. Pausa, menus/transições e perda de foco suspendem a assistência. **Status web 0.9.9:** código web atualizado e testado localmente (inclusive ponte worker/localStorage para F7 e bolinha verde de FC). URL existente: [teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site/). Deployment real no site requer ferramenta externa de deploy configurada com credenciais do serviço de hospedagem. [Testes, contrato ARM e limites](docs/LOOT_QOL.md).
+**Web:** arena e refino 0.13 publicados no site privado existente; progresso temporario e separado do save do PC.
 
 ## 0.9.8 — Proteção de equipamentos, separação de chefes no Códex e Web Destinia Zoom
 
@@ -276,7 +278,7 @@ O pacote Windows passa a incluir **`Destinia.exe`** (normal) e **`Destinia Zoom.
 
 O ZIP Windows da Release contém os quatro executáveis: os dois lançadores na raiz e os dois hosts nas respectivas subpastas. O ZIP de fontes contém `launcher/main.go` e os scripts de compilação, **não** os executáveis pré-compilados. Não são incluídos dados do jogo ou DLLs externas; veja [INSTALAÇÃO](INSTALL.md).
 
-**Web:** atualizada para **0.9.3 Beta**, revisão `0da736c`, [site privado](https://destinia-web-experimental.leafyheron257.chatgpt.site/). Esta atualização `0.9.2` altera apenas o modo de iniciar a versão Windows e **não foi implantada na web**. O progresso web continua temporário.
+**Web:** arena e refino 0.13 publicados no site privado existente; progresso temporario e separado do save do PC.
 
 ## 0.9.1 — Códex no menu e filtros de equipamentos
 
@@ -533,10 +535,6 @@ A tabela organiza as sugestões do relatório; **a viabilidade e as versões ain
 
 | Versão sugerida | Atualização futura |
 | --- | --- |
-| 0.13 | Conquistas e troféus, incluindo possíveis objetivos relacionados a bosses |
-| 0.14 | Painel de diagnóstico F12 e testes avançados do host/Unicorn |
-| 0.15 | Ficha de atributos secundários verificáveis |
-| 0.16 | Desmontagem em massa e Auto-Salvage com proteção de itens |
 | 0.17 | Loadouts de equipamentos e habilidades |
 | 0.18 | Segredos e easter eggs |
 | 0.19 | Mercador viajante |
@@ -566,7 +564,6 @@ A pesquisa do cooperativo deve começar **antes da 0.30**. A linha 0.27 é uma p
 - [ ] **Testes automatizados de falhas do host (Unicorn):** Expandir os testes Python (unittest) para simular erros de alocação, ponteiros corrompidos e estouro de pilha na camada ARM, com tratamento seguro das falhas.
 - [ ] **Cache LRU para miniaturas do Códex (zlib/sprites):** Investigar cache em memória com reciclagem dos sprites descomprimidos para reduzir recarregamentos e picos de RAM durante a navegação.
 - [ ] **Desacoplamento de entrada (IInputProvider):** Estudar uma interface entre comandos SDL2 e a emulação Unicorn, pensando em remapeamento, testes e eventual cooperativo, sem mudar o comportamento atual.
-- [ ] **Painel de diagnóstico no jogo (F12 Developer Overlay):** Propor exibição opcional de FPS real, memória, custo da emulação e estados relevantes para depuração, condicionada à disponibilidade e precisão das medições.
 
 **Ideia já coberta pelo planejamento existente:** a proposta de *abstração dos saves e escrita atômica* do arquivo de ideias se relaciona ao **item 03 — Gravação segura de saves**, já implementado; veja os limites nas Releases. Não foi cadastrada como uma nova melhoria nem como garantia de proteção comprovada contra falta de energia.
 
