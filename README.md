@@ -1,84 +1,74 @@
 # Destinia 0.16.0 Beta
 
-> **Versao 0.16.0 Beta (28/10/2026).** Inclui sobrevivencia/refino 0.13, diagnostico F12, ficha Ctrl+F3 e desmontagem em lote protegida.
+> **Versão 0.16.0 Beta (28/10/2026).** Inclui Desmontagem em Lote Protegida (0.16.0), Ficha de Atributos Secundários Ctrl+F3 (0.15.0), Painel de Diagnóstico em Tempo Real F12 (0.14.0) e Arena de Sobrevivência Infinita com Refino de Equipamentos até +15 (0.13.0).
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.16.0 Beta](https://github.com/sugyua/destinia/releases/tag/v0.16.0-beta)** - desmontagem em lote protegida e todas as atualizacoes anteriores.
+**[Baixar Destinia 0.16.0 Beta — Desmontagem em Lote, Ficha de Atributos, Diagnóstico F12, Arena e Refino](https://github.com/sugyua/destinia/releases/tag/v0.16.0-beta)** — ZIP Windows com executáveis standalone portáteis (16 DLLs inclusas), dois inicializadores GUI na raiz, os dois hosts (`destinia_host.exe` e `destinia_host_zoom.exe`), fontes e checksums SHA-256. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**. [Release anterior 0.15.0 Beta](https://github.com/sugyua/destinia/releases/tag/v0.15.0-beta).
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
-**Web 0.13:** arena e refino publicados no site privado; F12, Ctrl+F3 e lote sao exclusivos dos hosts PC.
+**[Jogar a versão web no navegador](http://localhost:8000/)** — teste local na porta 8000 (ou na rede LAN em `http://192.168.1.11:8000/` ou Tailscale em `http://100.108.92.19:8000/`). A versão web inclui a Arena de Sobrevivência e Refino (0.13.0), Catálogo F4, Baú Compartilhado F5 e Bounties F8, com 16 FPS no Safari iOS. F12, Ctrl+F3 e lote são exclusivos dos hosts PC. O deployment no site externo (`chatgpt.site`) permanece pendente de credenciais de publicação.
 
-## Novidade 0.16.0
-- No inventario, abra o painel de filtros e selecione LOTE. Confira a previa antes de confirmar; ate 50 itens elegiveis sao desmontados pelo fluxo ARM original. Itens protegidos e equipados ficam de fora. Esc cancela. F8 executa/confirma em duas etapas.
+## Novidades da Versão 0.16.0 Beta — Desmontagem em Lote Protegida (Batch Dismantling)
 
-## Novidade 0.15.0
-- Ctrl+F3 mostra PV/PM maximos, ATK, DEF, HIT, EVA, CRI e BLD sem alterar o personagem.
+- **Prévia e Desmontagem em Lote no Inventário**:
+  - No menu do inventário (hosts normal e Zoom), abra o painel de filtros e selecione a opção **LOTE**.
+  - Exibe uma prévia segura dos equipamentos elegíveis com confirmação explícita antes da execução (limite de segurança de até 50 itens por operação).
+- **Proteção Estrita e Validação ARM**:
+  - Itens protegidos (`[P]`), equipados ou modificados após a prévia são compulsoriamente excluídos do lote.
+  - Cada item alvo é revalidado por bolsa, posição, pool, fingerprint e trava de proteção antes de acionar o fluxo de desmontagem ARM original.
+  - Em caso de inconsistência de memória, a desmontagem é interrompida com segurança e informa exatamente quantos itens foram processados.
+- **Controles e Navegação**:
+  - Tecla `F8` inicia e confirma o lote em duas etapas (`F8` abre prévia, segundo `F8` executa a desmontagem).
+  - Tecla `Esc` ou fechar o painel cancela imediatamente a prévia.
+- **Sincronização da Arena e Correções de Saves**:
+  - A Arena de Sobrevivência limpa adequadamente seus inimigos ao retornar à campanha, contabiliza abates no mapa ativo e alinha os níveis de onda com a Web.
+  - Saves locais restaurados por sidecar não são mais sobrescritos por versões antigas da nuvem.
+  - Sidecars inválidos ou corrompidos desativam os recursos correspondentes com log limpo, sem travar a inicialização do jogo.
 
-## Novidade 0.14.0
-- F12 abre o painel de diagnostico nos hosts normal e Zoom.
+## Novidades da Versão 0.15.0 Beta — Ficha de Atributos Secundários Nativa (Ctrl+F3)
 
-## Correções da 0.12.1 Beta
+- **Ficha em Tempo Real (`Ctrl + F3`)**:
+  - Pressionar `Ctrl + F3` nos hosts normal e Zoom abre uma ficha detalhada em modo somente leitura com as estatísticas secundárias ativas do herói.
+- **Leitura Direta da Engine Nativa**:
+  - Exibe PV Máximo, PM Máximo, Dano de Ataque (ATK), Defesa (DEF), Precisão (HIT), Esquiva (EVA), Taxa de Crítico (CRI) e Sangramento/Penetração (BLD).
+  - Valores extraídos diretamente do cálculo nativo da biblioteca ARM em tempo real, sem alterar o personagem, equipamentos ou saves.
+- **Formatação Visual com `%`**:
+  - Inclusão do glifo nativo de porcentagem (`%`) na fonte da interface para correta exibição dos atributos percentuais.
 
-- Atalhos Web F4/F5/F8 encaminhados ao jogo com proteção de repetição e F5 durante pausa.
-- Notas atuais obrigatórias no pacote; VERSION, manifesto e documentação alinhados.
-- DLLs externas excluídas do novo pacote. Releases anteriores preservadas.
-- [Validação e limitações](docs/VERIFICACAO_0.12.1.md) · [Notas](release/NOTAS_0.12.1.md).
+## Novidades da Versão 0.14.0 Beta — Painel de Diagnóstico em Tempo Real (F12)
 
-## Novidades da Versão 0.12.0 — Modo Abissal Supremo e Título Senhor do Abismo
+- **HUD de Diagnóstico e Telemetria (`F12`)**:
+  - Pressionar `F12` ativa um painel flutuante de diagnóstico em tempo real nos hosts `destinia_host.exe` e `destinia_host_zoom.exe`.
+- **Métricas Monitoradas**:
+  - Taxa de quadros por segundo (**FPS** em tempo real).
+  - **Tempo médio de emulação** por quadro (latência em ms do motor Unicorn ARM).
+  - **Memória de trabalho** (working set do processo em execução no Windows).
+- **Eficiência e Estabilidade**:
+  - Coleta de dados ativada exclusivamente enquanto o overlay estiver visível, garantindo zero impacto de processamento durante o gameplay normal.
+  - Leitura de memória com substituição de valores antigos mesmo quando a consulta inicial retornar zero.
 
-- **Modo Abissal Hardcore Completo**:
-  - **100% Aura de Elite:** Todos os monstros do mapa passam a nascer compulsoriamente como elites (`monster+0x4c = 1`), transformando toda a campanha no desafio definitivo.
-  - **Escalonamento Brutal:** 6.0x de Vida e 6.0x de Dano base em relação ao modo normal.
-  - **Zero Bônus de Drop:** Tabela de recompensas e raridades preservadas nos valores idênticos aos da campanha normal, servindo puramente como teste definitivo de teoria de builds e reflexos.
-- **Título Lendário "Senhor do Abismo"**:
-  - Desbloqueado ao derrotar Diablo (`species 108`) no Modo Abissal.
-  - Concede **+150% em todos os status principais** (ATK, DEF, PV, PM).
-  - Persistência isolada no sidecar `titles-v1.txt` (PC) e `localStorage` (Web).
-- **Aba de Títulos no Mago dos Bosses (5ª Aba: [TITULOS])**:
-  - 5 abas integradas ([CHEFES], [TORRE], [MASCOTES], [SANTUARIO], [TITULOS]).
-  - Gerenciamento completo de títulos desbloqueados com aplicação imediata dos buffs no herói.
+## Novidades da Versão 0.13.0 Beta — Arena de Sobrevivência Infinita e Sistema de Refino (+15)
 
-## Novidades da Versão 0.11.0 Beta — Catálogo de Armamentos, Baú Compartilhado e Contratos Offline (Bounties)
+- **Arena de Sobrevivência Infinita (Survival Arena)**:
+  - Novo modo de desafio progressivo em ondas contínuas no PC e na Web, enfrentando até 12 inimigos simultâneos na arena.
+  - Chefes canônicos a cada 5 ondas e monstros com aura Elite a cada 3 ondas.
+  - Rastreamento e persistência de recorde de ondas por slot de personagem.
+- **Título Lendário "Mestre da Sobrevivência"**:
+  - Desbloqueado ao sobreviver até a **Onda 20**, concedendo bônus cumulativos de atributos principais, resistências elementais e esquiva.
+- **Mecânica "Último Suspiro" (Last Stand)**:
+  - Proteção contra dano letal: teto de dano que previne morte instantânea, concedendo 2 segundos de imunidade e recarga de 120 segundos.
+  - Elixir opcional oferecendo mitigação de 20% de todo o dano recebido durante 5 minutos.
+- **Sistema de Refino de Equipamentos (+1 a +15)**:
+  - Aprimoramento de armas e armaduras até o nível máximo +15 com pedras de refino por patamares de nível.
+  - Persistência transacional isolada em sidecar seguro, sem modificar ou arriscar a integridade dos arquivos binários `save*.dat` originais.
 
-- **Catálogo Completo de Equipamentos e Complecionista (F4)**:
-  - 48 equipamentos canônicos catalogados: 24 Armas (Espadas, Pistolas/Canhões e Adagas) e 24 Armaduras (Peitorais leves, médios e pesados), distribuídos em 8 patamares por classe (Guerreiro, Atirador e Ladino).
-  - 5 patamares de raridade por equipamento (Comum, Mágico, Raro, Épico e Lendário), totalizando 240 entradas colecionáveis.
-  - Alternância imediata de categoria entre Armas e Armaduras via tecla `T` ou toque no botão de categoria.
-  - Varredura em tempo real do inventário em busca de novas descobertas, com cálculo proporcional de progresso e sinergia com o título `Complecionista` (+100% de atributos principais ao completar).
-  - Persistência transacional e segura no sidecar `weapons-catalog-v1.txt` (PC) e `localStorage` (Web).
-- **Baú Compartilhado entre Personagens / Shared Stash (F5 / B)**:
-  - Capacidade ampliada para 48 slots divididos em 2 páginas de 24 itens, acessível a qualquer momento ou em cidades.
-  - Permite transferir armamentos, elmos, armaduras, luvas, botas, acessórios e consumíveis entre todos os saves do jogador.
-  - Preservação estrita da integridade: gravações atômicas em `shared-stash-v1.txt` com checksums e backups, sem tocar na estrutura binária dos arquivos `save*.dat` originais.
-  - Interface intuitiva com destaque por cor de raridade, navegação por teclado e toque nas duas páginas.
-- **Sistema de Bounties / Contratos Offline Repetíveis (F8 / C)**:
-  - 3 contratos diários gerados por slot de personagem: Caça a Monstros Comuns (ex: Soldados Imperiais), Caça a Chefes (ex: Diablo) e Desafios de Caça Épica.
-  - Contabilização automática e sem overhead de abates através do hook ARM nativo de derrota de monstros.
-  - Resgate instantâneo de recompensas com premiações balanceadas em Ouro e Cash offline.
-  - Interface com barra de progresso em tempo real, status de resgate e persistência em `bounties-v1.txt` (PC) e `localStorage` (Web).
-- **Otimizações Críticas e Performance Web (Mobile / Safari iOS)**:
-  - Resolução definitiva de gargalos em navegadores móveis: tabela de busca (LUT) RGB565 -> RGBA32 de 256 KB, acelerando o desenho de quadro para ~0.35ms (ganho de 7x de performance).
-  - Pacing do Web Worker acionado diretamente pela janela principal (`nextFrame`), evitando o estrangulamento de segundo plano do Safari (que limitava a 3 FPS). Framerate cravado em 16 FPS.
-  - Avanço automático suave pelas telas de apresentação (Everple / Gamevil / Logos) e suporte a toque para pular direto para o menu inicial.
-  - 119 testes unitários automatizados passando com 100% de sucesso.
+## Correções da Versão 0.12.1 Beta — Atalhos Web e Distribuição Verificada
 
-## Novidades da Versão 0.10.3 Beta — Dificuldades Canônicas e Modo Abissal
-
-- **Sistema Canônico de Dificuldades (Normal, Difícil, Pesadelo, Inferno e Abissal)**:
-  - Multiplicadores de HP, Dano recebido, XP de abate e Ouro gerado implementados via hooks ARM nos executáveis nativos `destinia_host.exe` e `destinia_host_zoom.exe`.
-  - Normal (1.0x), Difícil (1.5x/1.3x), Pesadelo (2.5x/1.8x), Inferno (4.0x/2.5x) e Abissal (6.0x/4.0x).
-  - **Modo Abissal com Zero Bônus de Itens**: Taxas, chances, qualidade e integridade do RNG de drops de itens permanecem rigorosamente idênticos aos da campanha original, funcionando como teste supremo de maestria (validado deterministicamente em 256 seeds).
-  - Escala proporcional de vida sem empilhar em respawns/reloads e sem reviver monstros mortos.
-  - **Congelamento de Tier na Morte (`deadTier`)**: Dificuldade congelada no instante do abate, impedindo exploits de XP/ouro ou obtenção indevida de liberações ao trocar de menu durante animações de morte.
-- **Interface e Navegação**:
-  - Menu Sistema inclui o botão **Mudar Dificuldade**, permitindo alternar apenas entre os níveis liberados para o personagem.
-  - Indicador da dificuldade atual exibido ao lado da classe na tela de Seleção de Personagem (apenas em slots com save).
-  - Desbloqueio progressivo: derrotar o Boss Final Diablo (`species 108`) libera o próximo nível de dificuldade no slot correspondente.
-- **Persistência Transacional Segura**:
-  - Saves binários originais `save*.dat` 100% preservados. Desbloqueios e configurações gravados atomicamente no sidecar `difficulty-unlocks-v1.txt`.
-  - Homologado em testes nativos nos dois hosts e auditado pelo Sentinel (Score 10/10).
+- **Atalhos Web Confiáveis**: Encaminhamento nativo de `F4` (Catálogo), `F5` (Baú) e `F8` (Bounties) na versão Web, com proteção contra disparos repetidos e bloqueio de `F5` durante a pausa. Tecla `Tab` e atalhos anteriores preservados.
+- **Coerência de Distribuição**: Empacotador Windows inclui obrigatoriamente as notas da versão indicada em `VERSION`. DLLs externas excluídas do ZIP curado de fontes, conforme as diretrizes do autor.
+- **Documentação e Metadados**: Sincronização entre `README.md`, `VERSION`, manifesto e notas de versão. [Validação e limitações](docs/VERIFICACAO_0.12.1.md) · [Notas](release/NOTAS_0.12.1.md).
 
 ## Novidades da Versão 0.12.0 — Modo Abissal Supremo e Título Senhor do Abismo
 
@@ -320,6 +310,17 @@ Da mais recente para a mais antiga. As releases anteriores e seus downloads são
 
 | Release | Lançamento (Brasília) |
 | --- | --- |
+| [0.16.0 Beta — Desmontagem em lote](https://github.com/sugyua/destinia/releases/tag/v0.16.0-beta) | 28/10/2026 |
+| [0.15.0 Beta — Ficha de atributos](https://github.com/sugyua/destinia/releases/tag/v0.15.0-beta) | 28/10/2026 |
+| [0.14.0 Beta — Diagnóstico F12](https://github.com/sugyua/destinia/releases/tag/v0.14.0-beta) | 28/10/2026 |
+| [0.13.0 Beta — Arena e refino](https://github.com/sugyua/destinia/releases/tag/v0.13.0-beta) | 28/10/2026 |
+| [0.12.1 Beta — Atalhos Web e distribuição](https://github.com/sugyua/destinia/releases/tag/v0.12.1-beta) | 27/10/2026 |
+| [0.12.0 Beta — Modo Abissal Supremo](https://github.com/sugyua/destinia/releases/tag/v0.12.0-beta) | 26/10/2026 |
+| [0.11.0 Beta — Expansão Completa e Controles USB](https://github.com/sugyua/destinia/releases/tag/v0.11.0-beta) | 26/10/2026 |
+| [0.10.3 Beta — Dificuldades Canônicas](https://github.com/sugyua/destinia/releases/tag/v0.10.3-beta) | 26/10/2026 |
+| [0.10.2 Beta — Mago dos Bosses Completo](https://github.com/sugyua/destinia/releases/tag/v0.10.2-beta) | 26/10/2026 |
+| [0.10.1 Beta — Mago dos Bosses em Vilas](https://github.com/sugyua/destinia/releases/tag/v0.10.1-beta) | 26/10/2026 |
+| [0.10.0 Beta — Endgame, Ranks e Sets](https://github.com/sugyua/destinia/releases/tag/v0.10.0-beta) | 26/10/2026 |
 | [0.9.9 Beta — QoL, Autoloot, Indicador FC e Atalhos](https://github.com/sugyua/destinia/releases/tag/v0.9.9-beta) | 26/10/2026 |
 | [0.9.8 Beta — Proteção de equipamentos e chefes no Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.8-beta) | 26/10/2026 |
 | [0.9.7 Beta — FC e comparador nativos](https://github.com/sugyua/destinia/releases/tag/v0.9.7-beta) | 25/10/2026 |
