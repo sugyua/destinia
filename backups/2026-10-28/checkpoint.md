@@ -1,11 +1,12 @@
 # Checkpoint de trabalho — 2026-10-28
 
-Branch de backup: `backup/chat-checkpoint-2026-10-28` (criada a partir de `main`).
+Branches de backup criadas separadamente de `main`; nenhum merge foi feito.
 
 ## Estado recuperável
-- O HEAD local do clone em `D:\IA\Meus Aplicativos\destinia` antes do checkpoint era `f1d5abec7752`.
-- O clone local tinha 45 entradas reportadas por `git status`, incluindo 232 arquivos não rastreados. O patch das alterações rastreadas está em `backups/2026-10-28/local-worktree.patch`.
-- Uma cópia seletiva dos textos/código leve e o manifesto de arquivos excluídos estão no Obsidian em `D:\Obsidian\IA\.backups\ChatCheckpoint-20261028-2355\Destinia-source-checkpoint.zip`. DLLs, BMPs e ZIPs de build foram deixados fora do arquivo para evitar duplicar aproximadamente 350 MB de artefatos.
+- O clone local está em `D:\IA\Meus Aplicativos\destinia`, branch `main`, HEAD-base `f1d5abec7752`.
+- Snapshot de trabalho rastreado completo: branch `backup/local-worktree-final-2026-10-28`, commit `e3c052ae02cfe03efad8fbbfd54e4cc1bc984480`; inclui `AGENTS.md`, `CHANGELOG.md`, `README.md`, `VERSION` e `docs/ROADMAP.md`.
+- Um checkpoint anterior menor está em `backup/local-worktree-2026-10-28`, commit `209fec3ae14dc7d8db6bfc54736334537de8c755`. Patch e estado da árvore estão também em `backup/chat-checkpoint-2026-10-28`.
+- O clone tinha arquivos não rastreados de documentação, código e artefatos; o snapshot Obsidian seletivo fica em `D:\Obsidian\IA\.backups\ChatCheckpoint-20261028-2355\Destinia-source-checkpoint.zip`. ZIPs de build, DLLs e BMPs (~350 MB) não foram duplicados; manifestos guardam caminho e SHA-256.
 
 ## Continuidade
-O usuário relatou que publicou atualizações 0.13–0.16 e começou trabalho em uma nova classe. Confirme o conteúdo real dos releases e o estado da classe no repositório antes de continuar; essa anotação preserva o relato do chat, não substitui a auditoria do código.
+O usuário relatou que publicou atualizações 0.13–0.16 e começou trabalho em uma nova classe. Confirme os releases e o estado da classe no repositório antes de continuar; este resumo preserva o relato, não substitui a auditoria do código.
