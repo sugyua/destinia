@@ -177,7 +177,7 @@ Estado atual: correções 0.12.1 da [Issue #5](https://github.com/sugyua/destini
 - **Mural de Bounties / Contratos Offline Repetíveis (F8 / C)**: 3 contratos diários por slot de personagem, contagem nativa via hooks ARM e recompensas em Ouro e Cash.
 - **Quest Tracker HUD Retrátil (Q / Toque)**: Rastreador no canto superior direito do HUD com moldura Gamevil, pergaminho pixel-art e alternância rápida via tecla `Q`.
 - **Boss Rush Gauntlet (Arena de Sobrevivência 10 Chefes)**: 11ª opção no Mago dos Bosses (`species 999`), combate contínuo contra todos os 10 chefes de Destinia.
-- **Auto-Potion QoL / Consumo Inteligente (H)**: Monitoramento contínuo de PV (< 35%) e PM (< 25%), consumo com cooldown de 60 frames e atalho `H` para ativar/desativar.
+- **Auto-Potion QoL / Consumo Inteligente (H)**: Monitoramento contínuo de PV (<= 50%) e PM (< 25%), consumo com cooldown de 60 frames e atalho `H` para ativar/desativar. PV cheio ou ausência de PV máximo válido não consome poção.
 - **Reset de Atributos e Habilidades Offline (Santuário do Poder)**: Devolução integral de pontos acumulados por 5.000 G no Mago dos Bosses e recálculo ARM (`GameUI_calcHeroStat`).
 - **Mascotes & Companheiros Offline (Pets System)**: 4 mascotes (Lobo Glacial, Fênix Ígnea, Golem de Pedra, Mini-Diablo) com buffs passivos, níveis até Lv50 e mascote flutuante renderizado ao lado do herói.
 - **Ciclo Novo Jogo+ (NG+1 a NG+5)**: Reinício da campanha preservando nível, equipamentos, baú, títulos e mascotes, com escalonamento de dificuldade e recompensas.

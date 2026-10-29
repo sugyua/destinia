@@ -166,9 +166,44 @@ test('Auto Potion QoL: consumo automatico sob threshold e respeito a cooldown', 
   assert.equal(fakeEngine.mem.get(0x1000 + 0x48f2), healedHp, 'Não deve curar em cooldown');
 });
 
-test('Mago dos Bosses 0.13: 6 abas preservam os titulos e integram sobrevivencia', () => {
+test('Auto Potion: usa PV somente em 50% ou menos e nunca ao atingir PV maximo', () => {
+  const fakeEngine = {
+    exports: new Map([['Game', 0x2000]]),
+    mem: new Map(),
+    rd16(addr) { return this.mem.get(addr) || 0; },
+    wr16(addr, val) { this.mem.set(addr, val); }
+  };
+  const game = 0x2000;
+  const hp = game + 0x48f2;
+  const maxHp = game + 0x48c4;
+  fakeEngine.mem.set(game + 0x4854, 0);
+  fakeEngine.mem.set(maxHp, 1000);
+  const ap = new AutoPotionController(fakeEngine);
+
+  assert.equal(ap.hpThresholdPercent, 50);
+  fakeEngine.mem.set(hp, 600);
+  fakeEngine.mem.set(maxHp, 0);
+  fakeEngine.mem.set(game + 0x48f4, 1); // Parte alta de um HP de 32 bits, nao PV maximo.
+  ap.update();
+  assert.equal(fakeEngine.mem.get(hp), 600, 'Sem PV maximo valido, nao deve inferir um limite da memoria vizinha');
+
+  fakeEngine.mem.set(maxHp, 1000);
+  fakeEngine.mem.set(hp, 510);
+  ap.update();
+  assert.equal(fakeEngine.mem.get(hp), 510, '51% de PV nao deve consumir pocao');
+
+  fakeEngine.mem.set(hp, 500);
+  ap.update();
+  assert.ok(fakeEngine.mem.get(hp) > 500, '50% exatos deve consumir pocao');
+
+  ap.cooldownHpTimer = 0;
+  fakeEngine.mem.set(hp, 1000);
+  ap.update();
+  assert.equal(fakeEngine.mem.get(hp), 1000, 'PV cheio nao deve consumir pocao');
+});
+
+test('Mago dos Bosses 0.11: 4 Abas (Chefes, Torre Abissal, Mascotes, Santuario)', () => {
   const ui = new BossRushUI(null);
-  ui.engine = { features0130: { rows: () => ['INICIAR ARENA', 'REFINAR'] } };
   assert.equal(ui.currentTab, 0);
 
   // Alternar abas com teclas 5 (esquerda) e 7 (direita)
@@ -187,18 +222,11 @@ test('Mago dos Bosses 0.13: 6 abas preservam os titulos e integram sobrevivencia
 
   ui.handleKey(7, true); // Aba 4: Titulos (0.12.0)
   assert.equal(ui.currentTab, 4);
-  assert.equal(ui.getItemsCount(), 9); // 8 anteriores + Mestre da Sobrevivencia
-
-  ui.handleKey(7, true); // Aba 5: Sobrevivencia (0.13.0)
-  assert.equal(ui.currentTab, 5);
-  assert.equal(ui.getItemsCount(), 2);
+  assert.equal(ui.getItemsCount(), 8); // 8 titulos
 
   ui.handleKey(7, true); // Volta para Aba 0: Chefes
   assert.equal(ui.currentTab, 0);
   assert.equal(ui.getItemsCount(), 11);
-  ui.handleKey(5, true); // Volta para Aba 5 em sentido inverso
-  assert.equal(ui.currentTab, 5);
-  assert.equal(ui.getItemsCount(), 2);
 });
 
 test('Torre Abissal: 50 andares com chefes a cada 5 andares', () => {

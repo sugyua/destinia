@@ -4,6 +4,10 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## Correção pós-release 0.16.0 - 28/10/2026
+
+- Auto-poção de PV passa a ativar em 50% ou menos. Removido o fallback que interpretava a palavra alta do campo de PV como PV máximo; PV cheio ou máximo ausente não consome poção.
+
 ## 0.16.0 Beta - 28/10/2026
 
 - Desmontagem em lote nos hosts normal e Zoom, com previa baseada nos filtros ativos e confirmacao separada.
