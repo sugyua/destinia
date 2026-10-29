@@ -1,16 +1,21 @@
-# Destinia 0.16.0 Beta
+# Destinia 0.16.1 Beta
 
-> **Versão 0.16.0 Beta (28/10/2026).** Inclui Desmontagem em Lote Protegida (0.16.0), Ficha de Atributos Secundários Ctrl+F3 (0.15.0), Painel de Diagnóstico em Tempo Real F12 (0.14.0) e Arena de Sobrevivência Infinita com Refino de Equipamentos até +15 (0.13.0).
+> **Versão 0.16.1 Beta (28/10/2026).** O menu principal exibe a versão atual, sincronizada automaticamente pelo arquivo VERSION; a auto-poção também foi corrigida. Inclui as melhorias das versões 0.13 a 0.16.
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.16.0 Beta — Desmontagem em Lote, Ficha de Atributos, Diagnóstico F12, Arena e Refino](https://github.com/sugyua/destinia/releases/tag/v0.16.0-beta)** — ZIP Windows com executáveis standalone portáteis (16 DLLs inclusas), dois inicializadores GUI na raiz, os dois hosts (`destinia_host.exe` e `destinia_host_zoom.exe`), fontes e checksums SHA-256. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**. [Release anterior 0.15.0 Beta](https://github.com/sugyua/destinia/releases/tag/v0.15.0-beta).
+**[Baixar Destinia 0.16.1 Beta — Versão no menu e correção da auto-poção](https://github.com/sugyua/destinia/releases/tag/v0.16.1-beta)** — ZIP Windows com executáveis e fontes; dependências externas e dados originais são fornecidos separadamente. Consulte **Dependências**. [Release anterior 0.16.0 Beta](https://github.com/sugyua/destinia/releases/tag/v0.16.0-beta).
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
 **[Jogar a versão web no navegador](http://localhost:8000/)** — teste local na porta 8000 (ou na rede LAN em `http://192.168.1.11:8000/` ou Tailscale em `http://100.108.92.19:8000/`). A versão web inclui a Arena de Sobrevivência e Refino (0.13.0), Catálogo F4, Baú Compartilhado F5 e Bounties F8, com 16 FPS no Safari iOS. F12, Ctrl+F3 e lote são exclusivos dos hosts PC. O deployment no site externo (`chatgpt.site`) permanece pendente de credenciais de publicação.
 
-## Novidades da Versão 0.16.0 Beta — Desmontagem em Lote Protegida (Batch Dismantling)
+## Novidades da Versão 0.16.1 Beta — Versão no menu e auto-poção
+- A versão `v0.16.1` aparece no canto inferior direito do menu principal.
+- A versão mostrada é lida do arquivo `VERSION` durante a compilação dos dois hosts. Ao preparar outra atualização, basta atualizar esse arquivo e compilar novamente.
+- A auto-poção de PV ativa em 50% ou menos e não consome poção com PV cheio.
+
+
 
 - **Prévia e Desmontagem em Lote no Inventário**:
   - No menu do inventário (hosts normal e Zoom), abra o painel de filtros e selecione a opção **LOTE**.

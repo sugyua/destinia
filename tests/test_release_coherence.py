@@ -17,8 +17,11 @@ class ReleaseCoherence(unittest.TestCase):
         self.assertIn(web_version.rsplit('-beta',1)[0]+' WEB',(ROOT/'web/dist/index.html').read_text(encoding='utf-8'))
         for host in ['host','host_zoom']:
             source=(ROOT/host/'main.cpp').read_text(encoding='utf-8')
-            self.assertIn('Destinia '+v+' Beta',source)
+            self.assertIn('"Destinia " DESTINIA_VERSION " Beta"',source)
+            self.assertIn('../common/version_stamp.h',source)
             self.assertNotIn('Destinia 0.12.0 Beta',source)
+            cmake=(ROOT/host/'CMakeLists.txt').read_text(encoding='utf-8')
+            self.assertIn('VERSION" DESTINIA_VERSION',cmake)
         self.assertTrue((ROOT/'release'/('NOTAS_'+v+'.md')).is_file())
 
     def test_source_manifest_covers_local_cpp_includes(self):
