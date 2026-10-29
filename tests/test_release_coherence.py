@@ -22,6 +22,7 @@ class ReleaseCoherence(unittest.TestCase):
             self.assertNotIn('Destinia 0.12.0 Beta',source)
             cmake=(ROOT/host/'CMakeLists.txt').read_text(encoding='utf-8')
             self.assertIn('VERSION" DESTINIA_VERSION',cmake)
+            self.assertIn('CMAKE_CONFIGURE_DEPENDS "${DESTINIA_PROJECT_ROOT}/VERSION"',cmake)
         self.assertTrue((ROOT/'release'/('NOTAS_'+v+'.md')).is_file())
 
     def test_source_manifest_covers_local_cpp_includes(self):
