@@ -4,6 +4,13 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.16.1 Beta - 28/10/2026
+
+- O menu principal exibe a versão atual no canto inferior direito. Os dois hosts leem VERSION no build, mantendo o número sincronizado nas próximas atualizações.
+- Auto-poção de PV ativa em 50% ou menos; PV cheio ou máximo ausente não consome poção.
+- Verificação: teste do selo e coerência de versão; builds Release dos hosts normal e Zoom.
+
+
 ## 0.16.0 Beta - 28/10/2026
 
 - Desmontagem em lote nos hosts normal e Zoom, com previa baseada nos filtros ativos e confirmacao separada.

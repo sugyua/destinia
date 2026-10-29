@@ -166,6 +166,42 @@ test('Auto Potion QoL: consumo automatico sob threshold e respeito a cooldown', 
   assert.equal(fakeEngine.mem.get(0x1000 + 0x48f2), healedHp, 'Não deve curar em cooldown');
 });
 
+test('Auto Potion: usa PV somente em 50% ou menos e nunca ao atingir PV maximo', () => {
+  const fakeEngine = {
+    exports: new Map([['Game', 0x2000]]),
+    mem: new Map(),
+    rd16(addr) { return this.mem.get(addr) || 0; },
+    wr16(addr, val) { this.mem.set(addr, val); }
+  };
+  const game = 0x2000;
+  const hp = game + 0x48f2;
+  const maxHp = game + 0x48c4;
+  fakeEngine.mem.set(game + 0x4854, 0);
+  fakeEngine.mem.set(maxHp, 1000);
+  const ap = new AutoPotionController(fakeEngine);
+
+  assert.equal(ap.hpThresholdPercent, 50);
+  fakeEngine.mem.set(hp, 600);
+  fakeEngine.mem.set(maxHp, 0);
+  fakeEngine.mem.set(game + 0x48f4, 1);
+  ap.update();
+  assert.equal(fakeEngine.mem.get(hp), 600, 'Sem PV maximo valido, nao deve inferir um limite da memoria vizinha');
+
+  fakeEngine.mem.set(maxHp, 1000);
+  fakeEngine.mem.set(hp, 510);
+  ap.update();
+  assert.equal(fakeEngine.mem.get(hp), 510, '51% de PV nao deve consumir pocao');
+
+  fakeEngine.mem.set(hp, 500);
+  ap.update();
+  assert.ok(fakeEngine.mem.get(hp) > 500, '50% exatos deve consumir pocao');
+
+  ap.cooldownHpTimer = 0;
+  fakeEngine.mem.set(hp, 1000);
+  ap.update();
+  assert.equal(fakeEngine.mem.get(hp), 1000, 'PV cheio nao deve consumir pocao');
+});
+
 test('Mago dos Bosses 0.13: 6 abas preservam os titulos e integram sobrevivencia', () => {
   const ui = new BossRushUI(null);
   ui.engine = { features0130: { rows: () => ['INICIAR ARENA', 'REFINAR'] } };
