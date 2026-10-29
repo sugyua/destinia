@@ -4,6 +4,12 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.16.1 Beta - 29/10/2026 (candidata)
+
+- Menu principal mostra a versão configurada no build nos hosts normal e Zoom.
+- Auto-poção de PV usa limite de 50% e não consome com PV cheio ou PV máximo ausente.
+- Validações e publicação em andamento; detalhes no plano 2026-10-29-release-0161.md. Não declarar release ou deployment Web concluídos nesta etapa.
+
 ## 0.16.0 Beta - 28/10/2026
 
 - Desmontagem em lote nos hosts normal e Zoom, com previa baseada nos filtros ativos e confirmacao separada.

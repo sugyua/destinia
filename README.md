@@ -1,10 +1,12 @@
-# Destinia 0.16.0 Beta
+# Destinia 0.16.1 Beta
+
+> **Candidata 0.16.1 Beta (29/10/2026).** Selo de versão no menu e correção da auto-poção de PV em 50%, sem consumo com PV cheio. Release 0.16.1 em preparação; não publicada até concluir as verificações. **Web:** fontes 0.13 com correção de auto-poção em preparação; deployment desta revisão ainda não realizado. Site privado mantido: https://destinia-web-experimental.leafyheron257.chatgpt.site/.
 
 > **Versão 0.16.0 Beta (28/10/2026).** Inclui Desmontagem em Lote Protegida (0.16.0), Ficha de Atributos Secundários Ctrl+F3 (0.15.0), Painel de Diagnóstico em Tempo Real F12 (0.14.0) e Arena de Sobrevivência Infinita com Refino de Equipamentos até +15 (0.13.0).
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.16.0 Beta — Desmontagem em Lote, Ficha de Atributos, Diagnóstico F12, Arena e Refino](https://github.com/sugyua/destinia/releases/tag/v0.16.0-beta)** — ZIP Windows com executáveis standalone portáteis (16 DLLs inclusas), dois inicializadores GUI na raiz, os dois hosts (`destinia_host.exe` e `destinia_host_zoom.exe`), fontes e checksums SHA-256. Dependências e dados originais são fornecidos separadamente; consulte **Dependências**. [Release anterior 0.15.0 Beta](https://github.com/sugyua/destinia/releases/tag/v0.15.0-beta).
+**Candidata 0.16.1 ainda não publicada.** Link previsto após validação: `https://github.com/sugyua/destinia/releases/tag/v0.16.1-beta`. [Baixar versão pública 0.16.0 Beta](https://github.com/sugyua/destinia/releases/tag/v0.16.0-beta). O conteúdo do próximo pacote será auditado antes da publicação.
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
@@ -310,7 +312,7 @@ Da mais recente para a mais antiga. As releases anteriores e seus downloads são
 
 | Release | Lançamento (Brasília) |
 | --- | --- |
-| [0.16.0 Beta — Desmontagem em lote](https://github.com/sugyua/destinia/releases/tag/v0.16.0-beta) | 28/10/2026 |
+| [0.16.0 Beta — Desmontagem em lote](https://github.com/sugyua/destinia/releases/tag/v0.16.1-beta) | 28/10/2026 |
 | [0.15.0 Beta — Ficha de atributos](https://github.com/sugyua/destinia/releases/tag/v0.15.0-beta) | 28/10/2026 |
 | [0.14.0 Beta — Diagnóstico F12](https://github.com/sugyua/destinia/releases/tag/v0.14.0-beta) | 28/10/2026 |
 | [0.13.0 Beta — Arena e refino](https://github.com/sugyua/destinia/releases/tag/v0.13.0-beta) | 28/10/2026 |

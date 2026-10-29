@@ -1,6 +1,6 @@
 {
-  "version": "0.16.0",
-  "base_commit": "f1d5abec7752b67baf9b0099bced165567bd43d8",
+  "version": "0.16.1",
+  "base_commit": "865752f0b9782d5780e5971cda9387b2d9011db8",
   "files": [
     ".gitignore",
     "AGENTS.md",
@@ -54,6 +54,7 @@
     "common/new_game_plus.h",
     "common/offline_store_host.h",
     "common/overlay_font.h",
+    "common/version_stamp.h",
     "common/pets_expansion.h",
     "common/player_controls.h",
     "common/portuguese_text.h",
@@ -142,6 +143,7 @@
     "release/NOTAS_0.12.1.md",
     "release/NOTAS_0.15.0.md",
     "release/NOTAS_0.16.0.md",
+    "release/NOTAS_0.16.1.md",
     "release/NOTAS_0.2.md",
     "release/NOTAS_0.3.md",
     "release/NOTAS_0.4.md",
