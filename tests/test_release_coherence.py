@@ -25,6 +25,13 @@ class ReleaseCoherence(unittest.TestCase):
             self.assertIn('CMAKE_CONFIGURE_DEPENDS "${DESTINIA_PROJECT_ROOT}/VERSION"',cmake)
         self.assertTrue((ROOT/'release'/('NOTAS_'+v+'.md')).is_file())
 
+    def test_roadmap_and_web_readme_identify_current_sources(self):
+        version=(ROOT/'VERSION').read_text().strip()
+        roadmap=(ROOT/'docs/ROADMAP.md').read_text(encoding='utf-8')
+        self.assertIn(version, '\n'.join(roadmap.splitlines()[:8]))
+        web=(ROOT/'web/README.md').read_text(encoding='utf-8')
+        self.assertIn(version,web.splitlines()[0])
+
     def test_release_history_preserves_existing_tag(self):
         readme=(ROOT/'README.md').read_text(encoding='utf-8')
         row=next(line for line in readme.splitlines() if line.startswith('| [0.16.0 Beta'))
