@@ -16,7 +16,8 @@ async function fixture(handler,run){
  const previous=Object.getOwnPropertyDescriptor(globalThis,'location');
  Object.defineProperty(globalThis,'location',{value:{origin:'http://127.0.0.1:'+server.address().port},configurable:true});
  const engine=Object.create(DestiniaWeb.prototype),logs=[],statuses=[];
- engine.saved=new Map();engine.log=message=>logs.push(message);engine.onSaveStatus=value=>statuses.push(value);
+ // Write-only cases start with an already validated server snapshot.
+ engine.cloudLoadOk=true;engine.saved=new Map();engine.log=message=>logs.push(message);engine.onSaveStatus=value=>statuses.push(value);
  try{await run({engine,logs,statuses,requests});}
  finally{if(previous)Object.defineProperty(globalThis,'location',previous);else delete globalThis.location;server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 }
@@ -76,4 +77,13 @@ test('persistent save warning survives later acknowledgements until explicit res
  assert.equal(status.accept({ok:false,message:'not confirmed'}),'not confirmed');
  assert.equal(status.accept({ok:true,message:'confirmed'}),'not confirmed');
  status.reset();assert.equal(status.accept({ok:true,message:'confirmed'}),'confirmed');
+});
+
+test('failed cloud load disables later writes without touching server data',async()=>{
+ await fixture(req=>req.method==='GET'?{status:503,body:{ok:false}}:{body:{ok:true}},async({engine,requests,statuses})=>{
+  assert.equal(await engine.loadCloudSaves(),false);engine.saved.set('save0.dat',bytes);
+  assert.equal(await engine.persistCloudSave('save0.dat'),false);
+  assert.equal(requests.length,1,'failed initial download must not permit POST');
+  assert.equal(statuses.at(-1).ok,false);
+ });
 });

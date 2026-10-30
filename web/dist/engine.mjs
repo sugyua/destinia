@@ -38,7 +38,7 @@ export class DestiniaWeb {
     this.economy=new LootEconomy();
     if(!["en","pt"].includes(language))throw Error("Idioma inválido.");this.language=language;if(language==="pt")assets=translatedAssets(assets);
     if(!["classico","expandido"].includes(gameMode))throw Error("Modo de jogo inválido.");this.gameMode=gameMode;if(![75,100,125].includes(uiScale))throw Error("Escala de interface inválida.");this.uiScale=uiScale;
-    this.onSaveStatus=onSaveStatus;this.onOpenBossRushMenu=onOpenBossRushMenu;this.lootOptions=lootOptions;this.inventoryStorage=inventoryStorage;this.width=width;this.height=height;this.screenBytes=width*height*2;this.codexFilter=0;
+    this.cloudLoadOk=false;this.onSaveStatus=onSaveStatus;this.onOpenBossRushMenu=onOpenBossRushMenu;this.lootOptions=lootOptions;this.inventoryStorage=inventoryStorage;this.width=width;this.height=height;this.screenBytes=width*height*2;this.codexFilter=0;
     this.pendingPurchase=false;this.storeNotice=false;this.virtualControls=true;this.fastGraphics=fastGraphics;this.fastMemory=fastMemory;this.graphicsStats={draws:0,supported:false};this.portraits=new Map();this.codexOpen=false;this.codexTabSelected=false;this.codexTouchCaptured=false;this.codexPage=0;this.codexSelection=0;this.codexDetailsOpen=false;this.codexDetailPage=0;this.codexDetailScroll=0;this.monsterMetadata=null;this.codexNativeMenuPending=-1;this.codexNativeMenuTarget=0;this.codexNativeMenuBypass=0;this.codexNativeMenuDraining=false;this.nativeTouchDown=false;this.nativeTouchPoint={x:0,y:0};
     this.codex=new Codex(monsterNames(assets.get('mon_data_en.gdt')));this.uc=uc;this.assets=assets;this.log=onLog;this.onSound=onSound;this.e=new uc.Unicorn(uc.ARCH_ARM,uc.MODE_ARM);
     this.regs=Array.from({length:13},(_,i)=>uc['ARM_REG_R'+i]);this.handlers=new Map();this.imports=new Map();this.exports=new Map();
@@ -161,6 +161,10 @@ export class DestiniaWeb {
     if(!fileName.includes('save')&&!fileName.includes('msave')&&!fileName.includes('codex'))return false;
     const bytes=this.saved.get(filePath)||this.saved.get(fileName);
     if(!bytes)return false;
+    if(this.cloudLoadOk!==true){
+      this.reportSaveStatus('write',false,'Sincronização desativada nesta aba; progresso temporário.');
+      return false;
+    }
     try{
       if(typeof fetch!=='function')throw Error('Transporte indisponível');
       let raw='';for(let i=0;i<bytes.length;i++)raw+=String.fromCharCode(bytes[i]);
@@ -180,6 +184,7 @@ export class DestiniaWeb {
     }
   }
   async loadCloudSaves(){
+    this.cloudLoadOk=false;
     try{
       if(typeof fetch!=='function')throw Error('Transporte indisponível');
       const base=(typeof location!=='undefined'&&location.origin)?location.origin:'http://localhost:8000';
@@ -199,6 +204,7 @@ export class DestiniaWeb {
         this.saved.set('/data/data/game.destiniaeng/files/'+file,bytes);
         this.saved.set('./'+file,bytes);
       }
+      this.cloudLoadOk=true;
       this.reportSaveStatus('load',true,staged.length?'Dados recebidos do servidor.':'Nenhum progresso recebido do servidor.');
       return true;
     }catch(error){

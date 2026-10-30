@@ -14,6 +14,7 @@
 
 ## Novidades 0.17.2
 
+- Após falha no carregamento inicial, envios de saves ficam desativados até um carregamento confirmado; o progresso permanece em memória e a cópia remota não recebe a sessão iniciada sem confirmação.
 - Gravação Web só é confirmada com HTTP de sucesso e `ok: true`; erro de transporte, JSON inválido e confirmação negativa mantêm aviso visível.
 - Carregamento de saves valida os arquivos recebidos antes de atualizar a memória, preservando sidecars protegidos e os dados da sessão quando a resposta é inválida.
 - A confirmação é do servidor, sem prometer Google Drive ou sincronização PC/Web. O protocolo existente não mudou; nenhum servidor de saves foi habilitado.
