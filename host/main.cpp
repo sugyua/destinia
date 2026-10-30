@@ -18,6 +18,7 @@ static destinia::RefinementHost refinementHost;
 #include "../common/auto_potion.h"
 static destinia::AutoPotionController autoPotion;
 #include "../common/version_stamp.h"
+#include "../common/unicorn_check.h"
 
 static bool controllerBackHeld = false;
 static bool controllerChordTriggered = false;
@@ -905,23 +906,12 @@ static int runHost(int argc, char** argv) {
   }
   if (soPath.empty()) soPath = gameDir + "/lib/armeabi/libdestinia_jni.so";
   assetsDir = gameDir + "/assets";
-  fs::create_directories(saveDir);
-  if(!saveLock.acquire(fs::path(saveDir)/".destinia.lock")) {
-    hostReport("[host] Nao foi possivel travar a pasta de save: outro jogo pode estar aberto ou falta acesso.\n"); return 1;
-  }
-  destinia::verifySaveMode(saveDir,preferences.gameMode);
-  hostReport("[host] Modo de jogo: %s\n",preferences.gameMode.c_str());
-  saveTransaction.configure(saveDir);
-  saveTransaction.recover();
-  const auto backup=destinia::backupSave(saveDir);
-  hostReport("[host] Backup: %s\n",backup.empty()?"nenhum progresso anterior para copiar":backup.string().c_str());
-
-  if (uc_open(UC_ARCH_ARM, UC_MODE_ARM, &uc) != UC_ERR_OK) { hostReport("uc_open falhou\n"); return 1; }
-  uc_mem_map(uc, HEAP_BASE, HEAP_SIZE, UC_PROT_ALL);
-  uc_mem_map(uc, STUB_BASE, STUB_COUNT * 4, UC_PROT_ALL);
-  uc_mem_map(uc, MAGIC_RET & ~0xFFFu, 0x1000, UC_PROT_ALL);
-  uc_mem_map(uc, DATA_BASE, DATA_SIZE, UC_PROT_ALL);
-  uc_mem_map(uc, STACK_BASE, STACK_SIZE, UC_PROT_ALL);
+  destinia::requireUnicorn(uc_open(UC_ARCH_ARM, UC_MODE_ARM, &uc), "uc_open ARM");
+  destinia::requireUnicorn(uc_mem_map(uc, HEAP_BASE, HEAP_SIZE, UC_PROT_ALL), "uc_mem_map heap", HEAP_BASE, HEAP_SIZE);
+  destinia::requireUnicorn(uc_mem_map(uc, STUB_BASE, STUB_COUNT * 4, UC_PROT_ALL), "uc_mem_map stubs", STUB_BASE, STUB_COUNT * 4);
+  destinia::requireUnicorn(uc_mem_map(uc, MAGIC_RET & ~0xFFFu, 0x1000, UC_PROT_ALL), "uc_mem_map return", MAGIC_RET & ~0xFFFu, 0x1000);
+  destinia::requireUnicorn(uc_mem_map(uc, DATA_BASE, DATA_SIZE, UC_PROT_ALL), "uc_mem_map data", DATA_BASE, DATA_SIZE);
+  destinia::requireUnicorn(uc_mem_map(uc, STACK_BASE, STACK_SIZE, UC_PROT_ALL), "uc_mem_map stack", STACK_BASE, STACK_SIZE);
 
   std::vector<u32> bx(STUB_COUNT, 0xE12FFF1E);  // "bx lr" em cada stub
   wr(STUB_BASE, bx.data(), bx.size() * 4);
@@ -948,11 +938,23 @@ static int runHost(int argc, char** argv) {
     hostReport("[host] Nao foi possivel ocultar controles: biblioteca ARM incompativel ou falha nos hooks.\n");return 1;
   }
   hostReport("[host] Controles virtuais durante gameplay: %s\n",preferences.virtualControls?"visiveis":"ocultos (teclado/controle e menus preservados)");
-  uc_hook hk; uc_hook_add(uc, &hk, UC_HOOK_CODE, (void*)stubHook, nullptr, STUB_BASE, STUB_BASE + STUB_COUNT * 4 - 1);
-  uc_hook hk2; uc_hook_add(uc, &hk2, UC_HOOK_CODE, (void*)stubHook, nullptr, MAGIC_RET, MAGIC_RET + 3);
+  uc_hook hk{}; destinia::requireUnicorn(uc_hook_add(uc, &hk, UC_HOOK_CODE, (void*)stubHook, nullptr, STUB_BASE, STUB_BASE + STUB_COUNT * 4 - 1), "uc_hook_add stubs", STUB_BASE, STUB_COUNT * 4);
+  uc_hook hk2{}; destinia::requireUnicorn(uc_hook_add(uc, &hk2, UC_HOOK_CODE, (void*)stubHook, nullptr, MAGIC_RET, MAGIC_RET + 3), "uc_hook_add return", MAGIC_RET, 4);
 
   for (const char* n : {"Java_game_destiniaeng_GameThread_initGame", "Java_game_destiniaeng_GameThread_jniRun", "Java_game_destiniaeng_GameThread_jniTouch"})
     if (!exportsMap.count(n)) { hostReport("Simbolo nao encontrado: %s\n", n); return 1; }
+  // Do not create, recover or back up saves until essential emulator setup succeeded.
+  fs::create_directories(saveDir);
+  if(!saveLock.acquire(fs::path(saveDir)/".destinia.lock")) {
+    hostReport("[host] Nao foi possivel travar a pasta de save: outro jogo pode estar aberto ou falta acesso.\n"); return 1;
+  }
+  destinia::verifySaveMode(saveDir,preferences.gameMode);
+  hostReport("[host] Modo de jogo: %s\n",preferences.gameMode.c_str());
+  saveTransaction.configure(saveDir);
+  saveTransaction.recover();
+  const auto backup=destinia::backupSave(saveDir);
+  hostReport("[host] Backup: %s\n",backup.empty()?"nenhum progresso anterior para copiar":backup.string().c_str());
+
   u32 fnInit = exportsMap["Java_game_destiniaeng_GameThread_initGame"];
   uiRenderer.statusBaseScale=2;
   uiRenderer.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,preferences.uiScale,false,soPath);

@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
+#include <cstdarg>
 static bool failAt(const char* step) {
   const char* value = std::getenv("DESTINIA_TEST_SDL_FAIL");
   return value && std::strcmp(value, step) == 0;
@@ -30,6 +31,33 @@ static uc_err testEmulate(uc_engine* engine, uint64_t begin, uint64_t end, uint6
   if (std::getenv("DESTINIA_TEST_EMU_FAIL") && begin == 0x10007c5d) return UC_ERR_EXCEPTION;
   return uc_emu_start(engine,begin,end,timeout,count);
 }
+static bool ucFail(const char* operation) {
+  const char* value=std::getenv("DESTINIA_TEST_UC_FAIL");
+  return value && std::strcmp(value,operation)==0;
+}
+static uc_err testUcOpen(uc_arch arch, uc_mode mode, uc_engine** engine) {
+  if(ucFail("open")) return UC_ERR_NOMEM;
+  return uc_open(arch,mode,engine);
+}
+static uc_err testUcMap(uc_engine* engine, uint64_t address, size_t size, uint32_t permissions) {
+  char label[40]; std::snprintf(label,sizeof label,"map:%llx",static_cast<unsigned long long>(address));
+  if(ucFail(label)) return UC_ERR_MAP;
+  return uc_mem_map(engine,address,size,permissions);
+}
+static uc_err testUcHook(uc_engine* engine, uc_hook* hook, int type, void* callback, void* user, uint64_t begin, uint64_t end, ...) {
+  // Only core code hooks are injected; forward variadic instruction hooks unchanged below.
+  if(type==UC_HOOK_CODE && ((begin==0x30000000 && ucFail("hook:stubs")) || (begin==0x30100000 && ucFail("hook:return")))) return UC_ERR_HOOK;
+  if(type==UC_HOOK_INSN) { va_list args; va_start(args,end); int instruction=va_arg(args,int); va_end(args); return uc_hook_add(engine,hook,type,callback,user,begin,end,instruction); }
+  return uc_hook_add(engine,hook,type,callback,user,begin,end);
+}
+static uc_err testUcClose(uc_engine* engine) {
+  if(std::getenv("DESTINIA_TEST_UC_FAIL")) std::fprintf(stderr,"TEST_UC_CLOSED\n");
+  return uc_close(engine);
+}
+#define uc_open testUcOpen
+#define uc_mem_map testUcMap
+#define uc_hook_add testUcHook
+#define uc_close testUcClose
 #define SDL_CreateWindow testWindow
 #define SDL_CreateRenderer testRenderer
 #define SDL_CreateTexture testTexture
@@ -42,6 +70,10 @@ static uc_err testEmulate(uc_engine* engine, uint64_t begin, uint64_t end, uint6
 #include "../host/main.cpp"
 #endif
 #undef main
+#undef uc_open
+#undef uc_mem_map
+#undef uc_hook_add
+#undef uc_close
 #undef uc_emu_start
 #undef SDL_CreateWindow
 #undef SDL_CreateRenderer

@@ -1,8 +1,10 @@
-# Destinia 0.13.0 Beta — fontes do navegador
+# Destinia 0.17.1 Beta — fontes do navegador
+
+Fontes0.17.1; esta revisão altera somente checagens de boot dos hosts Windows. VPN no PC atualizada para 0.17.1, com HTTP e cópia das fontes conferidos: http://100.108.92.19:8000/ . PC ligado/Tailscale conectado necessários. O Site privado vinculado mantém deployment 0.13.0 conhecido, sem nova publicação por indisponibilidade da ferramenta. [URL do Site](https://destinia-web-experimental.leafyheron257.chatgpt.site/). Nenhuma mudança de audiência. Safari físico não executado nesta entrega.
 
 **Atalhos:** F4 Catálogo, F5 Baú, F8 Bounties. Press/release sem repetição; F5 protegido em partida carregada/pausada. Tab preservado.
 
-**Deployment 0.13.0 publicado no Site privado existente:** arena e refinamento +15; acesso permanece restrito ao proprietario. O repositorio nao contem dados pessoais do jogo.
+**Histórico — deployment 0.13.0 publicado no Site privado existente:** arena e refinamento +15; acesso permanece restrito ao proprietario. O repositorio nao contem dados pessoais do jogo.
 
 Teste privado: https://destinia-web-experimental.leafyheron257.chatgpt.site/
 
