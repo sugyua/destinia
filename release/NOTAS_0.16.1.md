@@ -19,4 +19,4 @@
 - O pacote não inclui saves nem os dados originais do jogo.
 - Defeito preexistente ainda pendente na auto-poção: o vínculo com o estoque não é confiável. O caminho PC pode consumir outro consumível ou recuperar PV sem poção; a Web não confere estoque. Esta versão corrige o limite de PV e a proteção de PV cheio, não esse contrato de consumo. Não usar os testes de threshold como prova de validação de estoque.
 
-Revisao da candidata 0.16.1 (30/10/2026): mana valida permanece independente de PV maximo ausente; pacote de fontes inclui os quatro modulos Web importados que faltavam no manifesto. Regressoes nativa/Web e coerencia verificadas. Publicacao desta revisao ainda pendente.
+Revisao 0.16.1 (30/10/2026): mana valida permanece independente de PV maximo ausente; pacote de fontes inclui os quatro modulos Web importados que faltavam no manifesto. Regressoes nativa/Web e coerencia verificadas. Validacao local: Web158 PASS/1 SKIP; coerencia5 e pacotes9 PASS; builds/ARM normal+Zoom em saves temporarios PASS.

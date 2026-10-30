@@ -1,12 +1,12 @@
 # Destinia 0.16.1 Beta
 
-> **Candidata 0.16.1 Beta (29/10/2026).** Selo de versão no menu e correção da auto-poção de PV em 50%, sem consumo com PV cheio. O controle antigo de estoque da auto-poção ainda tem defeitos conhecidos (ver notas 0.16.1); esta correção limita-se ao threshold/PV cheio. Release 0.16.1 em preparação; não publicada até concluir as verificações. **Web:** fontes 0.13 com correção de auto-poção em preparação; deployment desta revisão ainda não realizado. Site privado mantido: https://destinia-web-experimental.leafyheron257.chatgpt.site/.
+> **Versao 0.16.1 Beta (30/10/2026).** Selo de versão no menu e correção da auto-poção de PV em 50%, sem consumo com PV cheio. O controle antigo de estoque da auto-poção ainda tem defeitos conhecidos (ver notas 0.16.1); esta correção limita-se ao threshold/PV cheio. Release 0.16.1 em preparação; não publicada até concluir as verificações. **Web:** fontes 0.13 com correção de auto-poção em preparação; deployment desta revisão ainda não realizado. Site privado mantido: https://destinia-web-experimental.leafyheron257.chatgpt.site/.
 
 > **Versão 0.16.0 Beta (28/10/2026).** Inclui Desmontagem em Lote Protegida (0.16.0), Ficha de Atributos Secundários Ctrl+F3 (0.15.0), Painel de Diagnóstico em Tempo Real F12 (0.14.0) e Arena de Sobrevivência Infinita com Refino de Equipamentos até +15 (0.13.0).
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**Candidata 0.16.1 ainda não publicada.** Link previsto após validação: `https://github.com/sugyua/destinia/releases/tag/v0.16.1-beta`. [Baixar versão pública 0.16.0 Beta](https://github.com/sugyua/destinia/releases/tag/v0.16.0-beta). O conteúdo do próximo pacote será auditado antes da publicação.
+[Release 0.16.1 Beta e pacotes](https://github.com/sugyua/destinia/releases/tag/v0.16.1-beta) ? [Versao anterior 0.16.0 Beta](https://github.com/sugyua/destinia/releases/tag/v0.16.0-beta). Consulte o estado publicado no GitHub antes do download.
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
@@ -643,4 +643,4 @@ Se quiser ajudar no projeto, entre em contato comigo pelo WhatsApp: [+55 21 9746
 - **Economia de Cash e Missões Épicas:** Ganho automático de 1 Cash a cada 30 minutos offline (teto de 24h = 48 Cash) e recompensas de Cash por Missões Épicas de marcos de chefes e conjunto completo (10, 25, 50 e 100 boss kills, set de 6 peças), calibradas com a loja original (item_en.gdt ~20 Cash por item premium).
 - **Saves:** Saves originais save*.dat 100% intocados (persistência atômica segura no sidecar DESTINIA_ECONOMY_2 / economy-v1.txt). Detalhes em [LOOT_ECONOMY.md](docs/LOOT_ECONOMY.md).
 
-Revisao da candidata 0.16.1 (30/10/2026): mana valida permanece independente de PV maximo ausente; pacote de fontes inclui os quatro modulos Web importados que faltavam no manifesto. Regressoes nativa/Web e coerencia verificadas. Publicacao desta revisao ainda pendente.
+Revisao 0.16.1 (30/10/2026): mana valida permanece independente de PV maximo ausente; pacote de fontes inclui os quatro modulos Web importados que faltavam no manifesto. Regressoes nativa/Web e coerencia verificadas. Status de entrega e limites: consulte a release e docs/VERIFICACAO_0.16.1.md.

@@ -4,7 +4,7 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
-## 0.16.1 Beta - 29/10/2026 (candidata)
+## 0.16.1 Beta - 30/10/2026
 
 - Menu principal mostra a versão configurada no build nos hosts normal e Zoom.
 - Auto-poção de PV usa limite de 50% e não consome com PV cheio ou PV máximo ausente.
@@ -597,4 +597,4 @@ Commit inicial: `d9a9352bbbe9902b7b9bc3ef0dac2353b3f26611`, “Backup inicial do
 
 A preparação 0.2 feita anteriormente nesta conversa não chegou ao GitHub; esta candidata a substitui e amplia.
 
-Revisao da candidata 0.16.1 (30/10/2026): mana valida permanece independente de PV maximo ausente; pacote de fontes inclui os quatro modulos Web importados que faltavam no manifesto. Regressoes nativa/Web e coerencia verificadas. Publicacao desta revisao ainda pendente.
+Revisao 0.16.1 (30/10/2026): mana valida permanece independente de PV maximo ausente; pacote de fontes inclui os quatro modulos Web importados que faltavam no manifesto. Regressoes nativa/Web e coerencia verificadas. Status de entrega: consulte a release.
