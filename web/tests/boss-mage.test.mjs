@@ -1,8 +1,8 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {bossMagePalette,mageFacing,placeBossMage,BossRushMenuEvent} from '../dist/boss-mage.mjs';
-test('isolated palette preserves alpha and source; native facing range is exact',()=>{
+test('original palette preserves every color, alpha and source; native facing range is exact',()=>{
  const art={width:2,height:2,pixels:Uint32Array.from([0,0x1ffff,0x1f800,0x18410])},before=art.pixels.slice(),copy=bossMagePalette(art);
- assert.deepEqual(art.pixels,before);assert.equal(copy.pixels[0],0);assert.notEqual(copy.pixels[2],art.pixels[2]);for(let i=0;i<4;i++)assert.equal(copy.pixels[i]>>>16,art.pixels[i]>>>16);
+ assert.deepEqual(art.pixels,before);assert.equal(copy.pixels[0],0);assert.deepEqual(copy.pixels,art.pixels,'original NPC palette must be retained');for(let i=0;i<4;i++)assert.equal(copy.pixels[i]>>>16,art.pixels[i]>>>16);
  const p={area:0,map:65,x:200,y:200};assert(mageFacing(p,200,216,2));assert(!mageFacing(p,200,216,3));assert(!mageFacing(p,200,229,2));
  assert(mageFacing(p,184,200,1)&&mageFacing(p,216,200,0)&&mageFacing(p,200,184,3));
 });

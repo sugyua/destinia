@@ -9,7 +9,7 @@ class ReleaseCoherence(unittest.TestCase):
         v=(ROOT/'VERSION').read_text().strip()
         self.assertEqual(json.loads((ROOT/'release/manifest.json').read_text())['version'],v)
         web_version=json.loads((ROOT/'web/package.json').read_text())['version']
-        self.assertEqual(web_version,'0.13.0-beta')
+        self.assertEqual(web_version,v+'-beta')
         readme=(ROOT/'README.md').read_text(encoding='utf-8')
         self.assertTrue(readme.startswith('# Destinia '+v+' Beta\n'))
         self.assertIn('/releases/tag/v'+v+'-beta','\n'.join(readme.splitlines()[:12]))

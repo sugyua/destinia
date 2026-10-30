@@ -1,4 +1,5 @@
 #pragma once
+#include "original_ui.h"
 #include <array>
 #include <cstdint>
 #include <string>
@@ -68,6 +69,7 @@ inline int overlayTextWidth(const std::string& text,int scale=1) {
 }
 inline void paintOverlayText(uint8_t* pixels,int width,int height,int x,int y,const std::string& text,uint16_t color,int scale=1) {
  if(scale<1)return;
+ if(paintOriginalText(pixels,width,height,x,y,text,color,width-x,scale))return;
  for(size_t at=0;at<text.size();x+=6*scale) {
   const auto glyph=overlayGlyph(overlayCodepoint(text,at));
   for(int i=0;i<5;++i)for(int row=0;row<11;++row)if(glyph[i]&(1<<row))

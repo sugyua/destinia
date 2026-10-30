@@ -2,6 +2,7 @@
 #include "bounties.h"
 #include "ui_transform.h"
 #include "overlay_font.h"
+#include "original_ui.h"
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -82,12 +83,33 @@ public:
       }
     };
 
+    std::vector<UiRect> originalRects;
+    auto panel = [&](int x, int y, int w, int h, uint16_t c) {
+      auto r = transform.rect(x, y, w, h);
+      if (paintOriginalPanel(pixels, width, height, r.x, r.y, r.w, r.h)) {
+        originalRects.push_back({x,y,w,h});
+        return;
+      }
+      rect(x,y,w,h,c);
+    };
+
     auto frame = [&](int rx, int ry, int rw, int rh, uint16_t c) {
+      for (const auto& r : originalRects) {
+        if ((rx == r.x && ry == r.y && rw == r.w && rh == r.h) ||
+            (rx == r.x+1 && ry == r.y+1 && rw == r.w-2 && rh == r.h-2)) return;
+      }
+      auto r = transform.rect(rx, ry, rw, rh);
+      if (paintOriginalPanel(pixels,width,height,r.x,r.y,r.w,r.h)) return;
+
       for (int x = 0; x < rw; ++x) { pixel(rx + x, ry, c); pixel(rx + x, ry + rh - 1, c); }
       for (int y = 0; y < rh; ++y) { pixel(rx, ry + y, c); pixel(rx + rw - 1, ry + y, c); }
     };
 
     auto text = [&](int x, int y, const std::string& value, uint16_t color, int scale = 1) {
+      auto point = transform.point(x,y);
+      if (paintOriginalText(pixels,width,height,point.first,point.second,value,color,0,
+                            std::max(1,int(std::lround(scale*transform.scale()))))) return;
+
       for (size_t at = 0; at < value.size(); x += 6 * scale) {
         auto bits = overlayGlyph(overlayCodepoint(value, at));
         for (int i = 0; i < 5; ++i) {
@@ -109,14 +131,14 @@ public:
     uint16_t muted = 0x7bef;
     uint16_t orange = 0xfb40;
 
-    rect(p.x, p.y, p.w, p.h, panelBg);
+    panel(p.x, p.y, p.w, p.h, panelBg);
     frame(p.x, p.y, p.w, p.h, borderCol);
     frame(p.x + 1, p.y + 1, p.w - 2, p.h - 2, gold);
 
     text(p.x + 12, p.y + 8, "CONTRATOS OFFLINE (BOUNTIES)", gold, 1);
 
     auto cb = closeButton(width, height);
-    rect(cb.x, cb.y, cb.w, cb.h, 0x8000);
+    panel(cb.x, cb.y, cb.w, cb.h, 0x8000);
     text(cb.x + 5, cb.y + 3, "X", white, 1);
 
     auto& list = mgr.getContracts(slot);
@@ -125,7 +147,7 @@ public:
       auto card = contractCardRect(int(i), width, height);
       bool isSelected = (selectedContract == int(i));
 
-      rect(card.x, card.y, card.w, card.h, isSelected ? 0x1925 : cardBg);
+      panel(card.x, card.y, card.w, card.h, isSelected ? 0x1925 : cardBg);
       frame(card.x, card.y, card.w, card.h, isSelected ? gold : borderCol);
 
       // Título e Descrição
@@ -140,15 +162,15 @@ public:
       // Botão de Status / Resgate
       auto btn = claimButton(int(i), width, height);
       if (c.claimed) {
-        rect(btn.x, btn.y, btn.w, btn.h, 0x2104);
+        panel(btn.x, btn.y, btn.w, btn.h, 0x2104);
         frame(btn.x, btn.y, btn.w, btn.h, 0x4208);
         text(btn.x + 8, btn.y + 8, "RESGATADO", muted, 1);
       } else if (c.completed) {
-        rect(btn.x, btn.y, btn.w, btn.h, 0x0540);
+        panel(btn.x, btn.y, btn.w, btn.h, 0x0540);
         frame(btn.x, btn.y, btn.w, btn.h, green);
         text(btn.x + 10, btn.y + 8, "RESGATAR", white, 1);
       } else {
-        rect(btn.x, btn.y, btn.w, btn.h, 0x10a2);
+        panel(btn.x, btn.y, btn.w, btn.h, 0x10a2);
         frame(btn.x, btn.y, btn.w, btn.h, borderCol);
         char progBuf[32];
         std::snprintf(progBuf, sizeof(progBuf), "%u/%u", c.currentCount, c.targetCount);

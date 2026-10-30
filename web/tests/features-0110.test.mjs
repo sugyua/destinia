@@ -109,7 +109,7 @@ test('Contratos Offline 0.11: 3 contratos diarios, contagem de abates e resgate 
 });
 
 test('Quest Tracker HUD: alternancia de exibicao e leitura de objetivos', () => {
-  const tracker = new QuestTrackerWeb(null);
+  const tracker = new QuestTrackerWeb({width:400,height:240});
   assert.equal(tracker.minimized, false);
   tracker.toggle();
   assert.equal(tracker.minimized, true);
@@ -122,7 +122,7 @@ test('Quest Tracker HUD: alternancia de exibicao e leitura de objetivos', () => 
   assert.equal(tracker.destination, 'Lagrant');
 
   // Toque na hitbox (canto superior direito)
-  const handled = tracker.handleTouch(700, 15, 0);
+  const handled = tracker.handleTouch(tracker.layout().x+5,tracker.layout().y+5,0);
   assert.equal(handled, true);
   assert.equal(tracker.minimized, true);
 });

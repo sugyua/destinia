@@ -1,5 +1,4 @@
 import { ALL_TITLES, TitlesStorage, TitleId } from './titles.mjs';
-import {overlayGlyph} from './overlay-font.mjs';
 
 export const BOSS_RUSH_LIST = [
   {species: 100, namePt: "Guardiao da Masmorra", nameEn: "Dungeon Guardian", goldCost: 500, area: 1, map: 5},
@@ -216,190 +215,52 @@ export class BossRushUI {
     return true;
   }
 
-  handleTouch(x, y, phase) {
-    if (!this.open) return false;
-    const w = this.engine.width, h = this.engine.height;
-    const pw = Math.min(360, w - 20), ph = Math.min(220, h - 20);
-    const px = Math.floor((w - pw) / 2), py = Math.floor((h - ph) / 2);
-
-    if (x < px || x >= px + pw || y < py || y >= py + ph) {
-      if (phase === 0) this.closeMenu();
-      return true;
-    }
-
-    // Botão [X]
-    if (x >= px + pw - 24 && y <= py + 20) {
-      if (phase === 0) this.closeMenu();
-      return true;
-    }
-
-    // Duas linhas de abas: py + 20 a py + 52.
-    if (y >= py + 20 && y < py + 52) {
-      if (phase === 0) {
-        const tabW = Math.floor((pw - 16) / 3);
-        const row = y >= py + 36 ? 1 : 0;
-        const col = Math.floor((x - (px + 8)) / tabW);
-        const t = row * 3 + col;
-        if (x >= px + 8 && x < px + pw - 8 && col >= 0 && col < 3) {
-          this.currentTab = t;
-          this.selectedIndex = 0;
-          this.scrollOffset = 0;
-          this.statusMessage = "";
-        }
-      }
-      return true;
-    }
-
-    // Linhas
-    let rowY = py + 60;
-    const count = this.getItemsCount();
-    for (let i = this.scrollOffset; i < count && i < this.scrollOffset + 7; i++) {
-      if (y >= rowY - 2 && y < rowY + 14) {
-        if (phase === 0) {
-          if (this.selectedIndex === i) {
-            this.handleKey(17, true);
-          } else {
-            this.selectedIndex = i;
-            this.statusMessage = "";
-          }
-        }
-        return true;
-      }
-      rowY += 16;
-    }
+  layout(width=this.engine.width,height=this.engine.height) {
+    const scale=Math.max(1,Math.floor(Math.min(width/400,height/240)));
+    const w=Math.min(360*scale,width-20*scale),h=Math.min(220*scale,height-20*scale);
+    const x=Math.floor((width-w)/2),y=Math.floor((height-h)/2),tabW=Math.floor((w-16*scale)/3);
+    return {x,y,w,h,scale,top:y+58*scale,row:(this.currentTab===2||this.currentTab===3?24:16)*scale,
+      close:{x:x+w-26*scale,y:y+3*scale,w:22*scale,h:17*scale},
+      tabs:Array.from({length:6},(_,i)=>({x:x+8*scale+i%3*tabW,y:y+(20+Math.floor(i/3)*16)*scale,w:tabW,h:16*scale}))};
+  }
+  rowRects(b=this.layout()) {
+    return Array.from({length:Math.min(7,this.getItemsCount()-this.scrollOffset)},(_,i)=>({x:b.x+8*b.scale,y:b.top+i*b.row,w:b.w-16*b.scale,h:b.row,index:i+this.scrollOffset}));
+  }
+  handleTouch(x,y,phase) {
+    if(!this.open)return false;
+    const b=this.layout(),inside=r=>x>=r.x&&x<r.x+r.w&&y>=r.y&&y<r.y+r.h;
+    if(!inside(b)||inside(b.close)){if(phase===0)this.closeMenu();return true;}
+    const tab=b.tabs.findIndex(inside);
+    if(tab>=0){if(phase===0){this.currentTab=tab;this.selectedIndex=0;this.scrollOffset=0;this.statusMessage='';}return true;}
+    const row=this.rowRects(b).find(inside);
+    if(row&&phase===0){if(this.selectedIndex===row.index)this.handleKey(17,true);else{this.selectedIndex=row.index;this.statusMessage='';}}
     return true;
   }
-
-  paint(fb, width, height) {
-    if (!this.open || !fb) return;
-
-    const pw = Math.min(360, width - 20), ph = Math.min(220, height - 20);
-    const px = Math.floor((width - pw) / 2), py = Math.floor((height - ph) / 2);
-
-    // Fundo escuro com borda dourada
-    for (let y = py; y < py + ph; y++) {
-      for (let x = px; x < px + pw; x++) {
-        const at = (y * width + x) * 2;
-        const border = (x === px || x === px + 1 || x === px + pw - 1 || x === px + pw - 2 ||
-                        y === py || y === py + 1 || y === py + ph - 1 || y === py + ph - 2);
-        if (border) {
-          fb[at] = 0xbf; fb[at + 1] = 0xd7;
-        } else {
-          const c = fb[at] | (fb[at + 1] << 8);
-          const dark = (c >> 2) & 0x39e7;
-          fb[at] = dark & 0xff;
-          fb[at + 1] = (dark >> 8) & 0xff;
-        }
-      }
+  paint(fb,width,height) {
+    if(!this.open||!fb||!this.engine.originalUi)return;
+    const b=this.layout(width,height),s=b.scale,ui=this.engine.originalUi;
+    const text=(x,y,value,color=0xffff,w=b.x+b.w-8*s-x)=>ui.text(fb,x,y,value,color,Math.max(1,w),s);
+    ui.panel(fb,b);
+    text(b.x+8*s,b.y+5*s,'MAGO DOS BOSSES -- SALAO ANCESTRAL',0xd7bf,b.w-40*s);
+    text(b.close.x,b.y+5*s,'[X]',0xf800,22*s);
+    const tabNames=['[CHEFES]','[TORRE]','[MASCOTES]','[SANTUARIO]','[TITULOS]','[SOBREVIVENCIA]'];
+    b.tabs.forEach((r,i)=>text(r.x+2*s,r.y+2*s,tabNames[i],i===this.currentTab?0x07e0:0xce59,r.w-4*s));
+    for(const r of this.rowRects(b)){
+      const i=r.index,sel=i===this.selectedIndex,prefix=sel?'> ':'  ';
+      let label='',detail='',cost='',color=sel?0xffff:0xce59;
+      if(this.currentTab===0){const v=BOSS_RUSH_LIST[i];label=(i+1)+'. '+v.namePt;cost=v.goldCost+' G';}
+      if(this.currentTab===1){const v=ABYSS_FLOORS[i];label='Andar '+v.floor+': '+v.titlePt;cost='(Lv'+v.recommendedLevel+') '+v.goldCost+' G';if(v.isBoss)color=sel?0xfd00:0xf800;}
+      if(this.currentTab===2){const v=PETS_LIST[i],active=this.activePetId===i;label=(active?'[ATIVO] ':'[GUARDADO] ')+v.namePt;detail=v.descPt;if(active)color=0x07e0;}
+      if(this.currentTab===3)label=['Resetar Atributos (FOR/DES/CON/INT)','Resetar Arvore de Habilidades',`Avancar Ciclo Novo Jogo+ [NG+${this.ngCycle}]`][i];
+      if(this.currentTab===4)label=ALL_TITLES[i].nome;
+      if(this.currentTab===5)label=this.engine.features0130?.rows()[i]||'';
+      const costW=cost?Math.min(100*s,(cost.length*6+4)*s):0;
+      text(r.x+4*s,r.y,prefix+label,color,r.w-8*s-costW);
+      if(cost)text(r.x+r.w-costW,r.y,cost,sel?0x07e0:0xa510,costW);
+      if(detail)text(r.x+12*s,r.y+12*s,detail,0xd7bf,r.w-16*s);
     }
-
-    const title = "MAGO DOS BOSSES -- SALAO ANCESTRAL";
-    this.drawText(fb, width, height, px + Math.floor((pw - this.textWidth(title)) / 2), py + 6, title, 0xd7bf);
-    this.drawText(fb, width, height, px + pw - 24, py + 6, "[X]", 0xf800);
-
-    // Abas
-    const tabNames = ["[CHEFES]", "[TORRE]", "[MASCOTES]", "[SANTUARIO]", "[TITULOS]", "[SOBREVIVENCIA]"];
-    const tabW = Math.floor((pw - 16) / 3);
-    for (let t = 0; t < 6; t++) {
-      const tx = px + 8 + (t%3) * tabW;
-      const tabY=py+(t<3?20:36);
-      const sel = (t === this.currentTab);
-      this.drawText(fb, width, height, tx + 4, tabY + 2, tabNames[t], sel ? 0x07e0 : 0x8c51);
-    }
-
-    // Linha divisória
-    for (let x = px + 8; x < px + pw - 8; x++) {
-      const at = ((py + 52) * width + x) * 2;
-      fb[at] = 0xbf; fb[at + 1] = 0xd7;
-    }
-
-    let rowY = py + 60;
-    if (this.currentTab === 0) {
-      for (let i = this.scrollOffset; i < BOSS_RUSH_LIST.length && i < this.scrollOffset + 7; i++) {
-        const b = BOSS_RUSH_LIST[i];
-        const sel = (i === this.selectedIndex);
-        const line = (sel ? "> " : "  ") + (i + 1) + ". " + b.namePt;
-        const cost = b.goldCost + " G";
-        this.drawText(fb, width, height, px + 12, rowY, line, sel ? 0xffff : 0xce59);
-        this.drawText(fb, width, height, px + pw - 16 - this.textWidth(cost), rowY, cost, sel ? 0x07e0 : 0xa510);
-        rowY += 15;
-      }
-    } else if (this.currentTab === 1) {
-      for (let i = this.scrollOffset; i < this.maxUnlockedFloor && i < this.scrollOffset + 7; i++) {
-        const fl = ABYSS_FLOORS[i];
-        const sel = (i === this.selectedIndex);
-        const line = (sel ? "> " : "  ") + "Andar " + fl.floor + ": " + fl.titlePt;
-        const info = "(Lv" + fl.recommendedLevel + ") " + fl.goldCost + " G";
-        this.drawText(fb, width, height, px + 12, rowY, line, fl.isBoss ? (sel ? 0xfd00 : 0xf800) : (sel ? 0xffff : 0xce59));
-        this.drawText(fb, width, height, px + pw - 16 - this.textWidth(info), rowY, info, sel ? 0x07e0 : 0xa510);
-        rowY += 15;
-      }
-    } else if (this.currentTab === 2) {
-      for (let i = 0; i < PETS_LIST.length; i++) {
-        const pt = PETS_LIST[i];
-        const sel = (i === this.selectedIndex);
-        const active = (this.activePetId === i);
-        const line = (sel ? "> " : "  ") + (active ? "[ATIVO] " : "[GUARDADO] ") + pt.namePt;
-        this.drawText(fb, width, height, px + 12, rowY, line, active ? 0x07e0 : (sel ? 0xffff : 0xce59));
-        this.drawText(fb, width, height, px + 24, rowY + 11, pt.descPt, 0xd7bf);
-        rowY += 24;
-      }
-    } else if (this.currentTab === 3) {
-      const titles = [
-        "Resetar Atributos (FOR/DES/CON/INT)",
-        "Resetar Arvore de Habilidades",
-        `Avancar Ciclo Novo Jogo+ [NG+${this.ngCycle}]`
-      ];
-      for (let i = 0; i < 3; i++) {
-        const sel = (i === this.selectedIndex);
-        const line = (sel ? "> " : "  ") + titles[i];
-        this.drawText(fb, width, height, px + 12, rowY, line, sel ? 0xffff : 0xce59);
-        rowY += 24;
-      }
-    }
-
-    // Rodapé
-    for (let x = px + 8; x < px + pw - 8; x++) {
-      const at = ((py + ph - 22) * width + x) * 2;
-      fb[at] = 0xbf; fb[at + 1] = 0xd7;
-    }
-
-    const curGold = this.engine && this.engine.exports ? this.engine.call(this.engine.exports.get('getMyGold'), []) : 0;
-    let footer = "OURO: " + curGold + " G  [< >]: ABAS  [ENTER]: CONFIRMAR  [ESC]: SAIR";
-    if (this.statusMessage) footer = this.statusMessage;
-    this.drawText(fb, width, height, px + 12, py + ph - 15, footer, this.statusMessage ? 0xf800 : 0xd7bf);
-  }
-
-  textWidth(str) {
-    let w = 0;
-    for (const ch of str) {
-      const g = overlayGlyph(ch);
-      w += g ? g.width + 1 : 6;
-    }
-    return w;
-  }
-
-  drawText(fb, width, height, x, y, str, color) {
-    let cx = x;
-    for (const ch of str) {
-      const glyph = overlayGlyph(ch);
-      if (glyph) {
-        for (let gy = 0; gy < glyph.height; gy++) {
-          for (let gx = 0; gx < glyph.width; gx++) {
-            if (glyph.rows[gy] & (1 << (glyph.width - 1 - gx))) {
-              const tx = cx + gx, ty = y + gy;
-              if (tx >= 0 && tx < width && ty >= 0 && ty < height) {
-                const at = (ty * width + tx) * 2;
-                fb[at] = color & 0xff;
-                fb[at + 1] = (color >> 8) & 0xff;
-              }
-            }
-          }
-        }
-        cx += glyph.width + 1;
-      } else {
-        cx += 6;
-      }
-    }
+    const gold=this.engine.exports?this.engine.call(this.engine.exports.get('getMyGold'),[]):0;
+    text(b.x+8*s,b.y+b.h-30*s,this.statusMessage||'OURO: '+gold+' G',this.statusMessage?0xf800:0xd7bf);
+    text(b.x+8*s,b.y+b.h-16*s,'[< >]: ABAS  [ENTER]: CONFIRMAR  [ESC]: SAIR',0xd7bf);
   }
 }

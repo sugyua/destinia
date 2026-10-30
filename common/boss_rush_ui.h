@@ -1,5 +1,6 @@
 #pragma once
 #include "overlay_font.h"
+#include "original_ui.h"
 #include "pets_expansion.h"
 #include "abyss_tower.h"
 #include "stat_reset.h"
@@ -270,8 +271,12 @@ public:
     const int pw = std::min(360, width - 20), ph = std::min(220, height - 20);
     const int px = (width - pw) / 2, py = (height - ph) / 2;
 
+    auto text = [&](uint8_t* target,int w,int h,int x,int y,const std::string& value,uint16_t color) {
+      if (!paintOriginalText(target,w,h,x,y,value,color)) paintOverlayText(target,w,h,x,y,value,color);
+    };
+
     // Fundo semitransparente escuro com moldura dourada
-    for (int y = py; y < py + ph; ++y) {
+    if (!paintOriginalPanel(pixels,width,height,px,py,pw,ph)) for (int y = py; y < py + ph; ++y) {
       for (int x = px; x < px + pw; ++x) {
         const size_t at = (size_t(y) * width + x) * 2;
         uint16_t c = pixels[at] | (pixels[at + 1] << 8);
@@ -289,11 +294,11 @@ public:
 
     // Título Principal
     const std::string title = "MAGO DOS BOSSES -- SALAO ANCESTRAL";
-    paintOverlayText(pixels, width, height, px + (pw - overlayTextWidth(title)) / 2 + 1, py + 6 + 1, title, 0);
-    paintOverlayText(pixels, width, height, px + (pw - overlayTextWidth(title)) / 2, py + 6, title, 0xd7bf);
+    text(pixels, width, height, px + (pw - overlayTextWidth(title)) / 2 + 1, py + 6 + 1, title, 0);
+    text(pixels, width, height, px + (pw - overlayTextWidth(title)) / 2, py + 6, title, 0xd7bf);
 
     // Botão [X]
-    paintOverlayText(pixels, width, height, px + pw - 24, py + 6, "[X]", 0xf800);
+    text(pixels, width, height, px + pw - 24, py + 6, "[X]", 0xf800);
 
     // Barra de Abas
     static const char* tabNames[6] = {"[CHEFES]", "[TORRE]", "[MASCOTES]", "[SANTUARIO]", "[TITULOS]", "[SOBREVIVENCIA]"};
@@ -303,7 +308,7 @@ public:
       int tabY=py+(t<3?20:36);
       bool selTab = (t == currentTab);
       uint16_t tabCol = selTab ? 0x07e0 : 0x8c51;
-      if (selTab) {
+      if (!paintOriginalPanel(pixels,width,height,tx,tabY,tabW-2,14) && selTab) {
         for (int y = tabY; y < tabY + 14; ++y) {
           for (int x = tx; x < tx + tabW - 2; ++x) {
             size_t at = (size_t(y) * width + x) * 2;
@@ -311,7 +316,7 @@ public:
           }
         }
       }
-      paintOverlayText(pixels, width, height, tx + 4, tabY + 2, tabNames[t], tabCol);
+      text(pixels, width, height, tx + 4, tabY + 2, tabNames[t], tabCol);
     }
 
     // Linha divisória
@@ -323,14 +328,14 @@ public:
     // Renderizar conteúdo da aba ativa
     int rowY = py + 60;
 
-    if(currentTab==5&&survivalRows){const auto rows=survivalRows();for(int i=scrollOffset;i<int(rows.size())&&i<scrollOffset+7;++i){paintOverlayText(pixels,width,height,px+12,rowY,(i==selectedIndex?"> ":"  ")+rows[i],i==selectedIndex?0xffff:0xd7bf);rowY+=16;}}
+    if(currentTab==5&&survivalRows){const auto rows=survivalRows();for(int i=scrollOffset;i<int(rows.size())&&i<scrollOffset+7;++i){text(pixels,width,height,px+12,rowY,(i==selectedIndex?"> ":"  ")+rows[i],i==selectedIndex?0xffff:0xd7bf);rowY+=16;}}
     else if (currentTab == 0) {
       // TAB 0: Chefes
       const auto& list = getBossRushList();
       for (int i = scrollOffset; i < int(list.size()) && i < scrollOffset + 7; i++) {
         const auto& b = list[i];
         const bool sel = (i == selectedIndex);
-        if (sel) {
+        if (sel && !paintOriginalPanel(pixels,width,height,px+8,rowY-1,pw-16,14)) {
           for (int y = rowY - 1; y < rowY + 13; ++y) {
             for (int x = px + 8; x < px + pw - 8; ++x) {
               const size_t at = (size_t(y) * width + x) * 2;
@@ -342,8 +347,8 @@ public:
         }
         std::string line = (sel ? "> " : "  ") + std::to_string(i + 1) + ". " + b.namePt;
         std::string cost = std::to_string(b.goldCost) + " G";
-        paintOverlayText(pixels, width, height, px + 12, rowY, line, sel ? 0xffff : 0xce59);
-        paintOverlayText(pixels, width, height, px + pw - 16 - overlayTextWidth(cost), rowY, cost, sel ? 0x07e0 : 0xa510);
+        text(pixels, width, height, px + 12, rowY, line, sel ? 0xffff : 0xce59);
+        text(pixels, width, height, px + pw - 16 - overlayTextWidth(cost), rowY, cost, sel ? 0x07e0 : 0xa510);
         rowY += 15;
       }
     } else if (currentTab == 1) {
@@ -352,7 +357,7 @@ public:
       for (int i = scrollOffset; i < abyss.maxUnlockedFloor && i < scrollOffset + 7; i++) {
         const auto& fl = floors[i];
         const bool sel = (i == selectedIndex);
-        if (sel) {
+        if (sel && !paintOriginalPanel(pixels,width,height,px+8,rowY-1,pw-16,14)) {
           for (int y = rowY - 1; y < rowY + 13; ++y) {
             for (int x = px + 8; x < px + pw - 8; ++x) {
               const size_t at = (size_t(y) * width + x) * 2;
@@ -364,8 +369,8 @@ public:
         }
         std::string line = (sel ? "> " : "  ") + std::string("Andar ") + std::to_string(fl.floor) + ": " + fl.titlePt;
         std::string info = "(Lv" + std::to_string(fl.recommendedLevel) + ") " + std::to_string(fl.goldCost) + " G";
-        paintOverlayText(pixels, width, height, px + 12, rowY, line, fl.isBoss ? (sel ? 0xfd00 : 0xf800) : (sel ? 0xffff : 0xce59));
-        paintOverlayText(pixels, width, height, px + pw - 16 - overlayTextWidth(info), rowY, info, sel ? 0x07e0 : 0xa510);
+        text(pixels, width, height, px + 12, rowY, line, fl.isBoss ? (sel ? 0xfd00 : 0xf800) : (sel ? 0xffff : 0xce59));
+        text(pixels, width, height, px + pw - 16 - overlayTextWidth(info), rowY, info, sel ? 0x07e0 : 0xa510);
         rowY += 15;
       }
     } else if (currentTab == 2) {
@@ -374,7 +379,7 @@ public:
         const auto& pt = pets.pets[i];
         const bool sel = (i == selectedIndex);
         const bool active = (pets.activePetId == i);
-        if (sel) {
+        if (sel && !paintOriginalPanel(pixels,width,height,px+8,rowY-1,pw-16,14)) {
           for (int y = rowY - 1; y < rowY + 13; ++y) {
             for (int x = px + 8; x < px + pw - 8; ++x) {
               const size_t at = (size_t(y) * width + x) * 2;
@@ -386,8 +391,8 @@ public:
         }
         std::string statusMark = active ? "[ATIVO] " : "[GUARDADO] ";
         std::string line = (sel ? "> " : "  ") + statusMark + pt.namePt + " (Lv." + std::to_string(pt.level) + ")";
-        paintOverlayText(pixels, width, height, px + 12, rowY, line, active ? 0x07e0 : (sel ? 0xffff : 0xce59));
-        paintOverlayText(pixels, width, height, px + 24, rowY + 11, pt.descPt, 0xd7bf);
+        text(pixels, width, height, px + 12, rowY, line, active ? 0x07e0 : (sel ? 0xffff : 0xce59));
+        text(pixels, width, height, px + 24, rowY + 11, pt.descPt, 0xd7bf);
         rowY += 24;
       }
     } else if (currentTab == 3) {
@@ -407,7 +412,7 @@ public:
 
       for (int i = 0; i < 3; ++i) {
         const bool sel = (i == selectedIndex);
-        if (sel) {
+        if (sel && !paintOriginalPanel(pixels,width,height,px+8,rowY-1,pw-16,14)) {
           for (int y = rowY - 1; y < rowY + 13; ++y) {
             for (int x = px + 8; x < px + pw - 8; ++x) {
               const size_t at = (size_t(y) * width + x) * 2;
@@ -420,8 +425,8 @@ public:
         std::string line = (sel ? "> " : "  ") + std::string(optTitles[i]);
         if (i == 2) line += " [Atual: NG+" + std::to_string(curCycle) + "]";
         std::string sub = "   " + std::string(optSub[i]);
-        paintOverlayText(pixels, width, height, px + 12, rowY, line, sel ? 0xffff : 0xce59);
-        paintOverlayText(pixels, width, height, px + 12, rowY + 11, sub, 0xa510);
+        text(pixels, width, height, px + 12, rowY, line, sel ? 0xffff : 0xce59);
+        text(pixels, width, height, px + 12, rowY + 11, sub, 0xa510);
         rowY += 24;
       }
     } else if (currentTab == 4) {
@@ -433,7 +438,7 @@ public:
         const bool sel = (i == selectedIndex);
         const bool unlocked = titlesStore.isUnlocked(currentSlot, t.id);
         const bool isEquipped = (equipped == t.id);
-        if (sel) {
+        if (sel && !paintOriginalPanel(pixels,width,height,px+8,rowY-1,pw-16,14)) {
           for (int y = rowY - 1; y < rowY + 13; ++y) {
             for (int x = px + 8; x < px + pw - 8; ++x) {
               const size_t at = (size_t(y) * width + x) * 2;
@@ -447,8 +452,8 @@ public:
         std::string line = (sel ? "> " : "  ") + badge + t.nome;
         std::string bonus = t.atkBonusPct > 0 ? ("+" + std::to_string(t.atkBonusPct) + "% ALL") : "-";
         uint16_t col = isEquipped ? 0xd7bf : (unlocked ? (sel ? 0xffff : 0xce59) : 0x7bef);
-        paintOverlayText(pixels, width, height, px + 12, rowY, line, col);
-        paintOverlayText(pixels, width, height, px + pw - 16 - overlayTextWidth(bonus), rowY, bonus, unlocked ? 0x07e0 : 0x7bef);
+        text(pixels, width, height, px + 12, rowY, line, col);
+        text(pixels, width, height, px + pw - 16 - overlayTextWidth(bonus), rowY, bonus, unlocked ? 0x07e0 : 0x7bef);
         rowY += 15;
       }
     }
@@ -463,8 +468,8 @@ public:
     std::string footer = "OURO: " + std::to_string(myGoldVal) + " G  [< >]: ABAS  [ENTER]: CONFIRMAR  [ESC]: SAIR";
     if (!statusMessage.empty()) footer = statusMessage;
 
-    paintOverlayText(pixels, width, height, px + 12 + 1, py + ph - 15 + 1, footer, 0);
-    paintOverlayText(pixels, width, height, px + 12, py + ph - 15, footer, statusMessage.empty() ? 0xd7bf : 0xf800);
+    text(pixels, width, height, px + 12 + 1, py + ph - 15 + 1, footer, 0);
+    text(pixels, width, height, px + 12, py + ph - 15, footer, statusMessage.empty() ? 0xd7bf : 0xf800);
   }
 };
 

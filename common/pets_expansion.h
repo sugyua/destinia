@@ -106,6 +106,7 @@ public:
   void paintCompanion(uint8_t* pixels, int width, int height, int screenHeroX, int screenHeroY, uint64_t frame) const {
     if (activePetId < 0 || activePetId >= 4 || !pixels) return;
     const auto& pt = pets[activePetId];
+    if(paintOriginalCompanion(pixels,width,height,activePetId,screenHeroX,screenHeroY,frame,pt.level))return;
 
     // Animacao de flutuacao senoidal suave
     int bob = int(std::sin(double(frame % 60) * 6.2831853 / 60.0) * 3.0);

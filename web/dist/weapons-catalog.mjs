@@ -185,126 +185,46 @@ export class WeaponsCatalogWeb {
     return true;
   }
 
-  handleTouch(x, y, type) {
-    if (!this.open) return false;
-    if (type === 0) {
-      // Abas de classe (x: 230 a 570, y: 75 a 95)
-      for (let i = 0; i < 3; ++i) {
-        const tx = 230 + i * 85;
-        if (x >= tx && x <= tx + 80 && y >= 75 && y <= 95) {
-          this.selectedJob = i + 1;
-          this.page = 0;
-          return true;
-        }
-      }
-      // Botão Toggle Categoria [ARMAS / ARMADURAS] (x: 490 a 570, y: 75 a 95)
-      if (x >= 490 && x <= 570 && y >= 75 && y <= 95) {
-        this.toggleCategory();
-        return true;
-      }
-      // Botões anterior/próximo
-      if (x >= 230 && x <= 310 && y >= 250 && y <= 275) {
-        if (this.page > 0) this.page--;
-        return true;
-      }
-      if (x >= 490 && x <= 570 && y >= 250 && y <= 275) {
-        const list = this.getItemsForJob(this.selectedJob, this.selectedCategory);
-        const totalPages = Math.ceil(list.length / 4);
-        if (this.page + 1 < totalPages) this.page++;
-        return true;
-      }
-      // Botão fechar [X] (canto superior direito)
-      if (x >= 555 && x <= 575 && y >= 50 && y <= 70) {
-        this.open = false;
-        return true;
-      }
+  handleTouch(x,y,type) {
+    if(!this.open)return false;
+    if(type!==0)return true;
+    const l=this.layout();x=(x-l.x)/l.scale;y=(y-l.y)/l.scale;
+    if(x>=320&&x<356&&y>=4&&y<24){this.open=false;return true;}
+    if(y>=34&&y<56){
+      if(x>=270&&x<350)this.toggleCategory();
+      else for(let i=0;i<3;i++)if(x>=10+i*85&&x<90+i*85){this.selectedJob=i+1;this.page=0;}
     }
+    if(y>=184&&y<207){if(x>=10&&x<100&&this.page>0)this.page--;if(x>=260&&x<350&&this.page+1<Math.ceil(this.getItemsForJob(this.selectedJob).length/4))this.page++;}
     return true;
+  }
+  layout() {
+    const width=this.engine.width||400,height=this.engine.height||240;
+    const scale=Math.min(width/400,height/240);
+    return {scale,x:(width-360*scale)/2,y:(height-220*scale)/2};
   }
 
   paint(pixels) {
-    if (!this.open) return;
-    const w = 800, h = 480;
-
-    const setPixel = (x, y, r, g, b) => {
-      if (x < 0 || x >= w || y < 0 || y >= h) return;
-      const at = (y * w + x) * 2;
-      const c = ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
-      pixels[at] = c & 255;
-      pixels[at + 1] = c >> 8;
-    };
-
-    const fillRect = (rx, ry, rw, rh, r, g, b) => {
-      for (let dy = 0; dy < rh; ++dy) {
-        for (let dx = 0; dx < rw; ++dx) {
-          setPixel(rx + dx, ry + dy, r, g, b);
-        }
-      }
-    };
-
-    // Painel principal (360x245 centrado)
-    fillRect(220, 45, 360, 245, 20, 24, 32);
-    // Borda Dourada
-    for (let x = 220; x < 580; ++x) { setPixel(x, 45, 220, 180, 50); setPixel(x, 289, 220, 180, 50); }
-    for (let y = 45; y < 290; ++y) { setPixel(220, y, 220, 180, 50); setPixel(579, y, 220, 180, 50); }
-
-    // Botão Fechar [X]
-    fillRect(555, 48, 20, 18, 160, 40, 40);
-
-    // Barra de Progresso Superior (Complecionista Global da Classe)
-    const pct = this.getCompletionPercentage(this.selectedJob);
-    fillRect(230, 68, 340, 4, 15, 18, 24);
-    const fillW = Math.floor((340 * pct) / 100);
-    if (fillW > 0) {
-      fillRect(230, 68, fillW, 4, 220, 180, 50);
-    }
-
-    // Abas de Classes
-    for (let i = 0; i < 3; ++i) {
-      const tx = 230 + i * 85;
-      const active = (this.selectedJob === (i + 1));
-      fillRect(tx, 76, 80, 18, active ? 45 : 25, active ? 70 : 30, active ? 105 : 40);
-    }
-
-    // Botão Toggle Categoria (Armas / Armaduras)
-    const isArmas = (this.selectedCategory === 0);
-    fillRect(490, 76, 80, 18, isArmas ? 60 : 30, isArmas ? 30 : 60, isArmas ? 20 : 60);
-
-    // Cards das Armas/Armaduras na Página (4 por página)
-    const list = this.getItemsForJob(this.selectedJob, this.selectedCategory);
-    const startIdx = this.page * 4;
-    const pageItems = list.slice(startIdx, startIdx + 4);
-
-    const rarityColors = [
-      [200, 200, 200], // 0: Comum (Branca)
-      [40, 200, 60],   // 1: Mágica (Verde)
-      [50, 140, 240],  // 2: Rara (Azul)
-      [240, 210, 40],  // 3: Épica (Amarela)
-      [240, 120, 20]   // 4: Lendária (Laranja)
-    ];
-
-    let cardY = 98;
-    for (const w of pageItems) {
-      fillRect(230, cardY, 340, 32, 16, 20, 28);
-
-      // 5 badges de raridade à direita
-      for (let r = 0; r < 5; ++r) {
-        const bx = 450 + r * 23;
-        const by = cardY + 8;
-        const collected = this.isRecorded(w.id, r);
-        if (collected) {
-          const col = rarityColors[r];
-          fillRect(bx, by, 18, 16, col[0], col[1], col[2]);
-        } else {
-          fillRect(bx, by, 18, 16, 40, 44, 52); // Silhueta apagada
-        }
-      }
-
-      cardY += 36;
-    }
-
-    // Rodapé de Navegação
-    fillRect(230, 252, 70, 20, 25, 30, 40);
-    fillRect(500, 252, 70, 20, 25, 30, 40);
+    const ui=this.engine.originalUi;
+    if(!this.open||!ui||!pixels)return;
+    const {scale:s,x,y}=this.layout();
+    const panel=(a,b,w,h)=>ui.panel(pixels,{x:x+a*s,y:y+b*s,w:w*s,h:h*s});
+    const text=(a,b,value,color=0xffff,w=340-a)=>ui.text(pixels,x+a*s,y+b*s,value,color,w*s,s);
+    panel(0,0,360,220);
+    text(324,7,'SAIR',0xffc0,30);
+    text(10,7,'CATALOGO',0xffc0,220);
+    text(120,7,Math.floor(this.getCompletionPercentage(this.selectedJob))+'% completo',0xffff,195);
+    ['Guerreiro','Atirador','Ladino'].forEach((label,i)=>{panel(10+i*85,34,80,22);text(14+i*85,39,label,this.selectedJob===i+1?0xffc0:0xffff,74);});
+    panel(270,34,80,22);text(274,39,this.selectedCategory?'Armaduras':'Armas',0xffc0,74);
+    const list=this.getItemsForJob(this.selectedJob);
+    list.slice(this.page*4,this.page*4+4).forEach((item,i)=>{
+      const row=62+i*29;panel(10,row,340,28);
+      text(15,row+3,item.name,0xffff,230);text(260,row+3,'Nv '+item.level,0xffc0,85);
+      text(15,row+15,item.type,0x8c51,180);
+      text(200,row+15,'R: '+[0,1,2,3,4].map(r=>this.isRecorded(item.id,r)?r+1:'-').join(' '),0xffc0,145);
+    });
+    panel(10,184,90,22);text(15,189,'ANTERIOR',0xffff,80);
+    text(150,189,(this.page+1)+' / '+Math.ceil(list.length/4),0xffff,85);
+    panel(260,184,90,22);text(266,189,'PROXIMO',0xffff,80);
+    text(10,207,'1/2/3 classe  T categoria  Setas pagina',0x8c51,340);
   }
 }

@@ -3,6 +3,7 @@
 #include "weapons_catalog_defs.h"
 #include "ui_transform.h"
 #include "overlay_font.h"
+#include "original_ui.h"
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -131,12 +132,33 @@ public:
       }
     };
 
+    std::vector<UiRect> originalRects;
+    auto panel = [&](int x, int y, int w, int h, uint16_t c) {
+      auto r = transform.rect(x, y, w, h);
+      if (paintOriginalPanel(pixels, width, height, r.x, r.y, r.w, r.h)) {
+        originalRects.push_back({x,y,w,h});
+        return;
+      }
+      rect(x,y,w,h,c);
+    };
+
     auto frame = [&](int x, int y, int w, int h, uint16_t c) {
+      for (const auto& r : originalRects) {
+        if ((x == r.x && y == r.y && w == r.w && h == r.h) ||
+            (x == r.x+1 && y == r.y+1 && w == r.w-2 && h == r.h-2)) return;
+      }
+      auto r = transform.rect(x, y, w, h);
+      if (paintOriginalPanel(pixels,width,height,r.x,r.y,r.w,r.h)) return;
+
       for (int dx = 0; dx < w; ++dx) { pixel(x + dx, y, c); pixel(x + dx, y + h - 1, c); }
       for (int dy = 0; dy < h; ++dy) { pixel(x, y + dy, c); pixel(x + w - 1, y + dy, c); }
     };
 
     auto text = [&](int x, int y, const std::string& value, uint16_t color, int scale = 1) {
+      auto point = transform.point(x,y);
+      if (paintOriginalText(pixels,width,height,point.first,point.second,value,color,0,
+                            std::max(1,int(std::lround(scale*transform.scale()))))) return;
+
       for (size_t at = 0; at < value.size(); x += 6 * scale) {
         auto bits = overlayGlyph(overlayCodepoint(value, at));
         for (int i = 0; i < 5; ++i) {
@@ -169,7 +191,7 @@ public:
     const char* rarityLabels[5] = { "C", "M", "R", "E", "L" };
 
     // Fundo Principal do Painel
-    rect(p.x, p.y, p.w, p.h, panelBg);
+    panel(p.x, p.y, p.w, p.h, panelBg);
     frame(p.x, p.y, p.w, p.h, borderCol);
     frame(p.x + 1, p.y + 1, p.w - 2, p.h - 2, gold);
 
@@ -178,13 +200,13 @@ public:
     text(p.x + 12, p.y + 8, isWeapon ? "CATALOGO: ARMAS" : "CATALOGO: ARMADURAS", gold, 1);
 
     auto catBtn = categoryButton(width, height);
-    rect(catBtn.x, catBtn.y, catBtn.w, catBtn.h, tabActive);
+    panel(catBtn.x, catBtn.y, catBtn.w, catBtn.h, tabActive);
     frame(catBtn.x, catBtn.y, catBtn.w, catBtn.h, gold);
     text(catBtn.x + 6, catBtn.y + 3, isWeapon ? "VER ARMADURAS" : "VER ARMAS", white, 1);
 
     // Botão Fechar [X]
     auto cb = closeButton(width, height);
-    rect(cb.x, cb.y, cb.w, cb.h, 0x8000);
+    panel(cb.x, cb.y, cb.w, cb.h, 0x8000);
     text(cb.x + 5, cb.y + 3, "X", white, 1);
 
     // Cálculo do Progresso Geral
@@ -209,7 +231,7 @@ public:
     for (int i = 0; i < 3; ++i) {
       auto tr = tabRect(i, width, height);
       bool active = (selectedClass == (i + 1));
-      rect(tr.x, tr.y, tr.w, tr.h, active ? tabActive : bgDark);
+      panel(tr.x, tr.y, tr.w, tr.h, active ? tabActive : bgDark);
       frame(tr.x, tr.y, tr.w, tr.h, active ? gold : borderCol);
       text(tr.x + 14, tr.y + 4, tabNames[i], active ? gold : muted, 1);
     }
@@ -222,7 +244,7 @@ public:
     for (size_t i = startIdx; i < endIdx; ++i) {
       const auto& w = allWeapons[i];
       // Card da arma
-      rect(p.x + 12, cardY, p.w - 24, 33, bgDark);
+      panel(p.x + 12, cardY, p.w - 24, 33, bgDark);
       frame(p.x + 12, cardY, p.w - 24, 33, borderCol);
 
       // Info da Arma: Nível e Nome
@@ -242,11 +264,11 @@ public:
 
         bool collected = catalog.isRecorded(currentSlot, w.baseId, r);
         if (collected) {
-          rect(bx, by, bw, bh, rarityColors[r]);
+          panel(bx, by, bw, bh, rarityColors[r]);
           frame(bx, by, bw, bh, white);
           text(bx + 6, by + 3, rarityLabels[r], 0x0000, 1); // Letra preta sobre fundo brilhante
         } else {
-          rect(bx, by, bw, bh, 0x2124); // Cinza apagado
+          panel(bx, by, bw, bh, 0x2124); // Cinza apagado
           frame(bx, by, bw, bh, 0x39c7);
           text(bx + 5, by + 3, "-", muted, 1);
         }
@@ -257,7 +279,7 @@ public:
 
     // Rodapé de Navegação
     auto pb = prevButton(width, height);
-    rect(pb.x, pb.y, pb.w, pb.h, (page > 0) ? bgDark : 0x0821);
+    panel(pb.x, pb.y, pb.w, pb.h, (page > 0) ? bgDark : 0x0821);
     frame(pb.x, pb.y, pb.w, pb.h, (page > 0) ? borderCol : 0x2104);
     text(pb.x + 10, pb.y + 4, "< ANTERIOR", (page > 0) ? white : muted, 1);
 
@@ -269,7 +291,7 @@ public:
 
     auto nb = nextButton(width, height);
     bool hasNext = (page + 1 < totalPages);
-    rect(nb.x, nb.y, nb.w, nb.h, hasNext ? bgDark : 0x0821);
+    panel(nb.x, nb.y, nb.w, nb.h, hasNext ? bgDark : 0x0821);
     frame(nb.x, nb.y, nb.w, nb.h, hasNext ? borderCol : 0x2104);
     text(nb.x + 12, nb.y + 4, "PROXIMO >", hasNext ? white : muted, 1);
   }

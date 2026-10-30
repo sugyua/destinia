@@ -33,4 +33,6 @@ jobs:
 
       - name: Run Web tests
         run: npm test
+        env:
+          DESTINIA_GAME_ROOT: ${{ github.workspace }}/game
         working-directory: web

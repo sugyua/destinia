@@ -30,7 +30,7 @@ class UiRenderer {
  void read(U p,void* data,size_t n){if(n&&uc_mem_read(e,p,data,n)!=UC_ERR_OK)throw std::runtime_error("UI: fonte ARM invalida");}
  U symbol(const char* n)const {auto it=symbols.find(n);if(it==symbols.end())throw std::runtime_error(std::string("UI: simbolo ausente ")+n);return it->second;}
  void hook(U pc){uc_hook h=0;if(uc_hook_add(e,&h,UC_HOOK_CODE,(void*)dispatch,this,pc,pc)!=UC_ERR_OK)throw std::runtime_error("UI: falha instalando hook");hooks.push_back(h);}
- static void dispatch(uc_engine*,uint64_t pc,uint32_t,void* data){auto& self=*static_cast<UiRenderer*>(data);try{self.at(U(pc));}catch(const std::exception& ex){self.error=ex.what();uc_emu_stop(self.e);}}
+ static void dispatch(uc_engine*,uint64_t pc,uint32_t,void* data){auto& self=*static_cast<UiRenderer*>(data);if(self.originalPass)return;try{self.at(U(pc));}catch(const std::exception& ex){self.error=ex.what();uc_emu_stop(self.e);}}
  static void unhandled(uc_engine*,uc_mem_type,uint64_t pc,int,int64_t,void* data){auto& self=*static_cast<UiRenderer*>(data);self.error="UI: raster ARM sem cobertura, pc="+std::to_string(self.reg(15)-self.base);uc_emu_stop(self.e);}
  UiTransform transform(int x,int y)const {
   UiAnchor anchor=UiAnchor::Center;int fw=0,fh=0;
@@ -103,6 +103,7 @@ class UiRenderer {
   }
  }
 public:
+ bool originalPass=false;
  int statusBaseScale=1;bool statusDrawn=false;void beginFrame(){statusDrawn=false;}
  std::string error;uint64_t draws=0;
  void install(uc_engine* engine,U soBase,const std::map<std::string,U>& exports,int w,int h,int scale,bool detectUnsupported=false,const std::string& library=""){e=engine;base=soBase;symbols=exports;width=w;height=h;percent=scale;grp=symbol("Grp");fb=symbol("frameBuffer");if(percent==100)return;

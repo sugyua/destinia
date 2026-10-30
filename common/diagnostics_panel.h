@@ -88,6 +88,7 @@ class DiagnosticsPanel {
     if (!shown || !pixels || width < 24 || height < 28) return;
     const int x = 5, y = 5, panelW = std::min(230, width - 10), panelH = 39;
     if (panelW < 24 || y + panelH > height) return;
+    if(!paintOriginalPanel(pixels,width,height,x,y,panelW,panelH)) {
     fillRect(pixels, width, height, x, y, panelW, panelH, 0x0841);
     for (int px = x; px < x + panelW; ++px) {
       putPixel(pixels, width, height, px, y, 0x7bef);
@@ -96,6 +97,7 @@ class DiagnosticsPanel {
     for (int py = y; py < y + panelH; ++py) {
       putPixel(pixels, width, height, x, py, 0x7bef);
       putPixel(pixels, width, height, x + panelW - 1, py, 0x7bef);
+    }
     }
     char line1[48], line2[48];
     std::snprintf(line1, sizeof(line1), "FPS %.0f  EMU %.1fMS", current.fps, current.averageEmulationMs);

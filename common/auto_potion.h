@@ -114,6 +114,7 @@ public:
     int tw = overlayTextWidth(lastNotice);
     int x = (width - tw) / 2;
     int y = height - 42;
+    if(paintOriginalPanel(pixels,width,height,x-6,y-3,tw+12,18)){paintOriginalText(pixels,width,height,x,y,lastNotice,config.enabled?0x07e0:0xf800,tw);return;}
     // Fundo escuro
     for (int dy = -2; dy < 12; ++dy) {
       for (int dx = -6; dx < tw + 6; ++dx) {
