@@ -8,3 +8,6 @@
 - Testes controlados não equivalem a gameplay físico ou Safari real. Fingerprint da biblioteca já existia; este lote não adiciona um formato de biblioteca. Hooks de câmera/limiteZoom e hooks opcionais permanecem fora do escopo.
 
 - Regressão de metadados: nova checagem falhou no roadmap que anunciava0.12.1; corrigido cabeçalho atual e preservado histórico. Seis testes de coerência aprovados após correção.
+
+- Revisão final: garantia textual limitada às falhas essenciais, asserções de cleanup/sem initGame repetidas também com save existente. Nova rodada15runtimePASS, logthermal-20261030-163325,84amostras CPU59.625/GPU45,Exit0. Revisor independente sem bloqueadores.
+- Asserção antiga do roadmap aceitou declaração de fontes alterada para0.17.0; a nova asserção específica rejeitou essa mutação e passou após restaurar0.17.1. Texto histórico passou a usar o tempo passado.

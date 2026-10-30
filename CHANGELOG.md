@@ -7,7 +7,7 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 ## 0.17.1 Beta — 30/10/2026
 
 - Hosts normal/Zoom verificam uc_open, cinco mapeamentos e os hooks essenciais de stubs/retorno; falhas incluem operação, endereço/tamanho quando aplicável e código Unicorn.
-- Preparação/recuperação/backup do save ocorre após inicialização essencial e validação já existente da biblioteca. Uma falha de boot não toca o save.
+- Preparação/recuperação/backup do save ocorre após inicialização essencial e validação já existente da biblioteca. Falhas de abertura, mapeamento e hooks essenciais do Unicorn não tocam o save; etapas posteriores mantêm seus contratos próprios.
 - Testes injetam oito falhas por host e verificam encerramento, cleanup e preservação de save/journal. Injeção não integra executáveis distribuídos.
 - Revisão sem alteração funcional Web; fontes identificadas como0.17.1. Estado de Site/VPN documentado separadamente.
 

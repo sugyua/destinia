@@ -28,7 +28,7 @@ class ReleaseCoherence(unittest.TestCase):
     def test_roadmap_and_web_readme_identify_current_sources(self):
         version=(ROOT/'VERSION').read_text().strip()
         roadmap=(ROOT/'docs/ROADMAP.md').read_text(encoding='utf-8')
-        self.assertIn(version, '\n'.join(roadmap.splitlines()[:8]))
+        self.assertRegex('\n'.join(roadmap.splitlines()[:8]), r'fontes e candidata\s*' + re.escape(version) + r'(?![\d.])')
         web=(ROOT/'web/README.md').read_text(encoding='utf-8')
         self.assertIn(version,web.splitlines()[0])
 

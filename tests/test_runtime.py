@@ -101,7 +101,8 @@ class RuntimeHostTests(unittest.TestCase):
     def check_unicorn_boot_failure(self, failure, diagnostic):
         for variant in self.binaries:
             with self.subTest(variant=variant):
-                case=self.base/(variant+'-'+failure.replace(':','-')); case.mkdir()
+                case=self.base/(variant+'-'+failure.replace(':','-'))
+                case.mkdir()
                 save=case/'save'
                 result=self.run_host(variant,['--save',str(save)],env={'DESTINIA_TEST_UC_FAIL':failure})
                 self.assertNotEqual(result.returncode,0)
@@ -110,12 +111,17 @@ class RuntimeHostTests(unittest.TestCase):
                 self.assertFalse(save.exists(), 'Rejected initialization created save directory')
                 self.assertEqual(result.stderr.count('TEST_UC_CLOSED'),0 if failure=='open' else 1)
                 # Recovery is forbidden as well as writes to an existing save.
-                save.mkdir(); (save/'sentinel.bin').write_bytes(b'untouched save')
-                journal=case/'save.transaction'; journal.mkdir(); (journal/'owner').write_text('unknown journal')
+                save.mkdir()
+                (save/'sentinel.bin').write_bytes(b'untouched save')
+                journal=case/'save.transaction'
+                journal.mkdir()
+                (journal/'owner').write_text('unknown journal')
                 before={str(p.relative_to(case)):p.read_bytes() for p in case.rglob('*') if p.is_file()}
                 result=self.run_host(variant,['--save',str(save)],env={'DESTINIA_TEST_UC_FAIL':failure})
                 self.assertNotEqual(result.returncode,0)
                 self.assertIn(diagnostic,result.stderr)
+                self.assertNotIn('initGame ok',result.stderr)
+                self.assertEqual(result.stderr.count('TEST_UC_CLOSED'),0 if failure=='open' else 1)
                 self.assertEqual(before,{str(p.relative_to(case)):p.read_bytes() for p in case.rglob('*') if p.is_file()})
 
     def test_sdl_resource_failures_return_error(self):
