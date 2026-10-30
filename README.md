@@ -642,3 +642,5 @@ Se quiser ajudar no projeto, entre em contato comigo pelo WhatsApp: [+55 21 9746
 - **Origens de Drops:** Categorização em **Sets Concentrados** (ex: Set do Dragão em Diablo/Lava Guardian e Set do Guardião no Dungeon Guardian) e **Sets Distribuídos** (peças espalhadas entre chefes regionais e monstros elites do mapa).
 - **Economia de Cash e Missões Épicas:** Ganho automático de 1 Cash a cada 30 minutos offline (teto de 24h = 48 Cash) e recompensas de Cash por Missões Épicas de marcos de chefes e conjunto completo (10, 25, 50 e 100 boss kills, set de 6 peças), calibradas com a loja original (item_en.gdt ~20 Cash por item premium).
 - **Saves:** Saves originais save*.dat 100% intocados (persistência atômica segura no sidecar DESTINIA_ECONOMY_2 / economy-v1.txt). Detalhes em [LOOT_ECONOMY.md](docs/LOOT_ECONOMY.md).
+
+Revisao da candidata 0.16.1 (30/10/2026): mana valida permanece independente de PV maximo ausente; pacote de fontes inclui os quatro modulos Web importados que faltavam no manifesto. Regressoes nativa/Web e coerencia verificadas. Publicacao desta revisao ainda pendente.

@@ -318,3 +318,18 @@ test('Suporte a Controles USB 0.11: Chords com Select e Botoes L3/R3', async () 
   pad.buttons[8].pressed = false;
   gamepad.tick(active);
 });
+
+
+test('Auto-pocao: mana permanece independente de PV maximo ausente', () => {
+  const g = 0x10000;
+  const mem = new Map([[g+0x48f2,500],[g+0x48c4,0],[g+0x48f6,100],[g+0x48c6,1000]]);
+  const engine = {exports:new Map([['Game',g]]),rd16:p=>mem.get(p)||0,wr16:(p,v)=>mem.set(p,v)};
+  const ap = new AutoPotionController(engine);
+  ap.update();
+  assert.equal(mem.get(g+0x48f6),450);
+  assert.equal(mem.get(g+0x48f2),500);
+  assert.equal(ap.cooldownHpTimer,0);
+  mem.set(g+0x48f2,0);mem.set(g+0x48f6,100);ap.cooldownMpTimer=0;
+  ap.update();
+  assert.equal(mem.get(g+0x48f6),100,'Sem PV atual, nenhuma assistencia deve atuar');
+});

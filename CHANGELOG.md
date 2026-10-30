@@ -596,3 +596,5 @@ A única alteração nos fontes C++ é o título da janela. Gameplay, resoluçã
 Commit inicial: `d9a9352bbbe9902b7b9bc3ef0dac2353b3f26611`, “Backup inicial do projeto Destinia”. Não havia releases no GitHub na consulta desta preparação. Não foi inventada uma versão 0.1.
 
 A preparação 0.2 feita anteriormente nesta conversa não chegou ao GitHub; esta candidata a substitui e amplia.
+
+Revisao da candidata 0.16.1 (30/10/2026): mana valida permanece independente de PV maximo ausente; pacote de fontes inclui os quatro modulos Web importados que faltavam no manifesto. Regressoes nativa/Web e coerencia verificadas. Publicacao desta revisao ainda pendente.

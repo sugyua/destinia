@@ -58,12 +58,12 @@ public:
     uint16_t maxMp = rd16(gameBase + 0x48c6); // stat 6
     if (maxMp == 0) maxMp = rd16(gameBase + 0x48f8);
 
-    if (curHp == 0 || maxHp == 0) return false;
+    if (curHp == 0) return false;
 
     bool used = false;
 
     // 1. HP Potion check
-    if (cooldownHpTimer == 0 && curHp < maxHp &&
+    if (cooldownHpTimer == 0 && maxHp > 0 && curHp < maxHp &&
         (uint32_t(curHp) * 100 <= uint32_t(maxHp) * uint32_t(config.hpThresholdPercent))) {
       // Procurar pocao no inventario (bolsa 1 de consumiveis)
       // Bolsa 1 fica em gameBase + 0x433c + 1 * 0x92

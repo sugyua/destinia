@@ -55,10 +55,10 @@ export class AutoPotionController {
     let maxMp = this.rd16(g + 0x48c6);
     if (!maxMp) maxMp = this.rd16(g + 0x48f8);
 
-    if (!curHp || !maxHp) return;
+    if (!curHp) return;
 
     // HP Potion
-    if (this.cooldownHpTimer === 0 && curHp < maxHp && curHp * 100 <= maxHp * this.hpThresholdPercent) {
+    if (this.cooldownHpTimer === 0 && maxHp > 0 && curHp < maxHp && curHp * 100 <= maxHp * this.hpThresholdPercent) {
       const heal = Math.max(50, Math.floor((maxHp * 40) / 100));
       const newHp = Math.min(maxHp, curHp + heal);
       this.wr16(g + 0x48f2, newHp);

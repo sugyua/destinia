@@ -46,3 +46,11 @@ class ReleaseCoherence(unittest.TestCase):
         files=json.loads((ROOT/'release/manifest.json').read_text())['files']
         self.assertNotIn('web/dist/vendor/unicorn_arm.js',files)
         self.assertIn('/web/dist/vendor/unicorn_arm.js export-ignore',(ROOT/'.gitattributes').read_text())
+
+    def test_source_manifest_covers_web_module_dependencies(self):
+        files=set(json.loads((ROOT/'release/manifest.json').read_text())['files'])
+        for name in sorted(files):
+            if not name.startswith('web/') or not name.endswith('.mjs'):continue
+            for dep in re.findall(r"(?:from\s*|import\s*)['\"](\.[^'\"]+)['\"]",(ROOT/name).read_text(encoding='utf-8')):
+                child=(ROOT/name).parent.joinpath(dep).resolve()
+                self.assertIn(child.relative_to(ROOT).as_posix(),files,name+' imports '+dep)

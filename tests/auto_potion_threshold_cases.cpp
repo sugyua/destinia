@@ -15,6 +15,7 @@ int main(){try{
  require(defaults.update(),"exact 50 percent must trigger");require(defaults.mem[Fixture::g+0x48f2]==900,"expected threshold healing");require(defaults.mem[Fixture::bag+6]==4,"one fixture unit consumed");
  Fixture full(1000);full.potion.config.hpThresholdPercent=100;require(!full.update(),"full HP must not trigger");require(full.mem[Fixture::bag+6]==5,"full HP must preserve fixture quantity");
  Fixture missing(500,0);require(!missing.update(),"missing maximum must not trigger");require(missing.mem[Fixture::bag+6]==5,"missing maximum preserves quantity");
+ Fixture mana(500,0);mana.mem[Fixture::g+0x48f6]=100;require(mana.update(),"missing HP maximum must not block mana");require(mana.mem[Fixture::g+0x48f6]==450,"mana must recover independently");require(mana.mem[Fixture::g+0x48f2]==500,"invalid HP maximum must preserve HP");require(mana.mem[Fixture::bag+6]==5,"mana must not enter HP inventory path");
  Fixture above(501,1001);require(!above.update(),"fraction above 50 percent must not be rounded down");
  Fixture below(500,1001);require(below.update(),"fraction below 50 percent must trigger");
  Fixture dead(0);require(!dead.update(),"dead hero must not trigger");
