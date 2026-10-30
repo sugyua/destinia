@@ -2,7 +2,7 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs. Faça backup dos saves antes de atualizar.**
 
-**Estado atual em30/10/2026:** fontes e candidata0.17.1 (inicialização essencial do Unicorn antes de acesso ao save);0.17.0 publicada e instalada. CI e estado final dos pacotes0.17.1 devem ser conferidos na [release](https://github.com/sugyua/destinia/releases/tag/v0.17.1-beta). Interface original0.17 preservada. WebVPNPC0.17.1 verificada; Site privadoCodex mantém0.13.0 conhecido por indisponibilidade da ferramenta de publicação. Campanha/Safari físico não executados nesta entrega.
+**Estado atual em30/10/2026:** fontes e candidata0.17.2 (confirmação e testes seguros de gravação Web);0.17.1 publicada e instalada. CI e estado final dos pacotes0.17.2 devem ser conferidos na [release](https://github.com/sugyua/destinia/releases/tag/v0.17.2-beta). Interface original0.17 preservada. WebVPNPC0.17.2 verificada; Site privadoCodex mantém0.13.0 conhecido por indisponibilidade da ferramenta de publicação. Campanha/Safari físico não executados nesta entrega.
 
 Próximas frentes da Issue #5: contratos/recuperação de saves, hooks opcionais/Zoom restantes, profiling comparável, permissões/dependências, divergências intencionais dos hosts, acessibilidade Web e fuzz. A [triagem atual](TRIAGEM_GITHUB_2026-10-30.md) separa correções já entregues das propostas; não reimplementar atalhos, CI Web ou versões anteriores.
 

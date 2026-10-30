@@ -1,16 +1,23 @@
-# Destinia 0.17.1 Beta
+# Destinia 0.17.2 Beta
 
-> **0.17.1 Beta — inicialização segura (30/10/2026).** Os dois hosts verificam abertura, cinco mapeamentos e dois hooks essenciais do Unicorn, com endereço/tamanho e erro no diagnóstico. Em falha essencial, encerram antes de criar, recuperar ou copiar saves. Preserva a interface original da 0.17.0 e o comportamento da campanha. Validação local aprovada; [pacotes 0.17.1](https://github.com/sugyua/destinia/releases/tag/v0.17.1-beta) somente após publicação confirmada.
+> **0.17.2 Beta — confirmação de gravação Web (30/10/2026).** A Web informa quando o servidor não confirma uma gravação; o aviso permanece separado do FPS. Respostas inválidas de saves são rejeitadas antes de atualizar a memória. O teste de sincronização usa somente dados sintéticos e um servidor efêmero, sem saves pessoais. [Pacotes 0.17.2](https://github.com/sugyua/destinia/releases/tag/v0.17.2-beta) somente após publicação confirmada.
 
 > **Versão 0.16.0 Beta (28/10/2026).** Inclui Desmontagem em Lote Protegida (0.16.0), Ficha de Atributos Secundários Ctrl+F3 (0.15.0), Painel de Diagnóstico em Tempo Real F12 (0.14.0) e Arena de Sobrevivência Infinita com Refino de Equipamentos até +15 (0.13.0).
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-[Release anterior 0.17.0 e pacotes verificados](https://github.com/sugyua/destinia/releases/tag/v0.17.0-beta) · [0.16.1](https://github.com/sugyua/destinia/releases/tag/v0.16.1-beta).
+[Release anterior 0.17.1 e pacotes verificados](https://github.com/sugyua/destinia/releases/tag/v0.17.1-beta) · [0.17.0](https://github.com/sugyua/destinia/releases/tag/v0.17.0-beta).
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
-**Web:** fontes 0.17.1, sem alteração funcional nesta revisão (correção restrita ao PC). A 0.17.1 está servida pelo PC na [VPN Tailscale](http://100.108.92.19:8000/?v=0.17.1), com HTTP e cópia das fontes conferidos. PC ligado e VPN conectada são necessários; Safari físico não foi validado nesta entrega. O [Site privado vinculado](https://destinia-web-experimental.leafyheron257.chatgpt.site/) mantém o deployment 0.13.0 conhecido: ferramenta Sites indisponível. Não confundir fontes, release e servidor VPN com deployment do Site.
+**Web:** fontes 0.17.2 e [VPN Tailscale0.17.2](http://100.108.92.19:8000/?v=0.17.2) atualizadas; cópia das fontes e HTTP conferidos. PC ligado e VPN conectada necessários. O servidor estático não oferece sincronização de saves; sem confirmação, mantenha a aba aberta para preservar o progresso temporário. Sidecars do navegador têm contratos próprios. O [Site privado vinculado](https://destinia-web-experimental.leafyheron257.chatgpt.site/) mantém deployment 0.13.0 conhecido: ferramenta Sites indisponível, audiência preservada. Safari físico não executado nesta entrega.
+
+## Novidades 0.17.2
+
+- Gravação Web só é confirmada com HTTP de sucesso e `ok: true`; erro de transporte, JSON inválido e confirmação negativa mantêm aviso visível.
+- Carregamento de saves valida os arquivos recebidos antes de atualizar a memória, preservando sidecars protegidos e os dados da sessão quando a resposta é inválida.
+- A confirmação é do servidor, sem prometer Google Drive ou sincronização PC/Web. O protocolo existente não mudou; nenhum servidor de saves foi habilitado.
+- `node --test tests/cloud-save-sync.test.mjs` usa apenas fixtures sintéticas em loopback e não acessa saves pessoais.
 
 ## Novidades 0.17.1
 
