@@ -1,3 +1,4 @@
+import http from 'node:http';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -19,7 +20,17 @@ function invoke(r,name,args){args.forEach((n,i)=>r.w(i,n));r.handlers.get(r.impo
 test('recusa ELF que nao seja ARM original antes de executar',()=>{const r=make();try{assert.throws(()=>r.load(new Uint8Array(52)),/ELF/);}finally{r.close();}});
 test('inicializa a biblioteca original e produz framebuffer real com toque',()=>{const r=make();try{r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();for(let i=0;i<10;i++)r.step();const b=r.framebuffer();assert.equal(b.length,192000);assert.ok(b.some(n=>n));r.touch(200,190,0);r.touch(200,190,1);r.step();assert.equal(r.frame,11);}finally{r.close();}});
 test('arquivos de save ficam somente na instancia e tamanho zero nao le memoria',()=>{const r=make();try{const name=r.malloc(64),mode=r.malloc(16),buffer=r.malloc(16);r.text(name,'/data/data/game.destiniaeng/files/test.dat');r.text(mode,'wb+');const handle=invoke(r,'fopen',[name,mode]);assert.ok(handle);r.write(buffer,new Uint8Array([7,9,13]));assert.equal(invoke(r,'fwrite',[buffer,1,3,handle]),3);assert.equal(invoke(r,'fread',[0xffffffff,0,5,handle]),0);assert.equal(invoke(r,'fwrite',[0xffffffff,1,0,handle]),0);invoke(r,'fseek',[handle,0,0]);r.write(buffer,new Uint8Array(3));assert.equal(invoke(r,'fread',[buffer,1,3,handle]),3);assert.deepEqual(Array.from(r.read(buffer,3)),[7,9,13]);assert.equal(r.saved.size,1);}finally{r.close();}assert.equal(r.saved.size,0);});
-test('feature save restored locally is not overwritten by an older cloud copy',async()=>{const prior=globalThis.fetch;globalThis.fetch=async()=>({ok:true,json:async()=>({ok:true,saves:{'save0.dat':btoa(String.fromCharCode(1,2)),'save1.dat':btoa(String.fromCharCode(3))}})});const engine={saved:new Map([['save0.dat',Uint8Array.of(9,8)]]),preservedFeatureSaveNames:new Set(['save0.dat']),log(){}};try{await DestiniaWeb.prototype.loadCloudSaves.call(engine);assert.deepEqual([...engine.saved.get('save0.dat')],[9,8]);assert.deepEqual([...engine.saved.get('save1.dat')],[3]);}finally{globalThis.fetch=prior;}});
+test('feature save restored locally is not overwritten by an older cloud copy',async()=>{
+ const prior=globalThis.fetch,engine=make();
+ globalThis.fetch=async()=>({ok:true,json:async()=>({ok:true,saves:{'save0.dat':btoa(String.fromCharCode(1,2)),'save1.dat':btoa(String.fromCharCode(3))}})});
+ engine.saved.set('save0.dat',Uint8Array.of(9,8));engine.preservedFeatureSaveNames=new Set(['save0.dat']);
+ try{
+  assert.equal(await engine.loadCloudSaves(),true);
+  assert.deepEqual([...engine.saved.get('save0.dat')],[9,8]);
+  assert.deepEqual([...engine.saved.get('save1.dat')],[3]);
+ }finally{globalThis.fetch=prior;engine.close();}
+});
+
 test('Códex recebe callbacks ARM originais de desenho e derrota',()=>{
  const r=make();try {
   r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();
@@ -406,4 +417,41 @@ test('FC Status usa fonte ARM sem faixa azul e comparador fica na descricao nati
   assert.throws(()=>r.combatPower.paint(item.slice()),/FC_RENDER_FAILURE/);assert.deepEqual(r.read(grp,124),graphics);assert.equal(r.get32(font),color);assert.deepEqual(r.read(r.exports.get('frameBuffer'),20),slots);assert.deepEqual(r.read(g,32056),game);
   r.call=nativeCall;const retry=item.slice();r.combatPower.paint(retry);assert.deepEqual(retry,itemPage);
  }finally{r.close();}
+});
+
+// Original ARM produces the fixture; no personal save or Drive path is used.
+test('ARM save and load roundtrip through an ephemeral cloud server',async()=>{
+ const remote=new Map(),previous=Object.getOwnPropertyDescriptor(globalThis,'location');
+ let uploadedResolve;const uploaded=new Promise(resolve=>{uploadedResolve=resolve;});
+ const server=http.createServer(async(req,res)=>{
+  let body='';for await(const chunk of req)body+=chunk;
+  if(req.method==='POST'){
+   const value=JSON.parse(body);remote.set(value.name,value.data);
+   res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({ok:true}));
+   if(value.name==='save0.dat')uploadedResolve();
+  }else{res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({ok:true,saves:Object.fromEntries(remote)}));}
+ });
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ Object.defineProperty(globalThis,'location',{value:{origin:'http://127.0.0.1:'+server.address().port},configurable:true});
+ let engine,timer;
+ try{
+  engine=make({featureStorage:{getItem:()=>null,setItem:()=>{}}});
+  engine.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));
+  assert.equal(await engine.loadCloudSaves(),true);engine.init();
+  // Synthetic level1 at the existing documented hero-level field (combat-power.mjs).
+  engine.write(engine.exports.get('Game')+0x48fa,Uint8Array.of(1,0));
+  engine.call(engine.exports.get('GameCanvas_SaveGame'),[0]);
+  await Promise.race([uploaded,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('ARM upload not received')),5000);})]);
+  clearTimeout(timer);
+  const expected=new Uint8Array(engine.saved.get('/data/data/game.destiniaeng/files/save0.dat'));
+  assert.ok(expected.length>0);assert.deepEqual(Uint8Array.from(Buffer.from(remote.get('save0.dat'),'base64')),expected);
+  engine.saved.clear();assert.equal(await engine.loadCloudSaves(),true);
+  assert.deepEqual(engine.saved.get('/data/data/game.destiniaeng/files/save0.dat'),expected);
+  assert.equal(engine.call(engine.exports.get('GameCanvas_LoadGame'),[0]),1);
+  assert.equal(engine.get16(engine.exports.get('Game')+0x48fa),1);
+ }finally{
+  clearTimeout(timer);engine?.close();
+  if(previous)Object.defineProperty(globalThis,'location',previous);else delete globalThis.location;
+  server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
+ }
 });

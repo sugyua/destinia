@@ -28,3 +28,8 @@ A Issue #5 deve permanecer aberta: contém trabalho não concluído. Próxima un
 ## Web
 
 Sites vinculado permanece0.13 conforme último estado conhecido; ferramenta indisponível, sem nova chamada nesta rodada. Alternativa autorizada:0.17.0 em servidorPC privado Tailscale, endereço100.108.92.19:8000. Não há publicação pública nem mudança de audiência. Safari físico depende de confirmação do usuário.
+
+
+## Continuidade0.17.2
+
+Teste legado de sync agora usa fixtures sintéticas em loopback, sem caminhos pessoais. Web avisa quando HTTP/JSON não confirmam gravação e carrega arquivos elegíveis de forma atômica na memória, preservando sidecars protegidos. Isso não conclui a matriz geral de recuperação/concorrência nem adiciona API de saves ao servidor estático. Ver VERIFICACAO_0.17.2.md.

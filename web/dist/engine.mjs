@@ -32,13 +32,13 @@ const DATA=0x40000000,STACK=0x7f000000,STACK_SIZE=0x200000,ENV=DATA,ENV_TAB=DATA
 const encoder=new TextEncoder(),decoder=new TextDecoder();
 const requireValue=(value,message)=>{if(!value)throw Error(message);};
 export class DestiniaWeb {
-  constructor(uc,assets,{onLog=()=>{},onSound=()=>{},fastGraphics=true,fastMemory=true,gameMode="classico",uiScale=100,language="pt",inventoryStorage,lootOptions,featureBackend,featureSnapshot,featureStorage,onOpenBossRushMenu=null,width=800,height=480}={}) {
+  constructor(uc,assets,{onLog=()=>{},onSound=()=>{},onSaveStatus=()=>{},fastGraphics=true,fastMemory=true,gameMode="classico",uiScale=100,language="pt",inventoryStorage,lootOptions,featureBackend,featureSnapshot,featureStorage,onOpenBossRushMenu=null,width=800,height=480}={}) {
     this.featureBackendOption=featureBackend;this.featureStorage=featureStorage;this.featureSnapshotOption=featureSnapshot;
     this.lootMaterialTable=assets.get('item_en.gdt');
     this.economy=new LootEconomy();
     if(!["en","pt"].includes(language))throw Error("Idioma inválido.");this.language=language;if(language==="pt")assets=translatedAssets(assets);
     if(!["classico","expandido"].includes(gameMode))throw Error("Modo de jogo inválido.");this.gameMode=gameMode;if(![75,100,125].includes(uiScale))throw Error("Escala de interface inválida.");this.uiScale=uiScale;
-    this.onOpenBossRushMenu=onOpenBossRushMenu;this.lootOptions=lootOptions;this.inventoryStorage=inventoryStorage;this.width=width;this.height=height;this.screenBytes=width*height*2;this.codexFilter=0;
+    this.cloudLoadOk=false;this.onSaveStatus=onSaveStatus;this.onOpenBossRushMenu=onOpenBossRushMenu;this.lootOptions=lootOptions;this.inventoryStorage=inventoryStorage;this.width=width;this.height=height;this.screenBytes=width*height*2;this.codexFilter=0;
     this.pendingPurchase=false;this.storeNotice=false;this.virtualControls=true;this.fastGraphics=fastGraphics;this.fastMemory=fastMemory;this.graphicsStats={draws:0,supported:false};this.portraits=new Map();this.codexOpen=false;this.codexTabSelected=false;this.codexTouchCaptured=false;this.codexPage=0;this.codexSelection=0;this.codexDetailsOpen=false;this.codexDetailPage=0;this.codexDetailScroll=0;this.monsterMetadata=null;this.codexNativeMenuPending=-1;this.codexNativeMenuTarget=0;this.codexNativeMenuBypass=0;this.codexNativeMenuDraining=false;this.nativeTouchDown=false;this.nativeTouchPoint={x:0,y:0};
     this.codex=new Codex(monsterNames(assets.get('mon_data_en.gdt')));this.uc=uc;this.assets=assets;this.log=onLog;this.onSound=onSound;this.e=new uc.Unicorn(uc.ARCH_ARM,uc.MODE_ARM);
     this.regs=Array.from({length:13},(_,i)=>uc['ARM_REG_R'+i]);this.handlers=new Map();this.imports=new Map();this.exports=new Map();
@@ -151,45 +151,65 @@ export class DestiniaWeb {
     this.call(this.exports.get('Java_game_destiniaeng_GameThread_procCommRead'),[ENV,16,arr,b.length]);
     for(let i=0;i<4;i++)this.call(this.exports.get('Comm_mRun'));
   }
-  persistCloudSave(filePath){
+  reportSaveStatus(phase,ok,message,detail=''){
+    // Notification failure must never change the server acknowledgement result.
+    try{this.log(message+(detail?' '+detail:''));}catch{}
+    try{this.onSaveStatus?.({phase,ok,message});}catch{}
+  }
+  async persistCloudSave(filePath){
     const fileName=filePath.split('/').pop().split('\\').pop();
-    if(!fileName.includes('save')&&!fileName.includes('msave')&&!fileName.includes('codex'))return;
+    if(!fileName.includes('save')&&!fileName.includes('msave')&&!fileName.includes('codex'))return false;
     const bytes=this.saved.get(filePath)||this.saved.get(fileName);
-    if(!bytes||typeof fetch!=='function')return;
+    if(!bytes)return false;
+    if(this.cloudLoadOk!==true){
+      this.reportSaveStatus('write',false,'Sincronização desativada nesta aba; progresso temporário.');
+      return false;
+    }
     try{
-      let b64='';
-      for(let i=0;i<bytes.length;i++)b64+=String.fromCharCode(bytes[i]);
-      b64=btoa(b64);
+      if(typeof fetch!=='function')throw Error('Transporte indisponível');
+      let raw='';for(let i=0;i<bytes.length;i++)raw+=String.fromCharCode(bytes[i]);
       const base=(typeof location!=='undefined'&&location.origin)?location.origin:'http://localhost:8000';
-      fetch(base+'/api/save',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({name:fileName,data:b64})
-      }).then(r=>r.json()).then(res=>{
-        if(res?.ok)this.log('Save sincronizado com Google Drive: '+fileName);
-      }).catch(err=>{
-        this.log('Aviso Sync Drive: '+(err?.message||err));
+      const response=await fetch(base+'/api/save',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({name:fileName,data:btoa(raw)})
       });
-    }catch(_){}
+      if(!response.ok)throw Error('HTTP '+response.status);
+      const reply=await response.json();
+      if(reply?.ok!==true)throw Error('Servidor não confirmou a gravação');
+      this.reportSaveStatus('write',true,'Gravação confirmada pelo servidor.');
+      return true;
+    }catch(error){
+      this.reportSaveStatus('write',false,'Gravação não confirmada; mantenha esta aba aberta.',String(error?.message||error));
+      return false;
+    }
   }
   async loadCloudSaves(){
-    if(typeof fetch!=='function')return;
+    this.cloudLoadOk=false;
     try{
+      if(typeof fetch!=='function')throw Error('Transporte indisponível');
       const base=(typeof location!=='undefined'&&location.origin)?location.origin:'http://localhost:8000';
-      const res=await fetch(base+'/api/save?format=json');
-      if(!res.ok)return;
-      const json=await res.json();
-      if(!json?.ok||!json.saves)return;
-      for(const [file,b64] of Object.entries(json.saves)){
+      const response=await fetch(base+'/api/save?format=json');
+      if(!response.ok)throw Error('HTTP '+response.status);
+      const reply=await response.json();
+      if(reply?.ok!==true||!reply.saves||typeof reply.saves!=='object'||Array.isArray(reply.saves))throw Error('Resposta de save inválida');
+      const staged=[];
+      for(const [file,b64] of Object.entries(reply.saves)){
         if(this.preservedFeatureSaveNames?.has(file.split(/[\\/]/).pop()))continue;
-        const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
-        this.saved.set(file,bin);
-        this.saved.set('/data/data/game.destiniaeng/files/'+file,bin);
-        this.saved.set('./'+file,bin);
+        if(typeof b64!=='string')throw Error('Conteúdo de save inválido');
+        staged.push([file,Uint8Array.from(atob(b64),c=>c.charCodeAt(0))]);
       }
-      this.log('Saves carregados do Google Drive: '+Object.keys(json.saves).join(', '));
-    }catch(err){
-      this.log('Drive sync indisponivel: '+(err?.message||err));
+      // Validate the entire response before changing any in-memory save.
+      for(const [file,bytes] of staged){
+        this.saved.set(file,bytes);
+        this.saved.set('/data/data/game.destiniaeng/files/'+file,bytes);
+        this.saved.set('./'+file,bytes);
+      }
+      this.cloudLoadOk=true;
+      this.reportSaveStatus('load',true,staged.length?'Dados recebidos do servidor.':'Nenhum progresso recebido do servidor.');
+      return true;
+    }catch(error){
+      this.reportSaveStatus('load',false,'Sem sincronização: progresso somente nesta aba.',String(error?.message||error));
+      return false;
     }
   }
   processNetwork(){

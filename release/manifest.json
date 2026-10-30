@@ -1,6 +1,6 @@
 {
-  "version": "0.17.1",
-  "base_commit": "92532f0b668194d5762f11cb4b81f3c69b645af1",
+  "version": "0.17.2",
+  "base_commit": "194ebed72f69e314414b3909ef685aa3cbe4c6eb",
   "files": [
     ".gitignore",
     "AGENTS.md",
@@ -382,6 +382,12 @@
     "docs/TRIAGEM_GITHUB_2026-10-30.md",
     "docs/VERIFICACAO_0.17.1.md",
     "docs/superpowers/plans/2026-10-30-unicorn-startup.md",
-    "release/NOTAS_0.17.1.md"
+    "release/NOTAS_0.17.1.md",
+    "web/dist/save-status.mjs",
+    "web/tests/cloud-save.test.mjs",
+    "tests/cloud-save-sync.test.mjs",
+    "release/NOTAS_0.17.2.md",
+    "docs/VERIFICACAO_0.17.2.md",
+    "docs/superpowers/plans/2026-10-30-web-save-status.md"
   ]
 }

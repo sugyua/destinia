@@ -4,6 +4,14 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.17.2 Beta — 30/10/2026
+
+- Após falha no carregamento inicial, envios de saves ficam desativados até um carregamento confirmado; o progresso permanece em memória e a cópia remota não recebe a sessão iniciada sem confirmação.
+- Web só confirma gravação após HTTP de sucesso e resposta `ok: true`. Falhas permanecem visíveis em aviso separado do FPS, sem remover o progresso em memória.
+- Resposta de carregamento é decodificada antes de atualizar os saves em memória; falha intermediária preserva a sessão e os sidecars protegidos.
+- Mensagens referem confirmação do servidor, sem alegar gravação no Google Drive. Formato base64 e endpoint existentes preservados; não adiciona servidor nem sincronização PC/Web.
+- Teste legado de sincronização substituído por fixtures sintéticas e servidor efêmero em loopback; não lê nem grava arquivos pessoais.
+
 ## 0.17.1 Beta — 30/10/2026
 
 - Hosts normal/Zoom verificam uc_open, cinco mapeamentos e os hooks essenciais de stubs/retorno; falhas incluem operação, endereço/tamanho quando aplicável e código Unicorn.

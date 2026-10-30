@@ -36,16 +36,16 @@ async function start(virtualControls=true,gameMode="classico",uiScale=100,langua
  if(engine||booting)return;booting=true;pendingLootOptions=initialLootOptions;lootFocused=!!initialLootFocused;
  try {
   self.postMessage({type:'status',message:'Carregando o jogo…'});
-  ({frameDelay}=await import('./frame-timing.mjs?v=0.17.1'));
-  const [{DestiniaWeb},uc,library,pack]=await Promise.all([import('./engine.mjs?v=0.17.1'),MUnicorn(),fetchBytes('./game/libdestinia_jni.so'),fetchBytes('./game/assets.bin')]);
+  ({frameDelay}=await import('./frame-timing.mjs?v=0.17.2-r1'));
+  const [{DestiniaWeb},uc,library,pack]=await Promise.all([import('./engine.mjs?v=0.17.2-r1'),MUnicorn(),fetchBytes('./game/libdestinia_jni.so'),fetchBytes('./game/assets.bin')]);
   const manifestLength=new DataView(pack.buffer).getUint32(0,true);if(manifestLength>200000||manifestLength+4>pack.length)throw Error('Pacote de recursos inválido.');
   const entries=JSON.parse(new TextDecoder().decode(pack.subarray(4,4+manifestLength))),assets=new Map();
   for(const entry of entries){if(typeof entry.name!=='string'||entry.offset<0||entry.size<0||4+manifestLength+entry.offset+entry.size>pack.length)throw Error('Recurso inválido.');assets.set(entry.name,pack.subarray(4+manifestLength+entry.offset,4+manifestLength+entry.offset+entry.size));}
   const hex=await sha256Hex(library);
   if(hex!=='f12f1d20ab42646ef81df27516851acccb9fffe7be07a054db83890d992df7e9')throw Error('Biblioteca original não corresponde ao teste verificado.');
-  const {InventoryStorageBridge}=await import('./inventory-storage.mjs?v=0.17.1');inventoryStorage=new InventoryStorageBridge(protectionSnapshot,message=>self.postMessage(message));
+  const {InventoryStorageBridge}=await import('./inventory-storage.mjs?v=0.17.2-r1');inventoryStorage=new InventoryStorageBridge(protectionSnapshot,message=>self.postMessage(message));
   const {FeatureStorageBridge}=await import("./features-storage.mjs");featureStorage=new FeatureStorageBridge(gameMode,featuresSnapshot,message=>self.postMessage(message));
-  engine=new DestiniaWeb(uc,assets,{featureStorage,gameMode,uiScale:100,language,lootOptions:pendingLootOptions,inventoryStorage});engine.load(library);engine.lootQol.focused=!!lootFocused;await engine.prepareCodexPortraits();await engine.loadCloudSaves();engine.init();await engine.prepareOriginalCompanions();engine.setVirtualControls(virtualControls);const {FrameInputs}=await import('./input.mjs?v=0.17.1');inputs=new FrameInputs(event=>{if(event.type==='key')engine.key(event.key,event.down);else engine.touch(event.x,event.y,event.phase);});booting=false;self.postMessage({type:'ready'});tick();
+  engine=new DestiniaWeb(uc,assets,{featureStorage,gameMode,uiScale:100,language,lootOptions:pendingLootOptions,inventoryStorage,onSaveStatus:status=>self.postMessage({type:'saveStatus',...status})});engine.load(library);engine.lootQol.focused=!!lootFocused;await engine.prepareCodexPortraits();await engine.loadCloudSaves();engine.init();await engine.prepareOriginalCompanions();engine.setVirtualControls(virtualControls);const {FrameInputs}=await import('./input.mjs?v=0.17.2-r1');inputs=new FrameInputs(event=>{if(event.type==='key')engine.key(event.key,event.down);else engine.touch(event.x,event.y,event.phase);});booting=false;self.postMessage({type:'ready'});tick();
  }catch(error){fail(error);}
 }
 function tick(){if(!engine||paused)return;try{if(engine.frame%10===0&&engine.frame<=50&&engine.menuState()<=0){engine.key(17,true);engine.key(17,false);}const t=performance.now(),wait=engine.step();inputs.afterFrame(engine.frame);if(engine.storeNotice){engine.storeNotice=false;inputs.clear();self.postMessage({type:"storeNotice"});}const pixels=engine.framebuffer();const elapsed=performance.now()-t;self.postMessage({type:'frame',pixels,frame:engine.frame,wait,elapsed},[pixels.buffer]);if(!wait){self.postMessage({type:'ended'});return;}clearTimeout(timer);timer=setTimeout(tick,frameDelay(wait,elapsed));}catch(error){fail(error);}}

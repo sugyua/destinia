@@ -1,3 +1,5 @@
+import {SaveStatus} from './save-status.mjs';
+const saveStatus=new SaveStatus();
 import {writeFeatureStorage} from './features-storage.mjs';
 if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>{for(const r of rs)r.unregister();});caches.keys().then(ks=>ks.forEach(k=>caches.delete(k)));}
 import {writeInventoryProtection} from './inventory-storage.mjs';
@@ -57,11 +59,13 @@ function release(){gamepad?.suspend();dropSources.clear();dropSource('keyboard',
 function showError(message){ready=false;release();$('loading').hidden=true;$('error').hidden=false;$('error-text').textContent=message;$('status').textContent='O teste parou. Toque em Reiniciar para tentar novamente.';$('restart').disabled=false;$('pause').disabled=true;$('virtual-controls').disabled=true;$('drop-names').disabled=true;}
 function setPaused(value){if(!ready)return;release();paused=value;fpsFrames=0;fpsStart=performance.now();send({type:'pause',value});$('paused').hidden=!value||storeOpen;$('pause').textContent=value?'Continuar':'Pausar';$('status').textContent=value?'Pausado · progresso somente nesta aba':'Experimental · progresso temporário · sem som';}
 function boot(){
+ $('save-status').textContent=saveStatus.reset();
  if(worker)worker.terminate();storeOpen=false;$('store-notice').hidden=true;release();ready=false;paused=false;surfacePointer=null;document.body.classList.add('running');$('welcome').hidden=true;$('error').hidden=true;$('paused').hidden=true;$('controls').hidden=true;$('loading').hidden=false;$('loading-text').textContent='Carregando o jogo…';$('pause').disabled=true;$('pause').setAttribute('aria-pressed','false');$('restart').disabled=true;$('virtual-controls').disabled=true;$('drop-names').disabled=true;
- worker=new Worker('./worker.js?v=0.17.1');loadTimer=setTimeout(()=>{$('loading-text').textContent='Ainda carregando. Mantenha esta aba aberta…';$('restart').disabled=false;},20000);
+ worker=new Worker('./worker.js?v=0.17.2-r1');loadTimer=setTimeout(()=>{$('loading-text').textContent='Ainda carregando. Mantenha esta aba aberta…';$('restart').disabled=false;},20000);
  worker.onerror=event=>{clearTimeout(loadTimer);showError(event.message||'O navegador não conseguiu iniciar este teste.');};
  worker.onmessage=event=>{const data=event.data;
   if(data.type==='ready'){clearTimeout(loadTimer);ready=true;$('virtual-controls').disabled=false;$('drop-names').disabled=false;if($('weapons-catalog')) $('weapons-catalog').disabled=false; if($('shared-stash')) $('shared-stash').disabled=false; if($('bounties-btn')) $('bounties-btn').disabled=false; if($('difficulty-btn')) $('difficulty-btn').disabled=false;lastFrame=performance.now();fpsStart=lastFrame;fpsFrames=0;$('loading').hidden=true;applyTouchVisibility();$('pause').disabled=false;$('restart').disabled=false;$('pause').textContent='Pausar';$('status').textContent='Experimental · progresso temporário · sem som';}
+  else if(data.type==='saveStatus'){const message=saveStatus.accept(data),element=$('save-status');if(element.textContent!==message)element.textContent=message;}
   else if(data.type==='featuresStorageWrite'){event.target.postMessage(writeFeatureStorage(localStorage,gameMode,data));}
   else if(data.type==='inventoryProtectionWrite'){let ack;try{ack=writeInventoryProtection(localStorage,gameMode,data);}catch(error){ack={type:'inventoryProtectionAck',id:data.id,ok:false,text:null,error:error.message};}event.target.postMessage(ack);}
   else if(data.type==='status')$('loading-text').textContent=data.message;
