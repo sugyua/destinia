@@ -46,5 +46,7 @@ int main(int argc,char**argv){
  bool failed=false;try{originalUiHost.capture(16,16,[&](){wr32(STACK_BASE+128,777);uint16_t badMode=999;wr(exportsMap.at("MMain")+0x3920,&badMode,2);wr32(exportsMap.at("GameUI"),888);wr32(game,123);wr32(grp,456);W(7,999);throw std::runtime_error("injected");},false);}catch(...){failed=true;}assert(failed);
  rd(game,after.data(),after.size());assert(before==after);std::array<uint8_t,124> graphicsAfter{};rd(grp,graphicsAfter.data(),graphicsAfter.size());assert(graphics==graphicsAfter);assert(R(7)==regBefore);assert(rd32(STACK_BASE+128)==stackWord);assert(rd32(table)==oldSlot);rd(ui,uiAfter.data(),uiAfter.size());rd(main,mainAfter.data(),mainAfter.size());assert(uiBefore==uiAfter);assert(mainBefore==mainAfter);
  assert(std::any_of(actual.begin(),actual.end(),[](uint8_t b){return b!=0;}));
+ OriginalUiHost unavailable;u32 savedPc=regPC(),badPc=SO_BASE;uc_reg_write(uc,UC_ARM_REG_PC,&badPc);
+ bool declined=false;try{declined=!unavailable.panel(actual.data(),SCREEN_W,SCREEN_H,0,0,127,57)&&!unavailable.text(actual.data(),SCREEN_W,SCREEN_H,0,0,"UNCACHED UNAVAILABLE",0xffff,123,1)&&!unavailable.cursor(actual.data(),SCREEN_W,SCREEN_H,20,20);}catch(...){declined=false;}uc_reg_write(uc,UC_ARM_REG_PC,&savedPc);assert(declined);
  puts("ORIGINAL_UI_ARM_OK");return 0;
 }

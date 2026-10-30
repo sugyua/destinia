@@ -49,3 +49,5 @@ test('panels opened during intro do not access unloaded menu resources or poison
  r.call(r.exports.get('GameCanvas_init'),[r.exports.get('GameCanvas')]);ui.panel(pixels,{x:10,y:20,w:180,h:100});assert.notDeepEqual(pixels,intro,'loaded menu replaces temporary original description frame');
  }finally{r.close();}
 });
+
+test('selection cursor uses the original image anchor',()=>{const r=new DestiniaWeb(uc,assets,{width:400,height:240,language:'en'});try{r.load(new Uint8Array(fs.readFileSync(root+'/lib/armeabi/libdestinia_jni.so')));r.init();const ui=new OriginalUi(r),p=r.exports.get('MMain')+12,anchors=r.read(p+12,4);try{r.write(p+12,Uint8Array.of(3,0,4,0));const output=new Uint8Array(192000);ui.cursor(output,50,50);const reference=ui.capture(400,240,()=>ui.call('Grp_drawWImage',[4,50,50,p]),true);for(let n=0;n<output.length;n+=2){const color=reference[n]|reference[n+1]<<8;assert.equal(output[n]|output[n+1]<<8,color===0xf81f?0:color);}}finally{r.write(p+12,anchors);}}finally{r.close();}});

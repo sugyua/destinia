@@ -20,3 +20,5 @@ test('four original cosmetic companions preserve native state and retain actual 
  }finally{r.close();}
 });
 test('corrupt original resource reports failure and never draws replacement art',async()=>{const r=make();try{r.assets.set('pet3.wmb',Uint8Array.of(1,2,3));const art=new OriginalCompanions(r),before=r.read(r.exports.get('Game'),32056),pixels=new Uint8Array(192000);await assert.rejects(art.prepare(),/pet3.wmb/);assert.equal(art.paint(pixels,0,20,20),false);assert.equal(pixels.some(v=>v),false);assert.deepEqual(r.read(r.exports.get('Game'),32056),before);}finally{r.close();}});
+
+test('optional companion art failure does not prevent the game reaching its first frame',async()=>{const r=make();try{r.assets.set('pet3.wmb',Uint8Array.of(1,2,3));const before=r.read(r.exports.get('Game'),32056);assert.equal(await r.prepareOriginalCompanions(),false);assert.deepEqual(r.read(r.exports.get('Game'),32056),before);r.step();const pixels=r.framebuffer();assert.equal(pixels.length,192000);assert.ok(pixels.some(v=>v));}finally{r.close();}});

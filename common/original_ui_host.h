@@ -52,7 +52,7 @@ public:
    invoke("Grp_setDrawOpVal",{0,0xffffffff});draw();std::vector<uint8_t> full(FB_BYTES),out(w*h*2);rd(pixels,full.data(),full.size());for(int y=0;y<h;y++)std::memcpy(out.data()+y*w*2,full.data()+y*SCREEN_W*2,w*2);draws++;restore();return out;
   }catch(...){restore();throw;}
  }
- bool panel(uint8_t* output,int width,int height,int x,int y,int w,int h){
+ bool panel(uint8_t* output,int width,int height,int x,int y,int w,int h)try{
   if(!output||width<=0||height<=0||w<12||h<12||w>SCREEN_W||h>SCREEN_H)return false;
   const auto menu=exportsMap.at("GameUI")+0x24fc;const bool menuReady=rd16(menu+8)>0&&rd16(menu+10)>0;
   const auto key=std::string(menuReady&&w>=140&&h>=40?"window:":"panel:")+std::to_string(w)+":"+std::to_string(h);auto it=cache.find(key);
@@ -74,20 +74,20 @@ public:
    if(cache.size()>=256)cache.clear();it=cache.emplace(key,std::move(art)).first;
   }
   blit(output,width,height,x,y,it->second,1);return true;
- }
- bool text(uint8_t* output,int width,int height,int x,int y,const std::string& value,uint16_t color,int limit,int scale){
+ }catch(const std::exception&){return false;}
+ bool text(uint8_t* output,int width,int height,int x,int y,const std::string& value,uint16_t color,int limit,int scale)try{
   if(!output||width<=0||height<=0||limit<=0||scale<1)return false;const int w=std::min(SCREEN_W,std::max(1,limit/scale));const auto label=ascii(value),key="text:"+std::to_string(w)+":"+std::to_string(color)+":"+label;auto it=cache.find(key);
   if(it==cache.end()){Raster art{w,12,true,capture(w,12,[&](){wr(string,label.c_str(),label.size()+1);invoke("Font_setColorPixel",{color});invoke("Font_drawStringChar",{4,string,0,0,u32(w),12,1,0x11});},true)};if(cache.size()>=256)cache.clear();it=cache.emplace(key,std::move(art)).first;}
   blit(output,width,height,x,y,it->second,scale);return true;
- }
- bool cursor(uint8_t* output,int width,int height,int x,int y){
+ }catch(const std::exception&){return false;}
+ bool cursor(uint8_t* output,int width,int height,int x,int y)try{
   if(!output||width<=0||height<=0)return false;
   const auto pointer=exportsMap.at("MMain")+12;const int w=rd16(pointer+8),h=rd16(pointer+10),ax=int16_t(rd16(pointer+12)),ay=int16_t(rd16(pointer+14));
   if(w<1||h<1||w>128||h>128)return false;
   const auto key="cursor:"+std::to_string(pointer)+":"+std::to_string(w)+":"+std::to_string(h);auto it=cache.find(key);
   if(it==cache.end()){Raster art{w,h,true,capture(w,h,[&](){invoke("Grp_drawWImage",{4,u32(ax),u32(ay),pointer});},true)};if(cache.size()>=256)cache.clear();it=cache.emplace(key,std::move(art)).first;}
   blit(output,width,height,x-ax,y-ay,it->second,1);return true;
- }
+ }catch(const std::exception&){return false;}
  void install(){ensure();destinia::originalCursorPainter=[this](uint8_t* p,int w,int h,int x,int y){return cursor(p,w,h,x,y);};destinia::originalPanelPainter=[this](uint8_t* p,int w,int h,int x,int y,int bw,int bh){return panel(p,w,h,x,y,bw,bh);};destinia::originalTextPainter=[this](uint8_t* p,int w,int h,int x,int y,const std::string& value,uint16_t c,int limit,int scale){return text(p,w,h,x,y,value,c,limit,scale);};}
 };
 static OriginalUiHost originalUiHost;

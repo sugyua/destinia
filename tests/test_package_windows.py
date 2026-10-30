@@ -27,6 +27,7 @@ class WindowsPackageTests(unittest.TestCase):
                 self.assertTrue(any(name.endswith('/Configurar Destinia.bat') for name in names))
                 version=(ROOT/'VERSION').read_text().strip()
                 self.assertTrue(any(name.endswith('/release/NOTAS_'+version+'.md') for name in names),'Notas da versao atual ausentes')
+                self.assertTrue(any(name.endswith('/docs/VERIFICACAO_'+version+'.md') for name in names),'Relatorio de verificacao atual ausente')
             with self.assertRaises(FileExistsError):module.package(ROOT,base/'out',exe,exe,exe,exe)
             struct.pack_into('<H',data,0x84,0x14c);exe.write_bytes(data)
             with self.assertRaises(ValueError):module.package(ROOT,base/'bad',exe,exe,exe,exe)

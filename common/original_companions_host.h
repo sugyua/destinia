@@ -1,10 +1,12 @@
 ﻿#pragma once
 #include "original_ui_host.h"
 #include "codex_portraits.h"
+#include <set>
 // Cosmetic mappings verified against original resources; save/buff IDs are unchanged.
 class OriginalCompanionsHost {
  struct Art {int w=0,h=0;std::vector<uint32_t> pixels;};
  std::map<int,std::vector<Art>> cache;
+ std::set<int> failed;std::string sourceAssets;
  Art crop(const std::vector<uint8_t>& raster){
   int left=SCREEN_W,top=SCREEN_H,right=-1,bottom=-1;
   for(int y=0;y<SCREEN_H;y++)for(int x=0;x<SCREEN_W;x++){const auto at=(y*SCREEN_W+x)*2;if((uint16_t(raster[at])|uint16_t(raster[at+1])<<8)!=0xf81f){left=std::min(left,x);top=std::min(top,y);right=std::max(right,x);bottom=std::max(bottom,y);}}
@@ -39,13 +41,15 @@ class OriginalCompanionsHost {
 public:
  bool paint(uint8_t* output,int width,int height,int id,int heroX,int heroY,uint64_t frame,int level){
   if(!output||width<=0||height<=0||id<0||id>3)return false;
+  if(sourceAssets!=assetsDir){cache.clear();failed.clear();sourceAssets=assetsDir;}
+  if(failed.count(id))return true;
   try{
    auto found=cache.find(id);if(found==cache.end())found=cache.emplace(id,load(id)).first;const auto& idle=found->second;const auto& art=idle[(frame/6)%idle.size()];
    const int px=heroX-16-art.w/2,py=heroY-6-art.h;
    for(int y=0;y<art.h;y++)for(int x=0;x<art.w;x++){const auto c=art.pixels[y*art.w+x];const int xx=px+x,yy=py+y;if(!(c&0x10000)||xx<0||yy<0||xx>=width||yy>=height)continue;const auto at=(yy*width+xx)*2;output[at]=c&255;output[at+1]=(c>>8)&255;}
    destinia::paintOriginalText(output,width,height,px,py-12,"Lv"+std::to_string(level),0xd7bf,50,1);return true;
-  }catch(const std::exception& error){hostReport("[companion] %s\n",error.what());return true;}
+  }catch(const std::exception& error){failed.insert(id);hostReport("[companion] %s\n",error.what());return true;}
  }
- void install(){destinia::originalCompanionPainter=[this](uint8_t* p,int w,int h,int id,int x,int y,uint64_t frame,int level){return paint(p,w,h,id,x,y,frame,level);};}
+ void install(){cache.clear();failed.clear();sourceAssets=assetsDir;destinia::originalCompanionPainter=[this](uint8_t* p,int w,int h,int id,int x,int y,uint64_t frame,int level){return paint(p,w,h,id,x,y,frame,level);};}
 };
 static OriginalCompanionsHost originalCompanionsHost;
