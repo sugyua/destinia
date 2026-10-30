@@ -4,7 +4,7 @@ export class AutoPotionController {
   constructor(engine) {
     this.engine = engine;
     this.enabled = true;
-    this.hpThresholdPercent = 35;
+    this.hpThresholdPercent = 50;
     this.mpThresholdPercent = 25;
     this.cooldownFrames = 60;
     this.cooldownHpTimer = 0;
@@ -49,17 +49,16 @@ export class AutoPotionController {
     if (state !== 0) return;
 
     const curHp = this.rd16(g + 0x48f2);
-    let maxHp = this.rd16(g + 0x48c4);
-    if (!maxHp) maxHp = this.rd16(g + 0x48f4);
+    const maxHp = this.rd16(g + 0x48c4);
 
     const curMp = this.rd16(g + 0x48f6);
     let maxMp = this.rd16(g + 0x48c6);
     if (!maxMp) maxMp = this.rd16(g + 0x48f8);
 
-    if (!curHp || !maxHp) return;
+    if (!curHp) return;
 
     // HP Potion
-    if (this.cooldownHpTimer === 0 && Math.floor((curHp * 100) / maxHp) <= this.hpThresholdPercent) {
+    if (this.cooldownHpTimer === 0 && maxHp > 0 && curHp < maxHp && curHp * 100 <= maxHp * this.hpThresholdPercent) {
       const heal = Math.max(50, Math.floor((maxHp * 40) / 100));
       const newHp = Math.min(maxHp, curHp + heal);
       this.wr16(g + 0x48f2, newHp);

@@ -9,7 +9,7 @@ namespace destinia {
 
 struct AutoPotionConfig {
   bool enabled = true;
-  int hpThresholdPercent = 35; // auto cura se HP < 35%
+  int hpThresholdPercent = 50; // auto cura se HP <= 50%
   int mpThresholdPercent = 25; // auto mana se MP < 25%
   int cooldownFrames = 60;     // 1 segundo a 60fps entre consumos
 };
@@ -52,19 +52,19 @@ public:
     if (gameState != 0) return false;
 
     uint16_t curHp = rd16(gameBase + 0x48f2);
-    uint16_t maxHp = rd16(gameBase + 0x48c4); // stat 5
-    if (maxHp == 0) maxHp = rd16(gameBase + 0x48f4);
+    uint16_t maxHp = rd16(gameBase + 0x48c4); // stat 5 (PV maximos)
 
     uint16_t curMp = rd16(gameBase + 0x48f6);
     uint16_t maxMp = rd16(gameBase + 0x48c6); // stat 6
     if (maxMp == 0) maxMp = rd16(gameBase + 0x48f8);
 
-    if (curHp == 0 || maxHp == 0) return false;
+    if (curHp == 0) return false;
 
     bool used = false;
 
     // 1. HP Potion check
-    if (cooldownHpTimer == 0 && (curHp * 100 / maxHp) <= config.hpThresholdPercent) {
+    if (cooldownHpTimer == 0 && maxHp > 0 && curHp < maxHp &&
+        (uint32_t(curHp) * 100 <= uint32_t(maxHp) * uint32_t(config.hpThresholdPercent))) {
       // Procurar pocao no inventario (bolsa 1 de consumiveis)
       // Bolsa 1 fica em gameBase + 0x433c + 1 * 0x92
       uint32_t bag1 = gameBase + 0x433c + 0x92;

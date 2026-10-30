@@ -17,9 +17,18 @@ class ReleaseCoherence(unittest.TestCase):
         self.assertIn(web_version.rsplit('-beta',1)[0]+' WEB',(ROOT/'web/dist/index.html').read_text(encoding='utf-8'))
         for host in ['host','host_zoom']:
             source=(ROOT/host/'main.cpp').read_text(encoding='utf-8')
-            self.assertIn('Destinia '+v+' Beta',source)
+            self.assertIn('"Destinia " DESTINIA_VERSION " Beta"',source)
+            self.assertIn('../common/version_stamp.h',source)
             self.assertNotIn('Destinia 0.12.0 Beta',source)
+            cmake=(ROOT/host/'CMakeLists.txt').read_text(encoding='utf-8')
+            self.assertIn('VERSION" DESTINIA_VERSION',cmake)
+            self.assertIn('CMAKE_CONFIGURE_DEPENDS "${DESTINIA_PROJECT_ROOT}/VERSION"',cmake)
         self.assertTrue((ROOT/'release'/('NOTAS_'+v+'.md')).is_file())
+
+    def test_release_history_preserves_existing_tag(self):
+        readme=(ROOT/'README.md').read_text(encoding='utf-8')
+        row=next(line for line in readme.splitlines() if line.startswith('| [0.16.0 Beta'))
+        self.assertIn('/releases/tag/v0.16.0-beta)',row)
 
     def test_source_manifest_covers_local_cpp_includes(self):
         files=set(json.loads((ROOT/'release/manifest.json').read_text())['files'])
@@ -37,3 +46,11 @@ class ReleaseCoherence(unittest.TestCase):
         files=json.loads((ROOT/'release/manifest.json').read_text())['files']
         self.assertNotIn('web/dist/vendor/unicorn_arm.js',files)
         self.assertIn('/web/dist/vendor/unicorn_arm.js export-ignore',(ROOT/'.gitattributes').read_text())
+
+    def test_source_manifest_covers_web_module_dependencies(self):
+        files=set(json.loads((ROOT/'release/manifest.json').read_text())['files'])
+        for name in sorted(files):
+            if not name.startswith('web/') or not name.endswith('.mjs'):continue
+            for dep in re.findall(r"(?:from\s*|import\s*)['\"](\.[^'\"]+)['\"]",(ROOT/name).read_text(encoding='utf-8')):
+                child=(ROOT/name).parent.joinpath(dep).resolve()
+                self.assertIn(child.relative_to(ROOT).as_posix(),files,name+' imports '+dep)

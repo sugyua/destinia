@@ -31,7 +31,8 @@ class RuntimeHostTests(unittest.TestCase):
         cls.binaries = {}
         for variant in ['host','host_zoom']:
             exe = Path(cls.build.name)/variant
-            command = ['g++','-std=c++17','-O0',str(ROOT/'tests/runtime_host_cases.cpp'),'-o',str(exe)]
+            version=(ROOT/'VERSION').read_text().strip()
+            command = ['g++','-std=c++17','-O0','-DDESTINIA_VERSION="'+version+'"',str(ROOT/'tests/runtime_host_cases.cpp'),'-o',str(exe)]
             if variant == 'host_zoom': command.append('-DDESTINIA_TEST_ZOOM')
             subprocess.run(command+flags, check=True, capture_output=True, text=True)
             cls.binaries[variant] = exe
