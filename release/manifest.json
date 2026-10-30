@@ -1,6 +1,6 @@
 {
-  "version": "0.17.0",
-  "base_commit": "e4fb6b048c890e06aacda63b5b8c8ba43ebfd33c",
+  "version": "0.17.1",
+  "base_commit": "92532f0b668194d5762f11cb4b81f3c69b645af1",
   "files": [
     ".gitignore",
     "AGENTS.md",
@@ -377,6 +377,11 @@
     "web/tests/original-feature-panels.test.mjs",
     "web/tests/original-quest.test.mjs",
     "web/tests/original-secondary-panels.test.mjs",
-    "web/tests/original-ui.test.mjs"
+    "web/tests/original-ui.test.mjs",
+    "common/unicorn_check.h",
+    "docs/TRIAGEM_GITHUB_2026-10-30.md",
+    "docs/VERIFICACAO_0.17.1.md",
+    "docs/superpowers/plans/2026-10-30-unicorn-startup.md",
+    "release/NOTAS_0.17.1.md"
   ]
 }

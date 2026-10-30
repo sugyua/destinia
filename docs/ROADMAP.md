@@ -2,9 +2,15 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs. Faça backup dos saves antes de atualizar.**
 
-Release publicada mais recente: 0.12.1 Beta. A branch PR #6 reune 0.13.0–0.16.0 em quatro commits ordenados. A Web privada ja tem arena e refino 0.13.0; F12, Ctrl+F3 e desmontagem em lote pertencem aos hosts PC. Permanecem pendentes contratos e recuperacao de saves, tratamento de erros de inicializacao/hooks Unicorn, profiling comparavel, revisao de licencas/dependencias, divergencia entre hosts, acessibilidade/orientacao Web e testes property/fuzz. A validacao fisica continua necessaria alem dos testes automatizados.
+**Estado atual em30/10/2026:** fontes e candidata0.17.1 (inicialização essencial do Unicorn antes de acesso ao save);0.17.0 publicada e instalada. CI e estado final dos pacotes0.17.1 devem ser conferidos na [release](https://github.com/sugyua/destinia/releases/tag/v0.17.1-beta). Interface original0.17 preservada. WebVPNPC0.17.1 verificada; Site privadoCodex mantém0.13.0 conhecido por indisponibilidade da ferramenta de publicação. Campanha/Safari físico não executados nesta entrega.
 
-Release atual: 0.12.1 Beta, publicada em 27/10/2026. Neste branch de continuidade, o workflow de testes Web e a correção de descrições de drops que excediam o limite visual de 55 caracteres estão em revisão local; ainda não enviados nem publicados. Permanecem pendentes os contratos e falhas de recuperação de saves, tratamento de erros de inicialização/hooks Unicorn, profiling comparável, revisão de licenças/dependências, divergência entre hosts, acessibilidade/orientação Web e testes property/fuzz. A frente 0.13.0 segue separada. Testes automatizados não encerram validação física.
+Próximas frentes da Issue #5: contratos/recuperação de saves, hooks opcionais/Zoom restantes, profiling comparável, permissões/dependências, divergências intencionais dos hosts, acessibilidade Web e fuzz. A [triagem atual](TRIAGEM_GITHUB_2026-10-30.md) separa correções já entregues das propostas; não reimplementar atalhos, CI Web ou versões anteriores.
+
+## Registro histórico da transição0.12.1–0.16.0
+
+Naquele registro, a release publicada mais recente era 0.12.1 Beta. A branch PR #6 reune 0.13.0–0.16.0 em quatro commits ordenados. A Web privada ja tem arena e refino 0.13.0; F12, Ctrl+F3 e desmontagem em lote pertencem aos hosts PC. Permanecem pendentes contratos e recuperacao de saves, tratamento de erros de inicializacao/hooks Unicorn, profiling comparavel, revisao de licencas/dependencias, divergencia entre hosts, acessibilidade/orientacao Web e testes property/fuzz. A validacao fisica continua necessaria alem dos testes automatizados.
+
+Em 27/10/2026, a release atual era 0.12.1 Beta. Neste branch de continuidade, o workflow de testes Web e a correção de descrições de drops que excediam o limite visual de 55 caracteres estão em revisão local; ainda não enviados nem publicados. Permanecem pendentes os contratos e falhas de recuperação de saves, tratamento de erros de inicialização/hooks Unicorn, profiling comparável, revisão de licenças/dependências, divergência entre hosts, acessibilidade/orientação Web e testes property/fuzz. A frente 0.13.0 segue separada. Testes automatizados não encerram validação física.
 
 ## Histórico de planejamento
 

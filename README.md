@@ -1,16 +1,22 @@
-# Destinia 0.17.0 Beta
+# Destinia 0.17.1 Beta
 
-> **0.17.0 Beta — interface original (30/10/2026).** Janelas adicionadas reutilizam moldura, fonte e cursor originais em tempo de execução. Missões, catálogo, baú, contratos, arena/refino, inventário, avisos e mascotes revisados nos hosts e na Web. **Web: fontes 0.17.0; publicação no Site privado ainda pendente.** URL existente: https://destinia-web-experimental.leafyheron257.chatgpt.site/. Pacotes 0.17.0 em validação; link previsto: `https://github.com/sugyua/destinia/releases/tag/v0.17.0-beta`.
+> **0.17.1 Beta — inicialização segura (30/10/2026).** Os dois hosts verificam abertura, cinco mapeamentos e dois hooks essenciais do Unicorn, com endereço/tamanho e erro no diagnóstico. Em falha essencial, encerram antes de criar, recuperar ou copiar saves. Preserva a interface original da 0.17.0 e o comportamento da campanha. Validação local aprovada; [pacotes 0.17.1](https://github.com/sugyua/destinia/releases/tag/v0.17.1-beta) somente após publicação confirmada.
 
 > **Versão 0.16.0 Beta (28/10/2026).** Inclui Desmontagem em Lote Protegida (0.16.0), Ficha de Atributos Secundários Ctrl+F3 (0.15.0), Painel de Diagnóstico em Tempo Real F12 (0.14.0) e Arena de Sobrevivência Infinita com Refino de Equipamentos até +15 (0.13.0).
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-[Release 0.16.1 Beta e pacotes](https://github.com/sugyua/destinia/releases/tag/v0.16.1-beta) ? [Versão anterior 0.16.0 Beta](https://github.com/sugyua/destinia/releases/tag/v0.16.0-beta). Consulte o estado publicado no GitHub antes do download.
+[Release anterior 0.17.0 e pacotes verificados](https://github.com/sugyua/destinia/releases/tag/v0.17.0-beta) · [0.16.1](https://github.com/sugyua/destinia/releases/tag/v0.16.1-beta).
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
-**[Jogar a versão web no navegador](http://localhost:8000/)** — teste local na porta 8000 (ou na rede LAN em `http://192.168.1.11:8000/` ou Tailscale em `http://100.108.92.19:8000/`). A versão web inclui a Arena de Sobrevivência e Refino (0.13.0), Catálogo F4, Baú Compartilhado F5 e Bounties F8, com 16 FPS no Safari iOS. F12, Ctrl+F3 e lote são exclusivos dos hosts PC. O deployment no site externo (`chatgpt.site`) permanece pendente de credenciais de publicação.
+**Web:** fontes 0.17.1, sem alteração funcional nesta revisão (correção restrita ao PC). A 0.17.1 está servida pelo PC na [VPN Tailscale](http://100.108.92.19:8000/?v=0.17.1), com HTTP e cópia das fontes conferidos. PC ligado e VPN conectada são necessários; Safari físico não foi validado nesta entrega. O [Site privado vinculado](https://destinia-web-experimental.leafyheron257.chatgpt.site/) mantém o deployment 0.13.0 conhecido: ferramenta Sites indisponível. Não confundir fontes, release e servidor VPN com deployment do Site.
+
+## Novidades 0.17.1
+
+- Falhas essenciais do emulador são diagnosticadas e encerram o boot antes de acesso ao save. Cleanup existente libera o emulador parcial.
+- Falhas injetadas apenas em testes; jogo distribuído não contém chave de injeção.
+- [Triagem da Issue #5 e PRs #7/#8](docs/TRIAGEM_GITHUB_2026-10-30.md): pendências separadas das entregas anteriores; hooks opcionais/Zoom ficam fora deste lote.
 
 ## Novidades da Versão 0.16.0 Beta — Desmontagem em Lote Protegida (Batch Dismantling)
 
