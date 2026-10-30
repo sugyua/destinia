@@ -25,6 +25,11 @@ class ReleaseCoherence(unittest.TestCase):
             self.assertIn('CMAKE_CONFIGURE_DEPENDS "${DESTINIA_PROJECT_ROOT}/VERSION"',cmake)
         self.assertTrue((ROOT/'release'/('NOTAS_'+v+'.md')).is_file())
 
+    def test_release_history_preserves_existing_tag(self):
+        readme=(ROOT/'README.md').read_text(encoding='utf-8')
+        row=next(line for line in readme.splitlines() if line.startswith('| [0.16.0 Beta'))
+        self.assertIn('/releases/tag/v0.16.0-beta)',row)
+
     def test_source_manifest_covers_local_cpp_includes(self):
         files=set(json.loads((ROOT/'release/manifest.json').read_text())['files'])
         pending=[ROOT/'host/main.cpp',ROOT/'host_zoom/main.cpp'];seen=set()
