@@ -36,8 +36,8 @@ public:
   bool handleTouch(int x, int y, int type, int screenWidth, int screenHeight) {
     if (type != 0) return false;
     // Hitbox no canto superior direito
-    int boxW = (screenWidth >= 800) ? 220 : 155;
-    int boxH = minimized ? 20 : ((screenWidth >= 800) ? 52 : 40);
+    int boxW = (screenWidth >= 800) ? 220 : 174;
+    int boxH = minimized ? 20 : ((screenWidth >= 800) ? 52 : 52);
     int boxX = screenWidth - boxW - 8;
     int boxY = (screenWidth >= 800) ? 10 : 6;
 
@@ -51,11 +51,19 @@ public:
   void paint(uint8_t* pixels, int width, int height) {
     if (!visible || !pixels) return;
 
-    int boxW = (width >= 800) ? 220 : 155;
-    int boxH = minimized ? 20 : ((width >= 800) ? 52 : 40);
+    int boxW = (width >= 800) ? 220 : 174;
+    int boxH = minimized ? 20 : ((width >= 800) ? 52 : 52);
     int boxX = width - boxW - 8;
     int boxY = (width >= 800) ? 10 : 6;
 
+    if (paintOriginalPanel(pixels,width,height,boxX,boxY,boxW,boxH)) {
+      paintOriginalText(pixels,width,height,boxX+7,boxY+4,minimized?"MISSAO [Q]":questTitle,0xffc0,boxW-14);
+      if(!minimized){
+        paintOriginalText(pixels,width,height,boxX+7,boxY+18,questObjective,0xffff,boxW-14);
+        paintOriginalText(pixels,width,height,boxX+7,boxY+32,destination,0x7bef,boxW-14);
+      }
+      return;
+    }
     auto setPixel = [&](int x, int y, uint8_t r, uint8_t g, uint8_t b) {
       if (x < 0 || x >= width || y < 0 || y >= height) return;
       size_t at = (size_t(y) * width + size_t(x)) * 2;

@@ -1,7 +1,6 @@
 import {Arena,wave,encode,decode} from './survival.mjs';
 import {Store,tag,scaleRelevant} from './refinement.mjs';
 import {stoneName} from './refinement-policy.mjs';
-import {overlayGlyph} from './overlay-font.mjs';
 import {CombatState} from './survival-state.mjs';
 export class Features0130 {
  constructor(engine,backend={},snapshot={}){this.engine=engine;this.backend=backend;this.arena=new Arena();this.refinement=new Store();this.combat=new CombatState();this.masterEquipped=Array.from({length:10},(_,i)=>snapshot.masterEquipped?.[i]===true);this.open=false;this.selected=0;this.message='';this.runSequence=0;if(snapshot.survival)this.arena.ledger=decode(snapshot.survival);if(snapshot.refinement)this.refinement.decode(snapshot.refinement);}
@@ -24,13 +23,19 @@ export class Features0130 {
  equipMaster(slot){if(this.backend.inFlight||this.backend.failed||!this.arena.ledger.slots[slot]?.titleUnlocked)return false;this.masterEquipped[slot]=!this.masterEquipped[slot];this.backend.recalculate?.();this.changed();return true;}
  action(row){if(this.backend.inFlight)return;if(row===0){const c=this.backend.context?.();if(c)this.start(c.slot,c.map);else this.message='ENTRE NO JOGO PRIMEIRO';}if(row===1)this.next();if(row===2)this.upgradeSelected();if(row===3)this.abort();if(row===4){const c=this.backend.context?.();if(c&&!this.equipMaster(c.slot))this.message='CONCLUA A ONDA 20 PARA EQUIPAR';}if(row===5)this.combat.enabled=!this.combat.enabled;if(row===6)this.combat.activateElixir();if(row===7)this.open=false;}
  rows(){const c=this.backend.context?.(),best=c?this.arena.ledger.slots[c.slot]?.bestWave??0:0;return ['INICIAR ARENA - RECORDE '+best,'PROXIMA ONDA','REFINAR ITEM SELECIONADO','ENCERRAR / VOLTAR A CAMPANHA','MESTRE DA SOBREVIVENCIA +120%','ULTIMO SUSPIRO: '+(this.combat.enabled?'ATIVO':'DESATIVADO'),'ELIXIR: 20% MITIGACAO / 5 MIN','FECHAR'];}
- layout(){const w=this.engine.width||800,h=this.engine.height||480;return {x:Math.max(4,Math.floor((w-Math.min(460,w-8))/2)),y:Math.max(4,Math.floor((h-Math.min(300,h-8))/2)),w:Math.min(460,w-8),row:Math.min(30,Math.floor((h-68)/8))};}
- handleTouch(x,y,phase){if(!this.open)return false;const b=this.layout(),top=b.y+44;if(phase===0&&x>=b.x&&x<b.x+b.w&&y>=top&&y<top+b.row*8)this.action(Math.floor((y-top)/b.row));return true;}
- paint(pixels){if(!this.open&&!this.arena.active)return;const w=this.engine.width||800,h=this.engine.height||480,b=this.layout();
- const pixel=(x,y,c)=>{if(x<0||y<0||x>=w||y>=h)return;const a=(y*w+x)*2;pixels[a]=c&255;pixels[a+1]=c>>>8;};
- const rect=(x,y,rw,rh,c)=>{for(let yy=Math.max(0,y);yy<Math.min(h,y+rh);yy++)for(let xx=Math.max(0,x);xx<Math.min(w,x+rw);xx++)pixel(xx,yy,c);};
- const text=(x,y,s,c=65535)=>{for(const ch of String(s).slice(0,Math.floor((w-x)/6))){const g=overlayGlyph(ch);for(let a=0;a<5;a++)for(let k=0;k<11;k++)if(g[a]&(1<<k))pixel(x+a,y+k,c);x+=6;}};
- if(this.arena.active){rect(4,4,Math.min(440,w-8),20,0x1082);text(8,8,'ONDA '+this.arena.currentWave+' RESTAM '+this.arena.remaining,0xffc0);}
- if(!this.open)return;rect(b.x,b.y,Math.min(b.w,w-b.x),Math.min(300,h-8),0x1082);text(b.x+8,b.y+5,'SOBREVIVENCIA / REFINO +15',0xffc0);const item=this.backend.selectedItem?.(),ctx=this.backend.context?.();if(ctx){let summary='PEDRAS C/P/A '+[0,1,2].map(t=>this.refinement.crystals(ctx.slot,t)).join('/');if(item){const q=this.refinement.quote(item.slot,item.pool,item.bytes,item.kind);summary+=' '+tag(q.level)+' '+q.goldCost+' G';}text(b.x+8,b.y+20,summary,0xffc0);}this.rows().forEach((s,i)=>{rect(b.x+4,b.y+44+i*b.row,b.w-8,b.row-2,i===this.selected?0x3186:0x2104);text(b.x+8,b.y+48+i*b.row,s);});text(b.x+8,b.y+46+8*b.row,this.message);text(b.x+8,b.y+60+8*b.row,'ARMAS +8% ATK | ARMADURAS +6% DEF/+4% PV');
+ layout(){const w=this.engine.width||800,h=this.engine.height||480,s=Math.max(1,Math.floor(Math.min(w/400,h/240))),pw=Math.min(460*s,w-8*s),ph=Math.min(300*s,h-8*s),x=Math.floor((w-pw)/2),y=Math.floor((h-ph)/2),row=Math.max(12*s,Math.floor((ph-88*s)/8));return {x,y,w:pw,h:ph,scale:s,row,top:y+40*s};}
+ handleTouch(x,y,phase){if(!this.open)return false;const b=this.layout();if(phase===0&&x>=b.x+4*b.scale&&x<b.x+b.w-4*b.scale&&y>=b.top&&y<b.top+b.row*8)this.action(Math.floor((y-b.top)/b.row));return true;}
+ paint(pixels){
+  if((!this.open&&!this.arena.active)||!this.engine.originalUi)return;
+  const w=this.engine.width||800,b=this.layout(),s=b.scale,ui=this.engine.originalUi;
+  const text=(x,y,value,color=0xffff,width=b.x+b.w-8*s-x)=>ui.text(pixels,x,y,value,color,Math.max(1,width),s);
+  if(this.arena.active){ui.panel(pixels,{x:4*s,y:4*s,w:Math.min(440*s,w-8*s),h:22*s});text(8*s,8*s,'ONDA '+this.arena.currentWave+' RESTAM '+this.arena.remaining,0xffc0,Math.min(432*s,w-16*s));}
+  if(!this.open)return;
+  ui.panel(pixels,b);text(b.x+8*s,b.y+5*s,'SOBREVIVENCIA / REFINO +15',0xffc0);
+  const item=this.backend.selectedItem?.(),ctx=this.backend.context?.();
+  if(ctx){let summary='PEDRAS C/P/A '+[0,1,2].map(t=>this.refinement.crystals(ctx.slot,t)).join('/');if(item){const q=this.refinement.quote(item.slot,item.pool,item.bytes,item.kind);summary+=' '+tag(q.level)+' '+q.goldCost+' G';}text(b.x+8*s,b.y+21*s,summary,0xffc0);}
+  this.rows().forEach((value,i)=>text(b.x+8*s,b.top+i*b.row,(i===this.selected?'> ':'  ')+value,i===this.selected?0xffff:0xce59));
+  text(b.x+8*s,b.top+8*b.row+4*s,this.message,0xffc0);
+  text(b.x+8*s,b.top+8*b.row+18*s,'ARMAS +8% ATK | ARMADURAS +6% DEF/+4% PV');
  }
 }

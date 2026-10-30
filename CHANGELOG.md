@@ -4,6 +4,13 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.17.0 Beta — 30/10/2026
+
+- Janelas adicionadas reutilizam moldura, fonte e cursor originais; missões e painéis Web têm texto e toque coerentes com o desenho.
+- Mascotes expandidos usam aparências cosméticas de recursos originais, preservando IDs, nomes e bônus.
+- Capturas isoladas preservam CPU, pilha, personagem, interface e gráficos inclusive após falhas; testes comparam pixels com as rotinas ARM originais.
+- Web identificada como 0.17.0; deployment do Site e teste físico no iPhone permanecem pendentes de confirmação. Pacotes públicos não incluem recursos originais ou saves.
+
 ## 0.16.1 Beta - 30/10/2026
 
 - Menu principal mostra a versão configurada no build nos hosts normal e Zoom.

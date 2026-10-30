@@ -1202,6 +1202,8 @@ static void runtimeLogTick(long frame,double emulationMs) {
 // ---------------------------------------------------------------- principal
 #include "../common/offline_store_host.h"
 #include "../common/combat_power_host.h"
+#include "../common/original_ui_host.h"
+#include "../common/original_companions_host.h"
 #include "../common/inventory_host.h"
 #include "../common/codex_native_host.h"
 #include "../common/difficulty_host.h"
@@ -1393,6 +1395,7 @@ static int runHost(int argc, char** argv) {
   if(!difficultyReady){hostReport("[dificuldade ARM] Inicializacao recusada; progresso preservado.\n");return 1;}
   difficultyArm.install(uc,SO_BASE,exportsMap,soPath,[](unsigned slot){return difficultyProgress.current(slot);});
   try {
+  originalUiHost.install();originalCompanionsHost.install();
   refinementHost.install(uc,SO_BASE,exportsMap,fs::path(saveDir),[](u32 at,const std::vector<u32>& args,u32* result){if(args.empty())return callFn(at,{},result);if(args.size()==1)return callFn(at,{args[0]},result);return false;});
   bossRushUI.survivalRows=[](){const auto slot=bossRushUI.currentSlot;const auto best=slot<10?survivalHost.arena.ledger.slots[slot].bestWave:0;const auto kills=slot<10?survivalHost.arena.ledger.slots[slot].totalKills:0;return std::vector<std::string>{"INICIAR ARENA - RECORDE "+std::to_string(best),"ENCERRAR / VOLTAR A CAMPANHA","REFINAR EQUIPADO "+std::to_string(refinementHost.selectedEquipment+1)+" "+refinementHost.suffix(refinementHost.selected()),"TROCAR EQUIPAMENTO ALVO",refinementHost.summary(),std::string("ULTIMO SUSPIRO: ")+(survivalHost.combat.enabled?"ATIVO":"DESATIVADO"),"ELIXIR: 20% MITIGACAO / 5 MIN", "RECORDE: "+std::to_string(best)+" ONDAS / "+std::to_string(kills)+" ABATES"};};
   bossRushUI.survivalAction=[](int row){try{if(row==0){if(survivalHost.start())bossRushUI.closeMenu();return survivalHost.message;}if(row==1){survivalHost.stop(true);survivalHost.credit();survivalHost.flush();return std::string("ARENA ENCERRADA");}if(row==2){if(survivalHost.arena.active)return std::string("ENCERRE A ARENA PARA REFINAR");refinementHost.upgrade();return refinementHost.message;}if(row==3){refinementHost.cycle();return refinementHost.message;}if(row==5){survivalHost.combat.enabled=!survivalHost.combat.enabled;return std::string("ULTIMO SUSPIRO ")+(survivalHost.combat.enabled?"ATIVADO":"DESATIVADO");}if(row==6){survivalHost.combat.activateElixir();return std::string("ELIXIR ATIVO POR 5 MINUTOS");}return std::string("SUCESSO 100% / SEM QUEBRA / MAX +15");}catch(const std::exception& e){return std::string(e.what());}};
@@ -1411,7 +1414,7 @@ static int runHost(int argc, char** argv) {
   // [OK] jniTouch(env,obj, x, y, tipo): tipo 0=toque 1=solta 2=move 3=tecla de menu (Thumb decodificado)
   bool mouseDown=false; int lastTouchX=0,lastTouchY=0;
   auto touch = [&](int x, int y, int type) {
-    if(questTrackerUI.handleTouch(x, y, type, SCREEN_W, SCREEN_H)) return;
+    if((int16_t(rd16(exportsMap.at("Game")+0x4854))==0 && rd16(exportsMap.at("Game")+0x48f2)>0 && !codexOpen && !bossRushUI.open && !weaponsCatalogHost.open && !sharedStashHost.open && !bountiesHost.open && !difficultyOpen) && questTrackerUI.handleTouch(x, y, type, SCREEN_W, SCREEN_H)) return;
     if(sharedStashHost.open || bountiesHost.open || weaponsCatalogHost.open || difficultyMenuTouch(x,y,type) || codexMenuTouch(x,y,type)) return;
     lastTouchX=x; lastTouchY=y;
     if(type!=2) destinia::sessionLog.write("ENTRADA toque x="+std::to_string(x)+" y="+std::to_string(y)+" tipo="+std::to_string(type));
@@ -1826,7 +1829,7 @@ static int runHost(int argc, char** argv) {
     if(!codexOpen)fcPaint(frameBuffer.data(),preferences.uiScale);
     bossRushUI.currentSlot = rd16(exportsMap.at("Game")+0x4886);
     autoPotion.update(exportsMap.at("Game"), [](u32 a){return rd16(a);}, [](u32 a, uint16_t v){wr16(a, v);}, playSoundId);
-    if(int16_t(rd16(exportsMap.at("Game")+0x4854))==0) {
+    if(int16_t(rd16(exportsMap.at("Game")+0x4854))==0 && rd16(exportsMap.at("Game")+0x48f2)>0) {
       int hX = int16_t(rd16(exportsMap.at("Game")+0x4890));
       int hY = int16_t(rd16(exportsMap.at("Game")+0x4892));
       int cX = int16_t(rd16(exportsMap.at("Game")+0x4878));
@@ -1850,7 +1853,7 @@ static int runHost(int argc, char** argv) {
         auto& c = contracts[0];
         questTrackerUI.setQuest(c.title, "Abates: " + std::to_string(c.currentCount) + " / " + std::to_string(c.targetCount), "Campanha");
       }
-      questTrackerUI.paint(frameBuffer.data(), SCREEN_W, SCREEN_H);
+      if(int16_t(rd16(exportsMap.at("Game")+0x4854))==0 && rd16(exportsMap.at("Game")+0x48f2)>0 && !codexOpen && !bossRushUI.open && !weaponsCatalogHost.open && !sharedStashHost.open && !bountiesHost.open && !difficultyOpen) questTrackerUI.paint(frameBuffer.data(), SCREEN_W, SCREEN_H);
       autoPotion.paintNotice(frameBuffer.data(), SCREEN_W, SCREEN_H);
       if (controllerBackHeld) { paintControllerGuide(frameBuffer.data(), SCREEN_W, SCREEN_H); }
     }

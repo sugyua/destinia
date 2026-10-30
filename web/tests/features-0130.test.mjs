@@ -1,4 +1,4 @@
-﻿import test from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Features0130} from '../dist/features-0130.mjs';
 import {BossRushUI} from '../dist/boss-rush.mjs';
@@ -49,8 +49,8 @@ test('refinement prices, supported kinds, wallet atomicity, identity and strict 
  const poor={gold:0};assert.equal(t.upgrade(0,3,bytes,Kind.Armor,poor).error,RefineError.InsufficientGold);assert.equal(poor.gold,0);assert.equal(t.upgrade(0,3,bytes,Kind.Other,wallet).error,RefineError.InvalidKind);
 });
 test('F9 panel consumes modal input and draws readable framebuffer pixels',()=>{
- const f=new Features0130({width:800,height:480});assert.equal(f.handleKey('F9',true),true);assert.equal(f.open,true);assert.equal(f.handleKey(17,true),true);
-  const pixels=new Uint8Array(800*480*2);f.paint(pixels);assert.ok(pixels.some(x=>x!==0));assert.equal(f.handleTouch(f.layout().x+20,f.layout().y+44+7*f.layout().row+2,0),true);assert.equal(f.open,false);
+ const f=new Features0130({width:800,height:480,originalUi:{panel(p){p[0]=1;},text(p){p[0]=1;}}});assert.equal(f.handleKey('F9',true),true);assert.equal(f.open,true);assert.equal(f.handleKey(17,true),true);
+  const pixels=new Uint8Array(800*480*2);f.paint(pixels);assert.ok(pixels.some(x=>x!==0));assert.equal(f.handleTouch(f.layout().x+20,f.layout().top+7*f.layout().row+2,0),true);assert.equal(f.open,false);
 });
 import {Features0130Stats,refinementBonus,boundedStat} from '../dist/features0130-stats.mjs';
 import {findTitle,TitleId} from '../dist/titles.mjs';
@@ -69,7 +69,7 @@ test('pending reward is cleared only after backend confirms credit; title equip 
 });
 
 test('active arena credits rewards automatically and rejects refining',()=>{let claims=0;const f=new Features0130({}, {creditRewards:()=>{claims++;return true;},context:()=>({slot:0,map:1})});f.arena.active=true;f.arena.ledger.slots[0].pendingGold=500;f.settle();assert.equal(claims,1);assert.equal(f.upgradeSelected(),false);f.arena.active=false;f.settle();assert.equal(claims,1);});
-test('touch selects both tabs in the second row',()=>{const ui=new BossRushUI({width:800,height:480});ui.openMenu();const pw=360,px=220,py=130,tabW=Math.floor((pw-16)/3);ui.handleTouch(px+8+tabW+5,py+44,0);assert.equal(ui.currentTab,4);ui.handleTouch(px+8+tabW*2+5,py+44,0);assert.equal(ui.currentTab,5);});
+test('touch selects both tabs in the second row',()=>{const ui=new BossRushUI({width:800,height:480});ui.openMenu();const tabs=ui.layout().tabs;ui.handleTouch(tabs[4].x+5,tabs[4].y+5,0);assert.equal(ui.currentTab,4);ui.handleTouch(tabs[5].x+5,tabs[5].y+5,0);assert.equal(ui.currentTab,5);});
 test('feature sidecar marks restored native saves as authoritative over cloud copies',()=>{const features=new Features0130({}),payload=JSON.stringify({version:1,mode:'classico',features:features.snapshot(),saves:[['./save0.dat',[9,8]]]});const engine={gameMode:'classico',saved:new Map(),log(){}};const backend=new NativeFeatures0130Backend(engine,{storage:{getItem:()=>payload}});backend.attach(features);assert.deepEqual([...engine.saved.get('./save0.dat')],[9,8]);assert.equal(engine.preservedFeatureSaveNames.has('save0.dat'),true);});
 import fs from 'node:fs';
 import os from 'node:os';

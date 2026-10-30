@@ -1,4 +1,3 @@
-import {overlayGlyph} from './overlay-font.mjs';
 
 export class AutoPotionController {
   constructor(engine) {
@@ -78,49 +77,9 @@ export class AutoPotionController {
     }
   }
 
-  paintNotice(fb, width, height) {
-    if (this.noticeTimer <= 0 || !this.notice) return;
-    let tw = 0;
-    for (const ch of this.notice) {
-      const g = overlayGlyph(ch);
-      tw += g ? g.width + 1 : 6;
-    }
-    const x = Math.floor((width - tw) / 2);
-    const y = height - 42;
-
-    // Fundo escuro
-    for (let dy = -2; dy < 12; dy++) {
-      for (let dx = -6; dx < tw + 6; dx++) {
-        const px = x + dx, py = y + dy;
-        if (px >= 0 && px < width && py >= 0 && py < height) {
-          const at = (py * width + px) * 2;
-          fb[at] = 0x00;
-          fb[at + 1] = 0x10;
-        }
-      }
-    }
-
-    const col = this.enabled ? 0x07e0 : 0xf800;
-    let cx = x;
-    for (const ch of this.notice) {
-      const glyph = overlayGlyph(ch);
-      if (glyph) {
-        for (let gy = 0; gy < glyph.height; gy++) {
-          for (let gx = 0; gx < glyph.width; gx++) {
-            if (glyph.rows[gy] & (1 << (glyph.width - 1 - gx))) {
-              const tx = cx + gx, ty = y + gy;
-              if (tx >= 0 && tx < width && ty >= 0 && ty < height) {
-                const at = (ty * width + tx) * 2;
-                fb[at] = col & 0xff;
-                fb[at + 1] = (col >> 8) & 0xff;
-              }
-            }
-          }
-        }
-        cx += glyph.width + 1;
-      } else {
-        cx += 6;
-      }
-    }
+  paintNotice(fb,width,height){
+    if(this.noticeTimer<=0||!this.notice||!this.engine?.originalUi)return;
+    const s=Math.max(1,Math.floor(Math.min(width/400,height/240))),w=Math.min(width-12*s,(this.notice.length*6+16)*s),h=24*s,x=Math.floor((width-w)/2),y=height-48*s,ui=this.engine.originalUi;
+    ui.panel(fb,{x,y,w,h});ui.text(fb,x+8*s,y+6*s,this.notice,this.enabled?0x07e0:0xf800,w-16*s,s);
   }
 }

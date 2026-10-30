@@ -11,3 +11,24 @@ header{height:auto;min-height:44px;flex-wrap:wrap;gap:8px}.tools{flex-wrap:wrap;
 @supports(width:1cqw){body.controller-mode{height:100dvh;overflow:hidden}.controller-mode main{container-type:size}.controller-mode .surface,html:fullscreen body.controller-mode .surface,body.expanded.controller-mode .surface{width:min(100cqw,calc(100cqh * 5 / 3))}}
 
 #loot-settings{margin:8px 12px;padding:10px 12px;border:1px solid #ffffff25;border-radius:10px;background:#171d29;font-size:13px;flex-shrink:0;max-width:calc(100% - 24px)}#loot-settings summary{cursor:pointer;color:var(--accent);font-weight:600}#loot-settings label{display:inline-flex;align-items:center;gap:5px;margin:7px 10px 0 0;max-width:100%}#loot-settings input[type=number]{width:58px}#loot-settings p{font-size:12px;line-height:1.5;color:var(--muted)}#loot-settings select,#loot-settings input[type=number]{color:inherit;background:#1b2230;border:1px solid #ffffff25;border-radius:4px;padding:4px}#loot-status{display:block;color:var(--accent)}
+/* Browser controls follow the original gray bevel, dark green panels and yellow focus. */
+:root{--bg:#101810;--ink:#eef3e8;--muted:#a0aaa0;--accent:#ffff00}
+body,header,footer{background:#101810;color:var(--ink);font-family:ui-monospace,Consolas,monospace}
+.brand,.welcome h1,aside h2{font-family:inherit;color:var(--accent)}
+button,.tools select,select,aside,#loot-settings,.welcome,.paused,.direction button,.actions button{border-radius:2px;background:#181f18;color:var(--ink);border:2px solid;border-color:#74796f #292e28 #292e28 #74796f;box-shadow:inset 0 0 0 1px #080d08}
+button:hover,button:focus-visible,button[aria-pressed=true]{color:var(--accent);outline-color:var(--accent);background:#242d24}
+button:active{border-color:#292e28 #74796f #74796f #292e28}
+canvas{image-rendering:pixelated}
+@media(max-height:600px) and (min-aspect-ratio:4/3){
+ header{height:40px;min-height:40px;flex-direction:row;flex-wrap:nowrap;gap:10px;align-items:center;overflow:hidden}
+ .brand{flex:none;white-space:nowrap;font-size:14px}.brand span{display:none}
+ .tools{min-width:0;flex:1;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;white-space:nowrap}
+ .tools>*{flex-shrink:0}.tools button{min-height:28px}
+ main{min-height:0;flex:1;padding:4px 0}
+ .surface{width:min(calc((100dvh - 130px)*5/3),calc(100vw - 316px));max-height:calc(100dvh - 130px)}
+ #loot-settings{position:absolute;z-index:4;top:42px;left:0;margin:0 8px;padding:4px 8px;max-width:calc(100% - 16px);max-height:48dvh;overflow:auto;font-size:10px}
+ #loot-settings:not([open]){max-width:180px}
+ .welcome{overflow:auto}.welcome h1{font-size:28px}.welcome p.notice{font-size:8px}
+}
+@media(max-height:600px) and (min-aspect-ratio:4/3){header{box-sizing:border-box;padding-top:4px;padding-bottom:4px}.tools{height:32px;align-self:stretch;align-items:center;scrollbar-width:none}.tools::-webkit-scrollbar{display:none}}
+.actions .attack,.primary{border-radius:2px;background:#242d24;color:#ffff00;border:2px solid;border-color:#74796f #292e28 #292e28 #74796f;box-shadow:inset 0 0 0 1px #080d08}

@@ -34,8 +34,10 @@ class AttributeSheet {
     if (!shown || !pixels || width < 220 || height < 110) return;
     const int panelW = std::min(300, width - 12), panelH = 112;
     const int x = (width - panelW) / 2, y = (height - panelH) / 2;
+    if(!paintOriginalPanel(pixels,width,height,x,y,panelW,panelH)) {
     fill(pixels, width, height, x, y, panelW, panelH, 0x0841);
     border(pixels, width, height, x, y, panelW, panelH, 0xe5b2);
+    }
     paintOverlayText(pixels, width, height, x + 10, y + 8, "ATRIBUTOS SECUNDARIOS", 0xffc0);
     const auto rows = secondaryAttributeRows(stats);
     for (size_t i = 0; i < rows.size(); ++i) {

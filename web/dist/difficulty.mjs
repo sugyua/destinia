@@ -77,70 +77,19 @@ export class DifficultyWeb {
     return true;
   }
 
-  handleTouch(x, y, type) {
-    if (!this.open) return false;
-    if (type === 0) {
-      const startY = 80;
-      for (let i = 0; i < 5; ++i) {
-        const itemY = startY + i * 26;
-        if (x >= 240 && x <= 560 && y >= itemY && y <= itemY + 22) {
-          this.selected = i;
-          if (this.selected <= this.unlockedTier) {
-            this.currentTier = this.selected;
-            this.open = false;
-          } else {
-            this.statusMessage = "BLOQUEADA: DERROTE DIABLO";
-          }
-          return true;
-        }
-      }
-      this.open = false;
-    }
+  layout(){const width=this.engine?.width||800,height=this.engine?.height||480,scale=Math.max(1,Math.floor(Math.min(width/400,height/240))),w=Math.min(360*scale,width-16*scale),h=Math.min(220*scale,height-16*scale),x=Math.floor((width-w)/2),y=Math.floor((height-h)/2);return {x,y,w,h,scale,rows:Array.from({length:5},(_,i)=>({x:x+8*scale,y:y+(30+i*28)*scale,w:w-16*scale,h:26*scale}))};}
+  handleTouch(x,y,type){
+    if(!this.open)return false;
+    if(type===0){const i=this.layout().rows.findIndex(b=>x>=b.x&&x<b.x+b.w&&y>=b.y&&y<b.y+b.h);if(i>=0){this.selected=i;this.handleKey(17,true);}else this.open=false;}
     return true;
   }
-
-  paint(pixels) {
-    if (!this.open) return;
-    const w = 800, h = 480;
-
-    const setPixel = (x, y, r, g, b) => {
-      if (x < 0 || x >= w || y < 0 || y >= h) return;
-      const at = (y * w + x) * 2;
-      const c = ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
-      pixels[at] = c & 255;
-      pixels[at + 1] = c >> 8;
-    };
-
-    const fillRect = (rx, ry, rw, rh, r, g, b) => {
-      for (let dy = 0; dy < rh; ++dy) {
-        for (let dx = 0; dx < rw; ++dx) {
-          setPixel(rx + dx, ry + dy, r, g, b);
-        }
-      }
-    };
-
-    fillRect(220, 50, 360, 240, 16, 20, 28);
-    for (let x = 220; x < 580; ++x) { setPixel(x, 50, 220, 180, 50); setPixel(x, 289, 220, 180, 50); }
-    for (let y = 50; y < 290; ++y) { setPixel(220, y, 220, 180, 50); setPixel(579, y, 220, 180, 50); }
-
-    const startY = 80;
-    for (let i = 0; i < 5; ++i) {
-      const itemY = startY + i * 26;
-      const isSelected = (this.selected === i);
-      const isUnlocked = (i <= this.unlockedTier);
-      const isCurrent = (this.currentTier === i);
-
-      if (isSelected) {
-        fillRect(230, itemY, 340, 22, 40, 60, 90);
-      } else {
-        fillRect(230, itemY, 340, 22, 24, 28, 38);
-      }
-
-      if (isCurrent) {
-        fillRect(234, itemY + 4, 14, 14, 50, 220, 80);
-      } else if (!isUnlocked) {
-        fillRect(234, itemY + 4, 14, 14, 120, 40, 40);
-      }
-    }
+  paint(pixels){
+    if(!this.open||!this.engine?.originalUi)return;
+    const b=this.layout(),s=b.scale,ui=this.engine.originalUi;
+    const text=(x,y,value,color=0xffff,width=b.x+b.w-8*s-x)=>ui.text(pixels,x,y,value,color,width,s);
+    ui.panel(pixels,b);text(b.x+8*s,b.y+8*s,'DIFICULDADE',0xe5b2);
+    b.rows.forEach((r,i)=>{const unlocked=i<=this.unlockedTier,current=i===this.currentTier,selected=i===this.selected;text(r.x+4*s,r.y+6*s,(selected?'> ':'  ')+DifficultyLabels[i]+(current?' [ATUAL]':unlocked?'':' [BLOQUEADA]'),current?0x07e0:unlocked?0xffff:0xf800,r.w-8*s);});
+    text(b.x+8*s,b.y+b.h-38*s,this.statusMessage,0xf800);
+    text(b.x+8*s,b.y+b.h-22*s,'ACAO: CONFIRMAR / VOLTAR: SAIR',0xe5b2);
   }
 }

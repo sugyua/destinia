@@ -31,6 +31,8 @@ def package(root,output,normal,zoom,launcher_normal=None,launcher_zoom=None):
     if archive.exists() or checksum.exists():raise FileExistsError('Artefato ja existe; use outra pasta de saida')
     # VERSION selects the current notes; a missing note must fail before packaging.
     files=list(dict.fromkeys([*FILES,'release/NOTAS_'+version+'.md']))
+    report='docs/VERIFICACAO_'+version+'.md'
+    if (root/report).is_file():files.append(report)
     inputs={name:(root/name).read_bytes() for name in files}
     inputs['host/build/destinia_host.exe']=pe64(normal)
     inputs['host_zoom/build/destinia_host.exe']=pe64(zoom)

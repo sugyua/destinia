@@ -1,6 +1,6 @@
-# Destinia 0.16.1 Beta
+# Destinia 0.17.0 Beta
 
-> **Versão 0.16.1 Beta (30/10/2026).** Selo de versão no menu e correção da autopoção de PV em 50%, sem consumo com PV cheio. O controle antigo de estoque da autopoção ainda tem defeitos conhecidos (ver notas 0.16.1); esta correção limita-se ao threshold/PV cheio. Release 0.16.1 em preparação; não publicada até concluir as verificações. **Web:** fontes 0.13 com correção de autopoção em preparação; deployment desta revisão ainda não realizado. Site privado mantido: https://destinia-web-experimental.leafyheron257.chatgpt.site/.
+> **0.17.0 Beta — interface original (30/10/2026).** Janelas adicionadas reutilizam moldura, fonte e cursor originais em tempo de execução. Missões, catálogo, baú, contratos, arena/refino, inventário, avisos e mascotes revisados nos hosts e na Web. **Web: fontes 0.17.0; publicação no Site privado ainda pendente.** URL existente: https://destinia-web-experimental.leafyheron257.chatgpt.site/. Pacotes 0.17.0 em validação; link previsto: `https://github.com/sugyua/destinia/releases/tag/v0.17.0-beta`.
 
 > **Versão 0.16.0 Beta (28/10/2026).** Inclui Desmontagem em Lote Protegida (0.16.0), Ficha de Atributos Secundários Ctrl+F3 (0.15.0), Painel de Diagnóstico em Tempo Real F12 (0.14.0) e Arena de Sobrevivência Infinita com Refino de Equipamentos até +15 (0.13.0).
 
@@ -644,3 +644,11 @@ Se quiser ajudar no projeto, entre em contato comigo pelo WhatsApp: [+55 21 9746
 - **Saves:** Saves originais save*.dat 100% intocados (persistência atômica segura no sidecar DESTINIA_ECONOMY_2 / economy-v1.txt). Detalhes em [LOOT_ECONOMY.md](docs/LOOT_ECONOMY.md).
 
 Revisão 0.16.1 (30/10/2026): a recuperação de mana permanece independente da ausência de PV máximo; pacote de fontes inclui os quatro módulos Web importados que faltavam no manifesto. Regressões nativas e Web e coerencia verificadas. Status de entrega e limites: consulte a release e docs/VERIFICACAO_0.16.1.md.
+
+## 0.17.0 — interface e recursos originais
+
+As janelas principais reaproveitam o contorno cinza chanfrado do menu original; cartões e avisos menores usam a moldura de descrição do jogo. Fonte e cursor são renderizados pela biblioteca ARM original, com cache e restauração de CPU, pilha e estado. A UI externa do navegador segue a mesma paleta e mantém controles acessíveis.
+
+As aparências dos quatro companheiros expandidos usam recursos originais `pet3`, `pet14`, `pet21` e o retrato `boss8` (Diablo). Essa é uma associação cosmética explícita: não identifica os nomes expandidos como espécies canônicas. IDs, nomes, bônus e saves anteriores permanecem compatíveis. Nenhuma imagem ou biblioteca original foi adicionada aos ZIPs públicos.
+
+Capturas e testes locais: veja [verificação 0.17.0](docs/VERIFICACAO_0.17.0.md). Deployment público/privado do Site e teste físico no Safari só serão declarados após confirmação real. A assistência de estoque da autopoção continua com os limites conhecidos da 0.16.1.

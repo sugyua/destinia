@@ -22,5 +22,7 @@ int main(){try{
  Fixture disabled;disabled.potion.config.enabled=false;require(!disabled.update(),"disabled assistance must not trigger");
  Fixture paused;paused.mem[Fixture::g+0x4854]=1;require(!paused.update(),"non-gameplay state must not trigger");
  Fixture cooling;cooling.potion.cooldownHpTimer=2;require(!cooling.update(),"active cooldown must block");
+ std::vector<uint8_t> notice(400*240*2);defaults.potion.noticeTimer=5;defaults.potion.lastNotice="AUTO POCAO";
+ destinia::originalPanelPainter=[](uint8_t*,int,int,int,int,int,int){return true;};destinia::originalTextPainter=[](uint8_t*,int,int,int,int,const std::string&,uint16_t,int,int){return false;};defaults.potion.paintNotice(notice.data(),400,240);require(std::any_of(notice.begin(),notice.end(),[](uint8_t b){return b;}),"declined original font must retain notice text");
  std::cout<<"AUTO_POTION_THRESHOLD_CASES_OK\n";return 0;
 }catch(const std::exception& e){std::cout<<e.what()<<'\n';return 1;}}

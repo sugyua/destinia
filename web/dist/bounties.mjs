@@ -195,97 +195,41 @@ export class BountiesWeb {
     return true;
   }
 
-  handleTouch(x, y, type) {
-    if (!this.open) return false;
-    if (type === 0) {
-      // Botão fechar [X] (canto superior direito)
-      if (x >= 555 && x <= 575 && y >= 50 && y <= 70) {
-        this.open = false;
-        return true;
-      }
-
-      // Botões Resgatar / Reivindicar para os 3 contratos
-      const slot = this.currentSlot();
-      const list = this.getContracts(slot);
-      for (let i = 0; i < list.length && i < 3; ++i) {
-        const c = list[i];
-        const cardY = 85 + i * 62;
-        // Botão Resgatar (x: 485 a 565, y: cardY + 24 a cardY + 44)
-        if (x >= 485 && x <= 565 && y >= cardY + 24 && y <= cardY + 44) {
-          if (c.completed && !c.claimed) {
-            const reward = this.claim(slot, c.id);
-            if (reward && this.engine?.exports) {
-              const g = this.engine.exports.get("Game");
-              if (g) {
-                const curGold = this.engine.get32(g + 0x4338);
-                this.engine.set32(g + 0x4338, curGold + reward.gold);
-              }
-            }
-          }
-          return true;
-        }
-      }
+  handleTouch(x,y,type) {
+    if(!this.open)return false;if(type!==0)return true;
+    const l=this.layout();x=(x-l.x)/l.scale;y=(y-l.y)/l.scale;
+    if(x>=320&&x<356&&y>=4&&y<24){this.open=false;return true;}
+    const slot=this.currentSlot(),list=this.getContracts(slot);
+    for(let i=0;i<Math.min(3,list.length);i++)if(x>=252&&x<346&&y>=62+i*57&&y<82+i*57){
+      const c=list[i];if(c.completed&&!c.claimed){const reward=this.claim(slot,c.id);if(reward&&this.engine?.exports){const g=this.engine.exports.get('Game');if(g)this.engine.set32(g+0x4338,this.engine.get32(g+0x4338)+reward.gold);}}return true;
     }
     return true;
   }
+  layout() {
+    const width=this.engine.width||400,height=this.engine.height||240;
+    const scale=Math.min(width/400,height/240);
+    return {scale,x:(width-360*scale)/2,y:(height-220*scale)/2};
+  }
 
   paint(pixels) {
-    if (!this.open) return;
-    const w = 800, h = 480;
-
-    const setPixel = (x, y, r, g, b) => {
-      if (x < 0 || x >= w || y < 0 || y >= h) return;
-      const at = (y * w + x) * 2;
-      const c = ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
-      pixels[at] = c & 255;
-      pixels[at + 1] = c >> 8;
-    };
-
-    const fillRect = (rx, ry, rw, rh, r, g, b) => {
-      for (let dy = 0; dy < rh; ++dy) {
-        for (let dx = 0; dx < rw; ++dx) {
-          setPixel(rx + dx, ry + dy, r, g, b);
-        }
-      }
-    };
-
-    // Painel principal (360x245 centrado em x=220, y=45)
-    fillRect(220, 45, 360, 245, 20, 24, 32);
-    // Borda Dourada avermelhada
-    for (let x = 220; x < 580; ++x) { setPixel(x, 45, 240, 140, 40); setPixel(x, 289, 240, 140, 40); }
-    for (let y = 45; y < 290; ++y) { setPixel(220, y, 240, 140, 40); setPixel(579, y, 240, 140, 40); }
-
-    // Botão Fechar [X]
-    fillRect(555, 48, 20, 18, 160, 40, 40);
-
-    const slot = this.currentSlot();
-    const list = this.getContracts(slot);
-
-    // 3 Cards de Contrato
-    for (let i = 0; i < list.length && i < 3; ++i) {
-      const c = list[i];
-      const cardY = 75 + i * 65;
-
-      fillRect(230, cardY, 340, 58, 16, 20, 28);
-
-      // Barra de progresso do contrato
-      const pct = Math.min(100, Math.floor((c.currentCount / Math.max(1, c.targetCount)) * 100));
-      fillRect(240, cardY + 36, 220, 6, 12, 14, 18);
-      const fillW = Math.floor((220 * pct) / 100);
-      if (fillW > 0) {
-        fillRect(240, cardY + 36, fillW, 6, c.completed ? 50 : 220, c.completed ? 200 : 160, c.completed ? 80 : 40);
-      }
-
-      // Botão Resgatar / Concluído
-      const btnX = 475;
-      const btnY = cardY + 28;
-      if (c.claimed) {
-        fillRect(btnX, btnY, 85, 20, 40, 45, 50); // Já resgatado (cinza)
-      } else if (c.completed) {
-        fillRect(btnX, btnY, 85, 20, 40, 180, 60); // Concluído / Resgatar (verde brilhante)
-      } else {
-        fillRect(btnX, btnY, 85, 20, 50, 55, 65); // Em andamento
-      }
-    }
+    const ui=this.engine.originalUi;
+    if(!this.open||!ui||!pixels)return;
+    const {scale:s,x,y}=this.layout();
+    const panel=(a,b,w,h)=>ui.panel(pixels,{x:x+a*s,y:y+b*s,w:w*s,h:h*s});
+    const text=(a,b,value,color=0xffff,w=340-a)=>ui.text(pixels,x+a*s,y+b*s,value,color,w*s,s);
+    panel(0,0,360,220);
+    text(324,7,'SAIR',0xffc0,30);
+    text(10,7,'CONTRATOS DE CACA',0xffc0,280);
+    const list=this.getContracts(this.currentSlot());
+    list.slice(0,3).forEach((c,i)=>{
+      const row=28+i*57;panel(10,row,340,55);
+      text(15,row+3,c.title,0xffc0,330);
+      text(15,row+15,c.description,0xffff,330);
+      text(15,row+28,c.currentCount+' / '+c.targetCount+'  Ouro '+c.rewardGold,0xffff,230);
+      text(15,row+40,'Cash '+c.rewardCash,0xffff,230);
+      panel(252,row+34,94,20);
+      text(257,row+38,c.claimed?'RESGATADO':c.completed?'Resgatar':'EM ANDAMENTO',c.completed&&!c.claimed?0xffc0:0x8c51,84);
+    });
+    text(10,207,'Toque Resgatar ao concluir. C / ESC: sair',0x8c51,340);
   }
 }
