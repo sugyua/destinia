@@ -1483,7 +1483,8 @@ static int runHost(int argc, char** argv) {
   } else fs::create_directories(outDir);
 
   auto zoomViewState = [&]() {
-    const bool overlay = diagnosticsPanel.visible() || attributeSheet.visible() ||
+    const bool overlay = diagnosticsPanel.visible() || attributeSheet.visible() || controllerBackHeld ||
+        (autoPotion.noticeTimer > 0 && !autoPotion.lastNotice.empty()) ||
         inventoryOpen || codexOpen || difficultyOpen || bossRushUI.open ||
         weaponsCatalogHost.open || sharedStashHost.open || bountiesHost.open;
     return menuState() == 1 && !overlay ? 1 : 0;
