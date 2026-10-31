@@ -8,6 +8,8 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
+> **Auto-poção:** um erro conhecido pode alterar a mana ao tentar recuperar vida e consumir itens incorretos. Desative-a com H; ela volta ativada ao reiniciar. A correção está em investigação.
+
 [Release anterior 0.17.1 e pacotes verificados](https://github.com/sugyua/destinia/releases/tag/v0.17.1-beta) · [0.17.0](https://github.com/sugyua/destinia/releases/tag/v0.17.0-beta).
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
