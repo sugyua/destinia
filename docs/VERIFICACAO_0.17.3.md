@@ -1,4 +1,4 @@
-﻿# Verificação da candidata 0.17.3
+# Verificação da candidata 0.17.3
 
 - Escopo: apresentação do menu principal no host Zoom e transformação inversa do mouse. Câmera e gameplay não foram alterados. Outros estados e painéis sobrepostos conservam o quadro completo.
 - Reproduzido no motor ARM com save temporário: estado 1 apresenta menu de 400×240 no centro do framebuffer de 800×480; Opções usa estado 4.

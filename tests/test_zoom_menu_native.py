@@ -17,5 +17,7 @@ class ZoomMenuNativeTests(unittest.TestCase):
             exe = base / 'test.exe'
             subprocess.run(['g++', '-std=c++17', '-O0', str(ROOT / 'tests/zoom_menu_native.cpp'), '-o', str(exe)] + flags, check=True)
             env = dict(os.environ, SDL_VIDEODRIVER='dummy', SDL_AUDIODRIVER='dummy', LOCALAPPDATA=str(base / 'appdata'))
-            run = subprocess.run([str(exe), '--game', str(ROOT / 'game'), '--save', str(base / 'save'), '--reports', str(base / 'reports'), '--settings', str(base / 'settings.ini'), '--scale', '2', '--windowed', '--no-save-preferences', '--mute'], env=env, cwd=base, capture_output=True, text=True, timeout=100)
+            run = subprocess.run([str(exe), '--game', str(ROOT / 'game'), '--save', str(base / 'save'), '--reports', str(base / 'reports'), '--settings', str(base / 'settings.ini'), '--scale', '2', '--windowed', '--no-save-preferences', '--mute', '--probe'], env=env, cwd=base, capture_output=True, text=True, timeout=100)
             self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+            self.assertIn('jniTouch(x=205, y=125, tipo=0)', run.stderr)
+            self.assertIn('jniTouch(x=205, y=125, tipo=1)', run.stderr)

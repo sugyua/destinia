@@ -2,7 +2,7 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs. Faça backup dos saves antes de atualizar.**
 
-**Estado das fontes em 31/10/2026:** fontes e candidata 0.17.3 ampliam o menu principal do Zoom; publica??o e instala??o dependem da valida??o. A 0.17.2 foi publicada e instalada. A Web via VPN permanece na revis?o 0.17.2; o Site privado mant?m a 0.13.0 conhecida por indisponibilidade da ferramenta de publica??o. Campanha e Safari f?sico n?o foram executados nesta candidata.
+**Estado das fontes em 31/10/2026:** fontes e candidata 0.17.3 ampliam o menu principal do Zoom; publicação e instalação dependem da validação. A 0.17.2 foi publicada e instalada. A Web via VPN permanece na revisão 0.17.2; o Site privado mantém a 0.13.0 conhecida por indisponibilidade da ferramenta de publicação. Campanha e Safari físico não foram executados nesta candidata.
 
 Próximas frentes da Issue #5: contratos/recuperação de saves, hooks opcionais/Zoom restantes, profiling comparável, permissões/dependências, divergências intencionais dos hosts, acessibilidade Web e fuzz. A [triagem atual](TRIAGEM_GITHUB_2026-10-30.md) separa correções já entregues das propostas; não reimplementar atalhos, CI Web ou versões anteriores.
 
