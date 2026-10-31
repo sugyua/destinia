@@ -1,4 +1,6 @@
-# Destinia 0.17.2 Beta
+# Destinia 0.17.3 Beta
+
+> **0.17.3 Beta — candidata:** menu principal do Zoom ampliado, com coordenadas de mouse ajustadas; jogo e submenus preservam o enquadramento. [Release 0.17.3](https://github.com/sugyua/destinia/releases/tag/v0.17.3-beta) somente após publicação confirmada.
 
 > **0.17.2 Beta — confirmação de gravação Web (30/10/2026).** A Web informa quando o servidor não confirma uma gravação; o aviso permanece separado do FPS. Respostas inválidas de saves são rejeitadas antes de atualizar a memória. O teste de sincronização usa somente dados sintéticos e um servidor efêmero, sem saves pessoais. [Pacotes 0.17.2](https://github.com/sugyua/destinia/releases/tag/v0.17.2-beta) somente após publicação confirmada.
 

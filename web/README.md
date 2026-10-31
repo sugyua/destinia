@@ -1,4 +1,4 @@
-# Destinia 0.17.2 Beta — fontes do navegador
+# Destinia 0.17.3 Beta — fontes do navegador
 
 Gravação só é confirmada após HTTP de sucesso e `ok: true`; aviso persistente informa falhas sem apagar os dados em memória. Respostas inválidas de saves não são aplicadas parcialmente. A confirmação é do servidor, sem prometer Google Drive ou PC/Web. O servidor estático da VPN não fornece /api/save: progresso ARM fica nesta aba; sidecars do navegador têm contratos próprios.
 

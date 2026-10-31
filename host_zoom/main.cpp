@@ -18,6 +18,7 @@ static destinia::RefinementHost refinementHost;
 #include "../common/auto_potion.h"
 static destinia::AutoPotionController autoPotion;
 #include "../common/version_stamp.h"
+#include "../common/zoom_menu_view.h"
 #include "../common/unicorn_check.h"
 
 static bool controllerBackHeld = false;
@@ -1414,7 +1415,7 @@ static int runHost(int argc, char** argv) {
   if (portugueseTextTest) hostReport("[host] traducao PT ativa: itens, equipamentos, habilidades, menus, Fabricacao e Missoes.\n");
 
   // [OK] jniTouch(env,obj, x, y, tipo): tipo 0=toque 1=solta 2=move 3=tecla de menu (Thumb decodificado)
-  bool mouseDown=false; int lastTouchX=0,lastTouchY=0;
+  bool mouseDown=false; int lastTouchX=0,lastTouchY=0, mouseMenuState=0;
   auto touch = [&](int x, int y, int type) {
     if((int16_t(rd16(exportsMap.at("Game")+0x4854))==0 && rd16(exportsMap.at("Game")+0x48f2)>0 && !codexOpen && !bossRushUI.open && !weaponsCatalogHost.open && !sharedStashHost.open && !bountiesHost.open && !difficultyOpen) && questTrackerUI.handleTouch(x, y, type, SCREEN_W, SCREEN_H)) return;
     if(sharedStashHost.open || bountiesHost.open || weaponsCatalogHost.open || difficultyMenuTouch(x,y,type) || codexMenuTouch(x,y,type)) return;
@@ -1481,6 +1482,12 @@ static int runHost(int argc, char** argv) {
       hostReport("[host] Teclado: WASD/setas mover, Enter/Z confirmar, Esc/X voltar, I menu, F5 save, F11 tela cheia. DualSense: analogico mover, X atacar, O voltar, triangulo menu, Share save, L1 acelerar.\n");
   } else fs::create_directories(outDir);
 
+  auto zoomViewState = [&]() {
+    const bool overlay = diagnosticsPanel.visible() || attributeSheet.visible() ||
+        inventoryOpen || codexOpen || difficultyOpen || bossRushUI.open ||
+        weaponsCatalogHost.open || sharedStashHost.open || bountiesHost.open;
+    return menuState() == 1 && !overlay ? 1 : 0;
+  };
   auto gameViewport = [&]() {
     int ow = 0, oh = 0;
     SDL_GetRendererOutputSize(ren, &ow, &oh);
@@ -1505,8 +1512,9 @@ static int runHost(int argc, char** argv) {
     const SDL_Rect vp = gameViewport();
     const bool inside = ox >= vp.x && ox < vp.x + vp.w && oy >= vp.y && oy < vp.y + vp.h;
     if (!inside && !clampOutside) return false;
-    x = std::clamp((int)((int64_t)(ox - vp.x) * SCREEN_W / vp.w), 0, SCREEN_W - 1);
-    y = std::clamp((int)((int64_t)(oy - vp.y) * SCREEN_H / vp.h), 0, SCREEN_H - 1);
+    const auto src = destinia::zoomMenuSource(mouseDown ? mouseMenuState : zoomViewState());
+    x = destinia::zoomMapCoordinate(ox - vp.x, vp.w, src.x, src.w);
+    y = destinia::zoomMapCoordinate(oy - vp.y, vp.h, src.y, src.h);
     return inside;
   };
 
@@ -1742,7 +1750,7 @@ static int runHost(int argc, char** argv) {
             hostReport("[sonda] SDL %s botao=%d janela_px=(%d,%d) tamanho_janela=%dx%d saida_render=%dx%d -> jogo=(%d,%d) dentro=%d\n",
                        ev.type==SDL_MOUSEBUTTONDOWN?"BAIXO":"CIMA",(int)ev.button.button,wx,wy,ww,wh,ow,oh,x,y,(int)inside);
           }
-          if(ev.type==SDL_MOUSEBUTTONDOWN && ev.button.button==SDL_BUTTON_LEFT && inside) { controls.event(ev); mouseDown=true; touch(x,y,0); }
+          if(ev.type==SDL_MOUSEBUTTONDOWN && ev.button.button==SDL_BUTTON_LEFT && inside) { controls.event(ev); mouseMenuState=zoomViewState(); mouseDown=true; touch(x,y,0); }
           else if(ev.type==SDL_MOUSEBUTTONUP && ev.button.button==SDL_BUTTON_LEFT && mouseDown) { mouseDown=false; touch(x,y,1); }
           else if(ev.type==SDL_MOUSEMOTION && mouseDown) touch(x,y,2);
         } else {
@@ -1861,7 +1869,11 @@ static int runHost(int argc, char** argv) {
     }
     diagnosticsPanel.paint(frameBuffer.data(), SCREEN_W, SCREEN_H);
     {destinia::CombatStats attributes{};for(int i=0;i<13;++i)attributes[i]=int16_t(rd16(exportsMap.at("Game")+0x48ba+2*i));attributeSheet.paint(frameBuffer.data(),SCREEN_W,SCREEN_H,attributes);}
-    if (menuState() == 1) destinia::paintVersionStamp(frameBuffer.data(), SCREEN_W, SCREEN_H, DESTINIA_VERSION);
+    if (menuState() == 1) {
+      const auto stampView = destinia::zoomMenuSource(zoomViewState());
+      destinia::paintVersionStamp(frameBuffer.data(), SCREEN_W, SCREEN_H, DESTINIA_VERSION,
+                                 stampView.x + stampView.w, stampView.y + stampView.h);
+    }
     const uint8_t* fb = frameBuffer.data();
     if (headlessFrames) {
       if (frame == 1 || frame % 10 == 0) { char nm[64]; snprintf(nm, sizeof nm, "/frame_%05ld.bmp", frame); writeBmp(outDir + nm, fb); }
@@ -1874,7 +1886,9 @@ static int runHost(int argc, char** argv) {
       SDL_Rect dst = gameViewport();
       SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);
       SDL_RenderClear(ren);
-      SDL_RenderCopy(ren, tex, nullptr, &dst);
+      const auto source = destinia::zoomMenuSource(zoomViewState());
+      const SDL_Rect src{source.x, source.y, source.w, source.h};
+      SDL_RenderCopy(ren, tex, &src, &dst);
       SDL_RenderPresent(ren);
       renderMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - renderStart).count();
     }
