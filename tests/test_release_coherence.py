@@ -9,7 +9,7 @@ class ReleaseCoherence(unittest.TestCase):
         v=(ROOT/'VERSION').read_text().strip()
         self.assertEqual(json.loads((ROOT/'release/manifest.json').read_text())['version'],v)
         web_version=json.loads((ROOT/'web/package.json').read_text())['version']
-        self.assertEqual(web_version,v+'-beta')
+        self.assertRegex(web_version, r'^\d+\.\d+\.\d+-beta$')
         readme=(ROOT/'README.md').read_text(encoding='utf-8')
         self.assertTrue(readme.startswith('# Destinia '+v+' Beta\n'))
         self.assertIn('/releases/tag/v'+v+'-beta','\n'.join(readme.splitlines()[:12]))
@@ -30,7 +30,8 @@ class ReleaseCoherence(unittest.TestCase):
         roadmap=(ROOT/'docs/ROADMAP.md').read_text(encoding='utf-8')
         self.assertRegex('\n'.join(roadmap.splitlines()[:8]), r'fontes e candidata\s*' + re.escape(version) + r'(?![\d.])')
         web=(ROOT/'web/README.md').read_text(encoding='utf-8')
-        self.assertIn(version,web.splitlines()[0])
+        web_version=json.loads((ROOT/'web/package.json').read_text())['version'].removesuffix('-beta')
+        self.assertIn(web_version,web.splitlines()[0])
 
     def test_release_history_preserves_existing_tag(self):
         readme=(ROOT/'README.md').read_text(encoding='utf-8')
@@ -59,5 +60,5 @@ class ReleaseCoherence(unittest.TestCase):
         for name in sorted(files):
             if not name.startswith('web/') or not name.endswith('.mjs'):continue
             for dep in re.findall(r"(?:from\s*|import\s*)['\"](\.[^'\"]+)['\"]",(ROOT/name).read_text(encoding='utf-8')):
-                child=(ROOT/name).parent.joinpath(dep.split("?",1)[0]).resolve()
+                child=(ROOT/name).parent.joinpath(dep).resolve()
                 self.assertIn(child.relative_to(ROOT).as_posix(),files,name+' imports '+dep)

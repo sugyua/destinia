@@ -403,7 +403,6 @@
     "tests/auto_potion_native_cases.cpp",
     "tests/auto_potion_arm_native.cpp",
     "tests/test_auto_potion_arm.py",
-    "web/tests/auto-potion-native.test.mjs",
     "release/NOTAS_0.17.4.md",
     "docs/VERIFICACAO_0.17.4.md"
   ]

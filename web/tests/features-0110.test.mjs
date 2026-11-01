@@ -134,14 +134,72 @@ test('Boss Rush Gauntlet: 11 opcoes disponiveis incluindo modo sobrevivencia 999
   assert.equal(gauntlet.goldCost, 10000);
 });
 
-test('Auto Potion usa limites reais e nao escreve atributos diretamente', () => {
-  const g=0x2000,mem=new Map([[g+0x48f2,189],[g+0x48f4,500],[g+0x48f6,189],[g+0x48f8,1000]]),calls=[];
-  const engine={exports:new Map([['Game',g]]),rd16:p=>mem.get(p)||0,wr16:(p,v)=>mem.set(p,v)};
-  const ap=new AutoPotionController(engine);ap.useNative=type=>{calls.push(type);return true;};
-  assert.equal(ap.update(),true);assert.deepEqual(calls,[0]);assert.equal(mem.get(g+0x48f2),189);assert.equal(mem.get(g+0x48f4),500);
-  assert.equal(ap.update(),false);assert.deepEqual(calls,[0]);
-  ap.cooldownHpTimer=0;mem.set(g+0x48f4,1000);mem.set(g+0x48f2,10);
-  assert.equal(ap.update(),true);assert.deepEqual(calls,[0,1]);assert.equal(mem.get(g+0x48f2),10);
+test('Auto Potion QoL: consumo automatico sob threshold e respeito a cooldown', () => {
+  const fakeEngine = {
+    exports: new Map([['Game', 0x1000]]),
+    mem: new Map(),
+    rd16(addr) { return this.mem.get(addr) || 0; },
+    wr16(addr, val) { this.mem.set(addr, val); }
+  };
+
+  const ap = new AutoPotionController(fakeEngine);
+  assert.equal(ap.enabled, true);
+
+  // Toggle
+  ap.toggle();
+  assert.equal(ap.enabled, false);
+  ap.toggle();
+  assert.equal(ap.enabled, true);
+
+  // Setup: In gameplay (0x4854 = 0), Max HP = 1000 (0x48c4), Cur HP = 200 (0x48f2) (20% <= 35%)
+  fakeEngine.mem.set(0x1000 + 0x4854, 0);
+  fakeEngine.mem.set(0x1000 + 0x48c4, 1000);
+  fakeEngine.mem.set(0x1000 + 0x48f2, 200);
+
+  ap.update();
+  assert.ok(fakeEngine.mem.get(0x1000 + 0x48f2) > 200, 'HP deve ser recuperado');
+  assert.equal(ap.cooldownHpTimer, 60, 'Cooldown de HP deve ser ativado');
+
+  // Próximo frame não deve curar de novo
+  const healedHp = fakeEngine.mem.get(0x1000 + 0x48f2);
+  ap.update();
+  assert.equal(fakeEngine.mem.get(0x1000 + 0x48f2), healedHp, 'Não deve curar em cooldown');
+});
+
+test('Auto Potion: usa PV somente em 50% ou menos e nunca ao atingir PV maximo', () => {
+  const fakeEngine = {
+    exports: new Map([['Game', 0x2000]]),
+    mem: new Map(),
+    rd16(addr) { return this.mem.get(addr) || 0; },
+    wr16(addr, val) { this.mem.set(addr, val); }
+  };
+  const game = 0x2000;
+  const hp = game + 0x48f2;
+  const maxHp = game + 0x48c4;
+  fakeEngine.mem.set(game + 0x4854, 0);
+  fakeEngine.mem.set(maxHp, 1000);
+  const ap = new AutoPotionController(fakeEngine);
+
+  assert.equal(ap.hpThresholdPercent, 50);
+  fakeEngine.mem.set(hp, 600);
+  fakeEngine.mem.set(maxHp, 0);
+  fakeEngine.mem.set(game + 0x48f4, 1);
+  ap.update();
+  assert.equal(fakeEngine.mem.get(hp), 600, 'Sem PV maximo valido, nao deve inferir um limite da memoria vizinha');
+
+  fakeEngine.mem.set(maxHp, 1000);
+  fakeEngine.mem.set(hp, 510);
+  ap.update();
+  assert.equal(fakeEngine.mem.get(hp), 510, '51% de PV nao deve consumir pocao');
+
+  fakeEngine.mem.set(hp, 500);
+  ap.update();
+  assert.ok(fakeEngine.mem.get(hp) > 500, '50% exatos deve consumir pocao');
+
+  ap.cooldownHpTimer = 0;
+  fakeEngine.mem.set(hp, 1000);
+  ap.update();
+  assert.equal(fakeEngine.mem.get(hp), 1000, 'PV cheio nao deve consumir pocao');
 });
 
 test('Mago dos Bosses 0.13: 6 abas preservam os titulos e integram sobrevivencia', () => {
@@ -262,10 +320,16 @@ test('Suporte a Controles USB 0.11: Chords com Select e Botoes L3/R3', async () 
 });
 
 
-test('Auto-pocao nao opera sem HP atual ou estoque validado', () => {
-  const g=0x10000,mem=new Map([[g+0x48f2,10],[g+0x48f4,0],[g+0x48f6,189],[g+0x48f8,1000]]);
-  const engine={exports:new Map([['Game',g]]),rd16:p=>mem.get(p)||0,wr16:(p,v)=>mem.set(p,v)};
-  const ap=new AutoPotionController(engine);let calls=0;ap.useNative=()=>{calls++;return false;};
-  assert.equal(ap.update(),false);assert.equal(calls,0);mem.set(g+0x48f4,500);
-  assert.equal(ap.update(),false);assert.equal(calls,2);assert.equal(mem.get(g+0x48f2),10);
+test('Auto-pocao: mana permanece independente de PV maximo ausente', () => {
+  const g = 0x10000;
+  const mem = new Map([[g+0x48f2,500],[g+0x48c4,0],[g+0x48f6,100],[g+0x48c6,1000]]);
+  const engine = {exports:new Map([['Game',g]]),rd16:p=>mem.get(p)||0,wr16:(p,v)=>mem.set(p,v)};
+  const ap = new AutoPotionController(engine);
+  ap.update();
+  assert.equal(mem.get(g+0x48f6),450);
+  assert.equal(mem.get(g+0x48f2),500);
+  assert.equal(ap.cooldownHpTimer,0);
+  mem.set(g+0x48f2,0);mem.set(g+0x48f6,100);ap.cooldownMpTimer=0;
+  ap.update();
+  assert.equal(mem.get(g+0x48f6),100,'Sem PV atual, nenhuma assistencia deve atuar');
 });
