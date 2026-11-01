@@ -398,8 +398,8 @@ public:
         "Avancar Ciclo Novo Jogo+ (NG+)"
       };
       static const char* optSub[3] = {
-        "Devolve pontos ao saldo por 5.000 G",
-        "Devolve pontos ao saldo por 5.000 G",
+        "Reset de atributos indisponivel",
+        "Reset de habilidades indisponivel",
         "Reinicia mapa preservando Lv/Itens/Mascotes"
       };
 
