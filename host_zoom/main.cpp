@@ -1483,6 +1483,8 @@ static int runHost(int argc, char** argv) {
   } else fs::create_directories(outDir);
 
   auto zoomViewState = [&]() {
+    // Keep rendering and input in the same coordinate space until release.
+    if (mouseDown) return mouseMenuState;
     const bool overlay = diagnosticsPanel.visible() || attributeSheet.visible() || controllerBackHeld ||
         (autoPotion.noticeTimer > 0 && !autoPotion.lastNotice.empty()) ||
         inventoryOpen || codexOpen || difficultyOpen || bossRushUI.open ||
