@@ -16,6 +16,7 @@ static destinia::BossRushUI bossRushUI;
 static destinia::SurvivalHost survivalHost;
 static destinia::RefinementHost refinementHost;
 #include "../common/auto_potion.h"
+#include "../common/auto_potion_native.h"
 static destinia::AutoPotionController autoPotion;
 #include "../common/version_stamp.h"
 #include "../common/zoom_menu_view.h"
@@ -976,6 +977,8 @@ static bool callFn(u32 addr, std::initializer_list<u32> args, u32* ret) {
   return codexDrainNativeMenu();
 }
 
+#include "../common/auto_potion_host.h"
+
 // ---------------------------------------------------------------- BMP (para o modo sem janela)
 static void rgb565ToRgba(const uint8_t* src, uint8_t* dst) {
   for (int i = 0; i < SCREEN_W * SCREEN_H; i++) {
@@ -1362,7 +1365,7 @@ static int runHost(int argc, char** argv) {
   uiRenderer.statusBaseScale=1;
   uiRenderer.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,preferences.uiScale,false,soPath);
   dropNamesRenderer.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,soPath);
-  {std::vector<uint8_t> table;if(!readFile(assetsDir+"/item_en.gdt",table))throw std::runtime_error("Tabela de loot ausente");lootQol.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,soPath,table);lootQol.options=preferences.loot;}
+  std::vector<uint8_t> potionTable;if(!readFile(assetsDir+"/item_en.gdt",potionTable))throw std::runtime_error("Tabela de loot ausente");lootQol.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,soPath,potionTable);lootQol.options=preferences.loot;
   try{bossMage.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,assetsDir,soPath,[]{return lootQol.autoTarget<0;});
     bossMage.menu.opener = [&]{ bossRushUI.openMenu(); };
     bossRushUI.getGold = [&]() -> int { return int(callFn(exportsMap["getMyGold"], {})); };
@@ -1849,7 +1852,12 @@ static int runHost(int argc, char** argv) {
     if(preferences.uiScale==100?hudScale!=0:uiRenderer.statusDrawn){std::array<destinia::SkillHintRect,4> hints{};for(size_t i=0;i<hints.size();++i){int16_t r[4]{};if(rd(exportsMap.at("MMain")+0x11a+u32(i)*8,r,8))hints[i]={r[0],r[1],r[2],r[3]};}destinia::paintSkillHints(frameBuffer.data(),SCREEN_W,SCREEN_H,preferences,controls.lastInputDevice(),hints,preferences.uiScale);}
     if(!codexOpen)fcPaint(frameBuffer.data(),preferences.uiScale);
     bossRushUI.currentSlot = rd16(exportsMap.at("Game")+0x4886);
-    autoPotion.update(exportsMap.at("Game"), [](u32 a){return rd16(a);}, [](u32 a, uint16_t v){wr16(a, v);}, playSoundId);
+    try {
+      autoPotion.update(exportsMap.at("Game"), [](u32 a){return rd16(a);}, [](u32 a, uint16_t v){wr16(a, v);}, [&](int type){return hostUsePotion(type,potionTable);}, playSoundId);
+    } catch (const std::exception& e) {
+      hostReport("[auto-pocao] Falha de acesso ignorada: %s\n", e.what());
+    }
+    if(executionFailed) break;
     reconcileMouse();
     if(int16_t(rd16(exportsMap.at("Game")+0x4854))==0 && rd16(exportsMap.at("Game")+0x48f2)>0) {
       int hX = int16_t(rd16(exportsMap.at("Game")+0x4890));

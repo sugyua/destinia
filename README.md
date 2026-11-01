@@ -1,4 +1,6 @@
-# Destinia 0.17.3 Beta
+# Destinia 0.17.4 Beta
+
+> **0.17.4 Beta — candidata para PC:** auto-poção usa os campos corretos de vida e mana e aciona a poção original com estoque validado. [Release 0.17.4](https://github.com/sugyua/destinia/releases/tag/v0.17.4-beta) somente após publicação confirmada.
 
 > **0.17.3 Beta — candidata:** menu principal do Zoom ampliado, com coordenadas de mouse ajustadas; jogo e submenus preservam o enquadramento. [Release 0.17.3](https://github.com/sugyua/destinia/releases/tag/v0.17.3-beta) somente após publicação confirmada.
 
@@ -8,13 +10,13 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-> **Auto-poção:** um erro conhecido pode alterar a mana ao tentar recuperar vida e consumir itens incorretos. Desative-a com H; ela volta ativada ao reiniciar. A correção está em investigação.
+> **Auto-poção:** até a 0.17.3 no PC e na Web atual, um erro pode alterar a mana ao tentar recuperar vida e consumir itens incorretos. Desative-a com H em cada reinício até instalar uma versão corrigida e verificada. A candidata para PC não ajusta automaticamente mana já excedente.
 
 [Release anterior 0.17.1 e pacotes verificados](https://github.com/sugyua/destinia/releases/tag/v0.17.1-beta) · [0.17.0](https://github.com/sugyua/destinia/releases/tag/v0.17.0-beta).
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
-**Web:** fontes 0.17.2 e [VPN Tailscale0.17.2](http://100.108.92.19:8000/?v=0.17.2) atualizadas; cópia das fontes e HTTP conferidos. PC ligado e VPN conectada necessários. O servidor estático não oferece sincronização de saves; sem confirmação, mantenha a aba aberta para preservar o progresso temporário. Sidecars do navegador têm contratos próprios. O [Site privado vinculado](https://destinia-web-experimental.leafyheron257.chatgpt.site/) mantém deployment 0.13.0 conhecido: ferramenta Sites indisponível, audiência preservada. Safari físico não executado nesta entrega.
+**Web:** fontes e [VPN Tailscale](http://100.108.92.19:8000/?v=0.17.2) permanecem na revisão 0.17.2 previamente conferida. PC ligado e VPN conectada são necessários. O servidor estático não oferece sincronização de saves; sem confirmação, mantenha a aba aberta para preservar o progresso temporário. Sidecars do navegador têm contratos próprios. O [Site privado vinculado](https://destinia-web-experimental.leafyheron257.chatgpt.site/) mantém deployment 0.13.0 conhecido: ferramenta Sites indisponível, audiência preservada. Safari físico não executado nesta candidata.
 
 ## Novidades 0.17.2
 
@@ -433,12 +435,12 @@ Para verificar o empacotador, com Python 3.10 ou superior:
 
 ```sh
 python -m unittest discover -s tests -v
-python scripts/package_release.py --out dist/release-0.17.3
+python scripts/package_release.py --out dist/release-0.17.4
 ```
 
 No Linux, o comando pode ser `python3`. O empacotador cria ZIP e SHA-256, não compila executáveis. Não sobrescreve artefatos existentes. A reprodução byte a byte foi verificada com a mesma versão de Python/zlib; outras versões podem mudar a compressão.
 
-O [manifesto](release/manifest.json) identifica a base e os arquivos da candidata 0.17.3. O workflow Windows compila/testa os EXEs e gera um pacote separado; o empacotador de fontes não compila executáveis. Consulte o [roadmap](docs/ROADMAP.md) para as etapas seguintes.
+O [manifesto](release/manifest.json) identifica a base e os arquivos da candidata 0.17.4. O workflow Windows compila/testa os EXEs e gera um pacote separado; o empacotador de fontes não compila executáveis. Consulte o [roadmap](docs/ROADMAP.md) para as etapas seguintes.
 
 ## Planejamento histórico e pendências
 

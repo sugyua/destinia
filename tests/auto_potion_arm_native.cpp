@@ -1,0 +1,58 @@
+﻿#include <unicorn/unicorn.h>
+#include <cstdio>
+static uc_err keepPotionEngine(uc_engine*){return UC_ERR_OK;}
+#define uc_close keepPotionEngine
+#define main potionOriginalMain
+#ifdef DESTINIA_TEST_ZOOM
+#include "../host_zoom/main.cpp"
+#else
+#include "../host/main.cpp"
+#endif
+#undef main
+#undef uc_close
+int main(int argc,char** argv){
+ if(int result=potionOriginalMain(argc,argv))return result;
+ const u32 g=exportsMap.at("Game");
+ if(!callFn(exportsMap.at("GameCanvas_init"),{exportsMap.at("GameCanvas")}))return 1;
+ std::vector<uint8_t> table;if(!readFile(assetsDir+"/item_en.gdt",table))return 2;
+ for(int type=0;type<2;++type){
+  const int id=type?5:0;
+  wr16(g+0x4a8c,0);wr16(g+0x4a90,0x6123);wr16(g+0x433c,1);wr16(g+0x433e,1);wr16(g+0x4340,id);wr16(g+0x4342,3);
+  for(unsigned b=1;b<4;++b)wr16(g+0x433c+b*0x92,0);
+  wr16(g+0x4854,0);wr16(g+0x48f2,type?10:189);wr16(g+0x48f4,type?1000:500);wr16(g+0x48f6,189);wr16(g+0x48f8,1000);wr32(g+0x7cd4,1000);
+  const auto hp=rd16(g+0x48f4),mp=rd16(g+0x48f2);
+  destinia::AutoPotionController controller;
+  auto read=[](u32 a){return uint16_t(rd16(a));};auto write=[](u32 a,uint16_t v){wr16(a,v);};
+  auto use=[&](int wanted){return hostUsePotion(wanted,table);};
+  if(!controller.update(g,read,write,use,{}) || rd16(g+0x4342)!=2 || rd16(g+0x4a90)!=0x6123 || rd16(g+0x48f4)!=hp || rd16(g+0x48f2)!=mp || rd16(g+(type?0x7cea:0x7ce8))!=(type?5:50))return 3+type;
+  if(controller.update(g,read,write,use,{}) || rd16(g+0x4342)!=2)return 5;
+ }
+ // Two low resources and a non-default shortcut page must use and restore
+ // the correct slot independently in both original PC engines.
+ wr16(g+0x4a8c,1);wr16(g+0x4a9a,0x5a34);wr16(g+0x433c,2);
+ wr16(g+0x433e,1);wr16(g+0x4340,0);wr16(g+0x4342,3);
+ wr16(g+0x4344,1);wr16(g+0x4346,5);wr16(g+0x4348,4);
+ for(unsigned b=1;b<4;++b)wr16(g+0x433c+b*0x92,0);
+ wr16(g+0x4854,0);wr16(g+0x48f2,10);wr16(g+0x48f4,500);wr16(g+0x48f6,189);wr16(g+0x48f8,1000);wr16(g+0x48c4,200);wr32(g+0x7cd4,2000);
+ destinia::AutoPotionController both;
+ auto read=[](u32 a){return uint16_t(rd16(a));};auto write=[](u32 a,uint16_t v){wr16(a,v);};
+ auto use=[&](int wanted){return hostUsePotion(wanted,table);};
+ const bool usedBoth=both.update(g,read,write,use,{});
+ if(!usedBoth || both.totalHpUsed!=1 || both.totalMpUsed!=1 || rd16(g+0x4342)!=2 || rd16(g+0x4348)!=3 || rd16(g+0x4a9a)!=0x5a34 || rd16(g+0x48f4)!=500 || rd16(g+0x48f2)!=10){std::fprintf(stderr,"both=%d hpused=%d mpused=%d hpqty=%u mpqty=%u slot=%x hp=%u mp=%u\n",usedBoth,both.totalHpUsed,both.totalMpUsed,rd16(g+0x4342),rd16(g+0x4348),rd16(g+0x4a9a),rd16(g+0x48f4),rd16(g+0x48f2));return 6;}
+ if(both.update(g,read,write,use,{}) || rd16(g+0x4342)!=2 || rd16(g+0x4348)!=3)return 7;
+ exportsMap["Game"]=0xdead0000;autoPotion.config.enabled=true;
+ if(hostUsePotion(0,table) || autoPotion.config.enabled || autoPotion.noticeTimer<=0)return 8;
+ exportsMap["Game"]=g;
+ autoPotion.config.enabled=true;wr32(g+0x7cd4,3000);saveTransaction.begin();
+ bool propagated=false;
+ try {hostUsePotion(0,table);} catch(const std::runtime_error&) {propagated=true;}
+ saveTransaction.finish(false);
+ if(!propagated || !autoPotion.config.enabled || rd16(g+0x4a9a)!=0x5a34)return 10;
+ const auto originalQuick=exportsMap.at("_pressedQuickSlot");exportsMap["_pressedQuickSlot"]=0xdead0001;
+ autoPotion.config.enabled=true;autoPotion.cooldownHpTimer=0;autoPotion.cooldownMpTimer=0;wr32(g+0x7cd4,3000);
+ int attempted=0;auto failUse=[&](int wanted){++attempted;return hostUsePotion(wanted,table);};
+ autoPotion.update(g,read,write,failUse,{});
+ exportsMap["_pressedQuickSlot"]=originalQuick;
+ if(!executionFailed || autoPotion.config.enabled || attempted!=1 || rd16(g+0x4a9a)!=0x5a34)return 9;
+ std::puts("AUTO_POTION_ARM_OK");return 0;
+}
