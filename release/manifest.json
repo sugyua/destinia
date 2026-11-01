@@ -405,6 +405,9 @@
     "tests/auto_potion_arm_native.cpp",
     "tests/test_auto_potion_arm.py",
     "release/NOTAS_0.17.4.md",
-    "docs/VERIFICACAO_0.17.4.md"
+    "docs/VERIFICACAO_0.17.4.md",
+    "docs/VERIFICACAO_OURO_MAGO_PC.md",
+    "tests/boss_gold_native.cpp",
+    "tests/test_boss_gold_native.py"
   ]
 }

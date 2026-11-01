@@ -1368,7 +1368,7 @@ static int runHost(int argc, char** argv) {
   std::vector<uint8_t> potionTable;if(!readFile(assetsDir+"/item_en.gdt",potionTable))throw std::runtime_error("Tabela de loot ausente");lootQol.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,soPath,potionTable);lootQol.options=preferences.loot;
   try{bossMage.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,assetsDir,soPath,[]{return lootQol.autoTarget<0;});
     bossMage.menu.opener = [&]{ bossRushUI.openMenu(); };
-    bossRushUI.getGold = [&]() -> int { return int(callFn(exportsMap["getMyGold"], {})); };
+    bossRushUI.getGold = [&]() -> int { u32 gold=0; if(!callFn(exportsMap.at("getMyGold"), {}, &gold) || gold>0x7fffffffu) return 0; return int(gold); };
     bossRushUI.setGold = [&](int g) { callFn(exportsMap["setMyGold"], {uint32_t(g)}); };
     bossRushUI.teleport = [&](int a, int m, int e) { callFn(exportsMap["Map_loadData"], {uint32_t(a), uint32_t(m), uint32_t(e)}); };
     bossRushUI.calcHeroStat = [&]() -> bool { return callFn(exportsMap["GameUI_calcHeroStat"], {}); };
