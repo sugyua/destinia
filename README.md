@@ -1,6 +1,6 @@
 # Destinia 0.17.4 Beta
 
-> **0.17.4 Beta — candidata para PC:** auto-poção usa os campos corretos de vida e mana e aciona a poção original com estoque validado; o Mago lê o saldo nativo de ouro e o rastreador de missões foi deslocado no Zoom. [Release 0.17.4](https://github.com/sugyua/destinia/releases/tag/v0.17.4-beta) somente após publicação confirmada.
+> **0.17.4 Beta — candidata para PC:** autopoção usa os campos corretos de vida e mana e aciona a poção original com estoque validado; o Mago lê o saldo nativo de ouro e o rastreador de missões foi deslocado no Zoom. [Release 0.17.4](https://github.com/sugyua/destinia/releases/tag/v0.17.4-beta) somente após publicação confirmada.
 
 > **0.17.3 Beta — PC publicada:** menu principal do Zoom ampliado, com coordenadas de mouse ajustadas; jogo e submenus preservam o enquadramento. [Pacotes 0.17.3](https://github.com/sugyua/destinia/releases/tag/v0.17.3-beta).
 

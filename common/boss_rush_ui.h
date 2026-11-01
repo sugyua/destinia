@@ -180,14 +180,9 @@ public:
         }
       } else if (currentTab == 3) {
         // Tab 3: Santuario
-        if (selectedIndex == 0) {
-          // Reset Atributos (5000 G)
-          auto res = resetHeroStats(gameBase, getGold, setGold, calcHeroStat, rd16, wr16, 5000);
-          statusMessage = res.message;
-        } else if (selectedIndex == 1) {
-          // Reset Habilidades (5000 G)
-          auto res = resetHeroSkills(gameBase, getGold, setGold, rd16, wr16, 5000);
-          statusMessage = res.message;
+        if (selectedIndex == 0 || selectedIndex == 1) {
+          // These paid resets cannot safely restore the original allocation yet.
+          statusMessage = "RESET INDISPONIVEL";
         } else if (selectedIndex == 2) {
           // Avancar Novo Jogo+
           auto res = NewGamePlusManager::advanceCycle(currentSlot, saveDir, teleport);
@@ -398,8 +393,8 @@ public:
     } else if (currentTab == 3) {
       // TAB 3: Santuario do Poder
       static const char* optTitles[3] = {
-        "Resetar Atributos (FOR/DES/CON/INT)",
-        "Resetar Arvore de Habilidades",
+        "Reset de atributos indisponivel",
+        "Reset de habilidades indisponivel",
         "Avancar Ciclo Novo Jogo+ (NG+)"
       };
       static const char* optSub[3] = {

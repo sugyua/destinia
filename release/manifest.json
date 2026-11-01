@@ -411,6 +411,7 @@
     "tests/boss_gold_native.cpp",
     "tests/test_boss_gold_native.py",
     "tests/shutdown_failure_native.cpp",
-    "tests/test_shutdown_failures.py"
+    "tests/test_shutdown_failures.py",
+    "tests/boss_reset_guard_cases.cpp"
   ]
 }

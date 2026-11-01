@@ -7,3 +7,4 @@
 - O Mago dos Bosses consulta o saldo nativo de ouro, e o rastreador de missões no Zoom foi afastado da faixa superior. A conferência visual em gameplay ainda está pendente.
 - O crédito de contratos, ressarcimento de contratos anteriores, mana já excedente, barra de abas duplicada e escala de inventário permanecem pendentes.
 - Campanha e controle físico não foram executados. A Web permanece nas revisões previamente verificadas, conforme solicitado.
+- Os resets pagos de atributos e habilidades do Mago ficam temporariamente indisponíveis por segurança; não cobram ouro nessa situação.

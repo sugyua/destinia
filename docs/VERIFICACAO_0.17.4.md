@@ -10,6 +10,7 @@
 - Não se afirma recuperação de mana já excedente, ressarcimento de contratos ou validação com saves pessoais. CI, pacotes finais e gameplay físico exigem verificação própria.
 - A base 0.17.3 PC foi publicada após CI e auditoria dos pacotes, e instalada com backup e hashes de dados conferidos; esta candidata permanece separada até suas próprias verificações.
 
-- O teste da fronteira de quadro injeta falha de restauração do atalho e confirma que ela chega ao tratamento fatal, sem permitir continuação normal.
+- O teste da fronteira de quadro injeta falha de restauração do atalho e confirma que a exceção se propaga; o encerramento integral ainda requer teste físico.
 - A leitura de ouro do Mago e a posição do rastreador no Zoom reaproveitam, respectivamente, as correções verificadas nos PRs #16 e #17. A validação visual em jogo segue pendente.
 - Em encerramento com erro, os hosts não gravam automaticamente Códex, dificuldade ou economia; o teste usa arquivo e journal sintéticos.
+- Os resets pagos de atributos e habilidades no Mago permanecem indisponíveis: suas rotinas anteriores não restauram corretamente os pontos. Teste sintético verifica que não há débito nem alteração e que o teleporte continua funcional.
