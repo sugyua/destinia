@@ -1,6 +1,6 @@
 {
-  "version": "0.17.2",
-  "base_commit": "194ebed72f69e314414b3909ef685aa3cbe4c6eb",
+  "version": "0.17.3",
+  "base_commit": "ad6580e10b6229089e0558f6bf4cc93d51a14757",
   "files": [
     ".gitignore",
     "AGENTS.md",
@@ -55,6 +55,7 @@
     "common/offline_store_host.h",
     "common/overlay_font.h",
     "common/version_stamp.h",
+    "common/zoom_menu_view.h",
     "common/pets_expansion.h",
     "common/player_controls.h",
     "common/portuguese_text.h",
@@ -257,12 +258,16 @@
     "tests/test_touch_controls.py",
     "tests/test_ui_transform.py",
     "tests/test_zoom_camera.py",
+    "tests/test_zoom_menu_view.py",
+    "tests/test_zoom_menu_native.py",
     "tests/test_zoom_render.py",
     "tests/touch_controls_native.cpp",
     "tests/ui_renderer_native.cpp",
     "tests/ui_transform_cases.cpp",
     "tests/update_0130_native.cpp",
     "tests/zoom_native_smoke.cpp",
+    "tests/zoom_menu_view_cases.cpp",
+    "tests/zoom_menu_native.cpp",
     "web/.gitignore",
     "web/README.md",
     "web/dist/CHANGELOG.txt",
@@ -388,6 +393,10 @@
     "tests/cloud-save-sync.test.mjs",
     "release/NOTAS_0.17.2.md",
     "docs/VERIFICACAO_0.17.2.md",
-    "docs/superpowers/plans/2026-10-30-web-save-status.md"
+    "docs/superpowers/plans/2026-10-30-web-save-status.md",
+    "release/NOTAS_0.17.3.md",
+    "docs/superpowers/plans/2026-10-31-zoom-menu.md",
+    "docs/superpowers/specs/2026-10-31-zoom-menu-design.md",
+    "docs/VERIFICACAO_0.17.3.md"
   ]
 }

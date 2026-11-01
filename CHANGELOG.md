@@ -4,6 +4,11 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.17.3 Beta — candidata
+
+- Amplia o menu principal no host Zoom e ajusta a posição dos cliques. Painéis sobrepostos e outras telas mantêm o quadro completo.
+- A câmera e o enquadramento do gameplay permanecem inalterados.
+
 ## 0.17.2 Beta — 30/10/2026
 
 - Após falha no carregamento inicial, envios de saves ficam desativados até um carregamento confirmado; o progresso permanece em memória e a cópia remota não recebe a sessão iniciada sem confirmação.

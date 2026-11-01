@@ -11,12 +11,12 @@
 namespace destinia {
 
 inline void paintVersionStamp(uint8_t* pixels, int width, int height,
-                              const std::string& version) {
+                              const std::string& version, int right = -1, int bottom = -1) {
   if (!pixels || width <= 0 || height <= 0 || version.empty()) return;
 
   const std::string label = "v" + version;
-  const int x = width - overlayTextWidth(label) - 6;
-  const int y = height - 13;
+  const int x = (right < 0 ? width : right) - overlayTextWidth(label) - 6;
+  const int y = (bottom < 0 ? height : bottom) - 13;
   paintOverlayText(pixels, width, height, x, y, label, 0x8410);
 }
 

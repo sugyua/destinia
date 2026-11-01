@@ -1,10 +1,14 @@
-# Destinia 0.17.2 Beta
+# Destinia 0.17.3 Beta
+
+> **0.17.3 Beta — candidata:** menu principal do Zoom ampliado, com coordenadas de mouse ajustadas; jogo e submenus preservam o enquadramento. [Release 0.17.3](https://github.com/sugyua/destinia/releases/tag/v0.17.3-beta) somente após publicação confirmada.
 
 > **0.17.2 Beta — confirmação de gravação Web (30/10/2026).** A Web informa quando o servidor não confirma uma gravação; o aviso permanece separado do FPS. Respostas inválidas de saves são rejeitadas antes de atualizar a memória. O teste de sincronização usa somente dados sintéticos e um servidor efêmero, sem saves pessoais. [Pacotes 0.17.2](https://github.com/sugyua/destinia/releases/tag/v0.17.2-beta) somente após publicação confirmada.
 
 > **Versão 0.16.0 Beta (28/10/2026).** Inclui Desmontagem em Lote Protegida (0.16.0), Ficha de Atributos Secundários Ctrl+F3 (0.15.0), Painel de Diagnóstico em Tempo Real F12 (0.14.0) e Arena de Sobrevivência Infinita com Refino de Equipamentos até +15 (0.13.0).
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
+
+> **Auto-poção:** um erro conhecido pode alterar a mana ao tentar recuperar vida e consumir itens incorretos. Desative-a com H; ela volta ativada ao reiniciar. A correção está em investigação.
 
 [Release anterior 0.17.1 e pacotes verificados](https://github.com/sugyua/destinia/releases/tag/v0.17.1-beta) · [0.17.0](https://github.com/sugyua/destinia/releases/tag/v0.17.0-beta).
 
@@ -429,12 +433,12 @@ Para verificar o empacotador, com Python 3.10 ou superior:
 
 ```sh
 python -m unittest discover -s tests -v
-python scripts/package_release.py --out dist/release-0.12.1
+python scripts/package_release.py --out dist/release-0.17.3
 ```
 
 No Linux, o comando pode ser `python3`. O empacotador cria ZIP e SHA-256, não compila executáveis. Não sobrescreve artefatos existentes. A reprodução byte a byte foi verificada com a mesma versão de Python/zlib; outras versões podem mudar a compressão.
 
-O [manifesto](release/manifest.json) identifica a base e os arquivos da 0.12.1. O workflow Windows compila/testa os EXEs e gera um pacote separado; o empacotador de fontes não compila executáveis. Consulte o [roadmap](docs/ROADMAP.md) para as etapas seguintes.
+O [manifesto](release/manifest.json) identifica a base e os arquivos da candidata 0.17.3. O workflow Windows compila/testa os EXEs e gera um pacote separado; o empacotador de fontes não compila executáveis. Consulte o [roadmap](docs/ROADMAP.md) para as etapas seguintes.
 
 ## Planejamento histórico e pendências
 

@@ -2,7 +2,7 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs. Faça backup dos saves antes de atualizar.**
 
-**Estado das fontes em 30/10/2026:** fontes e candidata 0.17.2 (confirmação e testes seguros de gravação Web). A entrega anterior 0.17.1 foi publicada e instalada. CI e estado final dos pacotes 0.17.2 devem ser conferidos na [release](https://github.com/sugyua/destinia/releases/tag/v0.17.2-beta). A interface original da 0.17 foi preservada. A Web 0.17.2 via VPN no PC foi verificada; o Site privado vinculado ao Codex mantém a 0.13.0 conhecida por indisponibilidade da ferramenta de publicação. Campanha e Safari físico não foram executados nesta entrega.
+**Estado das fontes em 31/10/2026:** fontes e candidata 0.17.3 ampliam o menu principal do Zoom; publicação e instalação dependem da validação. A 0.17.2 foi publicada e instalada. A Web via VPN permanece na revisão 0.17.2; o Site privado mantém a 0.13.0 conhecida por indisponibilidade da ferramenta de publicação. Campanha e Safari físico não foram executados nesta candidata.
 
 Próximas frentes da Issue #5: contratos/recuperação de saves, hooks opcionais/Zoom restantes, profiling comparável, permissões/dependências, divergências intencionais dos hosts, acessibilidade Web e fuzz. A [triagem atual](TRIAGEM_GITHUB_2026-10-30.md) separa correções já entregues das propostas; não reimplementar atalhos, CI Web ou versões anteriores.
 
