@@ -53,17 +53,22 @@ public:
     bool used = false;
     if (cooldownHpTimer == 0 && maxHp && curHp < maxHp &&
         uint32_t(curHp) * 100 <= uint32_t(maxHp) * uint32_t(config.hpThresholdPercent)) {
+      // Sempre define cooldown — sucesso ou falha — para evitar nova tentativa no próximo frame.
       if (useNative(0)) {
         cooldownHpTimer = config.cooldownFrames; ++totalHpUsed; used = true;
         lastNotice = "AUTO-POCAO: PV RECUPERANDO!"; noticeTimer = 60;
-      } else cooldownHpTimer = 10;
+      } else {
+        cooldownHpTimer = config.cooldownFrames; // sem poção disponível; aguarda ciclo completo
+      }
     }
     if (config.enabled && cooldownMpTimer == 0 && maxMp && curMp < maxMp &&
         uint32_t(curMp) * 100 <= uint32_t(maxMp) * uint32_t(config.mpThresholdPercent)) {
       if (useNative(1)) {
         cooldownMpTimer = config.cooldownFrames; ++totalMpUsed; used = true;
         lastNotice = "AUTO-POCAO: PM RECUPERANDO!"; noticeTimer = 60;
-      } else cooldownMpTimer = 10;
+      } else {
+        cooldownMpTimer = config.cooldownFrames;
+      }
     }
     return used;
   }
