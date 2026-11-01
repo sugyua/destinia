@@ -1,6 +1,6 @@
 {
-  "version": "0.17.3",
-  "base_commit": "ad6580e10b6229089e0558f6bf4cc93d51a14757",
+  "version": "0.17.4",
+  "base_commit": "cc9b9a0e647683ddc6d75e41625a2899cf6e4ef2",
   "files": [
     ".gitignore",
     "AGENTS.md",
@@ -397,6 +397,14 @@
     "release/NOTAS_0.17.3.md",
     "docs/superpowers/plans/2026-10-31-zoom-menu.md",
     "docs/superpowers/specs/2026-10-31-zoom-menu-design.md",
-    "docs/VERIFICACAO_0.17.3.md"
+    "docs/VERIFICACAO_0.17.3.md",
+    "common/auto_potion_native.h",
+    "tests/auto_potion_safe_cases.cpp",
+    "tests/auto_potion_native_cases.cpp",
+    "tests/auto_potion_arm_native.cpp",
+    "tests/test_auto_potion_arm.py",
+    "web/tests/auto-potion-native.test.mjs",
+    "release/NOTAS_0.17.4.md",
+    "docs/VERIFICACAO_0.17.4.md"
   ]
 }

@@ -4,6 +4,12 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.17.4 Beta — candidata
+
+- Auto-poção identifica corretamente vida e mana, exige item validado e usa a rotina original de consumo e recuperação gradual.
+- A Web não aciona a auto-poção enquanto a simulação estiver pausada em painéis; o atalho do jogador é restaurado após o uso.
+- Mana anteriormente excedente não é alterada automaticamente.
+
 ## 0.17.3 Beta — candidata
 
 - Amplia o menu principal no host Zoom e ajusta a posição dos cliques. Painéis sobrepostos e outras telas mantêm o quadro completo.

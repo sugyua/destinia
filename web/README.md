@@ -1,8 +1,8 @@
-# Destinia 0.17.3 Beta — fontes do navegador
+# Destinia 0.17.4 Beta — fontes do navegador
 
 Gravação só é confirmada após HTTP de sucesso e `ok: true`; aviso persistente informa falhas sem apagar os dados em memória. Respostas inválidas de saves não são aplicadas parcialmente. A confirmação é do servidor, sem prometer Google Drive ou PC/Web. O servidor estático da VPN não fornece /api/save: progresso ARM fica nesta aba; sidecars do navegador têm contratos próprios.
 
-Fontes0.17.2 e VPN no PC atualizadas, cópia das fontes e HTTP conferidos: http://100.108.92.19:8000/ . Site privadoCodex mantém0.13.0 conhecido, ferramenta indisponível e audiência preservada. Safari físico não foi executado nesta entrega. [Teste seguro de sync](tests/cloud-save.test.mjs): servidor efêmero e dados sintéticos; comando legado também seguro, sem arquivos pessoais.
+As fontes 0.17.4 incluem a candidata da auto-poção. A VPN no PC permanece na revisão 0.17.2 anteriormente conferida: http://100.108.92.19:8000/ . O Site privado mantém a revisão 0.13.0 conhecida, com audiência preservada. Safari físico não foi executado nesta candidata. [Teste seguro de sync](tests/cloud-save.test.mjs): servidor efêmero e dados sintéticos; comando legado também seguro, sem arquivos pessoais.
 
 **Atalhos:** F4 Catálogo, F5 Baú, F8 Bounties. Press/release sem repetição; F5 protegido em partida carregada/pausada. Tab preservado.
 

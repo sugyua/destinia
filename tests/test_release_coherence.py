@@ -59,5 +59,5 @@ class ReleaseCoherence(unittest.TestCase):
         for name in sorted(files):
             if not name.startswith('web/') or not name.endswith('.mjs'):continue
             for dep in re.findall(r"(?:from\s*|import\s*)['\"](\.[^'\"]+)['\"]",(ROOT/name).read_text(encoding='utf-8')):
-                child=(ROOT/name).parent.joinpath(dep).resolve()
+                child=(ROOT/name).parent.joinpath(dep.split("?",1)[0]).resolve()
                 self.assertIn(child.relative_to(ROOT).as_posix(),files,name+' imports '+dep)
