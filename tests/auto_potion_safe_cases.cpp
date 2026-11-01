@@ -25,7 +25,8 @@ int main(){
  Fixture disabled;disabled.potion.config.enabled=false;disabled.available[0]=true;if(disabled.run() || disabled.calls[0])return 12;
  Fixture cooldown;cooldown.available[0]=true;cooldown.potion.cooldownHpTimer=2;if(cooldown.run() || cooldown.calls[0])return 13;
  Fixture retry;if(retry.run() || retry.calls[0]!=1)return 14;
- for(int i=0;i<9;++i)if(retry.run() || retry.calls[0]!=1)return 15;
+ // Com cooldownFrames=60, sao necessarias 59 chamadas adicionais antes da proxima tentativa
+ for(int i=0;i<59;++i)if(retry.run() || retry.calls[0]!=1)return 15;
  if(retry.run() || retry.calls[0]!=2)return 16;
  Fixture notice;notice.available[0]=true;if(!notice.run() || notice.potion.noticeTimer!=60)return 17;
  std::vector<uint8_t> pixels(400*240*2);
