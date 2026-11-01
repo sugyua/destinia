@@ -977,6 +977,8 @@ static bool callFn(u32 addr, std::initializer_list<u32> args, u32* ret) {
   return codexDrainNativeMenu();
 }
 
+#include "../common/auto_potion_host.h"
+
 // ---------------------------------------------------------------- BMP (para o modo sem janela)
 static void rgb565ToRgba(const uint8_t* src, uint8_t* dst) {
   for (int i = 0; i < SCREEN_W * SCREEN_H; i++) {
@@ -1850,14 +1852,8 @@ static int runHost(int argc, char** argv) {
     if(preferences.uiScale==100?hudScale!=0:uiRenderer.statusDrawn){std::array<destinia::SkillHintRect,4> hints{};for(size_t i=0;i<hints.size();++i){int16_t r[4]{};if(rd(exportsMap.at("MMain")+0x11a+u32(i)*8,r,8))hints[i]={r[0],r[1],r[2],r[3]};}destinia::paintSkillHints(frameBuffer.data(),SCREEN_W,SCREEN_H,preferences,controls.lastInputDevice(),hints,preferences.uiScale);}
     if(!codexOpen)fcPaint(frameBuffer.data(),preferences.uiScale);
     bossRushUI.currentSlot = rd16(exportsMap.at("Game")+0x4886);
-    autoPotion.update(exportsMap.at("Game"), [](u32 a){return rd16(a);}, [](u32 a, uint16_t v){wr16(a, v);}, [&](int type){
-      auto readChecked=[](u32 a){uint16_t v=0;if(!rd(a,&v,2))throw std::runtime_error("Auto-pocao: leitura ARM invalida");return v;};
-      auto writeChecked=[](u32 a,uint16_t v){if(!wr(a,&v,2))throw std::runtime_error("Auto-pocao: escrita ARM invalida");};
-      if(!exportsMap.count("_pressedQuickSlot")) return false;
-      return destinia::useNativePotion(exportsMap.at("Game"),type,readChecked,writeChecked,
-        [&](){return callFn(exportsMap.at("_pressedQuickSlot"),{0});},
-        [&](uint16_t id,int t){return destinia::validPotionData(potionTable,id,t);});
-    }, playSoundId);
+    autoPotion.update(exportsMap.at("Game"), [](u32 a){return rd16(a);}, [](u32 a, uint16_t v){wr16(a, v);}, [&](int type){return hostUsePotion(type,potionTable);}, playSoundId);
+    if(executionFailed) break;
     reconcileMouse();
     if(int16_t(rd16(exportsMap.at("Game")+0x4854))==0 && rd16(exportsMap.at("Game")+0x48f2)>0) {
       int hX = int16_t(rd16(exportsMap.at("Game")+0x4890));

@@ -24,5 +24,19 @@ int main(){
  Fixture manaOnly;manaOnly.memory[manaOnly.g+0x48f8]=0;manaOnly.memory[manaOnly.g+0x48f2]=10;manaOnly.available[1]=true;if(!manaOnly.run() || manaOnly.calls[0] || manaOnly.calls[1]!=1)return 11;
  Fixture disabled;disabled.potion.config.enabled=false;disabled.available[0]=true;if(disabled.run() || disabled.calls[0])return 12;
  Fixture cooldown;cooldown.available[0]=true;cooldown.potion.cooldownHpTimer=2;if(cooldown.run() || cooldown.calls[0])return 13;
+ Fixture retry;if(retry.run() || retry.calls[0]!=1)return 14;
+ for(int i=0;i<9;++i)if(retry.run() || retry.calls[0]!=1)return 15;
+ if(retry.run() || retry.calls[0]!=2)return 16;
+ Fixture notice;notice.available[0]=true;if(!notice.run() || notice.potion.noticeTimer!=60)return 17;
+ std::vector<uint8_t> pixels(400*240*2);
+ destinia::originalPanelPainter=[](uint8_t*,int,int,int,int,int,int){return true;};
+ destinia::originalTextPainter=[](uint8_t*,int,int,int,int,const std::string&,uint16_t,int,int){return false;};
+ notice.potion.paintNotice(pixels.data(),400,240);
+ if(!std::any_of(pixels.begin(),pixels.end(),[](uint8_t b){return b;}))return 18;
+ Fixture stop;stop.memory[stop.g+0x48f2]=10;
+ auto stopRead=[&](uint32_t a){return stop.memory[a];};
+ auto stopWrite=[&](uint32_t a,uint16_t v){stop.memory[a]=v;};
+ auto stopUse=[&](int type){++stop.calls[type];stop.potion.config.enabled=false;return false;};
+ if(stop.potion.update(stop.g,stopRead,stopWrite,stopUse,{}) || stop.calls[0]!=1 || stop.calls[1]!=0)return 19;
  return 0;
 }

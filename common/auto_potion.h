@@ -52,14 +52,18 @@ public:
     if (int16_t(curHp) <= 0) return false;
     bool used = false;
     if (cooldownHpTimer == 0 && maxHp && curHp < maxHp &&
-        uint32_t(curHp) * 100 <= uint32_t(maxHp) * uint32_t(config.hpThresholdPercent) && useNative(0)) {
-      cooldownHpTimer = config.cooldownFrames; ++totalHpUsed; used = true;
-      lastNotice = "AUTO-POCAO: PV RECUPERANDO!"; noticeTimer = 60;
+        uint32_t(curHp) * 100 <= uint32_t(maxHp) * uint32_t(config.hpThresholdPercent)) {
+      if (useNative(0)) {
+        cooldownHpTimer = config.cooldownFrames; ++totalHpUsed; used = true;
+        lastNotice = "AUTO-POCAO: PV RECUPERANDO!"; noticeTimer = 60;
+      } else cooldownHpTimer = 10;
     }
-    if (cooldownMpTimer == 0 && maxMp && curMp < maxMp &&
-        uint32_t(curMp) * 100 <= uint32_t(maxMp) * uint32_t(config.mpThresholdPercent) && useNative(1)) {
-      cooldownMpTimer = config.cooldownFrames; ++totalMpUsed; used = true;
-      lastNotice = "AUTO-POCAO: PM RECUPERANDO!"; noticeTimer = 60;
+    if (config.enabled && cooldownMpTimer == 0 && maxMp && curMp < maxMp &&
+        uint32_t(curMp) * 100 <= uint32_t(maxMp) * uint32_t(config.mpThresholdPercent)) {
+      if (useNative(1)) {
+        cooldownMpTimer = config.cooldownFrames; ++totalMpUsed; used = true;
+        lastNotice = "AUTO-POCAO: PM RECUPERANDO!"; noticeTimer = 60;
+      } else cooldownMpTimer = 10;
     }
     return used;
   }

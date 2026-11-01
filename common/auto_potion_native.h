@@ -2,8 +2,17 @@
 #include <cstdint>
 #include <functional>
 #include <vector>
+#include <stdexcept>
 
 namespace destinia {
+class AutoPotionAccessError : public std::runtime_error {
+public:
+  explicit AutoPotionAccessError(const char* message) : std::runtime_error(message) {}
+};
+class AutoPotionRestoreError : public std::runtime_error {
+public:
+  AutoPotionRestoreError() : std::runtime_error("Auto-pocao: restauracao do atalho nao confirmada") {}
+};
 inline bool validPotionData(const std::vector<uint8_t>& table, uint16_t id, int type) {
   if (table.size()!=158u*166u || (type!=0 && type!=1) || id<type*5 || id>=type*5+5) return false;
   const size_t at=size_t(id)*166;
@@ -45,10 +54,15 @@ inline bool useNativePotion(uint32_t game, int type,
   };
   const uint32_t before=total(), slot=game+0x4a90+10*group;
   const uint16_t old=read(slot);
-  write(slot,uint16_t(0x4000|chosen));
+  auto restore=[&]() {
+    try { write(slot,old); if(read(slot)!=old) throw AutoPotionRestoreError(); }
+    catch(...) { throw AutoPotionRestoreError(); }
+  };
+  try { write(slot,uint16_t(0x4000|chosen)); }
+  catch(...) { restore(); throw; }
   bool ok=false;
-  try {ok=invoke();} catch (...) {write(slot,old);throw;}
-  write(slot,old);
+  try {ok=invoke();} catch (...) {restore();throw;}
+  restore();
   const uint32_t after=total();
   return ok && before!=UINT32_MAX && after!=UINT32_MAX && before==after+1;
 }

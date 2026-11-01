@@ -399,6 +399,7 @@
     "docs/superpowers/specs/2026-10-31-zoom-menu-design.md",
     "docs/VERIFICACAO_0.17.3.md",
     "common/auto_potion_native.h",
+    "common/auto_potion_host.h",
     "tests/auto_potion_safe_cases.cpp",
     "tests/auto_potion_native_cases.cpp",
     "tests/auto_potion_arm_native.cpp",
