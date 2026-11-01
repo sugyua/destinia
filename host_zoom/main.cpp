@@ -15,6 +15,8 @@ static destinia::DifficultyArmRuntime difficultyArm;
 static destinia::BossRushUI bossRushUI;
 static destinia::SurvivalHost survivalHost;
 static destinia::RefinementHost refinementHost;
+#include "../common/mana_guard.h"
+static destinia::ManaGuard manaGuard;
 #include "../common/auto_potion.h"
 #include "../common/auto_potion_native.h"
 static destinia::AutoPotionController autoPotion;
@@ -160,6 +162,12 @@ static bool wr(u32 a, const void* b, size_t n) { return n == 0 || uc_mem_write(u
 static u32 rd32(u32 a) { u32 v = 0; rd(a, &v, 4); return v; }
 static void wr32(u32 a, u32 v) { wr(a, &v, 4); }
 static void wr16(u32 a, uint16_t v) { wr(a, &v, 2); }
+static void resetManaOnLoad(uc_engine*,uint64_t,uint32_t,void*){manaGuard.reset();}
+static bool correctExcessMana(u32 game){
+ auto read=[](u32 a){uint16_t v=0;if(!rd(a,&v,2))throw std::runtime_error("Mana: leitura ARM invalida");return v;};
+ auto write=[](u32 a,uint16_t v){if(!wr(a,&v,2))throw std::runtime_error("Mana: escrita ARM invalida");};
+ return manaGuard.update(game,read,write);
+}
 
 // n-esimo argumento de uma chamada (AAPCS: r0-r3, depois pilha)
 static u32 arg(int n) { return n < 4 ? R(n) : rd32(regSP() + 4 * (n - 4)); }
@@ -1349,6 +1357,11 @@ static int runHost(int argc, char** argv) {
   for (const char* n : {"Java_game_destiniaeng_GameThread_initGame", "Java_game_destiniaeng_GameThread_jniRun", "Java_game_destiniaeng_GameThread_jniTouch"})
     if (!exportsMap.count(n)) { hostReport("Simbolo nao encontrado: %s\n", n); return 1; }
   if (traceViewport && !startTraceViewport()) return 1;
+  for(const char* name:{"GameCanvas_LoadGame","GameCanvas_init"}){
+    if(!exportsMap.count(name))throw std::runtime_error("Mana: rotina nativa ausente");
+    uc_hook manaHook{};const auto at=exportsMap.at(name)&~1u;
+    destinia::requireUnicorn(uc_hook_add(uc,&manaHook,UC_HOOK_CODE,(void*)resetManaOnLoad,nullptr,at,at),"uc_hook_add mana reset",at,1);
+  }
   // Do not create, recover or back up saves until essential emulator setup succeeded.
   fs::create_directories(saveDir);
   if(!saveLock.acquire(fs::path(saveDir)/".destinia.lock")) {
@@ -1775,9 +1788,9 @@ static int runHost(int argc, char** argv) {
         }
       }
       reconcileMouse();
-      if(inventoryOpen){controls.release();controls.pollSticks();updateAudioState(controls.focused,true);auto& panel=arrays[hScreen];inventoryPaint(panel.data());if(SDL_UpdateTexture(tex,nullptr,panel.data(),SCREEN_W*2)!=0){executionFailed=true;break;}SDL_Rect dst=gameViewport();SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);SDL_RenderCopy(ren,tex,nullptr,&dst);SDL_RenderPresent(ren);displayedMenuState=0;SDL_Delay(62);continue;}
+      if(inventoryOpen){manaGuard.reset();controls.release();controls.pollSticks();updateAudioState(controls.focused,true);auto& panel=arrays[hScreen];inventoryPaint(panel.data());if(SDL_UpdateTexture(tex,nullptr,panel.data(),SCREEN_W*2)!=0){executionFailed=true;break;}SDL_Rect dst=gameViewport();SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);SDL_RenderCopy(ren,tex,nullptr,&dst);SDL_RenderPresent(ren);displayedMenuState=0;SDL_Delay(62);continue;}
       if(codexOpen) {
-        controls.release();updateAudioState(controls.focused,true);
+        manaGuard.reset();controls.release();updateAudioState(controls.focused,true);
         auto panel=arrays[hScreen];nativeCodexPainter.paint(panel.data());
         if(SDL_UpdateTexture(tex,nullptr,panel.data(),SCREEN_W*2)!=0) {executionFailed=true;break;}
         SDL_Rect dst=gameViewport();SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);SDL_RenderCopy(ren,tex,nullptr,&dst);SDL_RenderPresent(ren);displayedMenuState=0;SDL_Delay(62);continue;
@@ -1790,7 +1803,7 @@ static int runHost(int argc, char** argv) {
         hostReport("[host] %s.\n",paused?"Pausado":"Retomado"); wasPaused=paused;
       }
       updateAudioState(controls.focused,paused);
-      if(paused) { SDL_Delay(16); continue; }
+      if(paused) { manaGuard.reset(); SDL_Delay(16); continue; }
     }
     if(executionFailed) break;
     // [SONDA] toque sintetico de teste (so com --autotap): pressiona no quadro N e solta 3 quadros depois
@@ -1817,6 +1830,9 @@ static int runHost(int argc, char** argv) {
       if (traceViewportRecording) stopTraceViewportRecording("run-error");
       break;
     }
+    const bool manaGameplayHud=preferences.uiScale==100?(getPlayerStatusHudScale(arrays[hScreen].data())!=0):uiRenderer.statusDrawn;
+    if(wait>0 && wait<1000 && manaGameplayHud){if(correctExcessMana(exportsMap.at("Game")))hostReport("[host] Mana acima do limite ajustada ao maximo atual.\n");}
+    else manaGuard.reset();
     if (pendingBuyCash) {
       controls.release();
       if(!finishOfflinePurchase()){executionFailed=true;break;}
