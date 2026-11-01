@@ -1416,14 +1416,17 @@ static int runHost(int argc, char** argv) {
 
   // [OK] jniTouch(env,obj, x, y, tipo): tipo 0=toque 1=solta 2=move 3=tecla de menu (Thumb decodificado)
   bool mouseDown=false; int lastTouchX=0,lastTouchY=0, mouseMenuState=0;
-  auto touch = [&](int x, int y, int type) {
-    if((int16_t(rd16(exportsMap.at("Game")+0x4854))==0 && rd16(exportsMap.at("Game")+0x48f2)>0 && !codexOpen && !bossRushUI.open && !weaponsCatalogHost.open && !sharedStashHost.open && !bountiesHost.open && !difficultyOpen) && questTrackerUI.handleTouch(x, y, type, SCREEN_W, SCREEN_H)) return;
-    if(sharedStashHost.open || bountiesHost.open || weaponsCatalogHost.open || difficultyMenuTouch(x,y,type) || codexMenuTouch(x,y,type)) return;
+  auto nativeTouch = [&](int x, int y, int type) {
     lastTouchX=x; lastTouchY=y;
     if(type!=2) destinia::sessionLog.write("ENTRADA toque x="+std::to_string(x)+" y="+std::to_string(y)+" tipo="+std::to_string(type));
     if(preferences.uiScale!=100&&type!=3){u32 state=0;if(!callFn(exportsMap.at("_getTouchState"),{},&state))return;auto point=uiRenderer.touchPoint(x,y,int(state));x=point.first;y=point.second;}
     bool ok = callFn(fnTouch, {ENV_OBJ, 0x10, (u32)x, (u32)y, (u32)type});
     if (probe && type != 2) { hostReport("[sonda] jniTouch(x=%d, y=%d, tipo=%d) -> %s\n", x, y, type, ok ? "ok" : "FALHOU"); probeState(type == 0 ? "logo apos PRESSIONAR" : type == 1 ? "logo apos SOLTAR" : "logo apos tecla"); }
+  };
+  auto touch = [&](int x, int y, int type) {
+    if((int16_t(rd16(exportsMap.at("Game")+0x4854))==0 && rd16(exportsMap.at("Game")+0x48f2)>0 && !codexOpen && !bossRushUI.open && !weaponsCatalogHost.open && !sharedStashHost.open && !bountiesHost.open && !difficultyOpen) && questTrackerUI.handleTouch(x, y, type, SCREEN_W, SCREEN_H)) return;
+    if(sharedStashHost.open || bountiesHost.open || weaponsCatalogHost.open || difficultyMenuTouch(x,y,type) || codexMenuTouch(x,y,type)) return;
+    nativeTouch(x,y,type);
   };
 
   SDL_Window* win = nullptr; SDL_Renderer* ren = nullptr; SDL_Texture* tex = nullptr; SDL_GameController* controller = nullptr;
@@ -1483,8 +1486,6 @@ static int runHost(int argc, char** argv) {
   } else fs::create_directories(outDir);
 
   auto zoomViewState = [&]() {
-    // Keep rendering and input in the same coordinate space until release.
-    if (mouseDown) return mouseMenuState;
     const bool overlay = diagnosticsPanel.visible() || attributeSheet.visible() || controllerBackHeld ||
         (autoPotion.noticeTimer > 0 && !autoPotion.lastNotice.empty()) ||
         inventoryOpen || codexOpen || difficultyOpen || bossRushUI.open ||
@@ -1530,6 +1531,12 @@ static int runHost(int argc, char** argv) {
     if(savePreferences)try{destinia::saveVirtualControlsPreference(settingsPath,"host_zoom",preferences.virtualControls);}
     catch(const std::exception& error){hostReport("[host] Visibilidade aplicada somente nesta sessao: %s\n",error.what());}
   });
+  auto reconcileMouse = [&]() {
+    if(mouseDown && zoomViewState()!=mouseMenuState) {
+      mouseDown=false;
+      nativeTouch(lastTouchX,lastTouchY,1);
+    }
+  };
   bool wasPaused=false;
   bool running = true; long frame = 0;
   auto profileWindowStart = std::chrono::steady_clock::now();
@@ -1764,6 +1771,7 @@ static int runHost(int argc, char** argv) {
             SDL_GetWindowSize(win,&windowWidth,&windowHeight);
         }
       }
+      reconcileMouse();
       if(inventoryOpen){controls.release();controls.pollSticks();updateAudioState(controls.focused,true);auto& panel=arrays[hScreen];inventoryPaint(panel.data());if(SDL_UpdateTexture(tex,nullptr,panel.data(),SCREEN_W*2)!=0){executionFailed=true;break;}SDL_Rect dst=gameViewport();SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);SDL_RenderCopy(ren,tex,nullptr,&dst);SDL_RenderPresent(ren);SDL_Delay(62);continue;}
       if(codexOpen) {
         controls.release();updateAudioState(controls.focused,true);
@@ -1842,6 +1850,7 @@ static int runHost(int argc, char** argv) {
     if(!codexOpen)fcPaint(frameBuffer.data(),preferences.uiScale);
     bossRushUI.currentSlot = rd16(exportsMap.at("Game")+0x4886);
     autoPotion.update(exportsMap.at("Game"), [](u32 a){return rd16(a);}, [](u32 a, uint16_t v){wr16(a, v);}, playSoundId);
+    reconcileMouse();
     if(int16_t(rd16(exportsMap.at("Game")+0x4854))==0 && rd16(exportsMap.at("Game")+0x48f2)>0) {
       int hX = int16_t(rd16(exportsMap.at("Game")+0x4890));
       int hY = int16_t(rd16(exportsMap.at("Game")+0x4892));
