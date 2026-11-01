@@ -39,7 +39,7 @@ public:
     int boxW = (screenWidth >= 800) ? 220 : 174;
     int boxH = minimized ? 20 : ((screenWidth >= 800) ? 52 : 52);
     int boxX = screenWidth - boxW - 8;
-    int boxY = (screenWidth >= 800) ? 10 : 6;
+    int boxY = (screenWidth >= 800) ? 68 : 6;
 
     if (x >= boxX && x <= boxX + boxW && y >= boxY && y <= boxY + boxH) {
       toggle();
@@ -54,7 +54,7 @@ public:
     int boxW = (width >= 800) ? 220 : 174;
     int boxH = minimized ? 20 : ((width >= 800) ? 52 : 52);
     int boxX = width - boxW - 8;
-    int boxY = (width >= 800) ? 10 : 6;
+    int boxY = (width >= 800) ? 68 : 6;
 
     if (paintOriginalPanel(pixels,width,height,boxX,boxY,boxW,boxH)) {
       paintOriginalText(pixels,width,height,boxX+7,boxY+4,minimized?"MISSAO [Q]":questTitle,0xffc0,boxW-14);
