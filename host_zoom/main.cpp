@@ -1368,7 +1368,7 @@ static int runHost(int argc, char** argv) {
   std::vector<uint8_t> potionTable;if(!readFile(assetsDir+"/item_en.gdt",potionTable))throw std::runtime_error("Tabela de loot ausente");lootQol.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,soPath,potionTable);lootQol.options=preferences.loot;
   try{bossMage.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,assetsDir,soPath,[]{return lootQol.autoTarget<0;});
     bossMage.menu.opener = [&]{ bossRushUI.openMenu(); };
-    bossRushUI.getGold = [&]() -> int { return int(callFn(exportsMap["getMyGold"], {})); };
+    bossRushUI.getGold = [&]() -> int { u32 gold=0; if(!callFn(exportsMap.at("getMyGold"), {}, &gold) || gold>0x7fffffffu) return 0; return int(gold); };
     bossRushUI.setGold = [&](int g) { callFn(exportsMap["setMyGold"], {uint32_t(g)}); };
     bossRushUI.teleport = [&](int a, int m, int e) { callFn(exportsMap["Map_loadData"], {uint32_t(a), uint32_t(m), uint32_t(e)}); };
     bossRushUI.calcHeroStat = [&]() -> bool { return callFn(exportsMap["GameUI_calcHeroStat"], {}); };
@@ -1852,11 +1852,7 @@ static int runHost(int argc, char** argv) {
     if(preferences.uiScale==100?hudScale!=0:uiRenderer.statusDrawn){std::array<destinia::SkillHintRect,4> hints{};for(size_t i=0;i<hints.size();++i){int16_t r[4]{};if(rd(exportsMap.at("MMain")+0x11a+u32(i)*8,r,8))hints[i]={r[0],r[1],r[2],r[3]};}destinia::paintSkillHints(frameBuffer.data(),SCREEN_W,SCREEN_H,preferences,controls.lastInputDevice(),hints,preferences.uiScale);}
     if(!codexOpen)fcPaint(frameBuffer.data(),preferences.uiScale);
     bossRushUI.currentSlot = rd16(exportsMap.at("Game")+0x4886);
-    try {
-      autoPotion.update(exportsMap.at("Game"), [](u32 a){return rd16(a);}, [](u32 a, uint16_t v){wr16(a, v);}, [&](int type){return hostUsePotion(type,potionTable);}, playSoundId);
-    } catch (const std::exception& e) {
-      hostReport("[auto-pocao] Falha de acesso ignorada: %s\n", e.what());
-    }
+    hostUpdatePotionFrame(exportsMap.at("Game"),[&](int type){return hostUsePotion(type,potionTable);});
     if(executionFailed) break;
     reconcileMouse();
     if(int16_t(rd16(exportsMap.at("Game")+0x4854))==0 && rd16(exportsMap.at("Game")+0x48f2)>0) {
@@ -1956,7 +1952,7 @@ static int runHost(int argc, char** argv) {
     try { destinia::saveWindowPreferences(settingsPath,"host_zoom",windowWidth,windowHeight,fullscreen); }
     catch(const std::exception& e) { hostReport("[host] Aviso: %s\n",e.what()); }
   }
-  if(destinia::lootEconomyReady){destinia::lootEconomy.lastTimestamp=int64_t(std::time(nullptr));try{destinia::saveLootEconomy(fs::path(saveDir),destinia::lootEconomy);}catch(...){}}
+  if(!executionFailed && destinia::lootEconomyReady){destinia::lootEconomy.lastTimestamp=int64_t(std::time(nullptr));try{destinia::saveLootEconomy(fs::path(saveDir),destinia::lootEconomy);}catch(...){}}
   return executionFailed ? 2 : 0;
 }
 
@@ -1976,8 +1972,7 @@ int main(int argc,char** argv) {
   catch(const std::exception& error) { hostReport("[host] ERRO: %s\n",error.what()); }
   for(auto& file:files) if(saveTransaction.close(file.second)!=0) { hostReport("[host] ERRO ao fechar arquivo pendente\n"); result=1; }
   files.clear(); filePaths.clear();
-  difficultyFlush();
-  codexFlush();
+  if(result==0 && !executionFailed){difficultyFlush();codexFlush();}
   saveLock.release();
   if(uc) uc_close(uc);
   destinia::sessionLog.write("FIM DA SESSAO codigo="+std::to_string(result),true);
