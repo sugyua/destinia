@@ -1,10 +1,10 @@
-# Instalação e compilação — Destinia 0.9.2 Beta
+# Instalação e compilação — Destinia 0.17.3 Beta
 
 > **Versão Beta: pode conter diversos bugs. Faça backup dos saves. Publicação aprovada pelo autor; campanha manual no Windows ainda pendente.**
 
 ## Abrir a versão atual sem arquivos BAT
 
-Para a **0.9.2 Beta**, baixe `destinia-0.9.2-beta-windows-x64.zip` na [página de Releases](https://github.com/sugyua/destinia/releases), extraia-o inteiro em uma pasta e deixe a pasta `game` original no mesmo nível de `VERSION`.
+Para a **0.17.3 Beta**, baixe `destinia-0.17.3-beta-windows-x64.zip` na [página de Releases](https://github.com/sugyua/destinia/releases), extraia-o inteiro em uma pasta e deixe a pasta `game` original no mesmo nível de `VERSION`.
 
 Na **raiz** da pasta extraída, execute `Destinia.exe` (normal) ou `Destinia Zoom.exe` (zoom). Eles encontram e iniciam os hosts em `host/build` e `host_zoom/build`, usando as DLLs MSYS2 UCRT64 instaladas separadamente. Os launchers verificam o arquivo VERSION e exibem mensagem se algum host ou dependência estiver ausente. Não inclua DLLs baixadas de fontes avulsas.
 
@@ -12,8 +12,8 @@ O ZIP de fontes contém `launcher/main.go` mas não contém nenhum EXE pronto. O
 
 ## Pacotes
 
-- `destinia-0.9.2-beta-windows-x64.zip`: **quatro EXEs Windows x64** — `Destinia.exe` e `Destinia Zoom.exe` na raiz, mais `destinia_host.exe` em cada subpasta —, BATs para suporte, configuradores e documentação. **Não precisa compilar.**
-- `destinia-0.9.2-beta-source.zip`: fontes (incluindo `launcher/main.go`), testes, compilador BAT e documentação para desenvolvimento; sem EXEs.
+- `destinia-0.17.3-beta-windows-x64.zip`: **quatro EXEs Windows x64** — `Destinia.exe` e `Destinia Zoom.exe` na raiz, mais `destinia_host.exe` em cada subpasta —, BATs para suporte, configuradores e documentação. **Não precisa compilar.**
+- `destinia-0.17.3-beta-source.zip`: fontes (incluindo `launcher/main.go`), testes, compilador BAT e documentação para desenvolvimento; sem EXEs.
 - Cada pacote acompanha `.sha256`. Não inclui dados do APK, saves pessoais, DLLs, instaladores ou ferramentas externas. A compilação da versão atual é verificada pelo workflow Windows do repositório; os resultados específicos constam da Release e de seus logs.
 
 ## Dependências de execução
