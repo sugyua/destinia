@@ -27,5 +27,18 @@ int main(int argc,char** argv){
   if(!controller.update(g,read,write,use,{}) || rd16(g+0x4342)!=2 || rd16(g+0x4a90)!=0x6123 || rd16(g+0x48f4)!=hp || rd16(g+0x48f2)!=mp || rd16(g+(type?0x7cea:0x7ce8))!=(type?5:50))return 3+type;
   if(controller.update(g,read,write,use,{}) || rd16(g+0x4342)!=2)return 5;
  }
+ // Two low resources and a non-default shortcut page must use and restore
+ // the correct slot independently in both original PC engines.
+ wr16(g+0x4a8c,1);wr16(g+0x4a9a,0x5a34);wr16(g+0x433c,2);
+ wr16(g+0x433e,1);wr16(g+0x4340,0);wr16(g+0x4342,3);
+ wr16(g+0x4344,1);wr16(g+0x4346,5);wr16(g+0x4348,4);
+ for(unsigned b=1;b<4;++b)wr16(g+0x433c+b*0x92,0);
+ wr16(g+0x4854,0);wr16(g+0x48f2,10);wr16(g+0x48f4,500);wr16(g+0x48f6,189);wr16(g+0x48f8,1000);wr32(g+0x7cd4,2000);
+ destinia::AutoPotionController both;
+ auto read=[](u32 a){return uint16_t(rd16(a));};auto write=[](u32 a,uint16_t v){wr16(a,v);};
+ auto use=[&](int wanted){return destinia::useNativePotion(g,wanted,read,write,[&](){return callFn(exportsMap.at("_pressedQuickSlot"),{0});},[&](uint16_t item,int t){return destinia::validPotionData(table,item,t);});};
+ const bool usedBoth=both.update(g,read,write,use,{});
+ if(!usedBoth || both.totalHpUsed!=1 || both.totalMpUsed!=1 || rd16(g+0x4342)!=2 || rd16(g+0x4348)!=3 || rd16(g+0x4a9a)!=0x5a34 || rd16(g+0x48f4)!=500 || rd16(g+0x48f2)!=10){std::fprintf(stderr,"both=%d hpused=%d mpused=%d hpqty=%u mpqty=%u slot=%x hp=%u mp=%u\n",usedBoth,both.totalHpUsed,both.totalMpUsed,rd16(g+0x4342),rd16(g+0x4348),rd16(g+0x4a9a),rd16(g+0x48f4),rd16(g+0x48f2));return 6;}
+ if(both.update(g,read,write,use,{}) || rd16(g+0x4342)!=2 || rd16(g+0x4348)!=3)return 7;
  std::puts("AUTO_POTION_ARM_OK");return 0;
 }
