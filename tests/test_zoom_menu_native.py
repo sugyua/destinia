@@ -21,3 +21,7 @@ class ZoomMenuNativeTests(unittest.TestCase):
             self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
             self.assertIn('jniTouch(x=205, y=125, tipo=0)', run.stderr)
             self.assertIn('jniTouch(x=205, y=125, tipo=1)', run.stderr)
+            down=run.stderr.index('SDL BAIXO botao=1 janela_px=(10,10) tamanho_janela=800x480 saida_render=800x480 -> jogo=(10,10)')
+            native_release=run.stderr.index('jniTouch(x=10, y=10, tipo=1)',down)
+            physical_release=run.stderr.index('SDL CIMA botao=1 janela_px=(10,10)',down)
+            self.assertLess(native_release,physical_release,'troca de escala deve encerrar o gesto antes da soltura fisica')

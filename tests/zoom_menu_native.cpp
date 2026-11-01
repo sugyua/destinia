@@ -7,9 +7,9 @@ static bool sawMenu = false, sawOverlay = false, sawNotice = false, sawHeld = fa
 static int checkedCopy(SDL_Renderer* r, SDL_Texture* t, const SDL_Rect* src, const SDL_Rect* dst) {
   ++frames;
   if (src && src->x == 200 && src->y == 120 && src->w == 400 && src->h == 240) sawMenu = true;
-  if (sawMenu && sent >= 4 && menuState() == 1 && src && src->x == 0 && src->y == 0 && src->w == 800 && src->h == 480) sawOverlay = true;
+  if (sawMenu && sent == 4 && menuState() == 1 && src && src->x == 0 && src->y == 0 && src->w == 800 && src->h == 480) sawOverlay = true;
   if (sawMenu && sent == 7 && menuState() == 1 && src && src->x == 0 && src->y == 0 && src->w == 800 && src->h == 480) sawNotice = true;
-  if (sawMenu && sent == 8 && frames >= 280 && src && src->x == 0 && src->w == 800) sawHeld = true;
+  if (sawMenu && sent == 8 && frames >= 280 && src && src->x == 200 && src->w == 400) sawHeld = true;
   if (sawMenu && sent == 9 && src && src->x == 200 && src->w == 400) sawRelease = true;
   if (sawMenu && sent == 10 && menuState() == 1 && src && src->x == 0 && src->y == 0 && src->w == 800 && src->h == 480) sawGuide = true;
   if (sawMenu && sent >= 13 && menuState() == 4 && src && src->x == 0 && src->y == 0 && src->w == 800 && src->h == 480) sawOptions = true;
