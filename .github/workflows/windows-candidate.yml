@@ -1,9 +1,16 @@
-name: Compilar e testar candidata Windows
+﻿name: Compilar e testar candidata Windows
 on:
   workflow_dispatch:
   push:
-    branches: [release/v0.6-beta]
+    branches:
+      - main
+      - 'fix/**'
+      - 'feat/**'
+      - 'release/**'
     paths: ['host/**', 'host_zoom/**', 'common/**', 'tests/**', 'scripts/**', 'VERSION', '.github/workflows/windows-candidate.yml']
+  pull_request:
+    branches: [main]
+    paths: ['host/**', 'host_zoom/**', 'common/**', 'tests/**', 'scripts/**', 'VERSION']
 concurrency:
   group: windows-candidate-${{ github.ref }}
   cancel-in-progress: true
@@ -28,6 +35,10 @@ jobs:
             mingw-w64-ucrt-x86_64-SDL2_mixer
             mingw-w64-ucrt-x86_64-unicorn
             mingw-w64-ucrt-x86_64-zlib
+      - name: Ler versao
+        id: ver
+        shell: bash
+        run: echo "version=$(cat VERSION | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
       - name: Compilar ambos com audio
         shell: msys2 {0}
         run: |
@@ -67,7 +78,7 @@ jobs:
         run: python scripts/package_windows.py --out dist --normal host/build/destinia_host.exe --zoom host_zoom/build/destinia_host.exe
       - uses: actions/upload-artifact@v4
         with:
-          name: destinia-0.6-beta-windows-x64
+          name: destinia-${{ steps.ver.outputs.version }}-windows-x64
           path: dist/*
           if-no-files-found: error
           retention-days: 30
