@@ -1416,7 +1416,7 @@ static int runHost(int argc, char** argv) {
   if (portugueseTextTest) hostReport("[host] traducao PT ativa: itens, equipamentos, habilidades, menus, Fabricacao e Missoes.\n");
 
   // [OK] jniTouch(env,obj, x, y, tipo): tipo 0=toque 1=solta 2=move 3=tecla de menu (Thumb decodificado)
-  bool mouseDown=false; int lastTouchX=0,lastTouchY=0, mouseMenuState=0;
+  bool mouseDown=false; int lastTouchX=0,lastTouchY=0, mouseMenuState=0, displayedMenuState=0;
   auto nativeTouch = [&](int x, int y, int type) {
     lastTouchX=x; lastTouchY=y;
     if(type!=2) destinia::sessionLog.write("ENTRADA toque x="+std::to_string(x)+" y="+std::to_string(y)+" tipo="+std::to_string(type));
@@ -1517,7 +1517,7 @@ static int runHost(int argc, char** argv) {
     const SDL_Rect vp = gameViewport();
     const bool inside = ox >= vp.x && ox < vp.x + vp.w && oy >= vp.y && oy < vp.y + vp.h;
     if (!inside && !clampOutside) return false;
-    const auto src = destinia::zoomMenuSource(mouseDown ? mouseMenuState : zoomViewState());
+    const auto src = destinia::zoomMenuSource(mouseDown ? mouseMenuState : displayedMenuState);
     x = destinia::zoomMapCoordinate(ox - vp.x, vp.w, src.x, src.w);
     y = destinia::zoomMapCoordinate(oy - vp.y, vp.h, src.y, src.h);
     return inside;
@@ -1761,7 +1761,7 @@ static int runHost(int argc, char** argv) {
             hostReport("[sonda] SDL %s botao=%d janela_px=(%d,%d) tamanho_janela=%dx%d saida_render=%dx%d -> jogo=(%d,%d) dentro=%d\n",
                        ev.type==SDL_MOUSEBUTTONDOWN?"BAIXO":"CIMA",(int)ev.button.button,wx,wy,ww,wh,ow,oh,x,y,(int)inside);
           }
-          if(ev.type==SDL_MOUSEBUTTONDOWN && ev.button.button==SDL_BUTTON_LEFT && inside) { controls.event(ev); mouseMenuState=zoomViewState(); mouseDown=true; touch(x,y,0); }
+          if(ev.type==SDL_MOUSEBUTTONDOWN && ev.button.button==SDL_BUTTON_LEFT && inside) { controls.event(ev); mouseMenuState=displayedMenuState; mouseDown=true; touch(x,y,0); }
           else if(ev.type==SDL_MOUSEBUTTONUP && ev.button.button==SDL_BUTTON_LEFT && mouseDown) { mouseDown=false; touch(x,y,1); }
           else if(ev.type==SDL_MOUSEMOTION && mouseDown) touch(x,y,2);
         } else {
@@ -1773,12 +1773,12 @@ static int runHost(int argc, char** argv) {
         }
       }
       reconcileMouse();
-      if(inventoryOpen){controls.release();controls.pollSticks();updateAudioState(controls.focused,true);auto& panel=arrays[hScreen];inventoryPaint(panel.data());if(SDL_UpdateTexture(tex,nullptr,panel.data(),SCREEN_W*2)!=0){executionFailed=true;break;}SDL_Rect dst=gameViewport();SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);SDL_RenderCopy(ren,tex,nullptr,&dst);SDL_RenderPresent(ren);SDL_Delay(62);continue;}
+      if(inventoryOpen){controls.release();controls.pollSticks();updateAudioState(controls.focused,true);auto& panel=arrays[hScreen];inventoryPaint(panel.data());if(SDL_UpdateTexture(tex,nullptr,panel.data(),SCREEN_W*2)!=0){executionFailed=true;break;}SDL_Rect dst=gameViewport();SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);SDL_RenderCopy(ren,tex,nullptr,&dst);SDL_RenderPresent(ren);displayedMenuState=0;SDL_Delay(62);continue;}
       if(codexOpen) {
         controls.release();updateAudioState(controls.focused,true);
         auto panel=arrays[hScreen];nativeCodexPainter.paint(panel.data());
         if(SDL_UpdateTexture(tex,nullptr,panel.data(),SCREEN_W*2)!=0) {executionFailed=true;break;}
-        SDL_Rect dst=gameViewport();SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);SDL_RenderCopy(ren,tex,nullptr,&dst);SDL_RenderPresent(ren);SDL_Delay(62);continue;
+        SDL_Rect dst=gameViewport();SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);SDL_RenderCopy(ren,tex,nullptr,&dst);SDL_RenderPresent(ren);displayedMenuState=0;SDL_Delay(62);continue;
       }
       controls.pollSticks(); fastForward=controls.accelerating;
       const bool paused=controls.paused();
@@ -1906,10 +1906,12 @@ static int runHost(int argc, char** argv) {
       SDL_Rect dst = gameViewport();
       SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);
       SDL_RenderClear(ren);
-      const auto source = destinia::zoomMenuSource(zoomViewState());
+      const int viewState = zoomViewState();
+      const auto source = destinia::zoomMenuSource(viewState);
       const SDL_Rect src{source.x, source.y, source.w, source.h};
       SDL_RenderCopy(ren, tex, &src, &dst);
       SDL_RenderPresent(ren);
+      displayedMenuState = viewState;
       renderMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - renderStart).count();
     }
     // [?] Java: se jniRun devolve 1000 (houve carga de arquivo) faz GC e dorme 100 ms; senao dorme (ms - tempo gasto).

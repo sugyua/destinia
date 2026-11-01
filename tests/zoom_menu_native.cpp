@@ -16,17 +16,17 @@ static int checkedCopy(SDL_Renderer* r, SDL_Texture* t, const SDL_Rect* src, con
   return SDL_RenderCopy(r,t,src,dst);
 }
 static int controlledEvent(SDL_Event* e) {
-  int threshold[] = {110,111,159,160,162,170,180,200,285,290,295,310,311,360};
+  int threshold[] = {110,111,159,159,162,170,180,200,285,290,295,310,311,360};
   if (sent >= 14 || frames < threshold[sent]) return 0;
   SDL_zero(*e);
   if (sent == 13) { e->type = SDL_QUIT; ++sent; return 1; }
-  if (sent == 3 || sent == 5) { e->type = SDL_KEYDOWN; e->key.keysym.sym = SDLK_F12; ++sent; return 1; }
+  if (sent == 2 || sent == 5) { e->type = SDL_KEYDOWN; e->key.keysym.sym = SDLK_F12; ++sent; return 1; }
   if (sent == 6) { e->type = SDL_KEYDOWN; e->key.keysym.sym = SDLK_h; ++sent; return 1; }
   if (sent == 9 || sent == 10) { setGuideHeld(sent == 9); ++sent; return 0; }
-  e->type = (sent == 0 || sent == 2 || sent == 7 || sent == 11) ? SDL_MOUSEBUTTONDOWN : SDL_MOUSEBUTTONUP;
+  e->type = (sent == 0 || sent == 3 || sent == 7 || sent == 11) ? SDL_MOUSEBUTTONDOWN : SDL_MOUSEBUTTONUP;
   e->button.button = SDL_BUTTON_LEFT;
-  e->button.x = (sent == 2 || sent == 4 || sent == 7 || sent == 8) ? 10 : 400;
-  e->button.y = sent < 2 ? 240 : ((sent == 2 || sent == 4 || sent == 7 || sent == 8) ? 10 : 274);
+  e->button.x = (sent == 3 || sent == 4 || sent == 7 || sent == 8) ? 10 : 400;
+  e->button.y = sent < 2 ? 240 : ((sent == 3 || sent == 4 || sent == 7 || sent == 8) ? 10 : 274);
   ++sent; return 1;
 }
 #define SDL_RenderCopy checkedCopy
