@@ -1,6 +1,7 @@
 # Verificação da candidata 0.17.4
 
 - O motor ARM original exibiu HP 303/505 e MP 202/404 com campos sintéticos distintos, confirmando os campos usados para os limites.
+- Na biblioteca ARM, `GameUI_calcHeroStat` copia o HP calculado de `Game+0x48c4` para `Game+0x48f8`; `GameUI_drawStatus` e `_pressedQuickSlot` consultam `0x48f8` para o máximo exibido e o limite de cura. A leitura da autopoção acompanha esses caminhos nativos, sem supor igualdade permanente entre os campos.
 - Testes ARM com saves temporários nos hosts normal e Zoom verificaram consumo do item correto, recuperação gradual e restauração do atalho. Casos de estoque vazio, item desconhecido, personagem morto e limites são cobertos separadamente.
 - Um cenário ARM adicional exercita HP e MP baixos simultaneamente com outra página de atalhos, verifica o consumo dos dois itens corretos e a restauração do atalho, e respeita o intervalo nativo entre usos.
 - Tentativas recusadas aguardam 10 quadros antes de nova tentativa. Falhas de acesso recuperáveis desativam a autopoção com aviso; a restauração do atalho é verificada, e falha não comprovada interrompe a sessão por segurança.

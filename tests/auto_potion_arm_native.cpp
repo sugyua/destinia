@@ -33,7 +33,7 @@ int main(int argc,char** argv){
  wr16(g+0x433e,1);wr16(g+0x4340,0);wr16(g+0x4342,3);
  wr16(g+0x4344,1);wr16(g+0x4346,5);wr16(g+0x4348,4);
  for(unsigned b=1;b<4;++b)wr16(g+0x433c+b*0x92,0);
- wr16(g+0x4854,0);wr16(g+0x48f2,10);wr16(g+0x48f4,500);wr16(g+0x48f6,189);wr16(g+0x48f8,1000);wr32(g+0x7cd4,2000);
+ wr16(g+0x4854,0);wr16(g+0x48f2,10);wr16(g+0x48f4,500);wr16(g+0x48f6,189);wr16(g+0x48f8,1000);wr16(g+0x48c4,200);wr32(g+0x7cd4,2000);
  destinia::AutoPotionController both;
  auto read=[](u32 a){return uint16_t(rd16(a));};auto write=[](u32 a,uint16_t v){wr16(a,v);};
  auto use=[&](int wanted){return hostUsePotion(wanted,table);};
