@@ -8,6 +8,10 @@ int main(){
   destinia::originalTextPainter=[&](uint8_t*,int,int,int,int,const std::string&,uint16_t,int,int){texts++;return true;};
   std::vector<uint8_t> frame(width*height*2);destinia::QuestTrackerUI q;q.paint(frame.data(),width,height);
   assert(panels==1&&texts>=3);assert(bx>=0&&by>=0&&bx+bw<=width&&by+bh<=height);
+  if(width==800){assert(by>=64);assert(!q.handleTouch(bx+bw-4,14,0,width,height));}
   assert(q.handleTouch(bx+bw-4,by+4,0,width,height));assert(q.minimized);
+  panels=0;texts=0;q.paint(frame.data(),width,height);assert(panels==1&&bh==20);
+  assert(!q.handleTouch(bx+bw-4,by+30,0,width,height));assert(q.minimized);
+  assert(q.handleTouch(bx+bw-4,by+4,0,width,height));assert(!q.minimized);
  }
 }

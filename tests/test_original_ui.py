@@ -19,7 +19,7 @@ class OriginalUiTests(unittest.TestCase):
 class OriginalPanelBindings(unittest.TestCase):
  def test_all_added_panel_bindings(self):
   with tempfile.TemporaryDirectory(prefix='destinia-panel-bindings-',ignore_cleanup_errors=True) as directory:
-   for fixture in ('original_quest_cases','original_secondary_cases','original_panel_bridge_cases','boss_mage_cases'):
+   for fixture in ('original_quest_cases','original_secondary_cases','original_panel_bridge_cases','boss_mage_cases','boss_reset_guard_cases'):
     exe=pathlib.Path(directory)/(fixture+'.exe')
     build=subprocess.run(['g++','-std=c++17','-O0',str(ROOT/'tests'/str(fixture+'.cpp')),'-o',str(exe),'-lz'],capture_output=True,text=True)
     self.assertEqual(build.returncode,0,build.stderr)

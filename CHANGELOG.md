@@ -8,9 +8,11 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 
 - Auto-poção dos hosts PC identifica corretamente vida e mana, exige item validado e usa a rotina original de consumo e recuperação gradual; o atalho do jogador é restaurado após o uso.
 - Web permanece na revisão anterior, sem alteração nesta candidata.
+- O Mago dos Bosses lê o saldo nativo de ouro, e o rastreador de missões no Zoom foi afastado da faixa superior; validação visual ainda pendente.
+- Falhas não recuperáveis de restauração do atalho interrompem a sessão.
 - Mana anteriormente excedente não é alterada automaticamente.
 
-## 0.17.3 Beta — candidata
+## 0.17.3 Beta — PC publicado
 
 - Amplia o menu principal no host Zoom e ajusta a posição dos cliques. Painéis sobrepostos e outras telas mantêm o quadro completo.
 - A câmera e o enquadramento do gameplay permanecem inalterados.

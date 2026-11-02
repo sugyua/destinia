@@ -54,5 +54,15 @@ int main(int argc,char** argv){
  autoPotion.update(g,read,write,failUse,{});
  exportsMap["_pressedQuickSlot"]=originalQuick;
  if(!executionFailed || autoPotion.config.enabled || attempted!=1 || rd16(g+0x4a9a)!=0x5a34)return 9;
+ executionFailed=false;fatal=false;autoPotion.config.enabled=true;autoPotion.cooldownHpTimer=autoPotion.cooldownMpTimer=0;
+ wr16(g+0x4854,0);wr16(g+0x48f4,500);wr16(g+0x48f8,1000);wr16(g+0x48f2,189);wr16(g+0x48f6,189);
+ bool restorePropagated=false;
+ try{hostUpdatePotionFrame(g,[](int)->bool{throw destinia::AutoPotionRestoreError();});}
+ catch(const destinia::AutoPotionRestoreError&){restorePropagated=true;}
+ if(!restorePropagated)return 11;
+ bool unexpectedPropagated=false;
+ try{hostUpdatePotionFrame(g,[](int)->bool{throw std::runtime_error("unexpected failure");});}
+ catch(const std::runtime_error&){unexpectedPropagated=true;}
+ if(!unexpectedPropagated)return 12;
  std::puts("AUTO_POTION_ARM_OK");return 0;
 }

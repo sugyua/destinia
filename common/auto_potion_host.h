@@ -19,3 +19,9 @@ static bool hostUsePotion(int type, const std::vector<uint8_t>& table) {
     return false;
   }
 }
+
+// Frame boundary shared by both hosts, also exercised by the native fault test.
+static void hostUpdatePotionFrame(u32 game,const std::function<bool(int)>& use){
+  // An unverified shortcut restore must reach the outer fatal boundary.
+  autoPotion.update(game,[](u32 a){return rd16(a);},[](u32 a,uint16_t v){wr16(a,v);},use,playSoundId);
+}
