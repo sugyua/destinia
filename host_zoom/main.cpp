@@ -1319,10 +1319,10 @@ static int runHost(int argc, char** argv) {
   wr32(GUARD, 0xA5C3F00D);
 
   if (!loadSo(soPath)) return 1;
-  if (!installNickRequirements()) { hostReport("[titulos] Biblioteca ou hook incompativel.\n"); return 1; }
   if(!destinia::installVirtualControls(uc,SO_BASE,soPath,preferences.virtualControls)) {
     hostReport("[host] Nao foi possivel ocultar controles: biblioteca ARM incompativel ou falha nos hooks.\n");return 1;
   }
+  if (!installNickRequirements()) { hostReport("[titulos] Biblioteca ou hook incompativel.\n"); return 1; }
   hostReport("[host] Controles virtuais durante gameplay: %s\n",preferences.virtualControls?"visiveis":"ocultos (teclado/controle e menus preservados)");
   uc_hook hk{}; destinia::requireUnicorn(uc_hook_add(uc, &hk, UC_HOOK_CODE, (void*)stubHook, nullptr, STUB_BASE, STUB_BASE + STUB_COUNT * 4 - 1), "uc_hook_add stubs", STUB_BASE, STUB_COUNT * 4);
   uc_hook hk2{}; destinia::requireUnicorn(uc_hook_add(uc, &hk2, UC_HOOK_CODE, (void*)stubHook, nullptr, MAGIC_RET, MAGIC_RET + 3), "uc_hook_add return", MAGIC_RET, 4);
