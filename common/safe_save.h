@@ -12,6 +12,9 @@ namespace destinia {
 // in tests without a failure switch in the distributed host.
 struct AtomicSaveOps {
   virtual ~AtomicSaveOps()=default;
+  virtual void removeJournal(const fs::path& path) const { fs::remove_all(path); }
+  virtual void afterCommitMarker(const fs::path&) const {}
+  virtual void afterInitializationDirectoryCreated(const fs::path&) const {}
   virtual void replace(const fs::path& source,const fs::path& target) const {
 #ifdef _WIN32
     if(!MoveFileExW(source.c_str(),target.c_str(),MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH))
@@ -24,13 +27,13 @@ struct AtomicSaveOps {
 class SaveTransaction {
   struct Entry {std::string name;bool existed=false,deleted=false;};
   struct Handle {size_t entry;bool writable;};
-  fs::path root,journal;
+  fs::path root,journal,committedJournal;
   std::vector<Entry> entries;
   std::vector<fs::path> removals;
   std::map<FILE*,Handle> handles;
   std::set<FILE*> abortedHandles;
   const AtomicSaveOps& ops;
-  bool active=false,failed=false,owned=false,committing=false;
+  bool active=false,failed=false,owned=false,committing=false,committed=false;
   static const AtomicSaveOps& defaults(){static AtomicSaveOps value;return value;}
   static bool validName(const std::string& value){
     return !value.empty() && value.size()<=240 && value[0]!='.' && value.find_first_of("/\\\r\n\t:")==std::string::npos && fs::path(value).filename()==fs::path(value);
@@ -64,16 +67,23 @@ class SaveTransaction {
   fs::path candidate(size_t n)const{return journal/"new"/std::to_string(n);}
   void ensureOwned(){
     if(owned)return;
-    if(fs::exists(journal))throw std::runtime_error("Journal pendente; recuperar antes de salvar.");
-    if(!fs::create_directory(journal))throw std::runtime_error("Falha criando pasta transacional.");
-    textFile(journal/"owner","DESTINIA_SAVE_TRANSACTION_1\n");owned=true;
-    fs::create_directory(journal/"new");fs::create_directory(journal/"old");
+    if(fs::exists(journal)||isLink(journal)||fs::exists(committedJournal)||isLink(committedJournal))throw std::runtime_error("Journal pendente; recuperar antes de salvar.");
+    // Build the ownership record and required subdirectories before
+    // publishing the journal name. An interruption during initialization can
+    // leave an isolated orphan, but cannot block recovery of the active saves.
+    auto initial=journal;initial+=".init-"+uniqueId();
+    if(!fs::create_directory(initial))throw std::runtime_error("Falha criando pasta transacional.");
+    ops.afterInitializationDirectoryCreated(initial);
+    textFile(initial/"owner","DESTINIA_SAVE_TRANSACTION_1\n");
+    if(!fs::create_directory(initial/"new")||!fs::create_directory(initial/"old"))throw std::runtime_error("Falha preparando pasta transacional.");
+    if(fs::exists(journal)||isLink(journal))throw std::runtime_error("Journal pendente; inicializacao preservada.");
+    fs::rename(initial,journal);owned=true;
   }
-  void validateOwned()const{
-    if(isLink(journal)||!fs::is_directory(journal)||readText(journal/"owner",64)!="DESTINIA_SAVE_TRANSACTION_1\n")throw std::runtime_error("Pasta transacional desconhecida; nenhum arquivo alterado.");
-    for(const auto& file:fs::recursive_directory_iterator(journal)){
+  void validateOwned(const fs::path& directory)const{
+    if(isLink(directory)||!fs::is_directory(directory)||readText(directory/"owner",64)!="DESTINIA_SAVE_TRANSACTION_1\n")throw std::runtime_error("Pasta transacional desconhecida; nenhum arquivo alterado.");
+    for(const auto& file:fs::recursive_directory_iterator(directory)){
       if(isLink(file.path()))throw std::runtime_error("Link em journal; recuperacao recusada.");
-      const auto relative=file.path().lexically_relative(journal);const std::string name=relative.generic_string();
+      const auto relative=file.path().lexically_relative(directory);const std::string name=relative.generic_string();
       if(relative.parent_path().empty()){
         if(name=="new"||name=="old"){if(!file.is_directory())throw std::runtime_error("Journal invalido.");}
         else if(name!="owner"&&name!="manifest"&&name!="manifest.tmp"&&name!="committed")throw std::runtime_error("Arquivo desconhecido em journal; preservado.");
@@ -83,7 +93,15 @@ class SaveTransaction {
       }
     }
   }
-  void cleanup(){if(fs::exists(journal)){validateOwned();fs::remove_all(journal);}owned=false;}
+  void cleanup(){if(fs::exists(journal)){validateOwned(journal);ops.removeJournal(journal);}owned=false;}
+  void promoteCommitted(){
+    validateOwned(journal);
+    if(fs::exists(committedJournal)||isLink(committedJournal))throw std::runtime_error("Journal concluido anterior pendente; preservado.");
+    fs::rename(journal,committedJournal);owned=false;
+  }
+  void cleanupCommitted(){
+    if(fs::exists(committedJournal)||isLink(committedJournal)){validateOwned(committedJournal);ops.removeJournal(committedJournal);}
+  }
   void abortHandles(){for(auto it=handles.begin();it!=handles.end();){if(it->second.writable){abortedHandles.insert(it->first);std::fclose(it->first);it=handles.erase(it);}else ++it;}}
 public:
   explicit SaveTransaction(const AtomicSaveOps& operations=defaults()):ops(operations){}
@@ -93,14 +111,19 @@ public:
     if(active||!handles.empty())throw std::runtime_error("Transacao ainda aberta.");
     root=fs::absolute(directory).lexically_normal();if(root==root.root_path()||isLink(root))throw std::runtime_error("Pasta de save invalida.");
     journal=root.parent_path()/(root.filename().string()+".transaction");
+    committedJournal=root.parent_path()/(root.filename().string()+".transaction-committed");
     fs::create_directories(root);
   }
   void recover(){
-    if(journal.empty()||!fs::exists(journal))return;
-    validateOwned();owned=true;committing=true;
+    if(journal.empty())return;
+    const bool pending=fs::exists(journal)||isLink(journal),finished=fs::exists(committedJournal)||isLink(committedJournal);
+    if(pending&&finished)throw std::runtime_error("Journals simultaneos; recuperacao recusada.");
+    if(finished){committing=true;cleanupCommitted();committing=false;return;}
+    if(!pending)return;
+    validateOwned(journal);owned=true;committing=true;
     if(fs::exists(journal/"committed")){
       if(readText(journal/"committed",8)!="OK\n")throw std::runtime_error("Marca transacional invalida.");
-      cleanup();committing=false;return;
+      promoteCommitted();cleanupCommitted();committing=false;return;
     }
     if(!fs::exists(journal/"manifest")){cleanup();committing=false;return;} // Never changed active files.
     std::istringstream in(readText(journal/"manifest"));std::string line;
@@ -126,7 +149,7 @@ public:
     }
     cleanup();committing=false;
   }
-  void begin(){if(active)throw std::runtime_error("Transacao ARM aninhada.");active=true;failed=false;entries.clear();removals.clear();}
+  void begin(){if(active)throw std::runtime_error("Transacao ARM aninhada.");active=true;failed=false;committed=false;entries.clear();removals.clear();}
   FILE* open(const fs::path& target,const std::string& mode){
     const auto path=fs::absolute(target).lexically_normal();
     if(root.empty()||path.parent_path()!=root||!validName(path.filename().string())||isLink(path)||(fs::exists(path)&&!fs::is_regular_file(path)))throw std::runtime_error("Caminho de save invalido.");
@@ -163,6 +186,7 @@ public:
     return 0;
   }
   const std::vector<fs::path>& committedRemovals()const{return removals;}
+  bool wasCommitted()const{return committed;}
   int close(FILE* file){
     if(abortedHandles.erase(file))return EOF; // Host handle table still references an aborted writer.
     auto it=handles.find(file);if(it==handles.end())return std::fclose(file);
@@ -177,6 +201,7 @@ public:
     const bool unclosed=std::any_of(handles.begin(),handles.end(),[](const auto&h){return h.second.writable;});
     if(!success||failed||unclosed){abortHandles();if(owned)cleanup();entries.clear();if(success)throw std::runtime_error("Escrita incompleta; save anterior preservado.");return;}
     if(entries.empty())return;
+    bool published=false;
     try{
       std::ostringstream manifest;manifest<<"DESTINIA_BATCH_1\n";
       for(size_t i=0;i<entries.size();++i){
@@ -192,10 +217,20 @@ public:
         if(entries[i].deleted)fs::remove(root/entries[i].name);
         else ops.replace(candidate(i),root/entries[i].name);
       }
-      textFile(journal/"committed","OK\n");cleanup();committing=false;
+      textFile(journal/"committed","OK\n");published=true;committed=true;
       for(const auto& entry:entries)if(entry.deleted)removals.push_back(root/entry.name);
+      ops.afterCommitMarker(journal);
+      promoteCommitted();cleanupCommitted();committing=false;
       entries.clear();
-    }catch(...){if(committing)recover();else cleanup();entries.clear();throw;}
+    }catch(...){
+      if(committing){
+        // A partially written marker is ambiguous; never guess its outcome.
+        if(!published&&fs::exists(journal/"committed")){entries.clear();throw;}
+        recover();
+        if(published){entries.clear();return;}
+      }else cleanup();
+      entries.clear();throw;
+    }
   }
 };
 class SaveCall {

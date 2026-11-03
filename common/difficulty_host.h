@@ -7,6 +7,9 @@ static bool difficultyReady=false,difficultyOpen=false,difficultyButton=false,di
 static int difficultySelected=0,difficultyRequest=-1,difficultyRequestSlot=-1;
 static std::set<std::pair<unsigned,unsigned>> difficultyKills;
 static std::unique_ptr<destinia::FileLock> difficultyRemovalLock;
+static std::unique_ptr<destinia::FileLock> titleRemovalLock;
+static std::unique_ptr<destinia::FileLock> survivalRemovalLock;
+static std::unique_ptr<destinia::FileLock> codexRemovalLock;
 static int difficultyRetry=0;
 static std::set<unsigned> difficultyRemovingSlots;
 static std::string difficultyStatus;
@@ -37,10 +40,45 @@ static void difficultyPrepareRemoval(const std::string& path){
  const int slot=difficultySaveSlot(path);if(slot<0)return;
  if(!difficultyReady)throw std::runtime_error("difficulty unavailable; deletion refused to preserve slot identity");
  if(!difficultyRemovalLock){difficultyRemovalLock=std::make_unique<destinia::FileLock>();if(!difficultyRemovalLock->acquire(fs::path(saveDir)/"progression-v1.lock")){difficultyRemovalLock.reset();throw std::runtime_error("progression busy");}}
+ if(!titleRemovalLock){titleRemovalLock=std::make_unique<destinia::FileLock>();if(!titleRemovalLock->acquire(fs::path(saveDir)/"titles-v1.lock")){titleRemovalLock.reset();throw std::runtime_error("titles busy");}}
+ if(!survivalRemovalLock){survivalRemovalLock=std::make_unique<destinia::FileLock>();if(!survivalRemovalLock->acquire(fs::path(saveDir)/"survival-v1.lock")){survivalRemovalLock.reset();throw std::runtime_error("survival busy");}}
+ if(!codexRemovalLock){codexRemovalLock=std::make_unique<destinia::FileLock>();if(!codexRemovalLock->acquire(fs::path(saveDir)/"codex-v1.lock")){codexRemovalLock.reset();throw std::runtime_error("codex busy");}}
+ if(!survivalHost.canDeleteCharacter())throw std::runtime_error("survival state changed or active; deletion refused");
  auto next=destinia::loadDifficulty(fs::path(saveDir),difficultyProgress.book.mode);difficultyRemovingSlots.insert(unsigned(slot));for(auto removed:difficultyRemovingSlots)next.erase(removed);destinia::stageDifficulty(saveTransaction,fs::path(saveDir),next);
+ const auto dir=fs::path(saveDir),titlesPath=dir/"titles-v1.txt";
+ if(destinia::isLink(titlesPath))throw std::runtime_error("titulos vinculados; exclusao recusada");
+ if(fs::exists(titlesPath)){
+  destinia::TitlesStore titles;if(!titles.load(dir))throw std::runtime_error("titulos invalidos; exclusao recusada");
+  for(auto removed:difficultyRemovingSlots)titles.eraseSlot(int(removed));
+  if(!titles.unchanged(dir))throw std::runtime_error("titulos mudaram; exclusao recusada");
+  const auto data=titles.encode();FILE* out=saveTransaction.open(titlesPath,"wb");if(!out)throw std::runtime_error("falha preparando titulos");
+  const bool wrote=std::fwrite(data.data(),1,data.size(),out)==data.size();const int closed=saveTransaction.close(out);
+  if(!wrote||closed!=0)throw std::runtime_error("titulos incompletos; exclusao recusada");
+ }else if(!bossRushUI.titlesStore.equippedTitles.empty()||!bossRushUI.titlesStore.unlockedTitles.empty()||!bossRushUI.titlesStore.exclusiveTitles.empty())throw std::runtime_error("titulos ausentes; exclusao recusada");
+ const auto survivalText=destinia::survival::readText(dir);
+ if(survivalText){
+  auto ledger=destinia::survival::decode(*survivalText);
+  for(auto removed:difficultyRemovingSlots)ledger.slots[removed]=destinia::survival::SlotProgress{};
+  const auto data=destinia::survival::encode(ledger);FILE* out=saveTransaction.open(destinia::survival::file(dir),"wb");
+  if(!out)throw std::runtime_error("falha preparando sobrevivencia");
+  const bool wrote=std::fwrite(data.data(),1,data.size(),out)==data.size();const int closed=saveTransaction.close(out);
+  if(!wrote||closed!=0)throw std::runtime_error("sobrevivencia incompleta; exclusao recusada");
+ }
+ const auto codexPath=dir/"codex-v1.txt";
+ if(destinia::isLink(codexPath))throw std::runtime_error("codex vinculado; exclusao recusada");
+ if(!codexAvailable||!codexWritable){if(fs::exists(codexPath)||!codex.entries.empty())throw std::runtime_error("codex indisponivel; exclusao recusada");}
+ else {
+  if(!codex.matchesBaseline(codexPath))throw std::runtime_error("codex mudou externamente; exclusao recusada");
+  if(fs::exists(codexPath)||!codex.entries.empty()){
+   auto next=codex;for(auto removed:difficultyRemovingSlots)next.erase(int(removed));
+   const auto data=next.encode();FILE* out=saveTransaction.open(codexPath,"wb");if(!out)throw std::runtime_error("falha preparando codex");
+   const bool wrote=std::fwrite(data.data(),1,data.size(),out)==data.size();const int closed=saveTransaction.close(out);
+   if(!wrote||closed!=0)throw std::runtime_error("codex incompleto; exclusao recusada");
+  }
+ }
 }
-static void difficultyEndCall(){difficultyRemovalLock.reset();difficultyRemovingSlots.clear();}
-static void difficultyFileRemoved(const std::string& path){const int slot=difficultySaveSlot(path);if(slot<0||!difficultyReady)return;difficultyProgress=destinia::loadDifficulty(fs::path(saveDir),difficultyProgress.book.mode);for(auto i=difficultyKills.begin();i!=difficultyKills.end();)if(i->first==unsigned(slot))i=difficultyKills.erase(i);else ++i;difficultyRemovalLock.reset();}
+static void difficultyEndCall(){codexRemovalLock.reset();survivalRemovalLock.reset();titleRemovalLock.reset();difficultyRemovalLock.reset();difficultyRemovingSlots.clear();}
+static void difficultyFileRemoved(const std::string& path){const int slot=difficultySaveSlot(path);if(slot<0||!difficultyReady)return;difficultyProgress=destinia::loadDifficulty(fs::path(saveDir),difficultyProgress.book.mode);bossRushUI.titlesStore.eraseSlot(slot);bossRushUI.titlesStore.load(fs::path(saveDir));survivalHost.reloadAfterCharacterDeletion();if(codexAvailable){for(auto removed:difficultyRemovingSlots){codex.erase(int(removed));codexFacts.erase(int(removed));}codex.adoptPersisted(fs::path(saveDir)/"codex-v1.txt");}for(auto i=difficultyKills.begin();i!=difficultyKills.end();)if(i->first==unsigned(slot))i=difficultyKills.erase(i);else ++i;difficultyRemovalLock.reset();}
 static void difficultyFlush(){
  if(!difficultyReady)return;if(difficultyRetry>0){--difficultyRetry;return;}
  if(difficultyKills.empty()&&difficultyRequest<0)return;

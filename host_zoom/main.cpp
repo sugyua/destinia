@@ -447,7 +447,11 @@ static std::string fmtPrintf(u32 fmtAddr, int ai) {
 }
 
 // ---------------------------------------------------------------- arquivos
+#ifdef DESTINIA_TEST_SAVE_OPS
+static destinia::SaveTransaction saveTransaction(testSaveOps);
+#else
 static destinia::SaveTransaction saveTransaction;
+#endif
 static std::map<u32, FILE*> files;
 static std::map<u32,std::string> filePaths;
 static u32 nextFile = 0x5000;
@@ -951,6 +955,7 @@ static void stubHook(uc_engine*, uint64_t address, uint32_t, void*) {
 }
 
 static bool codexDrainNativeMenu();
+static bool titleDrainNativeMenu();
 static bool callFn(u32 addr, std::initializer_list<u32> args, u32* ret) {
   struct DifficultyCallGuard{~DifficultyCallGuard(){difficultyEndCall();difficultyArm.endCall();}} difficultyGuard;
   destinia::SaveCall saveCall(saveTransaction);
@@ -971,13 +976,14 @@ static bool callFn(u32 addr, std::initializer_list<u32> args, u32* ret) {
   if (!hitMagic) { dumpState("tempo esgotado (a .so ficou presa num laco ou parou)"); executionFailed=true; destinia::sessionLog.write("ERRO de emulacao",true); return false; }
   if (ret) *ret = R(0);
   try {refinementHost.stage(saveTransaction);saveCall.commit();for(const auto& path:saveTransaction.committedRemovals())codexFileRemoved(path.string());}
-  catch(const std::exception& error) {hostReport("[host] Save nao publicado: %s\n",error.what());executionFailed=true;return false;}
+  catch(const std::exception& error) {hostReport(saveTransaction.wasCommitted()?"[host] Save concluido; limpeza pendente: %s\n":"[host] Falha na transacao de save: %s\n",error.what());executionFailed=true;return false;}
   if(!bossMage.error.empty()){hostReport("[mago] Erro ARM: %s\n",bossMage.error.c_str());executionFailed=true;return false;}
   bossMage.dispatch();
-  return codexDrainNativeMenu();
+  return codexDrainNativeMenu() && titleDrainNativeMenu();
 }
 
 #include "../common/auto_potion_host.h"
+#include "../common/nick_requirements_host.h"
 
 // ---------------------------------------------------------------- BMP (para o modo sem janela)
 static void rgb565ToRgba(const uint8_t* src, uint8_t* dst) {
@@ -1184,6 +1190,7 @@ static void difficultyNewMap();
 static void difficultyRespawn(u32 p);
 static void difficultyFileRemoved(const std::string& path);
 #include "../common/codex_host.h"
+#include "../common/title_menu_host.h"
 #include "../common/codex_ui.h"
 
 static void runtimeLogTick(long frame,double emulationMs) {
@@ -1315,6 +1322,7 @@ static int runHost(int argc, char** argv) {
   if(!destinia::installVirtualControls(uc,SO_BASE,soPath,preferences.virtualControls)) {
     hostReport("[host] Nao foi possivel ocultar controles: biblioteca ARM incompativel ou falha nos hooks.\n");return 1;
   }
+  if (!installNickRequirements()) { hostReport("[titulos] Biblioteca ou hook incompativel.\n"); return 1; }
   hostReport("[host] Controles virtuais durante gameplay: %s\n",preferences.virtualControls?"visiveis":"ocultos (teclado/controle e menus preservados)");
   uc_hook hk{}; destinia::requireUnicorn(uc_hook_add(uc, &hk, UC_HOOK_CODE, (void*)stubHook, nullptr, STUB_BASE, STUB_BASE + STUB_COUNT * 4 - 1), "uc_hook_add stubs", STUB_BASE, STUB_COUNT * 4);
   uc_hook hk2{}; destinia::requireUnicorn(uc_hook_add(uc, &hk2, UC_HOOK_CODE, (void*)stubHook, nullptr, MAGIC_RET, MAGIC_RET + 3), "uc_hook_add return", MAGIC_RET, 4);
@@ -1372,6 +1380,7 @@ static int runHost(int argc, char** argv) {
     bossRushUI.setGold = [&](int g) { callFn(exportsMap["setMyGold"], {uint32_t(g)}); };
     bossRushUI.teleport = [&](int a, int m, int e) { callFn(exportsMap["Map_loadData"], {uint32_t(a), uint32_t(m), uint32_t(e)}); };
     bossRushUI.calcHeroStat = [&]() -> bool { return callFn(exportsMap["GameUI_calcHeroStat"], {}); };
+    bossRushUI.equipTitle = [](destinia::TitleId id) { return titleSelectExtra(id); };
     bossRushUI.rd16 = [](u32 a) { return rd16(a); };
     bossRushUI.wr16 = [](u32 a, uint16_t v) { wr16(a, v); };
     bossRushUI.gameBase = exportsMap["Game"];
@@ -1397,6 +1406,7 @@ static int runHost(int argc, char** argv) {
   if (!callFn(fnInit, {ENV_OBJ, 0x10, hId, (u32)devId.size(), hModel, (u32)model.size(), SCREEN_W, SCREEN_H, 0})) return 2;
   if (traceViewport) traceViewportDimensions("after-init");
   installCodex();
+  if(!installTitleMenu()) { hostReport("[titulos] Entrada indisponivel.\n"); return 1; }
   installDifficulty();
   if(!difficultyReady){hostReport("[dificuldade ARM] Inicializacao recusada; progresso preservado.\n");return 1;}
   difficultyArm.install(uc,SO_BASE,exportsMap,soPath,[](unsigned slot){return difficultyProgress.current(slot);});
@@ -1406,6 +1416,12 @@ static int runHost(int argc, char** argv) {
   bossRushUI.survivalRows=[](){const auto slot=bossRushUI.currentSlot;const auto best=slot<10?survivalHost.arena.ledger.slots[slot].bestWave:0;const auto kills=slot<10?survivalHost.arena.ledger.slots[slot].totalKills:0;return std::vector<std::string>{"INICIAR ARENA - RECORDE "+std::to_string(best),"ENCERRAR / VOLTAR A CAMPANHA","REFINAR EQUIPADO "+std::to_string(refinementHost.selectedEquipment+1)+" "+refinementHost.suffix(refinementHost.selected()),"TROCAR EQUIPAMENTO ALVO",refinementHost.summary(),std::string("ULTIMO SUSPIRO: ")+(survivalHost.combat.enabled?"ATIVO":"DESATIVADO"),"ELIXIR: 20% MITIGACAO / 5 MIN", "RECORDE: "+std::to_string(best)+" ONDAS / "+std::to_string(kills)+" ABATES"};};
   bossRushUI.survivalAction=[](int row){try{if(row==0){if(survivalHost.start())bossRushUI.closeMenu();return survivalHost.message;}if(row==1){survivalHost.stop(true);survivalHost.credit();survivalHost.flush();return std::string("ARENA ENCERRADA");}if(row==2){if(survivalHost.arena.active)return std::string("ENCERRE A ARENA PARA REFINAR");refinementHost.upgrade();return refinementHost.message;}if(row==3){refinementHost.cycle();return refinementHost.message;}if(row==5){survivalHost.combat.enabled=!survivalHost.combat.enabled;return std::string("ULTIMO SUSPIRO ")+(survivalHost.combat.enabled?"ATIVADO":"DESATIVADO");}if(row==6){survivalHost.combat.activateElixir();return std::string("ELIXIR ATIVO POR 5 MINUTOS");}return std::string("SUCESSO 100% / SEM QUEBRA / MAX +15");}catch(const std::exception& e){return std::string(e.what());}};
   survivalHost.install(uc,SO_BASE,exportsMap,soPath,fs::path(saveDir),bossRushUI.titlesStore,refinementHost,[](u32 at,const std::vector<u32>& args){if(args.empty())return callFn(at,{});if(args.size()==1)return callFn(at,{args[0]});if(args.size()==3)return callFn(at,{args[0],args[1],args[2]});return false;});
+  if(codexAvailable&&codexWritable)survivalHost.bindCodex(&codex);
+  survivalHost.onFungusKilled=[](unsigned slot,uint64_t id){
+   if(!codexAvailable||!codexWritable||slot>=10)return;
+   const auto name=codex.names.find(1);if(name==codex.names.end()||name->second!="Fungus")return;
+   codex.select(int(slot));codex.observe((uint64_t(1)<<63)|id,1,true);
+  };
   } catch(const std::exception& e) { hostReport("[recursos 0.13] Arena/refino desativados: %s\n",e.what()); }
   installInventoryProtection();
   destinia::initLootEconomy(saveDir);
@@ -1427,6 +1443,7 @@ static int runHost(int argc, char** argv) {
     if (probe && type != 2) { hostReport("[sonda] jniTouch(x=%d, y=%d, tipo=%d) -> %s\n", x, y, type, ok ? "ok" : "FALHOU"); probeState(type == 0 ? "logo apos PRESSIONAR" : type == 1 ? "logo apos SOLTAR" : "logo apos tecla"); }
   };
   auto touch = [&](int x, int y, int type) {
+    if(titleMenuTouch(x,y,type,SCREEN_W,SCREEN_H,preferences.uiScale)) return;
     if((int16_t(rd16(exportsMap.at("Game")+0x4854))==0 && rd16(exportsMap.at("Game")+0x48f2)>0 && !codexOpen && !bossRushUI.open && !weaponsCatalogHost.open && !sharedStashHost.open && !bountiesHost.open && !difficultyOpen) && questTrackerUI.handleTouch(x, y, type, SCREEN_W, SCREEN_H)) return;
     if(sharedStashHost.open || bountiesHost.open || weaponsCatalogHost.open || difficultyMenuTouch(x,y,type) || codexMenuTouch(x,y,type)) return;
     nativeTouch(x,y,type);
@@ -1809,7 +1826,7 @@ static int runHost(int argc, char** argv) {
     inventoryBeginFrame();
     fcBeginFrame();
     uiRenderer.beginFrame();
-    const bool runSucceeded = callFn(fnRun, {ENV_OBJ, 0x10, hScreen, (u32)frame}, &wait);
+    bool runSucceeded=false;{TitleNativeFrameScope scope;runSucceeded=callFn(fnRun, {ENV_OBJ, 0x10, hScreen, (u32)frame}, &wait);}
     runMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - runStart).count();
     centerSmallMapCamera();
     traceViewportWriteFrameSummary(frame);
@@ -1867,7 +1884,9 @@ static int runHost(int argc, char** argv) {
     bossRushUI.paint(frameBuffer.data(), SCREEN_W, SCREEN_H);
     lootQol.paint(frameBuffer.data());
     inventoryPaint(frameBuffer.data());
-    nativeCodexPainter.paint(frameBuffer.data());
+    titleMenu.validate(int16_t(rd16(exportsMap.at("Game")+0x4854)),rd32(exportsMap.at("GameUI")+0x7c),rd16(exportsMap.at("Game")+0x4886));
+    nativeCodexPainter.paint(frameBuffer.data(),titleMenu.open);
+    destinia::paintTitleExtra(frameBuffer.data(),SCREEN_W,SCREEN_H,preferences.uiScale,titleMenu,bossRushUI.titlesStore,titleMenuMessage);
     difficultyPainter.paint(frameBuffer.data());
     weaponsCatalogHost.paint(frameBuffer.data(), SCREEN_W, SCREEN_H, rd16(exportsMap.at("Game")+0x4886), preferences.uiScale);
     sharedStashHost.paint(frameBuffer.data(), SCREEN_W, SCREEN_H, preferences.uiScale);
@@ -1972,7 +1991,7 @@ int main(int argc,char** argv) {
   catch(const std::exception& error) { hostReport("[host] ERRO: %s\n",error.what()); }
   for(auto& file:files) if(saveTransaction.close(file.second)!=0) { hostReport("[host] ERRO ao fechar arquivo pendente\n"); result=1; }
   files.clear(); filePaths.clear();
-  if(result==0 && !executionFailed){difficultyFlush();codexFlush();}
+  if(result==0 && !executionFailed){difficultyFlush();if(!codexFinalize())result=1;}
   saveLock.release();
   if(uc) uc_close(uc);
   destinia::sessionLog.write("FIM DA SESSAO codigo="+std::to_string(result),true);

@@ -11,6 +11,13 @@
 namespace destinia {
 inline const std::map<std::string, std::string>& portugueseText() {
   static const std::map<std::string, std::string> translations = {
+      {"Achieve Level %d", "Alcance o nivel %d."},
+      {"Complete %d sub-quests.", "Conclua %d missoes secundarias."},
+      {"Kill at least %d monsters.", "Derrote %d monstros."},
+      {"Obtain at least %d gold from hunting.", "Ganhe %d de ouro cacando."},
+      {"Craft at least %d times.", "Fabrique %d vezes."},
+      {"Reinforce at least %d times.", "Reforce %d vezes."},
+      {"Resurrect at least %d times.", "Ressuscite %d vezes."},
       {"Abyssal Hollow", "Abismo Profundo"},
       {"Ancient Ruins", "Ruinas Antigas"},
       {"Attila Highlands", "Terras Altas de Attila"},

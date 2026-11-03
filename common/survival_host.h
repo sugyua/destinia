@@ -15,10 +15,10 @@ class SurvivalHost {
  uc_engine* engine=nullptr;U base=0,game=0;fs::path directory;
  std::map<std::string,U> symbols;
  std::function<bool(U,const std::vector<U>&)> invoke;
- TitlesStore* titles=nullptr;RefinementHost* refinement=nullptr;
+ TitlesStore* titles=nullptr;RefinementHost* refinement=nullptr;Codex* arenaCodex=nullptr;
  std::optional<std::string> snapshot;
  std::map<U,uint64_t> instances;
- unsigned originalArea=0,originalMap=0,originalX=0,originalY=0,arenaMap=0,owner=10;
+ unsigned originalArea=0,originalMap=0,originalX=0,originalY=0,arenaMap=0,owner=10,pendingTitleOwner=10,pendingRewardOwner=10;
  uint64_t runSequence=0,identity=0;unsigned lastSecond=0;bool dirty=false,ownedMap=false;
  U random=0x13579bdf;
  template<class T>T read(U at)const{T v{};if(uc_mem_read(engine,at,&v,sizeof v)!=UC_ERR_OK)throw std::runtime_error("Sobrevivencia: leitura ARM invalida");return v;}
@@ -41,8 +41,22 @@ class SurvivalHost {
    set(UC_ARM_REG_R8,combat.hit(read<uint16_t>(game+0x48f4),read<uint16_t>(game+0x48c4),reg(UC_ARM_REG_R8),random%10000));return;
   }
   if(pc==(symbols.at("checkQuestMonster")&~1u)&&arena.active){const U monster=reg(UC_ARM_REG_R0);if(instances.count(monster)){set(UC_ARM_REG_R0,0);set(UC_ARM_REG_PC,reg(UC_ARM_REG_LR));return;}}
-  if(pc==base+0x25392&&titles&&titles->isUnlocked(s,TitleId::MestreDaSobrevivencia)&&titles->getEquipped(s)==TitleId::MestreDaSobrevivencia){
-   for(U index=0;index<13;++index){if(index==4)continue;const U at=game+0x48ba+index*2;const auto value=read<uint16_t>(at);const auto scaled=uint16_t(std::min<uint64_t>(32767,uint64_t(value)*220/100));write<uint16_t>(at,scaled);if(index<4){const U delta=game+0x48d4+index*2;write<uint16_t>(delta,uint16_t(read<uint16_t>(delta)+scaled-value));}}
+  if(pc==base+0x25392&&titles){
+   const auto id=titles->getEquipped(s);if(!titles->isUnlocked(s,id))return;
+   if(id==TitleId::MestreDaSobrevivencia){
+    for(U index=0;index<13;++index){if(index==4)continue;const U at=game+0x48ba+index*2;const auto value=read<uint16_t>(at);const auto scaled=uint16_t(std::min<uint64_t>(32767,uint64_t(value)*220/100));write<uint16_t>(at,scaled);if(index<4){const U delta=game+0x48d4+index*2;write<uint16_t>(delta,uint16_t(read<uint16_t>(delta)+scaled-value));}}
+   }else if(titles->isExclusive(s)){
+    const auto* def=findTitle(id);if(!def)return;
+    const int percentages[]={def->hpBonusPct,def->mpBonusPct,def->atkBonusPct,def->defBonusPct};
+    for(U i=0;i<4;++i){const U at=game+0x48c4+i*2;const auto value=read<uint16_t>(at);const auto scaled=uint16_t(std::min<uint64_t>(32767,uint64_t(value)*(100+percentages[i])/100));write<uint16_t>(at,scaled);}
+    if(def->critChanceTenths){const U at=game+0x48d0;write<uint16_t>(at,uint16_t(std::min<unsigned>(1000,unsigned(read<uint16_t>(at))+unsigned(def->critChanceTenths))));}
+   }
+   if(titles->isExclusive(s)&&id!=TitleId::Nenhum){
+    const auto hp=read<uint16_t>(game+0x48c4),mp=read<uint16_t>(game+0x48c6);
+    write<uint16_t>(game+0x48f8,hp);write<uint16_t>(game+0x48f6,mp);
+    if(read<uint16_t>(game+0x48f4)>hp)write<uint16_t>(game+0x48f4,hp);
+    if(read<uint16_t>(game+0x48f2)>mp)write<uint16_t>(game+0x48f2,mp);
+   }
   }
  }
  std::vector<std::pair<int,int>> positions(unsigned count){
@@ -78,10 +92,22 @@ class SurvivalHost {
   }
   dirty=true;message="ONDA "+std::to_string(plan.number);
  }
- void unlock(){if(owner<10&&arena.ledger.slots[owner].titleUnlocked&&titles&&!titles->isUnlocked(owner,TitleId::MestreDaSobrevivencia)){titles->unlock(owner,TitleId::MestreDaSobrevivencia);if(!titles->save(directory))throw std::runtime_error("Sobrevivencia: titulo nao salvo");}}
 public:
  survival::Arena arena;survival::CombatState combat;std::string error,message;
+ std::function<void(unsigned,uint64_t)> onFungusKilled;
+ void bindCodex(Codex* value){arenaCodex=value;}
+ bool rewardPending()const{return pendingRewardOwner<10;}
  bool ready=false;
+ // Slot deletion must not discard a live arena or progress not yet persisted.
+ bool canDeleteCharacter() const {
+  return !arena.active&&!dirty&&pendingRewardOwner>=10&&(!ready||survival::readText(directory)==snapshot);
+ }
+ void reloadAfterCharacterDeletion() {
+  if(!ready)return;
+  const auto fresh=survival::readText(directory);
+  auto ledger=fresh?survival::decode(*fresh):survival::Ledger{};
+  arena.ledger=std::move(ledger);snapshot=fresh;
+ }
  void install(uc_engine* e,U soBase,const std::map<std::string,U>& exports,const std::string& library,const fs::path& dir,TitlesStore& titleStore,RefinementHost& refiner,std::function<bool(U,const std::vector<U>&)> caller){
   std::ifstream in(library,std::ios::binary);uint64_t hash=14695981039346656037ull;char b;while(in.get(b))hash=(hash^uint8_t(b))*1099511628211ull;
   if(!in.eof()||hash!=0x74b2547839b88777ull||(exports.at("Mon_initMonster")&~1u)!=soBase+0x1740c||(exports.at("GameUI_calcHeroStat")&~1u)!=soBase+0x24fb0)throw std::runtime_error("Sobrevivencia: ABI incompativel");
@@ -91,7 +117,9 @@ public:
   ready=true;
  }
  bool start(){
-  if(!ready||arena.active||!error.empty())return false;const auto s=slot();
+  if(!ready||arena.active||!error.empty())return false;
+  if(pendingRewardOwner<10){message="RECOMPENSA PENDENTE";return false;}
+  const auto s=slot();
   if(s>=10||!alive()||read<int16_t>(game+0x4854)!=0){message="ENTRE NO JOGO PRIMEIRO";return false;}
   originalArea=read<uint16_t>(game+0x4870);originalMap=read<uint16_t>(game+0x4872);originalX=read<uint16_t>(game+0x4890);originalY=read<uint16_t>(game+0x4892);owner=s;ownedMap=true;
   try{if(!arena.start(s,++runSequence,1))return false;spawn();flush();return true;}catch(const std::exception&e){message=e.what();stop(true);return false;}
@@ -105,7 +133,11 @@ public:
  void tick(unsigned ms){
   if(!ready)return;
   try{
-   const auto s=slot();if(s!=owner&&!arena.active){owner=s;combat.reset();}
+   const auto s=slot();
+   // An earned title remains tied to the character that earned it even if
+   // the arena was exited while its transaction was blocked.
+   if(pendingRewardOwner<10&&!arena.active){if(s!=pendingRewardOwner||!credit())return;}
+   if(s!=owner&&!arena.active){owner=s;combat.reset();}
    if(arena.active&&(s!=owner||map()!=arenaMap||!alive())){stop(s==owner&&map()==arenaMap);flush();return;}
    if(read<int16_t>(game+0x4854)!=0)return;
    combat.tick(ms);const auto oldBestTime=arena.slot>=0?arena.ledger.slots[arena.slot].bestTimeSeconds:0;arena.tick(ms);if(arena.slot>=0&&arena.ledger.slots[arena.slot].bestTimeSeconds!=oldBestTime)dirty=true;
@@ -113,16 +145,37 @@ public:
    if(arena.active){
     if(s!=owner||map()!=arenaMap||!alive()){stop(false);flush();return;}
 
-    for(auto entry:instances)if(read<int32_t>(entry.first+0x20)<=0&&arena.observeKill(arena.runId,entry.second,arenaMap,int(s)))dirty=true;
-    if(arena.clearedWave()){credit();if(arena.beginNextWave()){spawn();unlock();}else stop(true);}
+    for(auto entry:instances)if(read<int32_t>(entry.first+0x20)<=0&&arena.observeKill(arena.runId,entry.second,arenaMap,int(s))){
+     dirty=true;if(onFungusKilled&&read<uint16_t>(entry.first+8)==1)onFungusKilled(s,entry.second);
+    }
+    if(arena.clearedWave()){
+     pendingRewardOwner=owner;
+     if(arena.currentWave>=20&&titles&&!titles->isUnlocked(int(owner),TitleId::MestreDaSobrevivencia))pendingTitleOwner=owner;
+     if(!credit())return;if(arena.beginNextWave()){spawn();}else stop(true);
+    }
 
    }flush();
   }catch(const std::exception&e){error=e.what();message=error;try{stop(true);}catch(...){}ready=false;}
  }
  bool credit(){
-  if(!refinement||owner>=10)return false;
+  if(!refinement||owner>=10||slot()!=owner)return false;
   auto nextArena=arena;const auto reward=nextArena.takePending(int(owner));
-  if(!reward.gold&&!reward.cash&&!reward.crystals&&!reward.pure&&!reward.abyssal)return true;
+  if(!reward.gold&&!reward.cash&&!reward.crystals&&!reward.pure&&!reward.abyssal&&pendingTitleOwner>=10){pendingRewardOwner=10;return true;}
+  // Only an actually completed wave in this run can earn the title. Old
+  // ledgers may belong to a deleted character that once occupied this slot.
+  const bool grant=pendingTitleOwner==owner&&titles&&!titles->isUnlocked(int(owner),TitleId::MestreDaSobrevivencia);
+  FileLock titleLock;
+  if(grant&&!titleLock.acquire(directory/"titles-v1.lock")){message="TITULOS OCUPADOS";return false;}
+  auto nextTitles=grant?*titles:TitlesStore{};
+  if(grant){if(!nextTitles.unchanged(directory)){message="TITULOS ALTERADOS";return false;}nextTitles.unlock(int(owner),TitleId::MestreDaSobrevivencia);}
+  FileLock survivalLock;
+  if(!survivalLock.acquire(directory/"survival-v1.lock")){message="SOBREVIVENCIA OCUPADA";return false;}
+  const bool saveCodex=arenaCodex&&arenaCodex->dirty;FileLock codexLock;std::string codexText;
+  if(saveCodex){
+   if(!codexLock.acquire(directory/"codex-v1.lock")){message="CODEX OCUPADO";return false;}
+   if(!arenaCodex->matchesBaseline(directory/"codex-v1.txt")){message="CODEX ALTERADO";return false;}
+   codexText=arenaCodex->encode();
+  }
   auto next=refinement->store;
   if(!next.addCrystals(owner,reward.crystals,0)||!next.addCrystals(owner,reward.pure,1)||!next.addCrystals(owner,reward.abyssal,2))return false;
   const U gold=call("getMyGold"),cash=call("getMyCash");
@@ -134,15 +187,31 @@ public:
   for(size_t i=0;i<4;++i)live[i]=read<uint16_t>(game+offsets[i]);
   if(ownedMap){const std::array<U,4> original{originalArea,originalMap,originalX,originalY};for(size_t i=0;i<4;++i)write<uint16_t>(game+offsets[i],uint16_t(original[i]));}
   const bool okay=refinement->commit(next,[&](SaveTransaction& tx){
+   if(grant){
+    if(!titles->unchanged(directory))throw std::runtime_error("Sobrevivencia: titulos mudaram externamente");
+    const auto titleText=nextTitles.encode();FILE* titleOut=tx.open(directory/"titles-v1.txt","wb");
+    if(!titleOut)throw std::runtime_error("Sobrevivencia: falha preparando titulo");
+    const bool titleWrote=std::fwrite(titleText.data(),1,titleText.size(),titleOut)==titleText.size();const int titleClosed=tx.close(titleOut);
+    if(!titleWrote||titleClosed)throw std::runtime_error("Sobrevivencia: titulo incompleto");
+   }
+   if(saveCodex){
+    if(!arenaCodex->matchesBaseline(directory/"codex-v1.txt")||arenaCodex->encode()!=codexText)throw std::runtime_error("Sobrevivencia: codex mudou externamente");
+    FILE* out=tx.open(directory/"codex-v1.txt","wb");if(!out)throw std::runtime_error("Sobrevivencia: falha preparando codex");
+    const bool wrote=std::fwrite(codexText.data(),1,codexText.size(),out)==codexText.size();const int closed=tx.close(out);
+    if(!wrote||closed)throw std::runtime_error("Sobrevivencia: codex incompleto");
+   }
    if(survival::readText(directory)!=snapshot)throw std::runtime_error("Sobrevivencia: sidecar mudou externamente");
    FILE* out=tx.open(directory/survival::SidecarName,"wb");if(!out)throw std::runtime_error("Sobrevivencia: falha preparando premio");
    const bool wrote=std::fwrite(text.data(),1,text.size(),out)==text.size();const int closed=tx.close(out);if(!wrote||closed)throw std::runtime_error("Sobrevivencia: premio incompleto");
   });
   for(size_t i=0;i<4;++i)write<uint16_t>(game+offsets[i],live[i]);
   if(!okay){call("setMyGold",{gold});call("setMyCash",{cash});message=refinement->message;return false;}
-  arena.ledger=nextArena.ledger;snapshot=text;dirty=false;return true;
+  arena.ledger=nextArena.ledger;snapshot=text;dirty=false;
+  if(grant){if(!nextTitles.load(directory))throw std::runtime_error("Sobrevivencia: titulo salvo mas recarga falhou");*titles=std::move(nextTitles);}
+  if(saveCodex)arenaCodex->adoptPersisted(directory/"codex-v1.txt");
+  pendingTitleOwner=10;pendingRewardOwner=10;return true;
  }
- void flush(){if(!dirty||!ready)return;survival::save(directory,arena.ledger,AtomicSaveOps{},snapshot);snapshot=survival::encode(arena.ledger);dirty=false;unlock();}
+ void flush(){if(!dirty||!ready||pendingRewardOwner<10)return;survival::save(directory,arena.ledger,AtomicSaveOps{},snapshot);snapshot=survival::encode(arena.ledger);dirty=false;}
  void paint(uint8_t* pixels,int w,int h)const{
   if(!ready||!pixels)return;auto s=slot();if(s>=10)return;
   if(arena.active){paintOverlayText(pixels,w,h,5,36,"ONDA "+std::to_string(arena.currentWave)+"  INIMIGOS RESTANTES "+std::to_string(arena.remaining),0xffc0);}

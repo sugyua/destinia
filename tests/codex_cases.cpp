@@ -3,6 +3,12 @@
 #include <cassert>
 #include <filesystem>
 #include <fstream>
+struct CollisionOps : destinia::CodexSaveOps {
+ std::filesystem::path collision;
+ explicit CollisionOps(std::filesystem::path p):collision(std::move(p)){}
+ std::filesystem::path temporary(const std::filesystem::path&) const override{return collision;}
+};
+static std::string fileText(const std::filesystem::path& p){std::ifstream in(p,std::ios::binary);return {std::istreambuf_iterator<char>(in),{}};}
 int main(int argc,char** argv) {
   assert(argc==2); std::filesystem::path root=argv[1];std::filesystem::create_directories(root);
   destinia::Codex book;book.names[1]="Fungus";book.names[4]="Scorpion";
@@ -43,4 +49,26 @@ int main(int argc,char** argv) {
   try { loaded.load(root/"bad.txt");assert(false); }catch(const std::exception&){}
   assert(loaded.entries[1][4].kills==1);
   book.save(root/"codex-v1.txt");assert(std::filesystem::is_regular_file(root/"codex-v1.txt"));
+  destinia::FileLock held;assert(held.acquire(root/"codex-v1.lock"));book.select(0);book.observe(900,1,true);
+  bool denied=false;try{book.save(root/"codex-v1.txt");}catch(const destinia::CodexBusyError&){denied=true;}
+  assert(denied&&book.dirty);destinia::Codex still;still.names=book.names;still.load(root/"codex-v1.txt");assert(still.entries[0][1].kills==3);
+  held.release();book.save(root/"codex-v1.txt");assert(!book.dirty);still.load(root/"codex-v1.txt");assert(still.entries[0][1].kills==4);
+  const auto collision=root/"personal.tmp";std::ofstream(collision)<<"PERSONAL";const auto before=fileText(root/"codex-v1.txt");
+  book.observe(901,1,true);CollisionOps ops(collision);bool refused=false;
+  try{book.save(root/"codex-v1.txt",ops);}catch(const std::exception&){refused=true;}
+  assert(refused&&book.dirty&&fileText(collision)=="PERSONAL"&&fileText(root/"codex-v1.txt")==before);
+  book.save(root/"codex-v1.txt");assert(!book.dirty);
+  // A cooperating writer may have advanced a different slot since this
+  // instance loaded; a stale snapshot must not overwrite that progress.
+  destinia::Codex concurrent;concurrent.names=book.names;concurrent.load(root/"codex-v1.txt");concurrent.select(1);concurrent.observe(777,4,true);concurrent.save(root/"codex-v1.txt");
+  const auto newer=fileText(root/"codex-v1.txt");book.observe(903,1,true);bool stale=false;
+  try{book.save(root/"codex-v1.txt");}catch(const std::exception&){stale=true;}
+  assert(stale&&book.dirty&&fileText(root/"codex-v1.txt")==newer);
+  const auto recovery=book.saveRecovery(root);assert(fileText(recovery)==book.encode()&&fileText(root/"codex-v1.txt")==newer&&book.dirty);
+  // An invalid lock path is an access error, not a transient lock held by a
+  // cooperating writer. Keep the directory and retain unsaved progress.
+  std::filesystem::remove(root/"codex-v1.lock");std::filesystem::create_directory(root/"codex-v1.lock");
+  book.observe(902,1,true);bool accessError=false,misclassifiedBusy=false;
+  try{book.save(root/"codex-v1.txt");}catch(const destinia::CodexBusyError&){misclassifiedBusy=true;}catch(const std::exception&){accessError=true;}
+  assert(accessError&&!misclassifiedBusy&&book.dirty&&std::filesystem::is_directory(root/"codex-v1.lock"));
 }
