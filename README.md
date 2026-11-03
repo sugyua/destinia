@@ -1,8 +1,8 @@
-# Destinia 0.17.4 Beta
+# Destinia 0.17.5 Beta
 
 Destinia é um projeto para jogar no PC usando os dados originais do jogo Android, com melhorias de interface, acessibilidade e recursos opcionais. A versão normal e o Zoom compartilham o mesmo progresso configurado.
 
-**[Baixar a versão 0.17.4 Beta para Windows](https://github.com/sugyua/destinia/releases/tag/v0.17.4-beta)** · [Todas as releases](https://github.com/sugyua/destinia/releases) · [Histórico de mudanças](CHANGELOG.md)
+**[Baixar a versão 0.17.5 Beta para Windows](https://github.com/sugyua/destinia/releases/tag/v0.17.5-beta)** · [Todas as releases](https://github.com/sugyua/destinia/releases) · [Histórico de mudanças](CHANGELOG.md)
 
 > **Beta:** faça backup dos saves antes de atualizar. Nem toda a campanha e todos os controles físicos foram testados nesta versão.
 
@@ -22,6 +22,8 @@ pacman -S --needed mingw-w64-ucrt-x86_64-SDL2 mingw-w64-ucrt-x86_64-SDL2_mixer m
 Os pacotes são distribuídos sem bibliotecas ou instaladores de terceiros. Consulte [INSTALL.md](INSTALL.md) para detalhes de dependências, estrutura dos arquivos e compilação; as referências a versões antigas nesse guia são históricas.
 
 ## Versão de PC
+
+Na candidata 0.17.5 PC, os titulos extras aparecem apos as sete paginas originais. Para testar Cacador de Fungos, derrote 10 Fungos comuns e abra a selecao de titulos no retrato do status; o bonus e de 10 pontos percentuais de chance de critico. Veterano, Mestre do Combate e Matador de Chefes ainda nao possuem regras de desbloqueio definidas. Consulte [notas da candidata](release/NOTAS_0.17.5.md) e [verificacao](docs/VERIFICACAO_0.17.5.md).
 
 Na 0.17.4, a autopoção usa a rotina original e verifica o estoque, o Mago dos Bosses lê o saldo real de ouro e o rastreador de missões no Zoom foi afastado da área superior. A posição do rastreador ainda precisa de confirmação visual durante o combate. Veja as [notas da versão](release/NOTAS_0.17.4.md) e a [verificação](docs/VERIFICACAO_0.17.4.md).
 

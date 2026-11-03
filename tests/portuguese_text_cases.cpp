@@ -11,6 +11,13 @@ int main() {
  assert(translatePortugueseString("Inventory")=="Inventario");
  assert(translatePortugueseString("A new skill acquired.")=="Nova habilidade adquirida.");
  assert(translatePortugueseString("Unknown location 123")=="Unknown location 123");
+ assert(translatePortugueseString("Achieve Level %d")=="Alcance o nivel %d.");
+ assert(translatePortugueseString("Complete %d sub-quests.")=="Conclua %d missoes secundarias.");
+ assert(translatePortugueseString("Kill at least %d monsters.")=="Derrote %d monstros.");
+ assert(translatePortugueseString("Obtain at least %d gold from hunting.")=="Ganhe %d de ouro cacando.");
+ assert(translatePortugueseString("Craft at least %d times.")=="Fabrique %d vezes.");
+ assert(translatePortugueseString("Reinforce at least %d times.")=="Reforce %d vezes.");
+ assert(translatePortugueseString("Resurrect at least %d times.")=="Ressuscite %d vezes.");
  // TDT lengths are rebuilt instead of truncating a longer translation.
  std::vector<uint8_t> table={1,0,9,0,'I','n','v','e','n','t','o','r','y'};
  assert(applyPortugueseText(true,"gametxt_en.tdt",table,log));

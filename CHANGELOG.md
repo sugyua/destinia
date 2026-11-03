@@ -4,6 +4,13 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.17.5 Beta - candidata PC
+
+- Selecao dos titulos extras junto das sete paginas originais, com requisitos dos titulos originais bloqueados.
+- Cacador de Fungos: derrote 10 Fungos comuns; +10 pontos percentuais de chance critica quando equipado.
+- Recompensa e titulo de sobrevivencia usam a mesma transacao; uma trava ocupada adia a recompensa.
+- Veterano, Mestre do Combate e Matador de Chefes aguardam regras; validacao visual e jogabilidade manual pendentes.
+
 ## 0.17.4 Beta — candidata
 
 - Auto-poção dos hosts PC identifica corretamente vida e mana, exige item validado e usa a rotina original de consumo e recuperação gradual; o atalho do jogador é restaurado após o uso.

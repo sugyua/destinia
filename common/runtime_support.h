@@ -4,6 +4,7 @@
 #include <array>
 #include <chrono>
 #include <cstdarg>
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -37,6 +38,7 @@ inline bool isLink(const fs::path& path) {
 
 // Trava liberada pelo sistema mesmo se o processo falhar; o arquivo nao e o save.
 class FileLock {
+  unsigned long lastError=0;
 #ifdef _WIN32
   HANDLE handle=INVALID_HANDLE_VALUE;
 #else
@@ -48,15 +50,31 @@ public:
   FileLock& operator=(const FileLock&)=delete;
   bool acquire(const fs::path& path) {
     release();
-    if(isLink(path)) return false;
+    lastError=0;
+    if(isLink(path)) {
+#ifdef _WIN32
+      lastError=ERROR_CANT_ACCESS_FILE;
+#else
+      lastError=ELOOP;
+#endif
+      return false;
+    }
 #ifdef _WIN32
     handle=CreateFileW(path.c_str(),GENERIC_READ|GENERIC_WRITE,0,nullptr,OPEN_ALWAYS,FILE_ATTRIBUTE_NORMAL,nullptr);
-    return handle!=INVALID_HANDLE_VALUE;
+    if(handle==INVALID_HANDLE_VALUE){lastError=GetLastError();return false;}
+    return true;
 #else
     handle=::open(path.c_str(),O_RDWR|O_CREAT|O_NOFOLLOW,0600);
-    if(handle<0) return false;
-    if(::flock(handle,LOCK_EX|LOCK_NB)!=0) { release(); return false; }
+    if(handle<0) {lastError=errno;return false;}
+    if(::flock(handle,LOCK_EX|LOCK_NB)!=0) {const int error=errno;release();lastError=error;return false;}
     return true;
+#endif
+  }
+  bool busy() const {
+#ifdef _WIN32
+    return lastError==ERROR_SHARING_VIOLATION||lastError==ERROR_LOCK_VIOLATION;
+#else
+    return lastError==EWOULDBLOCK||lastError==EAGAIN;
 #endif
   }
   void release() {

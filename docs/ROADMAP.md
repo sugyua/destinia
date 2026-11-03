@@ -2,7 +2,7 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs. Faça backup dos saves antes de atualizar.**
 
-**Estado das fontes em 01/11/2026:** fontes e candidata 0.17.4 corrigem a auto-poção no PC; publicação e instalação dependem de suas próprias validações. A 0.17.3 PC foi publicada e instalada. A Web via VPN permanece na revisão 0.17.2; o Site privado mantém a 0.13.0 conhecida por indisponibilidade da ferramenta de publicação. Campanha não foi executada nesta candidata.
+**Estado das fontes em 01/11/2026:** fontes e candidata 0.17.5 corrigem a auto-poção no PC; publicação e instalação dependem de suas próprias validações. A 0.17.3 PC foi publicada e instalada. A Web via VPN permanece na revisão 0.17.2; o Site privado mantém a 0.13.0 conhecida por indisponibilidade da ferramenta de publicação. Campanha não foi executada nesta candidata.
 
 Próximas frentes da Issue #5: contratos/recuperação de saves, hooks opcionais/Zoom restantes, profiling comparável, permissões/dependências, divergências intencionais dos hosts, acessibilidade Web e fuzz. A [triagem atual](TRIAGEM_GITHUB_2026-10-30.md) separa correções já entregues das propostas; não reimplementar atalhos, CI Web ou versões anteriores.
 

@@ -81,9 +81,19 @@ static void codexChangePage(int direction) {
  codexSelection=start+offset;codexEnsurePortraits();
 }
 static void codexFlush() {
-  if(!codexAvailable || !codexWritable || !codex.dirty) return;
+  if(!codexAvailable || !codexWritable || !codex.dirty || survivalHost.rewardPending()) return;
   try {codex.save(fs::path(saveDir)/"codex-v1.txt");}
+  catch(const destinia::CodexBusyError&) {return;} // Retain dirty progress and retry after the other transaction.
   catch(const std::exception& e) {codexWritable=false;hostReport("[codex] AVISO: %s; contagem apenas nesta sessao.\n",e.what());}
+}
+static bool codexFinalize(){
+  codexFlush();
+  if(codexAvailable&&codex.dirty){
+    try{const auto recovery=codex.saveRecovery(fs::path(saveDir));hostReport("[codex] ERRO: progresso principal nao salvo; copia de recuperacao: %s\n",recovery.u8string().c_str());}
+    catch(const std::exception& e){hostReport("[codex] ERRO: progresso pendente nao foi salvo nem copiado: %s\n",e.what());}
+    return false;
+  }
+  return true;
 }
 // Host-owned extension of the original root menu. Never writes a new ARM tab ID.
 static bool codexTabSelected=false,codexTouchCaptured=false,codexNativeTouchDown=false;
@@ -188,8 +198,6 @@ static bool codexMenuTouch(int x,int y,int phase) {
 }
 static void codexFileRemoved(const std::string& path) {
   difficultyFileRemoved(path);
-  const auto name=fs::path(path).filename().string();
-  if(codexAvailable && name.size()==9 && name.compare(0,4,"save")==0 && name[4]>='0' && name[4]<='9' && name.substr(5)==".dat") {codex.erase(name[4]-'0');codexFacts.erase(name[4]-'0');codexFlush();}
 }
 static void codexHook(uc_engine*,uint64_t,uint32_t,void* context) {
   if(!codexAvailable) return;

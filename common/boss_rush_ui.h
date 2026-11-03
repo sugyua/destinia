@@ -54,6 +54,7 @@ public:
   std::function<void(int)> setGold;
   std::function<void(int, int, int)> teleport; // area, map, entry
   std::function<bool()> calcHeroStat;
+  std::function<bool(TitleId)> equipTitle;
   std::function<uint16_t(uint32_t)> rd16;
   std::function<void(uint32_t, uint16_t)> wr16;
   uint32_t gameBase = 0;
@@ -195,10 +196,20 @@ public:
         if (selectedIndex >= 0 && selectedIndex < int(tList.size())) {
           const auto& t = tList[selectedIndex];
           if (titlesStore.isUnlocked(currentSlot, t.id)) {
-            titlesStore.setEquipped(currentSlot, t.id);
-            titlesStore.save(saveDir);
-            statusMessage = "TITULO EQUIPADO COM SUCESSO!";
-            if (calcHeroStat) calcHeroStat();
+            if(equipTitle){
+              statusMessage=equipTitle(t.id)?"TITULO EQUIPADO COM SUCESSO!":"ERRO AO SALVAR TITULO";
+              return true;
+            }
+            auto next=titlesStore;
+            next.setEquipped(currentSlot,t.id);
+            if(t.id==TitleId::Nenhum)next.setExclusive(currentSlot,false);
+            if(saveDir.empty() || !next.save(saveDir)) {
+              statusMessage="ERRO AO SALVAR TITULO";
+            } else {
+              titlesStore=std::move(next);
+              statusMessage = "TITULO EQUIPADO COM SUCESSO!";
+              if (calcHeroStat) calcHeroStat();
+            }
           } else {
             statusMessage = "TITULO BLOQUEADO! COMPLETE O REQUISITO.";
           }
