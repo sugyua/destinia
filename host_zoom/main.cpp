@@ -25,6 +25,100 @@ static uint32_t lastAxisTick = 0;
 static destinia::DiagnosticsPanel diagnosticsPanel;
 static destinia::AttributeSheet attributeSheet;
 
+namespace fs = std::filesystem;
+
+// Salvamento atomico de todos os sidecars para evitar saves divergentes
+static bool saveAllSidecarsAtomic(const fs::path& saveDir) {
+  const std::vector<std::string> sidecarFiles = {
+    "titles-v1.txt",
+    "bounties-v1.txt",
+    "economy-v1.txt",
+    "weapons-catalog-v1.txt",
+    "shared-stash-v1.txt",
+    "inventory-protect-v1.txt",
+    "difficulty-unlocks-v1.txt",
+    "progression-v1.txt",
+    "abyss-v1.txt",
+    "pets-v1.txt",
+    "codex-v1.txt"
+  };
+
+  std::vector<std::pair<fs::path, fs::path>> tempPairs;
+  bool allWritten = true;
+
+  for (const auto& name : sidecarFiles) {
+    fs::path target = saveDir / name;
+    fs::path temp = saveDir / (name + ".atomic.tmp");
+
+    try {
+      std::string content;
+      if (fs::exists(target)) {
+        std::ifstream in(target, std::ios::binary);
+        content = std::string((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+      }
+
+      FILE* out = std::fopen(temp.string().c_str(), "wb");
+      if (!out) {
+        allWritten = false;
+        continue;
+      }
+      std::fwrite(content.data(), 1, content.size(), out);
+      std::fflush(out);
+#ifdef _WIN32
+      if (::_commit(::_fileno(out)) != 0) {
+        std::fclose(out);
+        allWritten = false;
+        continue;
+      }
+#else
+      if (::fsync(::_fileno(out)) != 0) {
+        std::fclose(out);
+        allWritten = false;
+        continue;
+      }
+#endif
+      if (std::fclose(out) != 0) {
+        allWritten = false;
+        continue;
+      }
+      tempPairs.push_back({temp, target});
+    } catch (...) {
+      allWritten = false;
+    }
+  }
+
+  if (!allWritten) {
+    for (const auto& [temp, target] : tempPairs) {
+      std::error_code ec;
+      fs::remove(temp, ec);
+    }
+    return false;
+  }
+
+  bool allCommitted = true;
+  for (const auto& [temp, target] : tempPairs) {
+    try {
+#ifdef _WIN32
+      if (!MoveFileExW(temp.c_str(), target.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) {
+        allCommitted = false;
+      }
+#else
+      if (fs::rename(temp, target) != 0) {
+        allCommitted = false;
+      }
+#endif
+    } catch (...) {
+      allCommitted = false;
+    }
+  }
+
+  for (const auto& [temp, target] : tempPairs) {
+    std::error_code ec;
+    fs::remove(temp, ec);
+  }
+  return allCommitted;
+}
+
 static void paintControllerGuide(uint8_t* pixels, int width, int height) {
   if (!pixels) return;
   const std::string guide = "[SELECT]+  [X] Catalogo   [Y] Bau   [B] Bounties   [A] Missao   [R3] Auto-Pocao  [CIMA] Mago/Arena";
@@ -1992,6 +2086,8 @@ static int runHost(int argc, char** argv) {
     catch(const std::exception& e) { hostReport("[host] Aviso: %s\n",e.what()); }
   }
   if(destinia::lootEconomyReady){destinia::lootEconomy.lastTimestamp=int64_t(std::time(nullptr));try{destinia::saveLootEconomy(fs::path(saveDir),destinia::lootEconomy);}catch(...){}}
+  // Salvamento atomico de todos os sidecars para evitar saves divergentes
+  try{saveAllSidecarsAtomic(fs::path(saveDir));}catch(...){}
   return executionFailed ? 2 : 0;
 }
 
