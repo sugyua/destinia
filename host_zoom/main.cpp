@@ -1532,6 +1532,7 @@ static int runHost(int argc, char** argv) {
         // Roteamento completo de controle USB para menus modais
         if(ev.type==SDL_CONTROLLERBUTTONDOWN && ev.cbutton.which==controls.controllerId()) {
           uint8_t btn = ev.cbutton.button;
+          bool down = true;
 
           // 1. Menu Mago dos Bosses (Boss Rush / Torre / Mascotes / Santuario)
           if(bossRushUI.open) {
