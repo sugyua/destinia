@@ -90,50 +90,36 @@ jobs:
           xcrun lipo -info "$LIB"
           xcrun ar -t "$LIB" | head -20
 
-      - name: Download QEMU 9.2.0
+      - name: Clone Unicorn TCI
         run: |
-          curl -fL https://download.qemu.org/qemu-9.2.0.tar.xz -o /tmp/qemu.tar.xz
-          tar -xJf /tmp/qemu.tar.xz -C /tmp
+          git clone --depth 1 https://github.com/1rhino2/unicorn-tci.git /tmp/unicorn-tci
+          git -C /tmp/unicorn-tci rev-parse HEAD
 
-      - name: Setup Python for QEMU
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install QEMU Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install distlib meson ninja
-      - name: Configure QEMU TCI for iOS ARM64
+      - name: Build Unicorn TCI for iOS ARM64
         run: |
           set -eux
+          export ARCHFLAGS="-arch arm64"
           SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
-          CLANG="$(xcrun --sdk iphoneos --find clang)"
+          cmake -S /tmp/unicorn-tci/unicorn-engine-sys-tci \
+            -B /tmp/unicorn-tci-ios-build \
+            -G Ninja \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_SYSROOT="$SDK" \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=15.0 \
+            -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
+            -DUNICORN_ARCH=arm \
+            -DUNICORN_INTERPRETER=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DUNICORN_BUILD_TESTS=OFF \
+            -DUNICORN_INSTALL=OFF
+          cmake --build /tmp/unicorn-tci-ios-build --target unicorn --parallel 2
 
-          mkdir -p /tmp/qemu-ios-build
-          cd /tmp/qemu-ios-build
-
-          cat > /tmp/ios-meson-cross.ini <<EOF
-          [host_machine]
-          system = 'darwin'
-          cpu_family = 'aarch64'
-          cpu = 'aarch64'
-          endian = 'little'
-
-          [properties]
-          needs_exe_wrapper = true
-          EOF
-
-          PKG_CONFIG=false \
-          /tmp/qemu-9.2.0/configure \
-            --cross-prefix= \
-            --cc="$CLANG" \
-            --cpu=aarch64 \
-            --target-list=arm-softmmu \
-            --enable-tcg \
-            --enable-system \
-            --disable-docs \
-            --disable-werror \
-            --extra-cflags="-target arm64-apple-ios15.0 -isysroot $SDK" \
-            --extra-ldflags="-target arm64-apple-ios15.0 -isysroot $SDK" \
-            -Dtcg_interpreter=true
+      - name: Inspect Unicorn TCI library
+        run: |
+          set -eux
+          LIB=$(find /tmp/unicorn-tci-ios-build -name libunicorn.a -print -quit)
+          test -n "$LIB"
+          file "$LIB"
+          xcrun lipo -info "$LIB"
+          xcrun ar -t "$LIB" | head -20
