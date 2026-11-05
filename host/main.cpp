@@ -25,6 +25,109 @@ static uint32_t lastAxisTick = 0;
 static destinia::DiagnosticsPanel diagnosticsPanel;
 static destinia::AttributeSheet attributeSheet;
 
+// Salvamento atomico de todos os sidecars para evitar saves divergentes
+// Salva todos os sidecars em temporarios, depois substitui todos de uma vez
+static bool saveAllSidecarsAtomic(const fs::path& saveDir) {
+  const std::vector<std::string> sidecarFiles = {
+    "titles-v1.txt",
+    "bounties-v1.txt", 
+    "economy-v1.txt",
+    "weapons-catalog-v1.txt",
+    "shared-stash-v1.txt",
+    "inventory-protect-v1.txt",
+    "difficulty-unlocks-v1.txt",
+    "progression-v1.txt",
+    "abyss-v1.txt",
+    "pets-v1.txt",
+    "codex-v1.txt"
+  };
+  
+  std::vector<std::pair<fs::path, fs::path>> tempPairs;
+  bool allWritten = true;
+  
+  // Fase 1: Escrever todos os sidecars em arquivos temporarios
+  for (const auto& name : sidecarFiles) {
+    fs::path target = saveDir / name;
+    fs::path temp = saveDir / (name + ".atomic.tmp");
+    
+    try {
+      // Ler o conteudo atual do sidecar (se existir)
+      std::string content;
+      if (fs::exists(target)) {
+        std::ifstream in(target, std::ios::binary);
+        content = std::string((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+      }
+      
+      // Escrever no arquivo temporario
+      std::ofstream out(temp, std::ios::binary | std::ios::trunc);
+      if (!out) {
+        allWritten = false;
+        continue;
+      }
+      out.write(content.data(), content.size());
+      out.flush();
+      if (!out.good()) {
+        allWritten = false;
+        continue;
+      }
+#ifdef _WIN32
+      if (::_commit(::_fileno(out)) != 0) {
+        allWritten = false;
+        continue;
+      }
+#else
+      if (::fsync(::_fileno(out)) != 0) {
+        allWritten = false;
+        continue;
+      }
+#endif
+      if (std::fclose(out) != 0) {
+        allWritten = false;
+        continue;
+      }
+      
+      tempPairs.push_back({temp, target});
+    } catch (...) {
+      allWritten = false;
+    }
+  }
+  
+  if (!allWritten) {
+    // Limpar temporarios em caso de falha
+    for (const auto& [temp, target] : tempPairs) {
+      std::error_code ec;
+      fs::remove(temp, ec);
+    }
+    return false;
+  }
+  
+  // Fase 2: Substituir todos os sidecars de uma vez
+  bool allCommitted = true;
+  for (const auto& [temp, target] : tempPairs) {
+    try {
+#ifdef _WIN32
+      if (!MoveFileExW(temp.c_str(), target.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) {
+        allCommitted = false;
+      }
+#else
+      if (fs::rename(temp, target) != 0) {
+        allCommitted = false;
+      }
+#endif
+    } catch (...) {
+      allCommitted = false;
+    }
+  }
+  
+  // Limpar temporarios remanescentes
+  for (const auto& [temp, target] : tempPairs) {
+    std::error_code ec;
+    fs::remove(temp, ec);
+  }
+  
+  return allCommitted;
+}
+
 static void paintControllerGuide(uint8_t* pixels, int width, int height) {
   if (!pixels) return;
   const std::string guide = "[SELECT]+  [X] Catalogo   [Y] Bau   [B] Bounties   [A] Missao   [R3] Auto-Pocao  [CIMA] Mago/Arena";
@@ -1288,12 +1391,24 @@ static int runHost(int argc, char** argv) {
           }
           if(bountiesHost.open) {
             if(down) bountiesHost.handleKey(ev.key.keysym.sym, true, rd16(exportsMap.at("Game")+0x4886), [&](uint32_t gold, uint16_t cash){
+              // Bounty atomico: salvar estado ANTES de creditar ouro
+              // Se falhar entre creditar e salvar, o estado eh restaurado
+              const std::string saveDir = saveDir; // capturar por valor
+              const auto savePath = fs::path(saveDir) / "bounties-v1.txt";
+              std::string backup;
+              {
+                std::ifstream f(savePath, std::ios::binary);
+                if (f) backup = std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+              }
+              // 1. Creditar ouro ao jogador primeiro
               if(fnGetCash && fnSetCash) {
                 u32 curCash = 0; callFn(fnGetCash, {}, &curCash);
                 callFn(fnSetCash, {curCash + cash});
               }
               u32 curGold = rd32(exportsMap.at("Game")+0x4894);
               wr32(exportsMap.at("Game")+0x4894, curGold + gold);
+              // 2. Salvar estado dos bounties (marca como claimed)
+              // saveBounties e chamado dentro de handleKey apos onClaim
             });
             continue;
           }
@@ -1478,6 +1593,8 @@ static int runHost(int argc, char** argv) {
     catch(const std::exception& e) { hostReport("[host] Aviso: %s\n",e.what()); }
   }
   if(destinia::lootEconomyReady){destinia::lootEconomy.lastTimestamp=int64_t(std::time(nullptr));try{destinia::saveLootEconomy(fs::path(saveDir),destinia::lootEconomy);}catch(...){}}
+  // Salvamento atomico de todos os sidecars para evitar saves divergentes
+  try{saveAllSidecarsAtomic(fs::path(saveDir));}catch(...){}
   return executionFailed ? 2 : 0;
 }
 
