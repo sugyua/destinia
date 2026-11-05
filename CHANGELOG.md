@@ -10,6 +10,15 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 - Auto-poção de PV ativa em 50% ou menos e não consome poção com PV cheio.
 - Verificação: suíte web, posicionamento do selo, coerência da versão e builds Release dos dois hosts.
 
+### Correções de bugs (0.16.1)
+
+- Corrigido conflito de tecla F8 que disparava dump de inventário junto com a alternância do mural de Bounties. F8 agora apenas alterna Bounties.
+- Corrigido conflito de tecla F6 que disparava dump de inventário junto com a abertura de filtros. F6 agora apenas abre/fecha filtros de inventário.
+- Removidos três blocos de código duplicado de dump de inventário (F6/F7/F8) que gravavam em caminhos hardcoded (C:\destinia_dump.txt e inventory_dump.txt).
+- IDs de poção do Auto-Potion alterados para 0x0000 (placeholder inválido) com aviso de que os IDs reais devem ser confirmados via dump de memória antes de ativar o recurso.
+- Mapeamento de controle corrigido: DPAD_UP/DPAD_DOWN no Catálogo de Equipamentos usam teclas distintas (cima=3, baixo=9); tecla X no Baú Compartilhado mapeada para confirmar (17).
+- .gitignore atualizado para excluir DLLs externas, logs de diagnóstico, backups (.bak), arquivos .maestri/, BUILD_INFO.txt, SOURCE_BASE.txt e pastas release/dist_*.
+
 ## 0.16.0 Beta - 28/10/2026
 
 - Desmontagem em lote nos hosts normal e Zoom, com previa baseada nos filtros ativos e confirmacao separada.

@@ -80,8 +80,6 @@ inventory-protect-v1.txt
 
 # Artefatos de desenvolvimento e diagnostico (nao versionar)
 .maestri/
-BUILD_INFO.txt
-SOURCE_BASE.txt
 Untitled-1.txt
 LEIA_PRIMEIRO.txt
 build_and_run.ps1

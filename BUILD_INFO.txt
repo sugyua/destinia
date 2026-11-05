@@ -1,0 +1,5 @@
+Repositorio: https://github.com/sugyua/destinia
+Versao: 0.16.1 Beta
+Commit de compilacao: compilacao-local
+Plataforma: Windows x64 / MSYS2 UCRT64
+Dependencias externas: consulte README.md e INSTALL.md; DLLs nao incluidas.
