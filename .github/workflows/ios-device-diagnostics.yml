@@ -118,8 +118,10 @@ jobs:
       - name: Inspect Unicorn TCI library
         run: |
           set -eux
-          LIB=$(find /tmp/unicorn-tci-ios-build -name libunicorn.a -print -quit)
-          test -n "$LIB"
-          file "$LIB"
-          xcrun lipo -info "$LIB"
-          xcrun ar -t "$LIB" | head -20
+          for NAME in libunicorn-static.a libunicorn-common.a libarm-softmmu.a; do
+            LIB="/tmp/unicorn-tci-ios-build/$NAME"
+            test -f "$LIB"
+            file "$LIB"
+            xcrun lipo -info "$LIB"
+            xcrun ar -t "$LIB" | sed -n '1,10p'
+          done
