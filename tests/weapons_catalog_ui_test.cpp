@@ -11,7 +11,7 @@ using namespace destinia;
 
 void testDefs() {
   const auto& list = allCatalogWeapons();
-  assert(list.size() == 24); // 8 por classe x 3 classes = 24 armas base
+  assert(list.size() == 32); // 8 por classe x 4 classes = 32 armas base
 
   auto war = getCatalogWeaponsByClass(1);
   assert(war.size() == 8);
@@ -21,6 +21,9 @@ void testDefs() {
 
   auto rog = getCatalogWeaponsByClass(3);
   assert(rog.size() == 8);
+
+  auto mag = getCatalogWeaponsByClass(4);
+  assert(mag.size() == 8);
 
   std::cout << "[TEST] Defs canônicas validadas com sucesso: " << list.size() << " armas base catalogadas.\n";
 }
@@ -43,6 +46,8 @@ void testUIAndPainting() {
   assert(ui.selectedClass == 2);
   ui.nextTab();
   assert(ui.selectedClass == 3);
+  ui.nextTab();
+  assert(ui.selectedClass == 4);
   ui.nextTab();
   assert(ui.selectedClass == 1);
 

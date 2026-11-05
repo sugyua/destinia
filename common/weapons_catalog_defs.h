@@ -13,7 +13,7 @@ enum class CatalogItemCategory : uint8_t {
 struct EquipmentCatalogDef {
   uint16_t baseId;
   uint8_t minLevel;
-  uint8_t jobClass;    // 1: Guerreiro, 2: Atirador, 3: Ladino
+  uint8_t jobClass;    // 1: Guerreiro, 2: Atirador, 3: Ladino, 4: Mago
   CatalogItemCategory category;
   const char* name;
   const char* typeDesc;
@@ -57,6 +57,16 @@ inline const std::vector<EquipmentCatalogDef>& allCatalogEquipment() {
     { 3007, 80,  3, CatalogItemCategory::Weapon, "Presa da Noite",        "Adaga Toxica" },
     { 3008, 100, 3, CatalogItemCategory::Weapon, "Beijo da Morte",        "Arma Lendaria" },
 
+    // Mago (Job 4)
+    { 4001, 1,   4, CatalogItemCategory::Weapon, "Cajado de Madeira",     "Cajado Basico" },
+    { 4002, 10,  4, CatalogItemCategory::Weapon, "Cajado de Aco",         "Cajado Simples" },
+    { 4003, 20,  4, CatalogItemCategory::Weapon, "Varinha de Cristal",    "Varinha Mágica" },
+    { 4004, 35,  4, CatalogItemCategory::Weapon, "Bastao de Fogo",        "Cajado Igneo" },
+    { 4005, 50,  4, CatalogItemCategory::Weapon, "Orbe do Vazio",         "Orbe Arcano" },
+    { 4006, 65,  4, CatalogItemCategory::Weapon, "Cajado da Tempestade",  "Cajado Eletrico" },
+    { 4007, 80,  4, CatalogItemCategory::Weapon, "Grimoario Sombrio",     "Livro Sombrio" },
+    { 4008, 100, 4, CatalogItemCategory::Weapon, "Cajado do Arquimago",   "Arma Lendaria" },
+
     // =========================================================================
     // --- ARMADURAS / PEITORAIS (Categoria 1) ---
     // =========================================================================
@@ -88,7 +98,17 @@ inline const std::vector<EquipmentCatalogDef>& allCatalogEquipment() {
     { 3105, 50,  3, CatalogItemCategory::Armor,  "Manto do Assassino",    "Vestes Noturnas" },
     { 3106, 65,  3, CatalogItemCategory::Armor,  "Tunica Espectral",      "Tecido Espiritual" },
     { 3107, 80,  3, CatalogItemCategory::Armor,  "Vestes do Vazio",       "Sombra Toxica" },
-    { 3108, 100, 3, CatalogItemCategory::Armor,  "Manto da Morte",        "Vestimenta Lendaria" }
+    { 3108, 100, 3, CatalogItemCategory::Armor,  "Manto da Morte",        "Vestimenta Lendaria" },
+
+    // Mago (Job 4)
+    { 4101, 1,   4, CatalogItemCategory::Armor,  "Tunica de Aprendiz",    "Tecido Simples" },
+    { 4102, 10,  4, CatalogItemCategory::Armor,  "Vestes de Lino",        "Vestimenta Leve" },
+    { 4103, 20,  4, CatalogItemCategory::Armor,  "Manto do Estudioso",    "Tecido Reforcado" },
+    { 4104, 35,  4, CatalogItemCategory::Armor,  "Batas do Erudito",      "Tecido Runico" },
+    { 4105, 50,  4, CatalogItemCategory::Armor,  "Vestes do Arcanista",   "Vestes Mágicas" },
+    { 4106, 65,  4, CatalogItemCategory::Armor,  "Manto do Elementalista","Tecido Elemental" },
+    { 4107, 80,  4, CatalogItemCategory::Armor,  "Vestes do Sombra",      "Vestes Sombrias" },
+    { 4108, 100, 4, CatalogItemCategory::Armor,  "Manto do Arquimago",    "Vestimenta Lendaria" }
   };
   return list;
 }

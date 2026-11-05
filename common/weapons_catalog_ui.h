@@ -19,7 +19,7 @@ struct CatalogRect {
 
 class WeaponsCatalogUI {
 public:
-  uint8_t selectedClass = 1; // 1: Guerreiro, 2: Atirador, 3: Ladino
+  uint8_t selectedClass = 1; // 1: Guerreiro, 2: Atirador, 3: Ladino, 4: Mago
   CatalogItemCategory selectedCategory = CatalogItemCategory::Weapon; // 0: Armas, 1: Armaduras
   size_t page = 0;
   static constexpr size_t itemsPerPage = 4;

@@ -17,7 +17,7 @@ struct StashItem {
   uint8_t itemType = 0; // 0: Arma, 1: Armadura, 2: Elmo, 3: Luva, 4: Bota, 5: Acessorio, 6: Consumivel
   uint8_t rank = 0;     // 0: Comum, 1: Magico, 2: Raro, 3: Epico, 4: Lendario
   uint8_t level = 1;
-  uint8_t jobClass = 0; // 0: Todos, 1: Guerreiro, 2: Atirador, 3: Ladino
+  uint8_t jobClass = 0; // 0: Todos, 1: Guerreiro, 2: Atirador, 3: Ladino, 4: Mago
   uint16_t attr[6] = {0, 0, 0, 0, 0, 0};
   std::string name = "Item do Bau";
 

@@ -12,9 +12,13 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 - **Corrigido problema 3 — Mãos duplicadas no inventário (vault Obsidian):**
   - `inventoryIconHook` agora verifica se o ponteiro do ícone já está registrado antes de adicionar ao vetor `inventoryIcons`, evitando que o mesmo ícone de equipamento seja capturado múltiplas vezes em um único frame.
   - Isso elimina a duplicação de pontos de upgrade e mãos sobrepostas na tela do inventário e status.
-- **Correção anterior (mantida) — Offsets de memória do Auto-Potion:**
-  - `curHp` lê de `0x48f4` (HP atual); `curMp` lê de `0x48f2` (MP atual).
-  - Escrita de cura HP grava em `0x48f4`; escrita de cura MP grava em `0x48f2`.
+- **Nova quarta classe — Mago (jobClass 4):**
+  - Adicionada classe Mago (ID 4) ao sistema de classes, ao lado de Guerreiro (1), Atirador (2) e Ladino (3).
+  - 8 armas e 8 armaduras canônicas adicionadas ao catálogo para o Mago (IDs 4001-4008 e 4101-4108).
+  - Nome da classe adicionado ao sistema de textos: "Mago" / "Mage".
+  - Função `weaponTypeForJob` atualizada para mapear job 4.
+  - Verificação de tipo de arma em `combat_power_host.h` estendida para `type<4`.
+  - Testes automatizados atualizados para incluir a quarta classe.
 - Esta versão não corrige automaticamente a mana já acima do máximo, nem o crédito de contratos ou recompensas antigas. Barra de abas duplicada e escala de inventário/status continuam em investigação.
 - Os testes usam dados sintéticos; campanha completa, controle físico e validação visual em gameplay permanecem pendentes. Faça backup dos saves antes de atualizar.
 - A Web não foi alterada nesta entrega de PC.

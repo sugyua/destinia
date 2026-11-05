@@ -24,7 +24,7 @@ struct WeaponEntry {
   uint16_t baseId;    // ID base da arma (ex: 1001)
   uint8_t level;      // Nivel de requerimento da arma
   uint8_t rarity;     // 0..4 (WeaponRarity)
-  uint8_t jobClass;   // 0: Qualquer / 1: Guerreiro / 2: Atirador / 3: Ladrao
+  uint8_t jobClass;   // 0: Qualquer / 1: Guerreiro / 2: Atirador / 3: Ladino / 4: Mago
 
   bool operator<(const WeaponEntry& o) const {
     if (baseId != o.baseId) return baseId < o.baseId;

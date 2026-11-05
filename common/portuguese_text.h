@@ -185,7 +185,7 @@ inline const std::map<std::string, std::string>& portugueseText() {
       {"Return", "Voltar"}, {"Start", "Iniciar"}, {"Setting", "Configuracao"},
       {"Sound", "Som"}, {"Music", "Musica"}, {"On", "Ligado"}, {"Off", "Desligado"},
       {"Lv", "Nv"}, {"HP", "PV"}, {"MP", "PM"},
-      {"Warrior", "Guerreiro"}, {"Shooter", "Atirador"}, {"Assassin", "Assassino"},
+      {"Warrior", "Guerreiro"}, {"Shooter", "Atirador"}, {"Assassin", "Assassino"}, {"Mage", "Mago"},
       {"Main Weapon", "Arma Principal"}, {"One-handed Sword", "Espada de Uma Mao"},
       {"Giant Sword", "Espada Grande"}, {"Long-ranged", "Longo Alcance"},
       {"Dash Attack", "Ataque Rapido"}, {"Regenerative Aura", "Aura Regenerativa"},
