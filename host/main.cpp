@@ -25,6 +25,8 @@ static uint32_t lastAxisTick = 0;
 static destinia::DiagnosticsPanel diagnosticsPanel;
 static destinia::AttributeSheet attributeSheet;
 
+namespace fs = std::filesystem;
+
 // Salvamento atomico de todos os sidecars para evitar saves divergentes
 // Salva todos os sidecars em temporarios, depois substitui todos de uma vez
 static bool saveAllSidecarsAtomic(const fs::path& saveDir) {
@@ -59,24 +61,22 @@ static bool saveAllSidecarsAtomic(const fs::path& saveDir) {
       }
       
       // Escrever no arquivo temporario
-      std::ofstream out(temp, std::ios::binary | std::ios::trunc);
+      FILE* out = std::fopen(temp.string().c_str(), "wb");
       if (!out) {
         allWritten = false;
         continue;
       }
-      out.write(content.data(), content.size());
-      out.flush();
-      if (!out.good()) {
-        allWritten = false;
-        continue;
-      }
+      std::fwrite(content.data(), 1, content.size(), out);
+      std::fflush(out);
 #ifdef _WIN32
       if (::_commit(::_fileno(out)) != 0) {
+        std::fclose(out);
         allWritten = false;
         continue;
       }
 #else
       if (::fsync(::_fileno(out)) != 0) {
+        std::fclose(out);
         allWritten = false;
         continue;
       }
