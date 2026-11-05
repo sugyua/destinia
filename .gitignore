@@ -74,3 +74,28 @@ codex-v1.txt
 
 # Marcacoes pessoais de equipamentos (sidecar)
 inventory-protect-v1.txt
+
+# DLLs externas (dependencias do MSYS2 - nao versionar)
+*.dll
+
+# Artefatos de desenvolvimento e diagnostico (nao versionar)
+.maestri/
+BUILD_INFO.txt
+SOURCE_BASE.txt
+Untitled-1.txt
+LEIA_PRIMEIRO.txt
+build_and_run.ps1
+diagnostico/frame_*.bmp
+diagnostico/pacotes/
+host/patch_autotap2.py
+host/probe.diff
+installed-releases/
+release/dist_*/
+
+# Logs de diagnostico do host (nao versionar)
+host/log_*.txt
+host/log.txt
+host/sonda.txt
+host_zoom/camera.txt
+host_zoom/clear.txt
+host_zoom/fix.txt

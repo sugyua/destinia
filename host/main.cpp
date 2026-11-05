@@ -1137,7 +1137,9 @@ static int runHost(int argc, char** argv) {
             if(btn==SDL_CONTROLLER_BUTTON_B || btn==SDL_CONTROLLER_BUTTON_BACK) weaponsCatalogHost.open = false;
             else if(btn==SDL_CONTROLLER_BUTTON_DPAD_LEFT || btn==SDL_CONTROLLER_BUTTON_LEFTSHOULDER) weaponsCatalogHost.handleKey(3, true);
             else if(btn==SDL_CONTROLLER_BUTTON_DPAD_RIGHT || btn==SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) weaponsCatalogHost.handleKey(9, true);
-            else if(btn==SDL_CONTROLLER_BUTTON_DPAD_UP || btn==SDL_CONTROLLER_BUTTON_DPAD_DOWN || btn==SDL_CONTROLLER_BUTTON_Y) weaponsCatalogHost.handleKey('\t', true);
+            else if(btn==SDL_CONTROLLER_BUTTON_DPAD_UP) weaponsCatalogHost.handleKey(3, true);    // Cima no catalogo
+            else if(btn==SDL_CONTROLLER_BUTTON_DPAD_DOWN) weaponsCatalogHost.handleKey(9, true);  // Baixo no catalogo
+            else if(btn==SDL_CONTROLLER_BUTTON_Y) weaponsCatalogHost.handleKey('\t', true);       // Y: troca de categoria/aba
             else if(btn==SDL_CONTROLLER_BUTTON_X || btn==SDL_CONTROLLER_BUTTON_A) weaponsCatalogHost.handleKey('t', true);
             continue;
           }
@@ -1149,7 +1151,8 @@ static int runHost(int argc, char** argv) {
             else if(btn==SDL_CONTROLLER_BUTTON_DPAD_RIGHT) sharedStashHost.handleKey(9, true, exportsMap.at("Game"), [](u32 a){return rd16(a);}, [](u32 a, uint16_t v){wr16(a, v);});
             else if(btn==SDL_CONTROLLER_BUTTON_DPAD_UP) sharedStashHost.handleKey(5, true, exportsMap.at("Game"), [](u32 a){return rd16(a);}, [](u32 a, uint16_t v){wr16(a, v);});
             else if(btn==SDL_CONTROLLER_BUTTON_DPAD_DOWN) sharedStashHost.handleKey(7, true, exportsMap.at("Game"), [](u32 a){return rd16(a);}, [](u32 a, uint16_t v){wr16(a, v);});
-            else if(btn==SDL_CONTROLLER_BUTTON_X || btn==SDL_CONTROLLER_BUTTON_Y || btn==SDL_CONTROLLER_BUTTON_LEFTSHOULDER || btn==SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) sharedStashHost.handleKey('\t', true, exportsMap.at("Game"), [](u32 a){return rd16(a);}, [](u32 a, uint16_t v){wr16(a, v);});
+            else if(btn==SDL_CONTROLLER_BUTTON_X) sharedStashHost.handleKey(17, true, exportsMap.at("Game"), [](u32 a){return rd16(a);}, [](u32 a, uint16_t v){wr16(a, v);});
+            else if(btn==SDL_CONTROLLER_BUTTON_Y || btn==SDL_CONTROLLER_BUTTON_LEFTSHOULDER || btn==SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) sharedStashHost.handleKey('\t', true, exportsMap.at("Game"), [](u32 a){return rd16(a);}, [](u32 a, uint16_t v){wr16(a, v);});
             else if(btn==SDL_CONTROLLER_BUTTON_A) sharedStashHost.handleKey(13, true, exportsMap.at("Game"), [](u32 a){return rd16(a);}, [](u32 a, uint16_t v){wr16(a, v);});
             continue;
           }
@@ -1294,82 +1297,7 @@ static int runHost(int argc, char** argv) {
             continue;
           }
           if(ev.key.keysym.sym==SDLK_q) { if(down) questTrackerUI.toggle(); continue; }
-          if(ev.key.keysym.sym==SDLK_h) { if(down) autoPotion.toggle(); continue; }          
-          // --- INICIO DO BLOCO DE DUMP (F6) ---
-          if(ev.key.keysym.sym==SDLK_F6 && down) {
-            FILE* f = fopen("C:\\destinia_dump.txt", "w");
-            if(f) {
-              uint32_t g = exportsMap.at("Game");
-              fprintf(f, "--- INVENTORY DUMP ---\n");
-              for(int b=0; b<4; ++b) {
-                uint32_t bag = g + 0x433c + b*0x92;
-                uint16_t count = rd16(bag);
-                fprintf(f, "Bag %d (count %d):\n", b, count);
-                for(int i=0; i<count && i<24; ++i) {
-                  uint32_t rec = bag + 2 + 6*i;
-                  uint16_t id = rd16(rec + 0);
-                  uint16_t unk = rd16(rec + 2);
-                  uint16_t qty = rd16(rec + 4);
-                  fprintf(f, "  [%d] ID: %04X, Unk: %04X, Qty: %d\n", i, id, unk, qty);
-                }
-              }
-              fprintf(f, "----------------------\n");
-              fclose(f);
-              hostReport("[DUMP] Inventario salvo em C:\\destinia_dump.txt\n");
-            }
-            continue;
-          }
-          // --- FIM DO BLOCO DE DUMP (F6) ---          
-          // --- INICIO DO BLOCO DE DUMP (F7) ---
-          if(ev.key.keysym.sym==SDLK_F7 && down) {
-            FILE* f = fopen("inventory_dump.txt", "w");
-            if(f) {
-              uint32_t g = exportsMap.at("Game");
-              fprintf(f, "--- INVENTORY DUMP ---\n");
-              for(int b=0; b<4; ++b) {
-                uint32_t bag = g + 0x433c + b*0x92;
-                uint16_t count = rd16(bag);
-                fprintf(f, "Bag %d (count %d):\n", b, count);
-                for(int i=0; i<count && i<24; ++i) {
-                  uint32_t rec = bag + 2 + 6*i;
-                  uint16_t id = rd16(rec + 0);
-                  uint16_t unk = rd16(rec + 2);
-                  uint16_t qty = rd16(rec + 4);
-                  fprintf(f, "  [%d] ID: %04X, Unk: %04X, Qty: %d\n", i, id, unk, qty);
-                }
-              }
-              fprintf(f, "----------------------\n");
-              fclose(f);
-              hostReport("[DUMP] Inventario salvo em inventory_dump.txt\n");
-            }
-            continue;
-          }
-          // --- FIM DO BLOCO DE DUMP (F7) ---          
-          // --- INICIO DO BLOCO DE DUMP (F8) ---
-          if(ev.key.keysym.sym==SDLK_F8 && down) {
-            FILE* f = fopen("inventory_dump.txt", "w");
-            if(f) {
-              uint32_t g = exportsMap.at("Game");
-              fprintf(f, "--- INVENTORY DUMP ---\n");
-              for(int b=0; b<4; ++b) {
-                uint32_t bag = g + 0x433c + b*0x92;
-                uint16_t count = rd16(bag);
-                fprintf(f, "Bag %d (count %d):\n", b, count);
-                for(int i=0; i<count && i<24; ++i) {
-                  uint32_t rec = bag + 2 + 6*i;
-                  uint16_t id = rd16(rec + 0);
-                  uint16_t unk = rd16(rec + 2);
-                  uint16_t qty = rd16(rec + 4);
-                  fprintf(f, "  [%d] ID: %04X, Unk: %04X, Qty: %d\n", i, id, unk, qty);
-                }
-              }
-              fprintf(f, "----------------------\n");
-              fclose(f);
-              hostReport("[DUMP] Inventario salvo em inventory_dump.txt\n");
-            }
-            continue;
-          }
-          // --- FIM DO BLOCO DE DUMP (F8) ---
+          if(ev.key.keysym.sym==SDLK_h) { if(down) autoPotion.toggle(); continue; }
           if(ev.key.keysym.sym==SDLK_F11) { if(down) setFullscreen(!fullscreen); }
           else if(ev.key.keysym.sym==SDLK_F9) { controls.release();bossRushUI.openMenu(); }
           else controls.event(ev);

@@ -7,9 +7,11 @@
 
 namespace destinia {
 
-// TODO: Substitua pelos IDs reais das poções usando o dump da tecla F12
-constexpr uint16_t HP_POTION_ID = 0x0001; // Exemplo - Troque para o ID real
-constexpr uint16_t MP_POTION_ID = 0x0002; // Exemplo - Troque para o ID real
+// IDs reais das poções devem ser confirmados via dump de memória (F12 no host).
+// Valores abaixo são placeholders e NAO devem ser usados em producao sem validacao.
+// Ativar o auto-pocao com IDs incorretos pode consumir itens errados do inventario.
+constexpr uint16_t HP_POTION_ID = 0x0000; // Placeholder - confirme o ID real antes de ativar
+constexpr uint16_t MP_POTION_ID = 0x0000; // Placeholder - confirme o ID real antes de ativar
 
 struct AutoPotionConfig {
   // Desativado por padrao: HP_POTION_ID/MP_POTION_ID ainda sao placeholders
