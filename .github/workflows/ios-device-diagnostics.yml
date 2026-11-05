@@ -186,3 +186,24 @@ jobs:
             -o /tmp/uc_tci_smoke
 
           /tmp/uc_tci_smoke
+
+      - name: Link Unicorn TCI into iOS ARM64 executable
+        run: |
+          set -eux
+
+          SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
+
+          xcrun --sdk iphoneos clang \
+            -target arm64-apple-ios15.0 \
+            -isysroot "$SDK" \
+            -I/tmp/unicorn-tci/unicorn-engine-sys-tci/include \
+            /tmp/uc_tci_smoke.c \
+            /tmp/unicorn-tci-ios-build/libunicorn-static.a \
+            /tmp/unicorn-tci-ios-build/libarm-softmmu.a \
+            /tmp/unicorn-tci-ios-build/libunicorn-common.a \
+            -lm -lpthread \
+            -o /tmp/uc_tci_ios_link
+
+          file /tmp/uc_tci_ios_link
+          xcrun lipo -info /tmp/uc_tci_ios_link
+          xcrun vtool -show-build /tmp/uc_tci_ios_link
