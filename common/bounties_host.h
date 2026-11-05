@@ -56,8 +56,12 @@ public:
         auto& c = list[ui.selectedContract];
         if (c.completed && !c.claimed) {
           c.claimed = true;
-          onClaim(c.rewardGold, c.rewardCash);
+          // Bounty atomico: salvar estado ANTES de creditar ouro
+          // Se o jogo travar entre salvar e creditar, o contrato permanece como claimed
+          // e nao pode ser resgatado novamente. O ouro nao eh creditado, mas nao ha
+          // resgate duplo.
           saveBounties(saveDirectory, manager);
+          onClaim(c.rewardGold, c.rewardCash);
         }
       }
       return true;
