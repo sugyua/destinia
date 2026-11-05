@@ -207,3 +207,77 @@ jobs:
           file /tmp/uc_tci_ios_link
           xcrun lipo -info /tmp/uc_tci_ios_link
           xcrun vtool -show-build /tmp/uc_tci_ios_link
+
+      - name: Build TCIProbe IPA
+        run: |
+          set -eux
+
+          SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
+          ROOT="/tmp/tci-probe-package"
+          APP="$ROOT/Payload/TCIProbe.app"
+
+          mkdir -p "$APP"
+
+          xcrun --sdk iphoneos clang \
+            -target arm64-apple-ios15.0 \
+            -isysroot "$SDK" \
+            -fobjc-arc \
+            -O2 \
+            -I/tmp/unicorn-tci/unicorn-engine-sys-tci/include \
+            ios/TCIProbe/main.m \
+            /tmp/unicorn-tci-ios-build/libunicorn-static.a \
+            /tmp/unicorn-tci-ios-build/libarm-softmmu.a \
+            /tmp/unicorn-tci-ios-build/libunicorn-common.a \
+            -framework UIKit \
+            -framework Foundation \
+            -framework CoreGraphics \
+            -lm -lpthread \
+            -o "$APP/TCIProbe"
+
+          cat > "$APP/Info.plist" <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleIdentifier</key>
+            <string>com.destinia.tcidiagnostic</string>
+            <key>CFBundleName</key>
+            <string>TCIProbe</string>
+            <key>CFBundleDisplayName</key>
+            <string>TCI Probe</string>
+            <key>CFBundleExecutable</key>
+            <string>TCIProbe</string>
+            <key>CFBundlePackageType</key>
+            <string>APPL</string>
+            <key>CFBundleShortVersionString</key>
+            <string>0.1.0</string>
+            <key>CFBundleVersion</key>
+            <string>1</string>
+            <key>MinimumOSVersion</key>
+            <string>15.0</string>
+            <key>LSRequiresIPhoneOS</key>
+            <true/>
+            <key>UIDeviceFamily</key>
+            <array><integer>1</integer></array>
+            <key>UILaunchScreen</key>
+            <dict/>
+          </dict>
+          </plist>
+          PLIST
+
+          plutil -lint "$APP/Info.plist"
+          file "$APP/TCIProbe"
+          xcrun vtool -show-build "$APP/TCIProbe"
+
+          cd "$ROOT"
+          zip -qry /tmp/TCIProbe-unsigned.ipa Payload
+
+          unzip -l /tmp/TCIProbe-unsigned.ipa
+
+      - name: Upload TCIProbe IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: TCIProbe-iOS-unsigned
+          path: /tmp/TCIProbe-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 7
