@@ -117,9 +117,9 @@ jobs:
           /tmp/qemu-9.2.0/configure \
             --cc="$CLANG" \
             --cpu=aarch64 \
-            --target-list=arm-linux-user \
+            --target-list=arm-softmmu \
             --enable-tcg \
-            --disable-system \
+            --enable-system \
             --disable-docs \
             --disable-werror \
             --extra-cflags="-target arm64-apple-ios15.0 -isysroot $SDK" \
