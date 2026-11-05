@@ -28,29 +28,31 @@ async function sha256Hex(bytes){
 
 /* The emulator owns its memory inside this worker. Terminating it discards saves. */
 importScripts('./vendor/unicorn_arm.js');
-let inventoryStorage=null;
+let inventoryStorage=null,featureStorage=null;
 let engine=null,inputs=null,timer=null,paused=false,booting=false,frameDelay=null,pendingLootOptions,lootFocused=true;
 const fail=error=>{clearTimeout(timer);paused=true;self.postMessage({type:'error',message:String(error?.message||error)});};
 async function fetchBytes(url){const response=await fetch(url);if(!response.ok)throw Error('Não foi possível carregar os arquivos do teste ('+response.status+').');return new Uint8Array(await response.arrayBuffer());}
-async function start(virtualControls=true,gameMode="classico",uiScale=100,language="pt",initialLootOptions,initialLootFocused=true,protectionSnapshot){
+async function start(virtualControls=true,gameMode="classico",uiScale=100,language="pt",initialLootOptions,initialLootFocused=true,protectionSnapshot,featuresSnapshot){
  if(engine||booting)return;booting=true;pendingLootOptions=initialLootOptions;lootFocused=!!initialLootFocused;
  try {
   self.postMessage({type:'status',message:'Carregando o jogo…'});
-  ({frameDelay}=await import('./frame-timing.mjs?v=0.10.3-hotfix1'));
-  const [{DestiniaWeb},uc,library,pack]=await Promise.all([import('./engine.mjs?v=0.10.3-hotfix1'),MUnicorn(),fetchBytes('./game/libdestinia_jni.so'),fetchBytes('./game/assets.bin')]);
+  ({frameDelay}=await import('./frame-timing.mjs?v=0.13.0'));
+  const [{DestiniaWeb},uc,library,pack]=await Promise.all([import('./engine.mjs?v=0.13.0'),MUnicorn(),fetchBytes('./game/libdestinia_jni.so'),fetchBytes('./game/assets.bin')]);
   const manifestLength=new DataView(pack.buffer).getUint32(0,true);if(manifestLength>200000||manifestLength+4>pack.length)throw Error('Pacote de recursos inválido.');
   const entries=JSON.parse(new TextDecoder().decode(pack.subarray(4,4+manifestLength))),assets=new Map();
   for(const entry of entries){if(typeof entry.name!=='string'||entry.offset<0||entry.size<0||4+manifestLength+entry.offset+entry.size>pack.length)throw Error('Recurso inválido.');assets.set(entry.name,pack.subarray(4+manifestLength+entry.offset,4+manifestLength+entry.offset+entry.size));}
   const hex=await sha256Hex(library);
   if(hex!=='f12f1d20ab42646ef81df27516851acccb9fffe7be07a054db83890d992df7e9')throw Error('Biblioteca original não corresponde ao teste verificado.');
-  const {InventoryStorageBridge}=await import('./inventory-storage.mjs?v=0.10.3-hotfix1');inventoryStorage=new InventoryStorageBridge(protectionSnapshot,message=>self.postMessage(message));
-  engine=new DestiniaWeb(uc,assets,{gameMode,uiScale:100,language,lootOptions:pendingLootOptions,inventoryStorage});engine.load(library);engine.lootQol.focused=!!lootFocused;await engine.prepareCodexPortraits();await engine.loadCloudSaves();engine.init();engine.setVirtualControls(virtualControls);const {FrameInputs}=await import('./input.mjs?v=0.10.3-hotfix1');inputs=new FrameInputs(event=>{if(event.type==='key')engine.key(event.key,event.down);else engine.touch(event.x,event.y,event.phase);});booting=false;self.postMessage({type:'ready'});tick();
+  const {InventoryStorageBridge}=await import('./inventory-storage.mjs?v=0.13.0');inventoryStorage=new InventoryStorageBridge(protectionSnapshot,message=>self.postMessage(message));
+  const {FeatureStorageBridge}=await import("./features-storage.mjs");featureStorage=new FeatureStorageBridge(gameMode,featuresSnapshot,message=>self.postMessage(message));
+  engine=new DestiniaWeb(uc,assets,{featureStorage,gameMode,uiScale:100,language,lootOptions:pendingLootOptions,inventoryStorage});engine.load(library);engine.lootQol.focused=!!lootFocused;await engine.prepareCodexPortraits();await engine.loadCloudSaves();engine.init();engine.setVirtualControls(virtualControls);const {FrameInputs}=await import('./input.mjs?v=0.13.0');inputs=new FrameInputs(event=>{if(event.type==='key')engine.key(event.key,event.down);else engine.touch(event.x,event.y,event.phase);});booting=false;self.postMessage({type:'ready'});tick();
  }catch(error){fail(error);}
 }
 function tick(){if(!engine||paused)return;try{if(engine.frame%10===0&&engine.frame<=50&&engine.menuState()<=0){engine.key(17,true);engine.key(17,false);}const t=performance.now(),wait=engine.step();inputs.afterFrame(engine.frame);if(engine.storeNotice){engine.storeNotice=false;inputs.clear();self.postMessage({type:"storeNotice"});}const pixels=engine.framebuffer();const elapsed=performance.now()-t;self.postMessage({type:'frame',pixels,frame:engine.frame,wait,elapsed},[pixels.buffer]);if(!wait){self.postMessage({type:'ended'});return;}clearTimeout(timer);timer=setTimeout(tick,frameDelay(wait,elapsed));}catch(error){fail(error);}}
 self.onmessage=event=>{const message=event.data;try{
  if(message.type==='nextFrame'){if(!engine||paused)return;clearTimeout(timer);tick();return;}
- if(message.type==='start'){start(message.virtualControls!==false,message.gameMode,message.uiScale,message.language,message.lootOptions,message.lootFocused,message.inventoryProtection);return;}
+ if(message.type==='start'){start(message.virtualControls!==false,message.gameMode,message.uiScale,message.language,message.lootOptions,message.lootFocused,message.inventoryProtection,message.featuresSnapshot);return;}
+ if(message.type==='featuresStorageAck'){featureStorage?.acknowledge(message);return;}
  if(message.type==='inventoryProtectionSnapshot'){inventoryStorage?.refresh(message.snapshot);return;}
  if(message.type==='inventoryProtectionAck'){inventoryStorage?.acknowledge(message);return;}
  if(message.type==='lootOptions'){pendingLootOptions=message.options;if(engine?.lootQol)engine.lootQol.configure(message.options);return;}
@@ -58,10 +60,11 @@ self.onmessage=event=>{const message=event.data;try{
  if(!engine||booting)return;
  if(message.type==='dropNames'){engine.dropNames.enabled=!!message.enabled&&!paused;}
  else if(message.type==='virtualControls'){if(message.preserveKeys)inputs.clearTouch();else inputs.clear();engine.setVirtualControls(message.visible);}
+ else if(message.type==='toggleFeatures0130'){inputs.clear();engine.features0130.toggle();}
  else if(message.type==='toggleWeaponsCatalog'){engine.weaponsCatalog?.toggle();}
  else if(message.type==='toggleSharedStash'){engine.sharedStash?.toggle();}
  else if(message.type==='toggleBounties'){engine.bounties?.toggle();}
- else if(message.type==='toggleDifficulty'){if(engine.difficulty)engine.difficulty.open=!engine.difficulty.open;}
+ else if(message.type==='toggleDifficulty'){if(engine.difficulty&&!engine.features0130.arena.active)engine.difficulty.open=!engine.difficulty.open;}
  else if(message.type==='pause'){engine.dropNames.enabled=false;inputs.clear();paused=!!message.value;clearTimeout(timer);self.postMessage({type:'pauseState',value:paused});if(!paused)tick();}
- else if((message.type==='touch'||message.type==='key')&&!paused){if(message.type==='touch'&&(engine.codexBarTouch(message.x,message.y)||engine.combatPower.captured||engine.combatPower.footerAt(message.x,message.y))){if(message.phase===0)inputs.clearTouch();engine.touch(message.x,message.y,message.phase);}else if(engine.sharedStash?.open||engine.bounties?.open||engine.weaponsCatalog?.open||engine.difficulty?.open||engine.inventory.open||engine.inventory.captured||engine.codexOpen||engine.codexTouchCaptured){if(message.type==='key')engine.key(message.key,message.down);else engine.touch(message.x,message.y,message.phase);}else{const wasOpen=engine.inventory.open||engine.codexOpen;inputs.handle(message,engine.frame);if(!wasOpen&&(engine.inventory.open||engine.codexOpen))inputs.clear();}}
+ else if((message.type==='touch'||message.type==='key')&&!paused){if(message.type==='touch'&&(engine.codexBarTouch(message.x,message.y)||engine.combatPower.captured||engine.combatPower.footerAt(message.x,message.y))){if(message.phase===0)inputs.clearTouch();engine.touch(message.x,message.y,message.phase);}else if(engine.features0130?.open||engine.sharedStash?.open||engine.bounties?.open||engine.weaponsCatalog?.open||engine.difficulty?.open||engine.inventory.open||engine.inventory.captured||engine.codexOpen||engine.codexTouchCaptured){if(message.type==='key')engine.key(message.key,message.down);else engine.touch(message.x,message.y,message.phase);}else{const wasOpen=engine.inventory.open||engine.codexOpen;inputs.handle(message,engine.frame);if(!wasOpen&&(engine.inventory.open||engine.codexOpen))inputs.clear();}}
 }catch(error){fail(error);}};

@@ -82,6 +82,7 @@ export class BossRushUI {
     if (this.currentTab === 2) return PETS_LIST.length;
     if (this.currentTab === 3) return 3;
     if (this.currentTab === 4) return ALL_TITLES.length;
+    if(this.currentTab===5)return this.engine?.features0130?.rows().length||0;
     return 0;
   }
 
@@ -91,14 +92,14 @@ export class BossRushUI {
 
     // Tabs: 5 (Left), 7 (Right)
     if (key === 5) {
-      this.currentTab = (this.currentTab - 1 + 5) % 5;
+      this.currentTab = (this.currentTab - 1 + 6) % 6;
       this.selectedIndex = 0;
       this.scrollOffset = 0;
       this.statusMessage = "";
       return true;
     }
     if (key === 7) {
-      this.currentTab = (this.currentTab + 1) % 5;
+      this.currentTab = (this.currentTab + 1) % 6;
       this.selectedIndex = 0;
       this.scrollOffset = 0;
       this.statusMessage = "";
@@ -232,12 +233,14 @@ export class BossRushUI {
       return true;
     }
 
-    // Abas: py + 20 a py + 36
-    if (y >= py + 20 && y <= py + 36) {
+    // Duas linhas de abas: py + 20 a py + 52.
+    if (y >= py + 20 && y < py + 52) {
       if (phase === 0) {
-        const tabW = Math.floor((pw - 16) / 4);
-        const t = Math.floor((x - (px + 8)) / tabW);
-        if (t >= 0 && t < 4) {
+        const tabW = Math.floor((pw - 16) / 3);
+        const row = y >= py + 36 ? 1 : 0;
+        const col = Math.floor((x - (px + 8)) / tabW);
+        const t = row * 3 + col;
+        if (x >= px + 8 && x < px + pw - 8 && col >= 0 && col < 3) {
           this.currentTab = t;
           this.selectedIndex = 0;
           this.scrollOffset = 0;
@@ -248,7 +251,7 @@ export class BossRushUI {
     }
 
     // Linhas
-    let rowY = py + 42;
+    let rowY = py + 60;
     const count = this.getItemsCount();
     for (let i = this.scrollOffset; i < count && i < this.scrollOffset + 7; i++) {
       if (y >= rowY - 2 && y < rowY + 14) {
@@ -295,21 +298,22 @@ export class BossRushUI {
     this.drawText(fb, width, height, px + pw - 24, py + 6, "[X]", 0xf800);
 
     // Abas
-    const tabNames = ["[CHEFES]", "[TORRE]", "[MASCOTES]", "[SANTUARIO]", "[TITULOS]"];
-    const tabW = Math.floor((pw - 16) / 4);
-    for (let t = 0; t < 4; t++) {
-      const tx = px + 8 + t * tabW;
+    const tabNames = ["[CHEFES]", "[TORRE]", "[MASCOTES]", "[SANTUARIO]", "[TITULOS]", "[SOBREVIVENCIA]"];
+    const tabW = Math.floor((pw - 16) / 3);
+    for (let t = 0; t < 6; t++) {
+      const tx = px + 8 + (t%3) * tabW;
+      const tabY=py+(t<3?20:36);
       const sel = (t === this.currentTab);
-      this.drawText(fb, width, height, tx + 4, py + 22, tabNames[t], sel ? 0x07e0 : 0x8c51);
+      this.drawText(fb, width, height, tx + 4, tabY + 2, tabNames[t], sel ? 0x07e0 : 0x8c51);
     }
 
     // Linha divisória
     for (let x = px + 8; x < px + pw - 8; x++) {
-      const at = ((py + 36) * width + x) * 2;
+      const at = ((py + 52) * width + x) * 2;
       fb[at] = 0xbf; fb[at + 1] = 0xd7;
     }
 
-    let rowY = py + 42;
+    let rowY = py + 60;
     if (this.currentTab === 0) {
       for (let i = this.scrollOffset; i < BOSS_RUSH_LIST.length && i < this.scrollOffset + 7; i++) {
         const b = BOSS_RUSH_LIST[i];

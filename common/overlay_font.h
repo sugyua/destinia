@@ -46,6 +46,7 @@ inline std::array<uint16_t,5> overlayGlyph(char32_t code) {
    case '-':return {8,8,8,8,8};case '/':return {32,16,8,4,2};case '_':return {64,64,64,64,64};
    case '<':return {0,8,20,34,0};case '>':return {0,34,20,8,0};case '^':return {4,2,1,2,4};
    case '+':return {8,8,62,8,8};case '(':return {0,28,34,65,0};case ')':return {0,65,34,28,0};
+   case '%':return {99,100,8,19,99};
    case ' ':return {0,0,0,0,0};default:return {2,1,81,9,6};
   }
  };

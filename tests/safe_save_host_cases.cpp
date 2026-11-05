@@ -32,6 +32,7 @@ int main(int argc,char**argv){
  shouldFail=false;assert(callFn(stubAddr(testId),{}));assert(diskText(target)=="novo");
  const char slotPath[]="/data/data/game.destiniaeng/files/save0.dat";wr(HEAP_BASE,slotPath,sizeof slotPath);
  const auto slotFile=fs::path(saveDir)/"save0.dat";std::ofstream(slotFile)<<"personagem";
+ difficultyProgress=destinia::loadDifficulty(fs::path(saveDir),destinia::progression::Mode::Classic);difficultyReady=true;
  codexAvailable=true;codex.entries[0][4].kills=9;
  removeOnly=true;shouldFail=true;assert(!callFn(stubAddr(testId),{}));assert(fs::exists(slotFile));assert(codex.entries.at(0).at(4).kills==9);
  shouldFail=false;assert(callFn(stubAddr(testId),{}));assert(!fs::exists(slotFile)&&codex.entries.count(0)==0);

@@ -8,7 +8,8 @@ export const TitleId = {
   MestreDoCombate: 4,
   MatadorDeBosses: 5,
   Complecionista: 6,
-  SenhorDoAbismo: 7
+  SenhorDoAbismo: 7,
+  MestreDaSobrevivencia: 8
 };
 
 export const ALL_TITLES = [
@@ -19,6 +20,7 @@ export const ALL_TITLES = [
   { id: TitleId.MestreDoCombate, nome: 'Mestre do Combate', descricao: 'Domínio avançado das artes bélicas.', atk: 15, def: 15, hp: 15, mp: 15 },
   { id: TitleId.MatadorDeBosses, nome: 'Matador de Chefes', descricao: 'Eliminou os grandes líderes do continente.', atk: 25, def: 20, hp: 20, mp: 20 },
   { id: TitleId.Complecionista, nome: 'Complecionista', descricao: '100% do Códex concluído. Força absoluta de Destinia.', atk: 100, def: 100, hp: 100, mp: 100 },
+  { id: TitleId.MestreDaSobrevivencia, nome: 'Mestre da Sobrevivencia', descricao: 'Concluiu a onda 20. +120% atributos, +20% resistencia, +15% esquiva.', atk: 120, def: 120, hp: 120, mp: 120, resistance: 20, evasion: 15 },
   { id: TitleId.SenhorDoAbismo, nome: 'Senhor do Abismo', descricao: 'Derrotou Diablo no Modo Abissal. O ápice do poder absoluto.', atk: 150, def: 150, hp: 150, mp: 150 }
 ];
 

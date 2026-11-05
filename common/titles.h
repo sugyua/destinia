@@ -1,6 +1,7 @@
 #pragma once
 #include "codex.h"
 #include "combat_power.h"
+#include "safe_save.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -17,7 +18,8 @@ enum class TitleId : uint32_t {
   MestreDoCombate = 4,
   MatadorDeBosses = 5,
   Complecionista = 6,
-  SenhorDoAbismo = 7
+  SenhorDoAbismo = 7,
+  MestreDaSobrevivencia = 8
 };
 
 struct TitleDef {
@@ -28,6 +30,8 @@ struct TitleDef {
   int defBonusPct = 0;
   int hpBonusPct = 0;
   int mpBonusPct = 0;
+  int resistancePct = 0;
+  int evasionPct = 0;
 };
 
 inline const std::vector<TitleDef>& allTitles() {
@@ -39,6 +43,7 @@ inline const std::vector<TitleDef>& allTitles() {
     { TitleId::MestreDoCombate, "Mestre do Combate", "Domínio avançado das artes bélicas.", 15, 15, 15, 15 },
     { TitleId::MatadorDeBosses, "Matador de Chefes", "Eliminou os grandes líderes do continente.", 25, 20, 20, 20 },
     { TitleId::Complecionista, "Complecionista", "100% do Códex concluído. Força absoluta de Destinia.", 100, 100, 100, 100 },
+    { TitleId::MestreDaSobrevivencia, "Mestre da Sobrevivencia", "Conclua a onda 20. +120% atributos, +20% resistência, +15% esquiva.", 120, 120, 120, 120, 20, 15 },
     { TitleId::SenhorDoAbismo, "Senhor do Abismo", "Derrotou Diablo no Modo Abissal. O ápice do poder absoluto.", 150, 150, 150, 150 }
   };
   return list;
@@ -164,13 +169,14 @@ public:
   bool save(const fs::path& dir) const {
     fs::path p = dir / "titles-v1.txt";
     fs::path tmp = dir / "titles-v1.txt.tmp";
-    std::ofstream out(tmp);
+    if(isLink(dir)||isLink(p)||isLink(tmp))return false;
+    std::ofstream out(tmp,std::ios::binary);
     if (!out.is_open()) return false;
     out << encode();
     out.close();
     std::error_code ec;
-    fs::rename(tmp, p, ec);
-    return !ec;
+    if(!out)return false;
+    try{AtomicSaveOps{}.replace(tmp,p);return true;}catch(...){return false;}
   }
 };
 
