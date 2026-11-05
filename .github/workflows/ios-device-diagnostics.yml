@@ -64,32 +64,18 @@ jobs:
             --enable-static \
             --disable-multi-os-directory
 
-      - name: Patch libffi ARM64 CFI for Apple assembler
+      - name: Disable libffi CFI for diagnostic build
         run: |
           python3 - <<'PY'
           from pathlib import Path
 
-          p = Path("/tmp/libffi-3.4.6/src/aarch64/sysv.S")
+          p = Path("/tmp/libffi-3.4.6/include/ffi_cfi.h")
           s = p.read_text()
-
-          old1 = "cfi_def_cfa(x1, 40);"
-          new1 = "cfi_def_cfa(x1, 40)"
-
-          old2 = "cfi_adjust_cfa_offset (ffi_closure_SYSV_FS)"
-          new2 = "cfi_adjust_cfa_offset (272)"
-
-          assert old1 in s, "Primeira expressao nao encontrada"
-          assert old2 in s, "Segunda expressao nao encontrada"
-
-          s = s.replace(old1, new1)
-          s = s.replace(old2, new2)
-          s = s.replace(
-              "cfi_adjust_cfa_offset (-ffi_closure_SYSV_FS)",
-              "cfi_adjust_cfa_offset (-272)"
-          )
-
+          old = "#ifdef HAVE_AS_CFI_PSEUDO_OP"
+          assert s.count(old) == 1
+          s = s.replace(old, "#if 0 /* diagnostic: disable CFI */")
           p.write_text(s)
-          print("Patch aplicado")
+          print("CFI disabled for diagnostic build")
           PY
       - name: Compile libffi
         run: |
