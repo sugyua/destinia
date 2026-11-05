@@ -58,12 +58,18 @@ public:
     uint16_t gameState = rd16(gameBase + 0x4854);
     if (gameState != 0) return false;
 
-    uint16_t curHp = rd16(gameBase + 0x48f2);
-    uint16_t maxHp = rd16(gameBase + 0x48c4); // stat 5 (PV maximos)
+    // Offsets ARM confirmados via dump de memoria:
+    //   0x48f2 = MP atual
+    //   0x48f4 = HP atual
+    //   0x48f6 = MP maximo
+    //   0x48f8 = HP maximo
+    //   0x48c4 = stat 5 (PV maximos)
+    //   0x48c6 = stat 6 (PM maximos)
+    uint16_t curHp = rd16(gameBase + 0x48f4);  // HP atual
+    uint16_t maxHp = rd16(gameBase + 0x48c4);  // stat 5 (PV maximos)
 
-    uint16_t curMp = rd16(gameBase + 0x48f6);
-    uint16_t maxMp = rd16(gameBase + 0x48c6); // stat 6
-    if (maxMp == 0) maxMp = rd16(gameBase + 0x48f8);
+    uint16_t curMp = rd16(gameBase + 0x48f2);  // MP atual
+    uint16_t maxMp = rd16(gameBase + 0x48c6);  // stat 6 (PM maximos)
 
     if (curHp == 0 || maxHp == 0) return false;
 
@@ -91,7 +97,7 @@ public:
       if (consumeItem(HP_POTION_ID)) {
         uint16_t heal = std::max<uint16_t>(50, maxHp * 40 / 100);
         uint16_t newHp = std::min<uint16_t>(maxHp, curHp + heal);
-        wr16(gameBase + 0x48f2, newHp);
+        wr16(gameBase + 0x48f4, newHp);
         cooldownHpTimer = config.cooldownFrames;
         totalHpUsed++;
         used = true;
@@ -107,7 +113,7 @@ public:
       if (consumeItem(MP_POTION_ID)) {
         uint16_t healMp = std::max<uint16_t>(30, maxMp * 35 / 100);
         uint16_t newMp = std::min<uint16_t>(maxMp, curMp + healMp);
-        wr16(gameBase + 0x48f6, newMp);
+        wr16(gameBase + 0x48f2, newMp);
         cooldownMpTimer = config.cooldownFrames;
         totalMpUsed++;
         used = true;

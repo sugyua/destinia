@@ -9,6 +9,12 @@ Histórico em português, da versão mais recente para a mais antiga. Somente al
 - Auto-poção usa as poções do inventário e a rotina nativa; falha não recuperável de restauração do atalho é propagada ao tratamento de erro do host.
 - O Mago dos Bosses lê o saldo real de ouro. O rastreador de missões no Zoom foi afastado da faixa superior; confirme a posição durante uma luta.
 - Os resets pagos de atributos e habilidades do Mago ficam temporariamente indisponíveis por segurança e não cobram ouro.
+- **Corrigido offsets de memória do Auto-Potion (Problema 3 do vault):**
+  - `curHp` agora lê de `0x48f4` (HP atual) em vez de `0x48f2` (MP atual)
+  - `curMp` agora lê de `0x48f2` (MP atual) em vez de `0x48f6` (MP máximo)
+  - Escrita de cura HP agora grava em `0x48f4` em vez de `0x48f2`
+  - Escrita de cura MP agora grava em `0x48f2` em vez de `0x48f6`
+  - Removido fallback inválido `0x48f8` (HP máximo) para cálculo de MP máximo
 - Esta versão não corrige automaticamente a mana já acima do máximo, nem o crédito de contratos ou recompensas antigas. Barra de abas duplicada e escala de inventário/status continuam em investigação.
 - Os testes usam dados sintéticos; campanha completa, controle físico e validação visual em gameplay permanecem pendentes. Faça backup dos saves antes de atualizar.
 - A Web não foi alterada nesta entrega de PC.
