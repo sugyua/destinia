@@ -44,23 +44,35 @@ jobs:
           cmake --version
           xcodebuild -showsdks
 
-      - name: Build Unicorn for iOS ARM64
+      - name: Download libffi 3.4.6
         run: |
-          git clone --depth 1 --branch 2.1.4 \
-            https://github.com/unicorn-engine/unicorn.git /tmp/unicorn-ios
+          curl -fL https://github.com/libffi/libffi/releases/download/v3.4.6/libffi-3.4.6.tar.gz -o /tmp/libffi.tar.gz
+          tar -xzf /tmp/libffi.tar.gz -C /tmp
 
-          cmake -S /tmp/unicorn-ios -B /tmp/unicorn-ios-build \
-            -G Ninja \
-            -DCMAKE_SYSTEM_NAME=iOS \
-            -DCMAKE_OSX_SYSROOT=iphoneos \
-            -DCMAKE_OSX_ARCHITECTURES=arm64 \
-            -DCMAKE_OSX_DEPLOYMENT_TARGET=15.0 \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DUNICORN_BUILD_TESTS=OFF \
-            -DUNICORN_ARCH=arm
+      - name: Configure libffi for iOS ARM64
+        run: |
+          cd /tmp/libffi-3.4.6
+          SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
+          export CC="$(xcrun --sdk iphoneos --find clang)"
+          export CFLAGS="-target arm64-apple-ios15.0 -isysroot $SDK"
+          export LDFLAGS="-target arm64-apple-ios15.0 -isysroot $SDK"
 
-          cmake --build /tmp/unicorn-ios-build --parallel 4
+          ./configure \
+            --host=aarch64-apple-darwin \
+            --build="$(./config.guess)" \
+            --disable-shared \
+            --enable-static \
+            --disable-multi-os-directory
 
-          find /tmp/unicorn-ios-build \
-            -name "libunicorn*.a" -print
+      - name: Compile libffi
+        run: |
+          cd /tmp/libffi-3.4.6
+          make -j2
+
+      - name: Inspect libffi
+        run: |
+          cd /tmp/libffi-3.4.6
+          LIB=$(find . -name libffi.a -print -quit)
+          test -n "$LIB"
+          xcrun lipo -info "$LIB"
+          xcrun ar -t "$LIB" | head -20
