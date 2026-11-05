@@ -95,6 +95,15 @@ jobs:
           curl -fL https://download.qemu.org/qemu-9.2.0.tar.xz -o /tmp/qemu.tar.xz
           tar -xJf /tmp/qemu.tar.xz -C /tmp
 
+      - name: Setup Python for QEMU
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install QEMU Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install distlib meson ninja
       - name: Configure QEMU TCI for iOS ARM64
         run: |
           set -eux
