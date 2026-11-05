@@ -1,17 +1,16 @@
 import {decodePortrait} from './codex-portraits.mjs';
-import {overlayGlyph} from './overlay-font.mjs';
 export const MAGE_ASSETS=Object.freeze(['mon6_0_head.wmb','mon6.agd','shadow.wmb']);
 const need=(yes,message)=>{if(!yes)throw Error(message);};
 export function bossMageColor(c){const r=(c>>>11)*8,g=(c>>>5&63)*4,b=(c&31)*8,luma=Math.floor((3*r+6*g+b)/10),i=Math.min(7,Math.floor(luma/32));return [0x0823,0x1048,0x18ee,0x22b6,0x449d,0x8e7f,0xd7bf,0xffff][r>g+40&&r>b+40?Math.min(2,i):i];}
 function validateArt(art){need(art&&Number.isInteger(art.width)&&Number.isInteger(art.height)&&art.width>0&&art.height>0&&art.width<=256&&art.height<=256&&art.pixels?.length===art.width*art.height,'Mago: arte invalida');}
-export function bossMagePalette(source){validateArt(source);return {...source,pixels:Uint32Array.from(source.pixels,c=>c&0x10000?0x10000|bossMageColor(c&65535):0)};}
+export function bossMagePalette(source){validateArt(source);return {...source,pixels:source.pixels.slice()};}
 export async function unpackMageResource(bytes){
  need(bytes?.length&&bytes.length<=2097152,'Mago: recurso invalido');if(bytes[0]!==90||bytes[1]!==67||bytes[2]!==80||bytes[3]!==0)return bytes;
  need(bytes.length>=12,'Mago: ZCP truncado');const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.length),size=view.getUint32(8,true);need(size>0&&size<=2097152&&view.getUint32(4,true)===bytes.length-12,'Mago: ZCP invalido');
  const reader=new Blob([bytes.subarray(12)]).stream().pipeThrough(new DecompressionStream('deflate')).getReader(),out=new Uint8Array(size);let at=0;
  try{for(;;){const {value,done}=await reader.read();if(done)break;if(at+value.length>size){await reader.cancel();throw Error('Mago: ZCP excessivo');}out.set(value,at);at+=value.length;}}finally{reader.releaseLock();}need(at===size,'Mago: ZCP tamanho divergente');return out;
 }
-export async function loadBossMageArt(assets){const [w,a,s]=await Promise.all(MAGE_ASSETS.map(n=>unpackMageResource(assets.get(n))));const body=decodePortrait(w,a),single=new Uint8Array(20);single[0]=1;single[2]=1;single[11]=1;const shadow=decodePortrait(s,single,0);validateArt(body);validateArt(shadow);return {body:bossMagePalette(body),shadow:{...shadow,pixels:Uint32Array.from(shadow.pixels,c=>c&0x10000?0x10823:0)}};}
+export async function loadBossMageArt(assets){const [w,a,s]=await Promise.all(MAGE_ASSETS.map(n=>unpackMageResource(assets.get(n))));const body=decodePortrait(w,a),single=new Uint8Array(20);single[0]=1;single[2]=1;single[11]=1;const shadow=decodePortrait(s,single,0);validateArt(body);validateArt(shadow);return {body:bossMagePalette(body),shadow:{...shadow,pixels:shadow.pixels.slice()}};}
 export function mageFacing(npc,x,y,facing){const dx=npc.x-x,dy=npc.y-y;if(Math.abs(dx)>28||Math.abs(dy)>28)return false;return facing===0?dx<0:facing===1?dx>0:facing===2?dy<0:facing===3?dy>0:false;}
 export function placeBossMage(area,map,bytes){
  need(Number.isInteger(area)&&area>=0&&area<=2&&Number.isInteger(map)&&map>=0&&map<=255&&bytes?.length<=2097152,'Mago: mapa invalido');let at=0;
@@ -73,16 +72,9 @@ export class BossMage{
   const site=this.visibleSite();if(!site)return;const r=this.r,g=r.exports.get('Game'),x=site.x-r.get16(g+0x4878,true),y=site.y-r.get16(g+0x487a,true);paintBossMage(pixels,r.width,r.height,this.art.body,this.art.shadow,x,y);
   const hx=r.get16(g+0x4890,true),hy=r.get16(g+0x4892,true);
   if(Math.abs(hx-site.x)>48||Math.abs(hy-site.y)>48)return;
-  const label='MAGO DOS BOSSES',textW=label.length*6,textH=11,left=x-Math.floor(textW/2),top=y-this.art.body.height-12;
-  const padX=4,padY=2,bx=left-padX,by=top-padY,bw=textW+padX*2,bh=textH+padY*2;
-  for(let py=Math.max(0,by);py<Math.min(r.height,by+bh);py++){
-   for(let px=Math.max(0,bx);px<Math.min(r.width,bx+bw);px++){
-    if((px===bx||px===bx+bw-1)&&(py===by||py===by+bh-1))continue;
-    const at=(py*r.width+px)*2,c=pixels[at]|(pixels[at+1]<<8),dark=(c>>1)&0x7bef;
-    pixels[at]=dark&255;pixels[at+1]=dark>>>8;
-   }
-  }
-  const text=(dx,dy,color)=>{for(let n=0;n<label.length;n++){const glyph=overlayGlyph(label[n]);for(let col=0;col<5;col++)for(let row=0;row<11;row++)if(glyph[col]&(1<<row)){const px=left+n*6+col+dx,py=top+row-2+dy;if(px>=0&&py>=0&&px<r.width&&py<r.height){const at=(py*r.width+px)*2;pixels[at]=color&255;pixels[at+1]=color>>>8;}}}};
-  text(1,1,0);text(0,0,0xd7bf);
+  if(!r.originalUi)return;
+  const label='MAGO DOS BOSSES',bw=Math.min(r.width-8,112),bh=22,bx=Math.max(4,Math.min(r.width-bw-4,x-Math.floor(bw/2))),by=Math.max(4,Math.min(r.height-bh-4,y-this.art.body.height-bh-2));
+  r.originalUi.panel(pixels,{x:bx,y:by,w:bw,h:bh});
+  r.originalUi.text(pixels,bx+6,by+5,label,0xd7bf,bw-12,1);
  }
 }

@@ -31,7 +31,8 @@ class RuntimeHostTests(unittest.TestCase):
         cls.binaries = {}
         for variant in ['host','host_zoom']:
             exe = Path(cls.build.name)/variant
-            command = ['g++','-std=c++17','-O0',str(ROOT/'tests/runtime_host_cases.cpp'),'-o',str(exe)]
+            version=(ROOT/'VERSION').read_text().strip()
+            command = ['g++','-std=c++17','-O0','-DDESTINIA_VERSION="'+version+'"',str(ROOT/'tests/runtime_host_cases.cpp'),'-o',str(exe)]
             if variant == 'host_zoom': command.append('-DDESTINIA_TEST_ZOOM')
             subprocess.run(command+flags, check=True, capture_output=True, text=True)
             cls.binaries[variant] = exe
@@ -88,6 +89,40 @@ class RuntimeHostTests(unittest.TestCase):
                 result=self.run_host(variant,env={'DESTINIA_TEST_EMU_FAIL':'1'})
                 self.assertIn('PROBLEMA',result.stderr)
                 self.assertNotEqual(result.returncode,0,'Falha emulada retornou sucesso')
+
+    def test_unicorn_open_failure_does_not_touch_save(self):
+        self.check_unicorn_boot_failure('open', 'uc_open')
+
+    def test_unicorn_map_and_core_hook_failures_do_not_touch_save(self):
+        for failure in ['map:20000000','map:30000000','map:30100000','map:40000000','map:7f000000','hook:stubs','hook:return']:
+            with self.subTest(failure=failure):
+                self.check_unicorn_boot_failure(failure, 'uc_mem_map' if failure.startswith('map:') else 'uc_hook_add')
+
+    def check_unicorn_boot_failure(self, failure, diagnostic):
+        for variant in self.binaries:
+            with self.subTest(variant=variant):
+                case=self.base/(variant+'-'+failure.replace(':','-'))
+                case.mkdir()
+                save=case/'save'
+                result=self.run_host(variant,['--save',str(save)],env={'DESTINIA_TEST_UC_FAIL':failure})
+                self.assertNotEqual(result.returncode,0)
+                self.assertIn(diagnostic,result.stderr)
+                self.assertNotIn('initGame ok',result.stderr)
+                self.assertFalse(save.exists(), 'Rejected initialization created save directory')
+                self.assertEqual(result.stderr.count('TEST_UC_CLOSED'),0 if failure=='open' else 1)
+                # Recovery is forbidden as well as writes to an existing save.
+                save.mkdir()
+                (save/'sentinel.bin').write_bytes(b'untouched save')
+                journal=case/'save.transaction'
+                journal.mkdir()
+                (journal/'owner').write_text('unknown journal')
+                before={str(p.relative_to(case)):p.read_bytes() for p in case.rglob('*') if p.is_file()}
+                result=self.run_host(variant,['--save',str(save)],env={'DESTINIA_TEST_UC_FAIL':failure})
+                self.assertNotEqual(result.returncode,0)
+                self.assertIn(diagnostic,result.stderr)
+                self.assertNotIn('initGame ok',result.stderr)
+                self.assertEqual(result.stderr.count('TEST_UC_CLOSED'),0 if failure=='open' else 1)
+                self.assertEqual(before,{str(p.relative_to(case)):p.read_bytes() for p in case.rglob('*') if p.is_file()})
 
     def test_sdl_resource_failures_return_error(self):
         for variant in self.binaries:

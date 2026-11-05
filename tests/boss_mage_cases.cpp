@@ -4,7 +4,7 @@
 using namespace destinia;
 int main(int argc,char** argv){
  CodexPortrait source{2,2,{0,0x10000u|0xffffu,0x10000u|0xf800u,0x10000u|0x8410u}};auto copy=source;
- auto blue=bossMagePalette(source);assert(source.pixels==copy.pixels&&blue.pixels[0]==0&&blue.width==2&&blue.height==2);assert(blue.pixels[2]!=source.pixels[2]);
+ auto blue=bossMagePalette(source);assert(source.pixels==copy.pixels&&blue.pixels[0]==0&&blue.width==2&&blue.height==2);assert(blue.pixels==source.pixels);
  for(size_t i=0;i<4;i++)assert(bool(blue.pixels[i]&0x10000)==bool(source.pixels[i]&0x10000));
  MageSite site{0,65,200,200};assert(mageFacing(site,200,216,2));assert(!mageFacing(site,200,216,3));assert(!mageFacing(site,200,229,2));
  assert(mageFacing(site,184,200,1)&&mageFacing(site,216,200,0)&&mageFacing(site,200,184,3));

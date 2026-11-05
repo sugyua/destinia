@@ -13,12 +13,12 @@ inline uint16_t bossMageColor(uint16_t color){
  static constexpr uint16_t ramp[]={0x0823,0x1048,0x18ee,0x22b6,0x449d,0x8e7f,0xd7bf,0xffff};
  const int index=std::min(7,luma/32);return ramp[r>g+40&&r>b+40?std::min(2,index):index];
 }
-inline CodexPortrait bossMagePalette(const CodexPortrait& source){validateMageArt(source);auto result=source;for(auto& c:result.pixels)c=c&0x10000u?0x10000u|bossMageColor(uint16_t(c)):0;return result;}
+inline CodexPortrait bossMagePalette(const CodexPortrait& source){validateMageArt(source);return source;}
 inline BossMageArt loadBossMageArt(const std::vector<uint8_t>& body,const std::vector<uint8_t>& animation,const std::vector<uint8_t>& shadow){
  auto pose=codexDecodePortrait(codexUnpackResource(body),codexUnpackResource(animation));validateMageArt(pose);
  std::vector<uint8_t> single(20);single[0]=1;single[2]=1;single[11]=1;
  auto shade=codexDecodePortrait(codexUnpackResource(shadow),single,0);validateMageArt(shade);
- for(auto& c:shade.pixels)if(c&0x10000)c=0x10823u;
+
  return {bossMagePalette(pose),std::move(shade)};
 }
 inline bool mageFacing(const MageSite& npc,int x,int y,int facing){

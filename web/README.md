@@ -1,8 +1,12 @@
-# Destinia 0.12.1 Beta — fontes do navegador
+# Destinia 0.17.2 Beta — fontes do navegador
+
+Gravação só é confirmada após HTTP de sucesso e `ok: true`; aviso persistente informa falhas sem apagar os dados em memória. Respostas inválidas de saves não são aplicadas parcialmente. A confirmação é do servidor, sem prometer Google Drive ou PC/Web. O servidor estático da VPN não fornece /api/save: progresso ARM fica nesta aba; sidecars do navegador têm contratos próprios.
+
+Fontes0.17.2 e VPN no PC atualizadas, cópia das fontes e HTTP conferidos: http://100.108.92.19:8000/ . Site privadoCodex mantém0.13.0 conhecido, ferramenta indisponível e audiência preservada. Safari físico não foi executado nesta entrega. [Teste seguro de sync](tests/cloud-save.test.mjs): servidor efêmero e dados sintéticos; comando legado também seguro, sem arquivos pessoais.
 
 **Atalhos:** F4 Catálogo, F5 Baú, F8 Bounties. Press/release sem repetição; F5 protegido em partida carregada/pausada. Tab preservado.
 
-**Deployment 0.12.1 não concluído:** ferramenta Sites indisponível nesta sessão. A revisão do site não foi confirmada; os registros de funcionalidades abaixo incluem histórico.
+**Histórico — deployment 0.13.0 publicado no Site privado existente:** arena e refinamento +15; acesso permanece restrito ao proprietario. O repositorio nao contem dados pessoais do jogo.
 
 Teste privado: https://destinia-web-experimental.leafyheron257.chatgpt.site/
 

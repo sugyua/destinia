@@ -2,6 +2,7 @@
 #include "shared_stash.h"
 #include "ui_transform.h"
 #include "overlay_font.h"
+#include "original_ui.h"
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -106,12 +107,33 @@ public:
       }
     };
 
+    std::vector<UiRect> originalRects;
+    auto panel = [&](int x, int y, int w, int h, uint16_t c) {
+      auto r = transform.rect(x, y, w, h);
+      if (paintOriginalPanel(pixels, width, height, r.x, r.y, r.w, r.h)) {
+        originalRects.push_back({x,y,w,h});
+        return;
+      }
+      rect(x,y,w,h,c);
+    };
+
     auto frame = [&](int rx, int ry, int rw, int rh, uint16_t c) {
+      for (const auto& r : originalRects) {
+        if ((rx == r.x && ry == r.y && rw == r.w && rh == r.h) ||
+            (rx == r.x+1 && ry == r.y+1 && rw == r.w-2 && rh == r.h-2)) return;
+      }
+      auto r = transform.rect(rx, ry, rw, rh);
+      if (paintOriginalPanel(pixels,width,height,r.x,r.y,r.w,r.h)) return;
+
       for (int x = 0; x < rw; ++x) { pixel(rx + x, ry, c); pixel(rx + x, ry + rh - 1, c); }
       for (int y = 0; y < rh; ++y) { pixel(rx, ry + y, c); pixel(rx + rw - 1, ry + y, c); }
     };
 
     auto text = [&](int x, int y, const std::string& value, uint16_t color, int scale = 1) {
+      auto point = transform.point(x,y);
+      if (paintOriginalText(pixels,width,height,point.first,point.second,value,color,0,
+                            std::max(1,int(std::lround(scale*transform.scale()))))) return;
+
       for (size_t at = 0; at < value.size(); x += 6 * scale) {
         auto bits = overlayGlyph(overlayCodepoint(value, at));
         for (int i = 0; i < 5; ++i) {
@@ -142,7 +164,7 @@ public:
     };
 
     // Fundo Principal do Baú
-    rect(p.x, p.y, p.w, p.h, panelBg);
+    panel(p.x, p.y, p.w, p.h, panelBg);
     frame(p.x, p.y, p.w, p.h, borderCol);
     frame(p.x + 1, p.y + 1, p.w - 2, p.h - 2, gold);
 
@@ -151,7 +173,7 @@ public:
 
     // Botão Fechar [X]
     auto cb = closeButton(width, height);
-    rect(cb.x, cb.y, cb.w, cb.h, 0x8000);
+    panel(cb.x, cb.y, cb.w, cb.h, 0x8000);
     text(cb.x + 5, cb.y + 3, "X", white, 1);
 
     // Quantidade de itens
@@ -163,7 +185,7 @@ public:
     for (int pIdx = 0; pIdx < 2; ++pIdx) {
       auto tb = tabButton(pIdx, width, height);
       bool active = (page == size_t(pIdx));
-      rect(tb.x, tb.y, tb.w, tb.h, active ? tabActive : bgDark);
+      panel(tb.x, tb.y, tb.w, tb.h, active ? tabActive : bgDark);
       frame(tb.x, tb.y, tb.w, tb.h, active ? gold : borderCol);
       char tabTitle[32];
       std::snprintf(tabTitle, sizeof(tabTitle), "PAGINA %d", pIdx + 1);
@@ -177,14 +199,15 @@ public:
       bool hasItem = (gIdx < stash.items.size());
       bool isSelected = (selectedIndex == i);
 
-      rect(sr.x, sr.y, sr.w, sr.h, isSelected ? 0x2167 : bgDark);
+      panel(sr.x, sr.y, sr.w, sr.h, isSelected ? 0x2167 : bgDark);
       frame(sr.x, sr.y, sr.w, sr.h, isSelected ? gold : borderCol);
 
+      if(isSelected){auto pos=transform.point(sr.x-5,sr.y+5);paintOriginalCursor(pixels,width,height,pos.first,pos.second);}
       if (hasItem) {
         const auto& it = stash.items[gIdx];
         uint16_t col = rankColors[std::min<uint8_t>(it.rank, 4)];
         // Indicador de Raridade / Miniatura no slot
-        rect(sr.x + 4, sr.y + 4, sr.w - 8, sr.h - 8, 0x1102);
+        panel(sr.x + 4, sr.y + 4, sr.w - 8, sr.h - 8, 0x1102);
         frame(sr.x + 4, sr.y + 4, sr.w - 8, sr.h - 8, col);
 
         char lvText[16];

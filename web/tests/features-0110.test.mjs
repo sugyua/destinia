@@ -109,7 +109,7 @@ test('Contratos Offline 0.11: 3 contratos diarios, contagem de abates e resgate 
 });
 
 test('Quest Tracker HUD: alternancia de exibicao e leitura de objetivos', () => {
-  const tracker = new QuestTrackerWeb(null);
+  const tracker = new QuestTrackerWeb({width:400,height:240});
   assert.equal(tracker.minimized, false);
   tracker.toggle();
   assert.equal(tracker.minimized, true);
@@ -122,7 +122,7 @@ test('Quest Tracker HUD: alternancia de exibicao e leitura de objetivos', () => 
   assert.equal(tracker.destination, 'Lagrant');
 
   // Toque na hitbox (canto superior direito)
-  const handled = tracker.handleTouch(700, 15, 0);
+  const handled = tracker.handleTouch(tracker.layout().x+5,tracker.layout().y+5,0);
   assert.equal(handled, true);
   assert.equal(tracker.minimized, true);
 });
@@ -317,4 +317,19 @@ test('Suporte a Controles USB 0.11: Chords com Select e Botoes L3/R3', async () 
   pad.buttons[1].pressed = false;
   pad.buttons[8].pressed = false;
   gamepad.tick(active);
+});
+
+
+test('Auto-pocao: mana permanece independente de PV maximo ausente', () => {
+  const g = 0x10000;
+  const mem = new Map([[g+0x48f2,500],[g+0x48c4,0],[g+0x48f6,100],[g+0x48c6,1000]]);
+  const engine = {exports:new Map([['Game',g]]),rd16:p=>mem.get(p)||0,wr16:(p,v)=>mem.set(p,v)};
+  const ap = new AutoPotionController(engine);
+  ap.update();
+  assert.equal(mem.get(g+0x48f6),450);
+  assert.equal(mem.get(g+0x48f2),500);
+  assert.equal(ap.cooldownHpTimer,0);
+  mem.set(g+0x48f2,0);mem.set(g+0x48f6,100);ap.cooldownMpTimer=0;
+  ap.update();
+  assert.equal(mem.get(g+0x48f6),100,'Sem PV atual, nenhuma assistencia deve atuar');
 });
