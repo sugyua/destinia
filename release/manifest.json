@@ -52,6 +52,7 @@
     "common/loot_qol.h",
     "common/loot_qol_runtime.h",
     "common/new_game_plus.h",
+    "common/original_ui.h",
     "common/offline_store_host.h",
     "common/overlay_font.h",
     "common/version_stamp.h",
