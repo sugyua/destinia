@@ -1,0 +1,53 @@
+﻿name: iOS ARM64 - libffi Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-libffi:
+    runs-on: macos-15
+
+    steps:
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+          xcodebuild -version
+
+      - name: Download libffi 3.4.6
+        run: |
+          curl -fL https://github.com/libffi/libffi/releases/download/v3.4.6/libffi-3.4.6.tar.gz -o libffi.tar.gz
+          tar -xzf libffi.tar.gz
+
+      - name: Configure for iOS ARM64
+        run: |
+          cd libffi-3.4.6
+
+          SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
+
+          export CC="$(xcrun --sdk iphoneos --find clang)"
+          export CFLAGS="-arch arm64 -isysroot $SDK -miphoneos-version-min=15.0"
+          export LDFLAGS="-arch arm64 -isysroot $SDK -miphoneos-version-min=15.0"
+
+          ./configure \
+            --host=aarch64-apple-darwin \
+            --build="$(./config.guess)" \
+            --disable-shared \
+            --enable-static \
+            --disable-multi-os-directory
+
+      - name: Compile
+        run: |
+          cd libffi-3.4.6
+          make -j2
+
+      - name: Inspect result
+        run: |
+          cd libffi-3.4.6
+
+          find . -name 'libffi.a' -print
+
+          LIB=$(find . -name 'libffi.a' -print -quit)
+          test -n "$LIB"
+
+          xcrun lipo -info "$LIB"
+          xcrun ar -t "$LIB" | head -20
