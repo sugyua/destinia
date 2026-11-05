@@ -1,0 +1,26 @@
+﻿name: iOS Unicorn Smoke Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  unicorn-smoke:
+    runs-on: macos-15
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout Destinia
+        uses: actions/checkout@v4
+
+      - name: Install Unicorn
+        run: brew install unicorn
+
+      - name: Compile ARM smoke test
+        run: |
+          clang++ -std=c++17 \
+            ios/tests/unicorn_smoke.cpp \
+            $(pkg-config --cflags --libs unicorn) \
+            -o unicorn_smoke
+
+      - name: Execute ARM smoke test
+        run: ./unicorn_smoke
