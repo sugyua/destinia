@@ -1,14 +1,47 @@
-# Destinia 0.16.1 Beta
+# Destinia 0.17.4 Beta
 
-> **Versão 0.16.1 Beta (28/10/2026).** O menu principal mostra a versão atual, lida do arquivo VERSION durante a compilação; inclui correção da auto-poção e as atualizações 0.13 a 0.16.
+> **Versão 0.17.4 Beta (05/11/2026).** O menu principal mostra a versão atual, lida do arquivo VERSION durante a compilação; inclui sincronização com as releases 0.17.0 a 0.17.4 e atualizações acumuladas 0.13 a 0.17.
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.16.1 Beta](https://github.com/sugyua/destinia/releases/tag/v0.16.1-beta)** — nova versão no menu, correção da auto-poção e atualizações acumuladas. Consulte **Dependências**.
+**[Baixar Destinia 0.17.4 Beta](https://github.com/sugyua/destinia/releases/tag/v0.17.4-beta.1)** — sincronização com releases 0.17.x, interface original, inicialização segura, confirmação de saves Web e atualizações acumuladas. Consulte **Dependências**.
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 
 **Web 0.13:** arena e refino publicados no site privado; F12, Ctrl+F3 e lote sao exclusivos dos hosts PC.
+
+## Novidade 0.17.4 Beta — Sincronização com releases 0.17.x
+
+- Auto-poção usa as poções do inventário e a rotina nativa; falha não recuperável de restauração do atalho é propagada ao tratamento de erro do host.
+- O Mago dos Bosses lê o saldo real de ouro. O rastreador de missões no Zoom foi afastado da faixa superior.
+- Os resets pagos de atributos e habilidades do Mago ficam temporariamente indisponíveis por segurança e não cobram ouro.
+- Esta versão não corrige automaticamente a mana já acima do máximo, nem o crédito de contratos ou recompensas antigas. Barra de abas duplicada e escala de inventário/status continuam em investigação.
+- A Web não foi alterada nesta entrega de PC.
+
+## Novidade 0.17.3 Beta
+
+- Amplia proporcionalmente o menu principal no modo Zoom e ajusta o clique para a imagem exibida.
+- Mantém a câmera e o enquadramento do jogo e dos demais painéis.
+- **Auto-poção:** a versão atual pode alterar a mana e consumir itens incorretamente. Desative-a com H a cada inicialização; a correção está em um PR separado.
+
+## Novidade 0.17.2 Beta — Confirmação de saves Web
+
+- Após falha no carregamento inicial, envios de saves ficam desativados até um carregamento confirmado; o progresso permanece em memória e a cópia remota não recebe a sessão iniciada sem confirmação.
+- Gravação online só é confirmada após HTTP de sucesso e `ok: true`; erros e confirmações negativas mantêm aviso separado do FPS.
+- Carregamento de saves decodifica toda a resposta antes de atualizar os arquivos em memória. Sidecars protegidos são preservados.
+
+## Novidade 0.17.1 Beta — Inicialização segura
+
+- Hosts normal/Zoom encerram com diagnóstico se Unicorn não abrir, mapear uma das cinco regiões essenciais ou instalar hooks de stubs/retorno.
+- Save é preparado somente após o boot essencial: falhas de abertura, mapeamento ou hooks essenciais não criam pasta, recuperam journal nem geram backup.
+- Cleanup do emulador parcial preservado; endereços ARM, câmera/Zoom, ritmo e formatos de save inalterados.
+
+## Novidade 0.17.0 Beta — Interface original
+
+- Molduras, fontes e cursor originais nas interfaces adicionadas, com cache e composição sem alterar saves.
+- Missões mostram título, objetivo e destino também na Web; toque e desenho compartilham a mesma geometria e não cobrem menus originais.
+- Catálogo, baú, contratos, arena/refino, inventário e avisos revisados para 400×240 e 800×480; UI externa do navegador segue a paleta original.
+- Companheiros usam recursos cosméticos originais pet3/pet14/pet21 e retrato boss8; IDs, nomes e bônus expandidos preservados.
 
 ## Novidade 0.16.0
 - No inventario, abra o painel de filtros e selecione LOTE. Confira a previa antes de confirmar; ate 50 itens elegiveis sao desmontados pelo fluxo ARM original. Itens protegidos e equipados ficam de fora. Esc cancela. F8 executa/confirma em duas etapas.
@@ -320,6 +353,12 @@ Da mais recente para a mais antiga. As releases anteriores e seus downloads são
 
 | Release | Lançamento (Brasília) |
 | --- | --- |
+| [0.17.4 Beta — Sincronização com releases 0.17.x](https://github.com/sugyua/destinia/releases/tag/v0.17.4-beta.1) | 05/11/2026 |
+| [0.17.4 Beta PC](https://github.com/sugyua/destinia/releases/tag/v0.17.4-beta) | 02/11/2026 |
+| [0.17.3 Beta — PC](https://github.com/sugyua/destinia/releases/tag/v0.17.3-beta) | 01/11/2026 |
+| [0.17.2 Beta — confirmação de saves Web](https://github.com/sugyua/destinia/releases/tag/v0.17.2-beta) | 30/10/2026 |
+| [0.17.1 Beta — inicialização segura](https://github.com/sugyua/destinia/releases/tag/v0.17.1-beta) | 30/10/2026 |
+| [0.17.0 Beta — interface original](https://github.com/sugyua/destinia/releases/tag/v0.17.0-beta) | 30/10/2026 |
 | [0.9.9 Beta — QoL, Autoloot, Indicador FC e Atalhos](https://github.com/sugyua/destinia/releases/tag/v0.9.9-beta) | 26/10/2026 |
 | [0.9.8 Beta — Proteção de equipamentos e chefes no Códex](https://github.com/sugyua/destinia/releases/tag/v0.9.8-beta) | 26/10/2026 |
 | [0.9.7 Beta — FC e comparador nativos](https://github.com/sugyua/destinia/releases/tag/v0.9.7-beta) | 25/10/2026 |
