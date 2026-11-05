@@ -113,8 +113,20 @@ jobs:
           mkdir -p /tmp/qemu-ios-build
           cd /tmp/qemu-ios-build
 
+          cat > /tmp/ios-meson-cross.ini <<EOF
+          [host_machine]
+          system = 'darwin'
+          cpu_family = 'aarch64'
+          cpu = 'aarch64'
+          endian = 'little'
+
+          [properties]
+          needs_exe_wrapper = true
+          EOF
+
           PKG_CONFIG=false \
           /tmp/qemu-9.2.0/configure \
+            --cross-prefix= \
             --cc="$CLANG" \
             --cpu=aarch64 \
             --target-list=arm-softmmu \
