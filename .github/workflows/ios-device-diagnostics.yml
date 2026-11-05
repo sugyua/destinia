@@ -89,3 +89,30 @@ jobs:
           test -n "$LIB"
           xcrun lipo -info "$LIB"
           xcrun ar -t "$LIB" | head -20
+
+      - name: Download QEMU 9.2.0
+        run: |
+          curl -fL https://download.qemu.org/qemu-9.2.0.tar.xz -o /tmp/qemu.tar.xz
+          tar -xJf /tmp/qemu.tar.xz -C /tmp
+
+      - name: Configure QEMU TCI for iOS ARM64
+        run: |
+          set -eux
+          SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
+          CLANG="$(xcrun --sdk iphoneos --find clang)"
+
+          mkdir -p /tmp/qemu-ios-build
+          cd /tmp/qemu-ios-build
+
+          PKG_CONFIG=false \
+          /tmp/qemu-9.2.0/configure \
+            --cc="$CLANG" \
+            --cpu=aarch64 \
+            --target-list=arm-linux-user \
+            --enable-tcg \
+            --disable-system \
+            --disable-docs \
+            --disable-werror \
+            --extra-cflags="-target arm64-apple-ios15.0 -isysroot $SDK" \
+            --extra-ldflags="-target arm64-apple-ios15.0 -isysroot $SDK" \
+            -Dtcg_interpreter=true
