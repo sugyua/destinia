@@ -1,4 +1,4 @@
-﻿name: iOS Device Diagnostics
+name: iOS Device Diagnostics
 
 on:
   push:
@@ -64,6 +64,33 @@ jobs:
             --enable-static \
             --disable-multi-os-directory
 
+      - name: Patch libffi ARM64 CFI for Apple assembler
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path("/tmp/libffi-3.4.6/src/aarch64/sysv.S")
+          s = p.read_text()
+
+          old1 = "cfi_def_cfa(x1, 40);"
+          new1 = "cfi_def_cfa(x1, 40)"
+
+          old2 = "cfi_adjust_cfa_offset (ffi_closure_SYSV_FS)"
+          new2 = "cfi_adjust_cfa_offset (272)"
+
+          assert old1 in s, "Primeira expressao nao encontrada"
+          assert old2 in s, "Segunda expressao nao encontrada"
+
+          s = s.replace(old1, new1)
+          s = s.replace(old2, new2)
+          s = s.replace(
+              "cfi_adjust_cfa_offset (-ffi_closure_SYSV_FS)",
+              "cfi_adjust_cfa_offset (-272)"
+          )
+
+          p.write_text(s)
+          print("Patch aplicado")
+          PY
       - name: Compile libffi
         run: |
           cd /tmp/libffi-3.4.6
