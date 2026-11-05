@@ -1,0 +1,45 @@
+﻿name: iOS Device Diagnostics
+
+on:
+  push:
+    branches:
+      - ios/unicorn-poc
+    paths:
+      - ".github/workflows/ios-device-diagnostics.yml"
+      - "ios/**"
+  workflow_dispatch:
+
+jobs:
+  ios-diagnostics:
+    runs-on: macos-15
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout Destinia
+        uses: actions/checkout@v4
+
+      - name: Check Xcode and iOS SDK
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+
+      - name: Check ARM64 iOS compiler
+        run: |
+          cat > /tmp/ios_check.c <<'EOF'
+          int destinia_ios_check(void) {
+              return 42;
+          }
+          EOF
+
+          xcrun --sdk iphoneos clang \
+            -arch arm64 \
+            -target arm64-apple-ios15.0 \
+            -c /tmp/ios_check.c \
+            -o /tmp/ios_check.o
+
+          file /tmp/ios_check.o
+
+      - name: Check build tools
+        run: |
+          cmake --version
+          xcodebuild -showsdks
