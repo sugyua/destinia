@@ -43,3 +43,24 @@ jobs:
         run: |
           cmake --version
           xcodebuild -showsdks
+
+      - name: Build Unicorn for iOS ARM64
+        run: |
+          git clone --depth 1 --branch 2.1.4 \
+            https://github.com/unicorn-engine/unicorn.git /tmp/unicorn-ios
+
+          cmake -S /tmp/unicorn-ios -B /tmp/unicorn-ios-build \
+            -G Ninja \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_SYSROOT=iphoneos \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=15.0 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DUNICORN_BUILD_TESTS=OFF \
+            -DUNICORN_ARCH=arm
+
+          cmake --build /tmp/unicorn-ios-build --parallel 4
+
+          find /tmp/unicorn-ios-build \
+            -name "libunicorn*.a" -print
