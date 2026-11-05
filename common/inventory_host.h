@@ -27,7 +27,11 @@ static bool inventoryIsUpgrade(u32 pointer){
  const auto preview=fcCompareEquipment(pointer,true);return inventoryUpgradeCache[pointer]=preview.valid&&preview.projected>preview.current;
 }
 static void inventoryIconHook(uc_engine*,uint64_t,uint32_t,void*){
- if(inventoryIcons.size()<200)inventoryIcons.push_back({R(3),int32_t(R(1)),int32_t(R(2))});
+ u32 ptr=R(3);int x=int32_t(R(1)),y=int32_t(R(2));
+ // Evitar mãos duplicadas: nao registrar o mesmo ponteiro duas vezes no mesmo frame
+ if(inventoryIcons.size()>=200)return;
+ for(const auto& ic:inventoryIcons)if(ic.pointer==ptr)return;
+ inventoryIcons.push_back({ptr,x,y});
 }
 static bool inventoryRefreshProtection(){
  try{destinia::InventoryProtection next;destinia::loadInventoryProtection(fs::path(saveDir),next);inventoryProtection=std::move(next);inventoryProtectionReady=true;return true;}
