@@ -2,6 +2,9 @@
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - ios/unicorn-poc
 
 jobs:
   unicorn-smoke:
@@ -24,3 +27,4 @@ jobs:
 
       - name: Execute ARM smoke test
         run: ./unicorn_smoke
+
