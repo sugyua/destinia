@@ -4,6 +4,55 @@
 
 Histórico em português, da versão mais recente para a mais antiga. Somente alterações efetivas são registradas como novidades.
 
+## 0.17.4 Beta - 02/11/2026
+
+- Auto-poção usa as poções do inventário e a rotina nativa; falha não recuperável de restauração do atalho é propagada ao tratamento de erro do host.
+- O Mago dos Bosses lê o saldo real de ouro. O rastreador de missões no Zoom foi afastado da faixa superior; confirme a posição durante uma luta.
+- Os resets pagos de atributos e habilidades do Mago ficam temporariamente indisponíveis por segurança e não cobram ouro.
+- Esta versão não corrige automaticamente a mana já acima do máximo, nem o crédito de contratos ou recompensas antigas. Barra de abas duplicada e escala de inventário/status continuam em investigação.
+- Os testes usam dados sintéticos; campanha completa, controle físico e validação visual em gameplay permanecem pendentes. Faça backup dos saves antes de atualizar.
+- A Web não foi alterada nesta entrega de PC.
+
+## 0.17.3 Beta - 01/11/2026
+
+- Amplia proporcionalmente o menu principal no modo Zoom e ajusta o clique para a imagem exibida.
+- Mantém a câmera e o enquadramento do jogo e dos demais painéis.
+- A validação automática usou saves sintéticos; a conferência visual em gameplay pelo jogador permanece pendente.
+
+**Auto-poção:** a versão atual pode alterar a mana e consumir itens incorretamente. Desative-a com H a cada inicialização; a correção está em um PR separado.
+
+Os pacotes não incluem dados proprietários do jogo nem bibliotecas externas. Nenhuma atualização da versão Web está incluída nesta release.
+
+## 0.17.2 Beta - 30/10/2026
+
+- Após falha no carregamento inicial, envios de saves ficam desativados até um carregamento confirmado; o progresso permanece em memória e a cópia remota não recebe a sessão iniciada sem confirmação.
+- Gravação online só é confirmada após HTTP de sucesso e `ok: true`; erros e confirmações negativas mantêm aviso separado do FPS. Progresso em memória é preservado.
+- Carregamento de saves decodifica toda a resposta antes de atualizar os arquivos em memória. Sidecars protegidos são preservados.
+- Mensagens confirmam apenas a resposta do servidor; não prometem Google Drive, durabilidade externa ou sincronização PC/Web. Servidor estáticoVPN continua sem API de saves.
+- Teste de sincronização usa apenas bytes sintéticos e servidor efêmero em loopback. O comando antigo também ficou seguro para execução.
+- Hosts PC preservam a correção de inicialização0.17.1; nesta revisão mudam identificação de versão e documentação, sem mudança funcional nativa.
+- Campanha, Safari físico e USB não executados nesta entrega. Site privadoCodex sem novo deployment por ferramenta indisponível. Dependências e dados originais permanecem fora dos ZIPs.
+
+## 0.17.1 Beta - 30/10/2026
+
+- Hosts normal/Zoom encerram com diagnóstico se Unicorn não abrir, mapear uma das cinco regiões essenciais ou instalar hooks de stubs/retorno.
+- Save é preparado somente após o boot essencial: falhas de abertura, mapeamento ou hooks essenciais não criam pasta, recuperam journal nem geram backup.
+- Cleanup do emulador parcial preservado; endereços ARM, câmera/Zoom, ritmo e formatos de save inalterados.
+- Testes com falhas existem apenas nas fixtures. Hooks opcionais/Zoom não foram reestruturados.
+- Web sem alteração funcional: metadados0.17.1. Site Codex não atualizado; alternativaVPN no PC e limites em README. Safari físico/campanha não executados nesta entrega.
+- Estoque da auto-poção continua pendência conhecida; gatilho de 50% não significa consumo de item correto.
+- ZIPs sem DLLs externas, dados originais ou saves. Dependências em INSTALL.md.
+
+## 0.17.0 Beta - 30/10/2026
+
+- Molduras, fontes e cursor originais nas interfaces adicionadas, com cache e composição sem alterar saves.
+- Missões mostram título, objetivo e destino também na Web; toque e desenho compartilham a mesma geometria e não cobrem menus originais.
+- Catálogo, baú, contratos, arena/refino, inventário e avisos revisados para 400×240 e 800×480; UI externa do navegador segue a paleta original.
+- Companheiros usam recursos cosméticos originais pet3/pet14/pet21 e retrato boss8; IDs, nomes e bônus expandidos preservados. Essa associação não é uma identificação de espécies canônicas.
+- Bibliotecas, imagens originais, saves e dependências externas não fazem parte dos ZIPs públicos. Consulte INSTALL.md.
+- Testes físicos da campanha/Safari e deployment do Site não devem ser inferidos dos testes automatizados. Consulte docs/VERIFICACAO_0.17.0.md para o estado verificado.
+- Defeito preexistente de estoque da autopoção continua documentado; esta atualização visual não o corrige.
+
 ## 0.16.1 Beta - 28/10/2026
 
 - Menu principal mostra a versão atual no canto inferior direito; o número vem do VERSION no build dos hosts normal e Zoom.
