@@ -26,6 +26,8 @@ struct ActiveGame {
     uint32_t frameAddress=0;
     uint32_t touchAddress=0;
     uint32_t nextFrame=0;
+    bool profilePending=false;
+    std::vector<std::pair<uint32_t,std::string>> exports;
     ~ActiveGame() {
         runtime.reset();
         if (uc) uc_close(uc);
@@ -507,6 +509,19 @@ static int destinia_probe_impl(
             game->frameAddress=frameAddress;
             game->touchAddress=touchAddress;
             game->nextFrame=framesRendered;
+            for (size_t i=0;i<image.symbols.size();++i) {
+                if (image.symbols[i].shndx!=0 &&
+                    !image.names[i].empty()) {
+                    game->exports.emplace_back(
+                        static_cast<uint32_t>(base)+
+                            (image.symbols[i].value&~1u),
+                        image.names[i]);
+                }
+            }
+            std::sort(game->exports.begin(),game->exports.end(),
+                      [](const auto &x,const auto &y) {
+                          return x.first<y.first;
+                      });
             activeGame=std::move(game);
         } else {
             runtime.reset();
@@ -583,6 +598,9 @@ extern "C" int destinia_game_step(
     std::vector<uint8_t> pixels;
     std::string error;
     uint32_t delay=0;
+    const bool profiling=activeGame->profilePending;
+    activeGame->profilePending=false;
+    if (profiling) activeGame->runtime->requestGameplayProfile();
     if (!activeGame->runtime->runGameFrame(
             activeGame->frameAddress, activeGame->nextFrame,
             pixels, delay, error)) {
@@ -594,7 +612,41 @@ extern "C" int destinia_game_step(
     *nextMs=delay;
     std::memcpy(frameOut,pixels.data(),400u*240u*2u);
     message[0]=0;
+    if (profiling) {
+        std::map<std::string,uint64_t> totals;
+        for (const auto &block:activeGame->runtime->profiledBlocks()) {
+            const auto it=std::upper_bound(
+                activeGame->exports.begin(),activeGame->exports.end(),
+                block.first,[](uint32_t address,const auto &item) {
+                    return address<item.first;
+                });
+            if (it==activeGame->exports.begin()) {
+                totals["[unknown]"]+=block.second;
+            } else {
+                totals[std::prev(it)->second]+=block.second;
+            }
+        }
+        std::vector<std::pair<std::string,uint64_t>> hot(
+            totals.begin(),totals.end());
+        std::sort(hot.begin(),hot.end(),
+                  [](const auto &x,const auto &y) {
+                      return x.second>y.second;
+                  });
+        std::string report="TOP ARM32:";
+        for(size_t i=0;i<std::min<size_t>(5,hot.size());++i) {
+            report+="\n"+std::to_string(i+1)+". "+
+                hot[i].first+" ("+std::to_string(hot[i].second)+")";
+            std::fprintf(stderr,"IPHONE_ARM32_HOT rank=%zu count=%llu name=%s\n",
+                i+1,static_cast<unsigned long long>(hot[i].second),
+                hot[i].first.c_str());
+        }
+        std::snprintf(message,capacity,"%s",report.c_str());
+    }
     return 1;
+}
+
+extern "C" void destinia_game_profile_next(void) {
+    if (activeGame) activeGame->profilePending=true;
 }
 
 extern "C" int destinia_game_touch(
