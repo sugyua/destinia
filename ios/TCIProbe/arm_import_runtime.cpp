@@ -1126,7 +1126,13 @@ bool ArmImportRuntime::runGameFrame(
         error="jniRun: nao inicializou registradores ARM32";
         return false;
     }
-    const bool profileFrame = frameNumber==48 &&
+    uint32_t profileTarget=48;
+    if (const char *target=std::getenv("DESTINIA_PROFILE_FRAME")) {
+        const long parsed=std::strtol(target,nullptr,10);
+        if (parsed>=0 && parsed<=420)
+            profileTarget=static_cast<uint32_t>(parsed);
+    }
+    const bool profileFrame = frameNumber==profileTarget &&
         std::getenv("DESTINIA_PROFILE_BLOCKS")!=nullptr;
     if (profileFrame) {
         profileBlocks_.clear();
