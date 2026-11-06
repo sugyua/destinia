@@ -19,6 +19,9 @@ public:
                            std::string &error);
     bool runGameInit(uint32_t address, const std::string &assetsRoot,
                      std::string &error);
+    bool runGameFrame(uint32_t address, uint32_t frameNumber,
+                      std::vector<uint8_t> &frameBuffer, uint32_t &nextMs,
+                      std::string &error);
     unsigned implementedCount() const;
 private:
     static void onCode(uc_engine *, uint64_t, uint32_t, void *);
@@ -46,6 +49,7 @@ private:
     uint32_t heapNext_ = 0x30000000;
     uint32_t nextFile_ = 0x5000;
     uint32_t nextArray_ = 0x1000;
+    uint32_t screenArray_ = 0;
     uint32_t nextClass_ = 0x100;
     std::map<uint32_t,std::vector<uint8_t>> arrays_;
     std::map<uint32_t,uint32_t> arrayPointers_;
