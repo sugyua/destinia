@@ -1,34 +1,40 @@
-Destinia iOS ARM32 diagnostic milestone 0.3.6
+Destinia iOS ARM32 diagnostic milestone 0.3.7
 Branch: ios/unicorn-poc
-Build: unsigned IPA (requires signing for installation)
-Replaces native TCIProbe iOS 0.3.5; identical app bundle identifier.
+Build: 11, unsigned IPA (must be signed with AltStore or equivalent)
+Upgrade over native TCIProbe iOS 0.3.6; preserve CFBundleIdentifier
+com.destinia.tcidiagnostic and installed app data. DO NOT uninstall to upgrade.
 
-User iPhone evidence for 0.3.5 (06 Nov 2026):
-- Real gameplay: 3.3 FPS, ARM32 296.0 ms/frame, RGB565 conversion 0.1 ms.
-- Target 16 game updates/sec (~62.5 ms/update) remains UNVERIFIED.
+Real iPhone 15 Pro Max gameplay evidence from 0.3.6 (06 Nov 2026):
+- Game progression: completed three tutorial maps and reached first town.
+- 7.2-7.3 FPS in the examined scenes, ARM32 132.6-133.1ms per update.
+- RGB preparation approximately 0.1ms; RAM approximately 119-124MiB.
+- Thermal state transitioned from NORMAL to ELEVADO after longer play.
+- Target remains 16 logical updates/sec (62.5ms); NOT YET VERIFIED.
 
-Improvements compiled into 0.3.6:
-- Original Android 1.0.6 engine and original game assets remain unchanged.
-- Keep previous native RGB565 fill/sprite/heap accelerators.
-- Enable native RGB565 transparency ALPHA16 and alpha-row hooks.
-- Enable native _Grp_drawDodge16 color blend hook, replacing only a
-  Thumb per-pixel inner loop in Unicorn guest memory.
-- Preserve original clipping, game logic, timing, and disk library.
-- Runtime signature checks reject unexpected original ARM32 binaries.
-- Keep HUD (three fingers) and one-frame original function profiler
-  (four fingers). Profiling is deliberately slow, and should only
-  be used for one screenshot, not continuous benchmark FPS.
+0.3.7 changes:
+- Enable the native Grp_drawSimpleClipWImageP RGB565 palette-copy row loop
+  acceleration (DESTINIA_NATIVE_SIMPLECLIP=1), leaving its ARM32 clipping,
+  control flow, original library on disk, and game timing unchanged.
+- Preserve native fill, sprite, heap, ALPHA16, alpha-row, and Dodge16 hooks
+  validated in iOS 0.3.6.
+- Fix profiler banner layout so TOP ARM32 names are not truncated to one line.
+- Keep HUD toggle on three-finger touch and single-frame top-functions
+  profiler on four-finger touch. Profiling intentionally slows one frame.
+- Bundle original Android 1.0.6 libdestinia_jni.so and assets unchanged.
 
-Evidence on GitHub macOS ARM64 stage runner (not iPhone):
-- CI run 42242039264, 420/420 RGB565 frame hashes identical.
-- Frame 300..419 original median 315.5ms, optimized median 181.0ms
-  (~42.6% lower ARM32 runtime); p90 365ms -> 221ms.
-- 186529 _Grp_drawDodge16 rows accelerated in that sequence.
-- No iPhone FPS claim or guarantee, independent verification needed.
+Reproducible Linux ARM64 GitHub Actions validation:
+- Stage navigation run 42267860632, success, all 420 frame hashes identical
+  across original baseline, 0.3.6 native optimizations and SimpleClip.
+- For frames 300-419, the prior optimized median was 190.0ms and with
+  SimpleClip 130.0ms (31.6% reduction in ARM32 time); p90 195 -> 135ms.
+- The native SimpleClip hook processed 1,200,150 source image rows.
+- These are runner measurements, NOT guaranteed iPhone performance.
 
-User install/test steps:
-1. Back up saves and install over 0.3.5; do not uninstall the app.
-2. Use the same scene as prior 0.3.5 screenshot for comparison.
-3. Three-finger gesture shows fps/ARM32 metrics. Capture screenshot.
-4. Four fingers once to profile following frame, screenshot TOP ARM32.
-5. Run at least 10 minutes; check heat/thermal/RAM; ensure saves work.
+Installation and testing:
+1. Preserve app data/saves; install 0.3.7 on top of 0.3.6 (same bundle ID).
+2. Play the same tutorial/city scenes and record three-finger HUD metrics.
+3. Repeat combat, map transitions and saving; inspect artifacts / artifacts
+   missing / sprite transparency, particularly in the first town.
+4. Tap four fingers once for single ARM32 profile and send TOP ARM32 screenshot.
+5. Monitor frame-time peaks, sustained FPS, memory and thermal state.
+No claim of 16 FPS until actual-device measurement.
