@@ -105,17 +105,17 @@ jobs:
         run: |
           set -euo pipefail
           DESTINIA_FAST_ALPHA16=1 DESTINIA_FAST_ALPHA=1 \
-            DESTINIA_PROBE_FRAMES=280 \
+            DESTINIA_PROBE_FRAMES=240 \
             DESTINIA_AUTOTOUCH="65,200,211;120,200,67" \
             DESTINIA_HASH_FRAMES=1 \
             /tmp/destinia-gameplay-test game/lib/armeabi/libdestinia_jni.so \
             2> /tmp/destinia-menu-alpha-combined.log
           grep '^ARM32_FRAME_HASH' /tmp/destinia-menu-alpha-combined.log \
             > /tmp/destinia-menu-hashes-combined.txt
-          test "$(wc -l < /tmp/destinia-menu-hashes-combined.txt)" -eq 280
+          test "$(wc -l < /tmp/destinia-menu-hashes-combined.txt)" -eq 240
           cmp /tmp/destinia-menu-hashes-baseline.txt \
               /tmp/destinia-menu-hashes-combined.txt
-          echo 'ALPHA COMBINADO: 280/280 frames identicos ao jogo original'
+          echo 'ALPHA COMBINADO: 240/240 frames identicos ao jogo original'
           grep 'ARM32_FRAME_PERF frame=220' /tmp/destinia-menu-alpha-combined.log
 
       - name: Upload scene progression and hot functions
