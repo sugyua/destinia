@@ -234,6 +234,11 @@ static int destinia_probe_impl(
                     "Falha no initGame original: "+runtimeError);
             }
 
+            if (!runtime->selfTestJniBufferReuse(runtimeError)) {
+                throw std::runtime_error(
+                    "Falha no teste de reuso JNI: "+runtimeError);
+            }
+
             for (size_t i=0; i<image.symbols.size(); ++i) {
                 if (image.symbols[i].shndx!=0 &&
                     image.names[i]==
