@@ -100,9 +100,6 @@ jobs:
           python3 ios/tools/summarize_arm32_perf.py \
             /tmp/destinia-arm32-baseline.log /tmp/destinia-arm32-native.log \
             /tmp/destinia-arm32-direct.log
-            /tmp/destinia-hashes-base.txt
-            /tmp/destinia-hashes-native.txt
-            /tmp/destinia-hashes-direct.txt
           cat /tmp/destinia-arm32-native.log | grep 'ARM32_HOT_FUNCTION' | head -12
 
       - name: Endurance regression and byte-for-byte verification of all 360 frames
@@ -151,5 +148,8 @@ jobs:
             /tmp/destinia-arm32-baseline.log
             /tmp/destinia-arm32-native.log
             /tmp/destinia-arm32-direct.log
+            /tmp/destinia-hashes-base.txt
+            /tmp/destinia-hashes-native.txt
+            /tmp/destinia-hashes-direct.txt
           if-no-files-found: ignore
           retention-days: 7
