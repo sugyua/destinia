@@ -1,7 +1,8 @@
-Destinia iOS ARM32 milestone 0.2.0
+Destinia iOS ARM32 milestone 0.3.0
 Branch: ios/unicorn-poc
-Automated gate: ELF relocated 213/213, guest C runtime, JNI asset bridge,
-original ARM32 getMyCash and Java_game_destiniaeng_GameThread_initGame.
-Next manual device check: install the unsigned IPA via AltStore/AltServer
-and confirm TCIProbe reports "InitGame: OK" on the iPhone.
-This is still a diagnostic executable, not a playable game.
+Automated regression PASS: 213/213 relocations, native C/JNI import layer,
+original ARM32 initGame, persistent jniRun framebuffer and jniTouch inputs.
+Visual evidence: original Gamevil splash and Destinia title rendered on macOS.
+Native iOS interface: landscape RGB565 presentation with touch forwarding.
+Next device milestone: install Destinia-iOS unsigned IPA using AltStore/AltServer.
+Note: audio and full in-game performance are not yet validated on iPhone.
