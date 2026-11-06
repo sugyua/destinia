@@ -1,5 +1,5 @@
 #include "../../common/elf_image.h"
-#include "arm_import_runtime.h"
+#include "arm_import_runtime->h"
 #include <unicorn/unicorn.h>
 #include <cstdio>
 #include <cstring>
@@ -14,10 +14,27 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <memory>
+#include <utility>
 
-extern "C" int destinia_probe_elf_frame(
+namespace {
+struct ActiveGame {
+    uc_engine *uc=nullptr;
+    std::unique_ptr<destinia::ArmImportRuntime> runtime;
+    uint32_t frameAddress=0;
+    uint32_t touchAddress=0;
+    uint32_t nextFrame=0;
+    ~ActiveGame() {
+        runtime->reset();
+        if (uc) uc_close(uc);
+    }
+};
+std::unique_ptr<ActiveGame> activeGame;
+}
+
+static int destinia_probe_impl(
     const char *path, char *out, size_t capacity,
-    uint8_t *frameOut, size_t frameCapacity) {
+    uint8_t *frameOut, size_t frameCapacity, bool retainGame) {
 
     if (!path || !out || capacity == 0) return 0;
     constexpr size_t kFrameBytes=400u*240u*2u;
@@ -27,6 +44,7 @@ extern "C" int destinia_probe_elf_frame(
     }
 
     try {
+        if (retainGame) activeGame.reset();
         std::ifstream input(path, std::ios::binary | std::ios::ate);
         if (!input) throw std::runtime_error("Arquivo nao encontrado");
 
@@ -159,11 +177,15 @@ extern "C" int destinia_probe_elf_frame(
         uint32_t nextFrameMs=0;
         uint32_t framesRendered=0;
         std::vector<uint8_t> lastPixels;
+        uint32_t frameAddress=0;
+        uint32_t touchAddress=0;
+        std::unique_ptr<destinia::ArmImportRuntime> runtime;
         {
-            destinia::ArmImportRuntime runtime(uc, stubAddresses);
+            runtime=std::make_unique<destinia::ArmImportRuntime>(
+                uc, stubAddresses);
             std::string runtimeError;
-            if (!runtime.install(runtimeError) ||
-                !runtime.selfTest(runtimeError)) {
+            if (!runtime->install(runtimeError) ||
+                !runtime->selfTest(runtimeError)) {
                 throw std::runtime_error(
                     "Falha no teste de imports ARM32: " + runtimeError);
             }
@@ -182,7 +204,7 @@ extern "C" int destinia_probe_elf_frame(
                     "Exportacao original getMyCash nao encontrada");
             }
             uint32_t gameValue=0;
-            if (!runtime.runOriginalExport(
+            if (!runtime->runOriginalExport(
                     originalAddress,gameValue,runtimeError)) {
                 throw std::runtime_error(
                     "Falha ao executar getMyCash original: "+runtimeError);
@@ -206,13 +228,12 @@ extern "C" int destinia_probe_elf_frame(
             if (!std::filesystem::is_directory(assets))
                 assets=libraryPath.parent_path().parent_path()
                     .parent_path()/"assets";
-            if (!runtime.runGameInit(
+            if (!runtime->runGameInit(
                     initAddress,assets.string(),runtimeError)) {
                 throw std::runtime_error(
                     "Falha no initGame original: "+runtimeError);
             }
 
-            uint32_t frameAddress=0;
             for (size_t i=0; i<image.symbols.size(); ++i) {
                 if (image.symbols[i].shndx!=0 &&
                     image.names[i]==
@@ -224,6 +245,17 @@ extern "C" int destinia_probe_elf_frame(
             }
             if (!frameAddress)
                 throw std::runtime_error("jniRun original ausente");
+            for (size_t i=0; i<image.symbols.size(); ++i) {
+                if (image.symbols[i].shndx!=0 &&
+                    image.names[i]==
+                    "Java_game_destiniaeng_GameThread_jniTouch") {
+                    touchAddress=static_cast<uint32_t>(base) +
+                        image.symbols[i].value;
+                    break;
+                }
+            }
+            if (!touchAddress)
+                throw std::runtime_error("jniTouch original ausente");
             uint32_t targetFrames=4;
             bool paced=false;
             if (const char *env=std::getenv("DESTINIA_PROBE_FRAMES")) {
@@ -235,7 +267,7 @@ extern "C" int destinia_probe_elf_frame(
             }
             for (uint32_t frame=0; frame<targetFrames; ++frame) {
                 std::vector<uint8_t> pixels;
-                if (!runtime.runGameFrame(
+                if (!runtime->runGameFrame(
                         frameAddress,frame,pixels,nextFrameMs,runtimeError)) {
                     throw std::runtime_error(
                         "Falha no jniRun quadro "+std::to_string(frame)+
@@ -262,7 +294,18 @@ extern "C" int destinia_probe_elf_frame(
                 std::memcpy(frameOut,lastPixels.data(),kFrameBytes);
         }
 
-        uc_close(uc);
+        if (retainGame) {
+            auto game=std::make_unique<ActiveGame>();
+            game->uc=uc;
+            game->runtime=std::move(runtime);
+            game->frameAddress=frameAddress;
+            game->touchAddress=touchAddress;
+            game->nextFrame=framesRendered;
+            activeGame=std::move(game);
+        } else {
+            runtime.reset();
+            uc_close(uc);
+        }
 
         std::snprintf(
             out, capacity,
@@ -304,8 +347,64 @@ extern "C" int destinia_probe_elf_frame(
         return 0;
     }
 }
+extern "C" int destinia_probe_elf_frame(
+    const char *path, char *out, size_t capacity,
+    uint8_t *frameOut, size_t frameCapacity) {
+    return destinia_probe_impl(
+        path,out,capacity,frameOut,frameCapacity,false);
+}
+
 extern "C" int destinia_probe_elf(
     const char *path, char *out, size_t capacity) {
     return destinia_probe_elf_frame(
         path,out,capacity,nullptr,0);
+}
+
+extern "C" int destinia_game_open(
+    const char *path, char *out, size_t capacity,
+    uint8_t *frameOut, size_t frameCapacity) {
+    return destinia_probe_impl(
+        path,out,capacity,frameOut,frameCapacity,true);
+}
+
+extern "C" int destinia_game_step(
+    uint8_t *frameOut, size_t frameCapacity, uint32_t *nextMs,
+    char *message, size_t capacity) {
+    if (!activeGame || !frameOut || !nextMs ||
+        !message || !capacity || frameCapacity<400u*240u*2u)
+        return 0;
+
+    std::vector<uint8_t> pixels;
+    std::string error;
+    uint32_t delay=0;
+    if (!activeGame->runtime->runGameFrame(
+            activeGame->frameAddress, activeGame->nextFrame,
+            pixels, delay, error)) {
+        std::snprintf(message,capacity,"Quadro %u: %s",
+                      activeGame->nextFrame,error.c_str());
+        return 0;
+    }
+    ++activeGame->nextFrame;
+    *nextMs=delay;
+    std::memcpy(frameOut,pixels.data(),400u*240u*2u);
+    message[0]=0;
+    return 1;
+}
+
+extern "C" int destinia_game_touch(
+    uint32_t x, uint32_t y, uint32_t type,
+    char *message, size_t capacity) {
+    if (!activeGame || !message || !capacity) return 0;
+    std::string error;
+    if (!activeGame->runtime->runGameTouch(
+            activeGame->touchAddress,x,y,type,error)) {
+        std::snprintf(message,capacity,"Toque: %s",error.c_str());
+        return 0;
+    }
+    message[0]=0;
+    return 1;
+}
+
+extern "C" void destinia_game_close(void) {
+    activeGame.reset();
 }
