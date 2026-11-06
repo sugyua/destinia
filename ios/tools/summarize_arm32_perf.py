@@ -36,9 +36,10 @@ def report(label, frames, hot):
         print(f"    {rank:2d}. {blocks:>9d} instrucoes; {name}")
 
 def main():
-    if len(sys.argv)!=3:
-        raise SystemExit("Uso: summarize_arm32_perf.py baseline.log optimized.log")
-    (base,h1),(opt,h2)=[load(p) for p in sys.argv[1:]]
+    if len(sys.argv) not in (3,4):
+        raise SystemExit(
+            "Uso: summarize_arm32_perf.py baseline.log optimized.log [direct.log]")
+    (base,h1),(opt,h2)=[load(p) for p in sys.argv[1:3]]
     report("MODO BASE",base,h1)
     report("ACELERACAO NATIVA",opt,h2)
     indices=range(47,50)
@@ -46,6 +47,14 @@ def main():
     after=[opt[i][0] for i in indices if i in opt]
     if before and after and median(after):
         print(f"\nSpeedup (splash 47..49): {median(before)/median(after):.2f}x")
+    if len(sys.argv)==4:
+        direct,hot=load(sys.argv[3])
+        report("HEAP NATIVO MAPEADO",direct,hot)
+        for group,indices in (("boot",range(1,46)),("splash",range(47,50))):
+            a=[opt[i][0] for i in indices if i in opt]
+            b=[direct[i][0] for i in indices if i in direct]
+            if a and b and median(b):
+                print(f"Mapeamento direto ({group}): {median(a)/median(b):.2f}x")
     print("Medicoes do macOS; iPhone requer medicao no dispositivo.")
 if __name__=="__main__":
     main()
