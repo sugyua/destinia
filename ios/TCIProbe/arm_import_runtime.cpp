@@ -657,7 +657,7 @@ bool ArmImportRuntime::runGameInit(
         error="Falha ao configurar argumentos do initGame"; return false;
     }
     lastError_.clear();
-    const uc_err e=uc_emu_start(uc_,address,kReturn,0,300000);
+    const uc_err e=uc_emu_start(uc_,address,kReturn,0,3000000);
     if (!lastError_.empty()) { error=lastError_; return false; }
     if (e!=UC_ERR_OK) {
         error=std::string("initGame ARM32: ")+uc_strerror(e);
@@ -665,7 +665,10 @@ bool ArmImportRuntime::runGameInit(
     }
     uint32_t pc=0;
     if (!readReg(UC_ARM_REG_PC,pc) || pc!=kReturn) {
-        error="initGame excedeu limite de 300000 instrucoes";
+        char diagnostic[160];
+        std::snprintf(diagnostic,sizeof(diagnostic),
+            "initGame excedeu 3000000 instrucoes (PC=0x%08x)",pc);
+        error=diagnostic;
         return false;
     }
     return true;
