@@ -166,7 +166,7 @@ extern "C" int destinia_probe_elf(
             "Imports externos vinculados: %zu\n"
             "Tipos nao suportados: %zu\n"
             "Imports distintos: %zu\n"
-            "Memoria Unicorn: OK\\n"
+            "Memoria Unicorn: OK\n"
             "Testes ARM32: OK",
             image.bytes.size() / 1024,
             image.symbols.size(),
