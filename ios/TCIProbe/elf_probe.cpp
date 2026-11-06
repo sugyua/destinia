@@ -5,6 +5,10 @@
 #include <cstring>
 #include <fstream>
 #include <filesystem>
+#include <cstdlib>
+#include <chrono>
+#include <thread>
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -220,7 +224,16 @@ extern "C" int destinia_probe_elf_frame(
             }
             if (!frameAddress)
                 throw std::runtime_error("jniRun original ausente");
-            for (uint32_t frame=0; frame<4; ++frame) {
+            uint32_t targetFrames=4;
+            bool paced=false;
+            if (const char *env=std::getenv("DESTINIA_PROBE_FRAMES")) {
+                const long requested=std::strtol(env,nullptr,10);
+                if (requested>=1 && requested<=160) {
+                    targetFrames=static_cast<uint32_t>(requested);
+                    paced=true;
+                }
+            }
+            for (uint32_t frame=0; frame<targetFrames; ++frame) {
                 std::vector<uint8_t> pixels;
                 if (!runtime.runGameFrame(
                         frameAddress,frame,pixels,nextFrameMs,runtimeError)) {
@@ -230,6 +243,11 @@ extern "C" int destinia_probe_elf_frame(
                 ++framesRendered;
                 lastPixels=std::move(pixels);
                 if (!nextFrameMs) break;
+                if (paced) {
+                    std::this_thread::sleep_for(
+                        std::chrono::milliseconds(
+                            std::min(nextFrameMs,1000u)));
+                }
             }
             std::set<uint16_t> colors;
             for (size_t at=0; at+1<lastPixels.size(); at+=2) {
