@@ -12,6 +12,7 @@ using namespace destinia;
 void testDefs() {
   const auto& list = allCatalogWeapons();
   assert(list.size() == 32); // 8 por classe x 4 classes = 32 armas base
+  assert(allCatalogEquipment().size() == 64); // 32 armas + 32 armaduras
 
   auto war = getCatalogWeaponsByClass(1);
   assert(war.size() == 8);
@@ -24,6 +25,7 @@ void testDefs() {
 
   auto mag = getCatalogWeaponsByClass(4);
   assert(mag.size() == 8);
+  assert(getCatalogArmorsByClass(4).size() == 8);
 
   std::cout << "[TEST] Defs canônicas validadas com sucesso: " << list.size() << " armas base catalogadas.\n";
 }
@@ -50,6 +52,18 @@ void testUIAndPainting() {
   assert(ui.selectedClass == 4);
   ui.nextTab();
   assert(ui.selectedClass == 1);
+
+  // Keyboard/touch tab navigation must include Mago and cycle through four jobs.
+  ui.prevTab(); assert(ui.selectedClass == 4);
+  ui.nextTab(); assert(ui.selectedClass == 1);
+  for(int index=0;index<4;++index){
+    const auto r=ui.tabRect(index,400,240);
+    assert(r.x>=0 && r.x+r.w<=400);
+    assert(ui.handleTouch(r.x+r.w/2,r.y+r.h/2,400,240,8));
+    assert(ui.selectedClass==index+1);
+  }
+  ui.selectedClass=1;
+
 
   // Testa buffer de renderização 400x240 (RGB565 = 2 bytes por pixel)
   std::vector<uint8_t> frameBuffer(400 * 240 * 2, 0);
@@ -86,6 +100,12 @@ void testHostLifecycle() {
   bool opened = host2.toggle(0, 0, [](uint32_t) -> uint16_t { return 0; });
   assert(opened);
   assert(host2.open);
+  assert(host2.handleKey('\t',true)); // Tab must cycle classes, not pages
+  assert(host2.ui.selectedClass == 2);
+  assert(host2.handleKey('4',true));
+  assert(host2.ui.selectedClass == 4);
+  assert(host2.handleKey(1073741903,true)); // Right arrow pages, class preserved
+  assert(host2.ui.selectedClass == 4);
 
   // ESC fecha
   assert(host2.handleKey(27, true));
