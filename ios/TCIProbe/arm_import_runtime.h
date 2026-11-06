@@ -66,8 +66,8 @@ private:
     uc_hook fastFillHook_ = 0;
     uc_hook fastSpriteHook_ = 0;
     uc_hook fastAlphaHook_ = 0;
+    uc_hook fastAlpha16Hook_ = 0;
     std::array<uint32_t,3> alphaWords_{};
-    uc_hook fastAlphaHook_ = 0;
     std::map<uint32_t,uint64_t> profileBlocks_;
     std::map<std::string, uint32_t> names_;
     std::map<uint32_t, std::string> reverse_;
