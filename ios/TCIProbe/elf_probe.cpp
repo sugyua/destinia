@@ -212,6 +212,14 @@ static int destinia_probe_impl(
                 throw std::runtime_error(
                     "Falha no native sprite RGB565: "+runtimeError);
             }
+            // Additional alpha renderer must pass full game framebuffer
+            // equivalence tests before it can ever become an iOS default.
+            if (std::getenv("DESTINIA_FAST_ALPHA") &&
+                !runtime->enableNativeAlphaRow(
+                    static_cast<uint32_t>(base),runtimeError)) {
+                throw std::runtime_error(
+                    "Falha no native alpha RGB565: "+runtimeError);
+            }
 
             uint32_t originalAddress=0;
             for (size_t i=0; i<image.symbols.size(); ++i) {
