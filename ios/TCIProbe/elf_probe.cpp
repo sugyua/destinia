@@ -509,9 +509,9 @@ static int destinia_probe_impl(
                     "ARM32_NATIVE_DODGE rows=%llu\n",
                     static_cast<unsigned long long>(
                         runtime->nativeDodgeRows()));
-                if (runtime->nativeDodgeRows()==0)
-                    throw std::runtime_error(
-                        "Dodge16 nativo nao executou nenhuma linha");
+                // The app's first four bootstrap frames may contain no
+                // Dodge16 pixels. Presence is enforced in the 420-frame
+                // test, not at startup, to avoid false initialization failures.
             }
             if (std::getenv("DESTINIA_DIRECT_HEAP")) {
                 const auto counts=runtime->directAccessCounts();
