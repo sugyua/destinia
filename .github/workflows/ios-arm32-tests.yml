@@ -63,7 +63,7 @@ jobs:
 
       - name: Execute real ARM32 code through Unicorn TCI
         run: |
-          DESTINIA_PROBE_FRAMES=48 /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
+          DESTINIA_PROBE_FRAMES=56 /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
 
       - name: Upload original game framebuffer
         if: success()
