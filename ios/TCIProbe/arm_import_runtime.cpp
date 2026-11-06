@@ -45,6 +45,7 @@ ArmImportRuntime::~ArmImportRuntime() {
     if (profileHook_) uc_hook_del(uc_, profileHook_);
     if (fastFillHook_) uc_hook_del(uc_, fastFillHook_);
     if (fastSpriteHook_) uc_hook_del(uc_, fastSpriteHook_);
+    if (fastAlphaHook_) uc_hook_del(uc_,fastAlphaHook_);
     // Unicorn must release the borrowed host memory before vector storage dies.
     if (hasDirectHeap_)
         uc_mem_unmap(uc_,kHeapBase,kHeapSize);
@@ -232,6 +233,129 @@ void ArmImportRuntime::onFastSpriteColumn(
         !runtime->writeReg(UC_ARM_REG_R3,static_cast<uint32_t>(count))) {
         runtime->fail("Sprite ARM32: falha ao atualizar coluna");
     }
+}
+
+// Exact Thumb alpha row from Gamevil libdestinia_jni.so (SHA256 recorded in
+// ios/tools/audit_game_source.py). Leaves row arithmetic/clipping to ARM32;
+// replaces only the per-pixel Grp_drawWPNImage loop at ELF +0xb0ee.
+// This is opt-in until framebuffer hashes and live game tests pass.
+bool ArmImportRuntime::enableNativeAlphaRow(
+    uint32_t imageBase, std::string &error) {
+    const uint32_t loop=imageBase+0x0000b0ee;
+    uint16_t original=0;
+    if (!readBytes(loop,&original,sizeof(original)) ||
+        original!=0x5d3b) {
+        error="Grp_drawWPNImage alpha signature mismatch";
+        return false;
+    }
+    // Thumb B from 0xb0ee to 0xb11c: skip 0x2a bytes after PC +4.
+    const uint16_t skipPixelLoop=0xe015;
+    if (!writeBytes(loop,&skipPixelLoop,sizeof(skipPixelLoop))) {
+        error="Nao foi possivel substituir alpha Thumb";
+        return false;
+    }
+    const uc_err hooked=uc_hook_add(
+        uc_,&fastAlphaHook_,UC_HOOK_CODE,
+        reinterpret_cast<void *>(onFastAlphaRow),this,loop,loop);
+    if (hooked!=UC_ERR_OK) {
+        writeBytes(loop,&original,sizeof(original));
+        error=std::string("Hook alpha RGB565: ")+uc_strerror(hooked);
+        return false;
+    }
+    return true;
+}
+
+void ArmImportRuntime::onFastAlphaRow(
+    uc_engine *,uint64_t,uint32_t,void *opaque) {
+    auto *rt=static_cast<ArmImportRuntime *>(opaque);
+    uint32_t src=0,srcPalette=0,dst=0,count=0,col=0;
+    uint32_t baseAlpha=0,alphaOffset=0,alphaFlag=0;
+    if (!rt->readReg(UC_ARM_REG_R7,src) ||
+        !rt->readReg(UC_ARM_REG_R6,srcPalette) ||
+        !rt->readReg(UC_ARM_REG_R5,dst) ||
+        !rt->readReg(UC_ARM_REG_R8,count) ||
+        !rt->readReg(UC_ARM_REG_R4,col) ||
+        !rt->readReg(UC_ARM_REG_R9,baseAlpha) ||
+        !rt->readReg(UC_ARM_REG_R10,alphaOffset) ||
+        !rt->readReg(UC_ARM_REG_R11,alphaFlag)) {
+        rt->fail("Alpha row: registradores ARM32 indisponiveis"); return;
+    }
+    if (col!=0 || count==0 || count>400 ||
+        static_cast<uint64_t>(dst)+count*2u>UINT32_MAX ||
+        static_cast<uint64_t>(srcPalette)+count*2u>UINT32_MAX ||
+        static_cast<uint64_t>(src)+count>UINT32_MAX) {
+        rt->fail("Alpha row: dimensoes/endereco invalidos"); return;
+    }
+    std::array<uint8_t,400> alphaCodes{};
+    std::array<uint16_t,400> palette{};
+    std::array<uint16_t,400> destination{};
+    if (!rt->readBytes(src,alphaCodes.data(),count) ||
+        !rt->readBytes(srcPalette,palette.data(),count*2u) ||
+        !rt->readBytes(dst,destination.data(),count*2u)) {
+        rt->fail("Alpha row: leitura da memoria falhou"); return;
+    }
+    constexpr uint32_t mask=0x07e0f81f;
+    uint32_t lastDst=0,lastSrc=0,lastBlend=0;
+    bool hasBlended=false;
+    bool modified=false;
+    for (uint32_t i=0;i<count;++i) {
+        const uint32_t index=alphaCodes[i];
+        const uint32_t opacity=index
+            ? ((alphaOffset+index+alphaFlag)&0xffffu)
+            : (baseAlpha&0xffffu);
+        if (opacity>14) continue;
+        const uint16_t color=palette[i];
+        if (opacity==0) {
+            destination[i]=color;
+            modified=true;
+            continue;
+        }
+        const uint16_t existing=destination[i];
+        const uint32_t packedDst=
+            (static_cast<uint32_t>(existing) |
+             (static_cast<uint32_t>(existing)<<16))&mask;
+        const uint32_t packedSrc=
+            (static_cast<uint32_t>(color) |
+             (static_cast<uint32_t>(color)<<16))&mask;
+        const uint32_t delta=packedDst-packedSrc;
+        const uint32_t product=delta*opacity;
+        const int32_t scaled=static_cast<int32_t>(product)>>4;
+        const uint32_t blended=(packedSrc+static_cast<uint32_t>(scaled))&mask;
+        destination[i]=static_cast<uint16_t>(
+            blended|(blended>>16));
+        modified=true;
+        hasBlended=true;
+        lastDst=packedDst;
+        lastSrc=packedSrc;
+        lastBlend=blended;
+    }
+    if (modified &&
+        !rt->writeBytes(dst,destination.data(),count*2u)) {
+        rt->fail("Alpha row: escrita RGB565 falhou"); return;
+    }
+    if (hasBlended) {
+        // Preserve final exported ALPHA16 temporaries. PC-relative GOT is
+        // fixed for the original, version-pinned binary. No assumptions
+        // about host pointers or data layouts.
+        const uint32_t gotBase=0x10000000u+0x000440c8u;
+        const uint32_t offsets[3]={0x2bcu,0x20cu,0x264u};
+        const uint32_t values[3]={lastDst,lastSrc,lastBlend};
+        for (int i=0;i<3;++i) {
+            uint32_t address=0;
+            if (!rt->readBytes(gotBase+offsets[i],&address,4) ||
+                !address || !rt->writeBytes(address,&values[i],4)) {
+                rt->fail("Alpha row: globais ALPHA16 invalidas");
+                return;
+            }
+        }
+    }
+    if (!rt->writeReg(UC_ARM_REG_R4,count) ||
+        !rt->writeReg(UC_ARM_REG_R6,srcPalette+count*2u) ||
+        !rt->writeReg(UC_ARM_REG_R5,dst+count*2u)) {
+        rt->fail("Alpha row: falha ao avancar ponteiros");
+        return;
+    }
+    ++rt->nativeAlphaRows_;
 }
 
 bool ArmImportRuntime::readReg(int reg, uint32_t &value) {
