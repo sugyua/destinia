@@ -39,6 +39,7 @@ jobs:
           set -eux
           cmake -S /tmp/unicorn-tci/unicorn-engine-sys-tci \
             -B /tmp/unicorn-tci-macos-build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_OSX_ARCHITECTURES=arm64 \
             -DUNICORN_ARCH=arm \
             -DUNICORN_INTERPRETER=ON \
