@@ -151,6 +151,26 @@ extern "C" int destinia_probe_elf(
                 throw std::runtime_error(
                     "Falha no teste de imports ARM32: " + runtimeError);
             }
+
+            uint32_t originalAddress=0;
+            for (size_t i=0; i<image.symbols.size(); ++i) {
+                if (image.symbols[i].shndx != 0 &&
+                    image.names[i] == "getMyCash") {
+                    originalAddress = static_cast<uint32_t>(base) +
+                        image.symbols[i].value;
+                    break;
+                }
+            }
+            if (!originalAddress) {
+                throw std::runtime_error(
+                    "Exportacao original getMyCash nao encontrada");
+            }
+            uint32_t gameValue=0;
+            if (!runtime.runOriginalExport(
+                    originalAddress,gameValue,runtimeError)) {
+                throw std::runtime_error(
+                    "Falha ao executar getMyCash original: "+runtimeError);
+            }
         }
 
         uc_close(uc);
@@ -167,7 +187,8 @@ extern "C" int destinia_probe_elf(
             "Tipos nao suportados: %zu\n"
             "Imports distintos: %zu\n"
             "Memoria Unicorn: OK\n"
-            "Testes ARM32: OK",
+            "Testes ARM32: OK\\n"
+            "Codigo original: OK",
             image.bytes.size() / 1024,
             image.symbols.size(),
             image.relocations.size(),
