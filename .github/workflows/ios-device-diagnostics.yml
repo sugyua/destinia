@@ -257,7 +257,7 @@ jobs:
           }
           EOF
 
-          clang++ -std=c++17 -I. \
+          clang++ -std=c++17 -iquote . \
             /tmp/list_destinia_imports.cpp \
             -o /tmp/list_destinia_imports
 
