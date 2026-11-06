@@ -51,15 +51,17 @@ jobs:
       - name: Touch title and capture intermediate original frames
         run: |
           set -euo pipefail
-          DESTINIA_PROBE_FRAMES=230 \
-            DESTINIA_AUTOTOUCH="65,200,211" \
-            DESTINIA_CAPTURE_FRAMES="55,90,130,180,225" \
+          DESTINIA_PROBE_FRAMES=280 \
+            DESTINIA_AUTOTOUCH="65,200,211;120,200,67" \
+            DESTINIA_CAPTURE_FRAMES="90,130,160,190,220,260" \
             DESTINIA_PROFILE_BLOCKS=1 \
-            DESTINIA_PROFILE_FRAME=180 \
+            DESTINIA_PROFILE_FRAME=220 \
             /tmp/destinia-gameplay-test game/lib/armeabi/libdestinia_jni.so \
             2> /tmp/destinia-gameplay.log
-          grep -E "ARM32_TOUCH|ARM32_HOT_FUNCTION|ARM32_FRAME_PERF frame=(65|90|130|180|225)" /tmp/destinia-gameplay.log | tail -50
-          test "$(find /tmp -maxdepth 1 -name 'destinia-stage-*.ppm' | wc -l | tr -d ' ')" -ge 5
+          grep -E "ARM32_TOUCH|ARM32_HOT_FUNCTION|ARM32_FRAME_PERF frame=(65|90|130|180|220|260)" /tmp/destinia-gameplay.log
+          for frame in 90 130 160 190 220 260; do
+            test -s "/tmp/destinia-stage-$frame.ppm"
+          done
 
       - name: Upload scene progression and hot functions
         if: always()
