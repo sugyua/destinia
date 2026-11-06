@@ -1,21 +1,30 @@
-Destinia iOS ARM32 milestone 0.3.4
+Destinia iOS ARM32 diagnostic milestone 0.3.5
 Branch: ios/unicorn-poc
-Experiment verified in macOS ARM64 CI #42156713768:
-- 360 out of 360 rendered RGB565 frame hashes identical in baseline,
-  native accelerated graphics, and native graphics with host-backed ARM heap.
-- Native-mapped Unicorn heap: 64 MiB, fall back to ordinary map if device
-  disallows host-pointer mapping; no altered original Android game assets.
-- Actual native drawing operations validated: 86411 filled rows,
-  150720 sprite columns across 360 frames.
-- Avoid repeated guest-memory RPC and per-column dynamic allocations.
-- On-device performance HUD: three-finger tap toggles FPS, ARM32 execution
-  average milliseconds and RGB565 preparation milliseconds.
-- HUD hidden by default, console metrics every ~2 seconds.
-- ARM32 logic rate unchanged; no fake 60-FPS promise.
-- CI checked original Android engine 1.0.6; PC 0.17.4 mods not ported.
-Test on iPhone:
-1) Install over existing Destinia via AltStore (do not delete saved data).
-2) Let game run past splash/loading into title or active menu.
-3) Three-finger tap once and capture FPS/ARM32/RGB metrics.
-4) If device is slow, compare ARM32 time to ~62.5ms tick budget.
-Desktop macOS benchmarks are not device FPS claims.
+Evidence on iPhone (user screenshot, 06 Nov 2026):
+- Inside actual gameplay: 3.5 FPS, average ARM32 279.6 ms/frame,
+  RGB565 conversion/preparation 0.1 ms/frame.
+- Target ~16 FPS requires reducing ARM32 cost below 62.5ms:
+  current gap ~4.5x.
+- This is a CPU-side ARM32 emulation bottleneck in gameplay, not
+  the Objective-C UIKit frame conversion.
+Diagnostic features in this milestone:
+- Existing three-finger touch shows FPS, ARM32 and RGB metrics.
+- Four-finger touch requests profiling ONE following real gameplay frame.
+- Result shows top five original ELF ARM32 function names and
+  executed instruction counts on screen and in NSLog.
+- The profile panel persists until three-finger HUD toggle.
+- Profiling is disabled in ordinary frames, and the hooked
+  diagnostic frame will be slower than normal gameplay.
+- All game assets and original Android ARM32 library are unchanged.
+- Graphics accelerated native operations remain enabled.
+- Native 64 MiB guest heap can fall back to original Unicorn map.
+Purpose:
+- Identify gameplay CPU hotspots in actual scene rather than
+  optimize the original logo/title screen again.
+- No performance improvement is claimed from profiling itself.
+User instructions:
+1. Install via AltStore over current application; do not uninstall.
+2. Enter the scene shown in screenshot.
+3. Tap with four fingers simultaneously ONCE, allow profile frame to complete.
+4. Screenshot the displayed TOP ARM32 list; send to ChatGPT.
+5. Three-finger tap returns to FPS metrics.
