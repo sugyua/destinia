@@ -6,6 +6,8 @@
 #include <cstring>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
+#include <iterator>
 #include <vector>
 
 namespace destinia {
@@ -36,6 +38,7 @@ ArmImportRuntime::ArmImportRuntime(
 ArmImportRuntime::~ArmImportRuntime() {
     for (const auto &entry : files_) std::fclose(entry.second);
     if (hook_) uc_hook_del(uc_, hook_);
+    if (jniHook_) uc_hook_del(uc_, jniHook_);
 }
 
 unsigned ArmImportRuntime::implementedCount() const { return implemented_; }
@@ -398,6 +401,271 @@ bool ArmImportRuntime::runOriginalExport(
     }
     if (!readReg(UC_ARM_REG_R0,result)) {
         error="Nao leu retorno do codigo original";
+        return false;
+    }
+    return true;
+}
+
+bool ArmImportRuntime::readAssetName(
+    uint32_t handle, std::string &name) {
+    const auto it=arrays_.find(handle);
+    if (it==arrays_.end()) return false;
+    name.assign(it->second.begin(),it->second.end());
+    if (name.empty() || name.find('\\')!=std::string::npos)
+        return false;
+    const std::filesystem::path sub(name);
+    if (sub.is_absolute()) return false;
+    for (const auto &part:sub) {
+        if (part=="." || part==".." || part.empty()) return false;
+    }
+    return true;
+}
+
+bool ArmImportRuntime::installJni(std::string &error) {
+    constexpr uint32_t jniBase=0x21000000;
+    constexpr uint32_t vmBase=0x21001000;
+    constexpr uint32_t envObject=0x40000000;
+    constexpr uint32_t envTable=0x40000100;
+    constexpr uint32_t vmObject=0x40001000;
+    constexpr uint32_t vmTable=0x40001100;
+    uc_err e=uc_mem_map(uc_,jniBase,0x2000,UC_PROT_ALL);
+    if (e==UC_ERR_OK) e=uc_mem_map(
+        uc_,envObject,0x10000,UC_PROT_ALL);
+    if (e!=UC_ERR_OK) {
+        error=std::string("Mapa JNI: ")+uc_strerror(e);
+        return false;
+    }
+    const uint32_t bxlr=0xe12fff1e;
+    std::vector<uint32_t> jniFunctions(235);
+    for (unsigned i=0;i<jniFunctions.size();++i) {
+        jniFunctions[i]=jniBase+4*i;
+        if (!writeBytes(jniFunctions[i],&bxlr,sizeof(bxlr))) {
+            error="Falha na tabela de stubs JNI"; return false;
+        }
+    }
+    std::vector<uint32_t> vmFunctions(8);
+    for (unsigned i=0;i<vmFunctions.size();++i) {
+        vmFunctions[i]=vmBase+4*i;
+        if (!writeBytes(vmFunctions[i],&bxlr,sizeof(bxlr))) {
+            error="Falha na tabela JavaVM"; return false;
+        }
+    }
+    if (!writeBytes(envObject,&envTable,4) ||
+        !writeBytes(envTable,jniFunctions.data(),jniFunctions.size()*4) ||
+        !writeBytes(vmObject,&vmTable,4) ||
+        !writeBytes(vmTable,vmFunctions.data(),vmFunctions.size()*4)) {
+        error="Falha nos ponteiros JNI/JavaVM"; return false;
+    }
+    e=uc_hook_add(uc_,&jniHook_,UC_HOOK_CODE,
+                  reinterpret_cast<void *>(onJniCode),this,
+                  jniBase,vmBase+0x100);
+    if (e!=UC_ERR_OK) {
+        error=std::string("Hook JNI: ")+uc_strerror(e);
+        return false;
+    }
+    return true;
+}
+
+void ArmImportRuntime::onJniCode(
+    uc_engine *,uint64_t address,uint32_t,void *user) {
+    static_cast<ArmImportRuntime *>(user)->dispatchJni(
+        static_cast<uint32_t>(address));
+}
+
+void ArmImportRuntime::dispatchJni(uint32_t address) {
+    const uint32_t jniBase=0x21000000;
+    const uint32_t vmBase=0x21001000;
+    const bool vm=address>=vmBase;
+    const uint32_t index=(address-(vm ? vmBase : jniBase))/4;
+    uint32_t a=0,b=0,c=0,d=0;
+    if (!readReg(UC_ARM_REG_R0,a) || !readReg(UC_ARM_REG_R1,b) ||
+        !readReg(UC_ARM_REG_R2,c) || !readReg(UC_ARM_REG_R3,d)) {
+        fail("JNI: registradores indisponiveis"); return;
+    }
+    uint32_t result=0;
+    bool writeResult=true;
+
+    if (vm) {
+        if (index==6 || index==4) {
+            const uint32_t envObject=0x40000000;
+            if (!writeBytes(b,&envObject,4)) {
+                fail("JavaVM: ponteiro GetEnv invalido"); return;
+            }
+        } else {
+            fail("JavaVM sem implementacao: "+std::to_string(index));
+            return;
+        }
+    } else if (index==6) { // FindClass
+        std::string name;
+        if (!readCString(b,name)) {
+            fail("JNI FindClass: nome invalido"); return;
+        }
+        result=nextClass_++;
+    } else if (index==21) { // NewGlobalRef
+        result=b ? b : 1;
+    } else if (index==113) { // GetStaticMethodID
+        std::string method;
+        if (!readCString(c,method)) {
+            fail("JNI GetStaticMethodID: nome invalido"); return;
+        }
+        const std::map<std::string,uint32_t> known = {
+            {"playVib",1},{"gotoURL",2},{"getAssetResSize",3},
+            {"getAssetRes",4},{"playSound",5},{"setSoundVolume",6},
+            {"close",7},{"buyCash",8},{"logEvent",9}
+        };
+        const auto found=known.find(method);
+        result=found==known.end() ? 0 : found->second;
+    } else if (index==171) { // GetArrayLength
+        const auto it=arrays_.find(b);
+        result=it==arrays_.end() ? 0 :
+            static_cast<uint32_t>(it->second.size());
+    } else if (index==176) { // NewByteArray
+        if (b>kMaxTransfer) {
+            fail("JNI NewByteArray excedeu memoria"); return;
+        }
+        result=nextArray_++;
+        arrays_[result].assign(b,0);
+    } else if (index==184) { // GetByteArrayElements
+        const auto it=arrays_.find(b);
+        if (it==arrays_.end()) result=0;
+        else {
+            const uint32_t size=static_cast<uint32_t>(it->second.size());
+            const uint32_t aligned=(std::max(size,1u)+15u)&~15u;
+            if (aligned>kHeapSize || heapNext_>kHeapBase+kHeapSize-aligned) {
+                fail("JNI sem heap para GetByteArrayElements"); return;
+            }
+            result=heapNext_;
+            heapNext_+=aligned;
+            if (size && !writeBytes(result,it->second.data(),size)) {
+                fail("JNI falhou ao copiar byteArray"); return;
+            }
+            if (c) {
+                const uint32_t copied=1;
+                if (!writeBytes(c,&copied,4)) {
+                    fail("JNI isCopy invalido"); return;
+                }
+            }
+            arrayPointers_[result]=b;
+        }
+    } else if (index==192) { // ReleaseByteArrayElements
+        const auto it=arrays_.find(b);
+        if (it!=arrays_.end() && d!=2 && !it->second.empty() &&
+            !readBytes(c,it->second.data(),it->second.size())) {
+            fail("JNI ReleaseByteArrayElements invalido"); return;
+        }
+        if (d!=1) arrayPointers_.erase(c);
+        writeResult=false;
+    } else if (index==200 || index==208) { // Get/SetByteArrayRegion
+        const auto it=arrays_.find(b);
+        uint32_t sp=0, guestBuffer=0;
+        if (!readReg(UC_ARM_REG_SP,sp) ||
+            !readBytes(sp,&guestBuffer,4)) {
+            fail("JNI ByteArrayRegion: argumento na pilha invalido");
+            return;
+        }
+        if (it==arrays_.end() || uint64_t(c)+d>it->second.size()) {
+            fail("JNI ByteArrayRegion: limites invalidos"); return;
+        }
+        if (d) {
+            uint8_t *data=it->second.data()+c;
+            const bool copied=index==200 ?
+                writeBytes(guestBuffer,data,d) :
+                readBytes(guestBuffer,data,d);
+            if (!copied) {
+                fail("JNI ByteArrayRegion: ponteiro ARM invalido");
+                return;
+            }
+        }
+        writeResult=false;
+    } else if (index==219) { // GetJavaVM
+        const uint32_t vmObject=0x40001000;
+        if (!writeBytes(b,&vmObject,4)) {
+            fail("JNI GetJavaVM: endereco invalido"); return;
+        }
+    } else if (index==129 || index==114) { // Assets
+        if (c!=3 && c!=4) {
+            fail("JNI: metodo estatico nao suportado "+std::to_string(c));
+            return;
+        }
+        std::string asset;
+        if (!readAssetName(d,asset)) {
+            fail("JNI: nome do asset invalido"); return;
+        }
+        const auto source=std::filesystem::path(assetsRoot_)/asset;
+        if (index==129 && c==3) {
+            std::error_code ec;
+            const auto n=std::filesystem::file_size(source,ec);
+            result=ec || n>UINT32_MAX ? 0 : static_cast<uint32_t>(n);
+        } else if (index==114 && c==4) {
+            std::ifstream stream(source,std::ios::binary|std::ios::ate);
+            if (!stream) result=0;
+            else {
+                const auto length=stream.tellg();
+                if (length<0 || length>static_cast<std::streamoff>(kMaxTransfer)) {
+                    fail("Asset maior que 1 MiB"); return;
+                }
+                std::vector<uint8_t> data(static_cast<size_t>(length));
+                stream.seekg(0);
+                if (!data.empty() && !stream.read(
+                    reinterpret_cast<char *>(data.data()),length)) {
+                    fail("Falha na leitura de asset"); return;
+                }
+                result=nextArray_++;
+                arrays_[result]=std::move(data);
+            }
+        } else {
+            fail("JNI: assinatura de acesso a asset inesperada");
+            return;
+        }
+    } else if (index==141) { // CallStaticVoidMethod
+        // Som, vibracao, anuncios e compras serao tratados no frontend.
+        writeResult=false;
+    } else {
+        fail("JNI ainda nao implementado: "+std::to_string(index));
+        return;
+    }
+    if (writeResult && !writeReg(UC_ARM_REG_R0,result))
+        fail("JNI falhou ao retornar R0");
+}
+
+bool ArmImportRuntime::runGameInit(
+    uint32_t address,const std::string &assetsRoot,std::string &error) {
+    assetsRoot_=assetsRoot;
+    if (!std::filesystem::is_directory(assetsRoot_)) {
+        error="Diretorio de assets indisponivel: "+assetsRoot_;
+        return false;
+    }
+    if (!installJni(error)) return false;
+    const std::string devId="DESTINIA-IOS-0001";
+    const std::string model="iPhone";
+    const uint32_t hId=nextArray_++;
+    const uint32_t hModel=nextArray_++;
+    arrays_[hId].assign(devId.begin(),devId.end());
+    arrays_[hModel].assign(model.begin(),model.end());
+
+    const uint32_t stackPtr=0x7f01ffc0;
+    const uint32_t extraArgs[5] = {
+        hModel,static_cast<uint32_t>(model.size()),400,240,0
+    };
+    if (!writeBytes(stackPtr,extraArgs,sizeof(extraArgs)) ||
+        !writeReg(UC_ARM_REG_R0,0x40000000) ||
+        !writeReg(UC_ARM_REG_R1,0x10) ||
+        !writeReg(UC_ARM_REG_R2,hId) ||
+        !writeReg(UC_ARM_REG_R3,static_cast<uint32_t>(devId.size())) ||
+        !writeReg(UC_ARM_REG_SP,stackPtr) ||
+        !writeReg(UC_ARM_REG_LR,kReturn)) {
+        error="Falha ao configurar argumentos do initGame"; return false;
+    }
+    lastError_.clear();
+    const uc_err e=uc_emu_start(uc_,address,kReturn,0,300000);
+    if (!lastError_.empty()) { error=lastError_; return false; }
+    if (e!=UC_ERR_OK) {
+        error=std::string("initGame ARM32: ")+uc_strerror(e);
+        return false;
+    }
+    uint32_t pc=0;
+    if (!readReg(UC_ARM_REG_PC,pc) || pc!=kReturn) {
+        error="initGame excedeu limite de 300000 instrucoes";
         return false;
     }
     return true;
