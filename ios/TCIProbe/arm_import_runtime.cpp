@@ -45,6 +45,7 @@ ArmImportRuntime::~ArmImportRuntime() {
     if (profileHook_) uc_hook_del(uc_, profileHook_);
     if (fastFillHook_) uc_hook_del(uc_, fastFillHook_);
     if (fastSpriteHook_) uc_hook_del(uc_, fastSpriteHook_);
+    if (fastDodgeHook_) uc_hook_del(uc_, fastDodgeHook_);
     if (fastAlphaHook_) uc_hook_del(uc_, fastAlphaHook_);
     if (fastAlpha16Hook_) uc_hook_del(uc_,fastAlpha16Hook_);
     // Unicorn must release the borrowed host memory before vector storage dies.
@@ -234,6 +235,129 @@ void ArmImportRuntime::onFastSpriteColumn(
         !runtime->writeReg(UC_ARM_REG_R3,static_cast<uint32_t>(count))) {
         runtime->fail("Sprite ARM32: falha ao atualizar coluna");
     }
+}
+
+// Dodge16: blend a full RGB565 row in C++ rather than interpret its original
+// Thumb pixel loop. The source .so remains unchanged; only guest RAM is patched.
+// ELF signature and hook offset are pinned to Android 1.0.6 (SHA256 audited).
+bool ArmImportRuntime::enableNativeDodge16(
+    uint32_t imageBase,std::string &error) {
+    const uint32_t loop=imageBase+0x00009590u;
+    uint16_t original=0;
+    if (!readBytes(loop,&original,sizeof(original)) ||
+        original!=0x4645u) {
+        error="Dodge16: assinatura Thumb inesperada";
+        return false;
+    }
+    // Thumb B: branch from 0x9590 (PC=0x9594) to 0x95fa.
+    // Original row advances (r8 and destination) stay in ARM32.
+    const uint16_t skipPixelLoop=0xe033u;
+    if (!writeBytes(loop,&skipPixelLoop,sizeof(skipPixelLoop))) {
+        error="Dodge16: falha ao substituir loop Thumb";
+        return false;
+    }
+    const uc_err hooked=uc_hook_add(
+        uc_,&fastDodgeHook_,UC_HOOK_CODE,
+        reinterpret_cast<void *>(onFastDodgeRow),this,loop,loop);
+    if (hooked!=UC_ERR_OK) {
+        writeBytes(loop,&original,sizeof(original));
+        error=std::string("Dodge16: hook: ")+uc_strerror(hooked);
+        return false;
+    }
+    return true;
+}
+
+void ArmImportRuntime::onFastDodgeRow(
+    uc_engine *,uint64_t,uint32_t,void *opaque) {
+    auto *rt=static_cast<ArmImportRuntime *>(opaque);
+    uint32_t dst=0,src=0,width=0,grp=0,got=0,stack=0;
+    if (!rt->readReg(UC_ARM_REG_R0,dst) ||
+        !rt->readReg(UC_ARM_REG_R8,src) ||
+        !rt->readReg(UC_ARM_REG_R9,width) ||
+        !rt->readReg(UC_ARM_REG_R10,grp) ||
+        !rt->readReg(UC_ARM_REG_R12,got) ||
+        !rt->readReg(UC_ARM_REG_SP,stack)) {
+        rt->fail("Dodge16: registradores invalidos"); return;
+    }
+    uint32_t strideRaw=0,palettePtr=0,key=0;
+    if (!rt->readBytes(stack+4u,&strideRaw,4) ||
+        !rt->readBytes(stack+8u,&palettePtr,4) ||
+        !rt->readBytes(grp+0x50u,&key,4)) {
+        rt->fail("Dodge16: metadados invalidos"); return;
+    }
+    const int64_t stride=static_cast<int32_t>(strideRaw);
+    if (width<1 || width>1024 || !palettePtr) {
+        rt->fail("Dodge16: dimensoes invalidas"); return;
+    }
+    const int64_t last=static_cast<int64_t>(dst)+
+        static_cast<int64_t>(width-1)*stride;
+    const int64_t first=std::min<int64_t>(dst,last);
+    const int64_t after=std::max<int64_t>(dst,last)+2;
+    if (first<1 || after>UINT32_MAX ||
+        after-first>1024*1024) {
+        rt->fail("Dodge16: destino invalido"); return;
+    }
+    std::array<uint8_t,1024> indices{};
+    std::array<uint16_t,256> colors{};
+    if (!rt->readBytes(src,indices.data(),width) ||
+        !rt->readBytes(palettePtr,colors.data(),colors.size()*2)) {
+        rt->fail("Dodge16: indices/paleta invalidos"); return;
+    }
+    // The original function loads three channel masks through its GOT.
+    // Keep the original guest masks, rather than assuming RGB565 constants.
+    std::array<uint32_t,3> masks{};
+    constexpr std::array<uint32_t,3> offsets={0x7cu,0x2c8u,0x214u};
+    for (size_t i=0;i<offsets.size();++i) {
+        uint32_t addr=0;
+        if (!rt->readBytes(got+offsets[i],&addr,4) || !addr ||
+            !rt->readBytes(addr,&masks[i],4)) {
+            rt->fail("Dodge16: mascara RGB565 ausente"); return;
+        }
+    }
+    const bool direct=rt->hasDirectHeap_ &&
+        first>=kHeapBase &&
+        after<=static_cast<int64_t>(kHeapBase)+kHeapSize;
+    std::vector<uint8_t> copy;
+    uint8_t *pixels=nullptr;
+    if (direct) {
+        pixels=rt->directHeap_.data();
+    } else {
+        copy.resize(static_cast<size_t>(after-first));
+        if (!rt->readBytes(
+                static_cast<uint32_t>(first),copy.data(),copy.size())) {
+            rt->fail("Dodge16: leitura RGB565 invalida"); return;
+        }
+        pixels=copy.data();
+    }
+    const int64_t origin=direct?kHeapBase:first;
+    bool modified=false;
+    for (uint32_t i=0;i<width;++i) {
+        const uint16_t color=colors[indices[i]];
+        if (color==key) continue;
+        const size_t pos=static_cast<size_t>(
+            static_cast<int64_t>(dst)+static_cast<int64_t>(i)*stride-origin);
+        const uint16_t existing=static_cast<uint16_t>(
+            pixels[pos]|(static_cast<uint16_t>(pixels[pos+1])<<8));
+        uint32_t merged=0;
+        for (const uint32_t mask:masks) {
+            merged|=std::min<uint32_t>(
+                (existing&mask)+(color&mask),mask);
+        }
+        pixels[pos]=static_cast<uint8_t>(merged);
+        pixels[pos+1]=static_cast<uint8_t>(merged>>8);
+        modified=true;
+    }
+    if (modified && !direct &&
+        !rt->writeBytes(
+            static_cast<uint32_t>(first),copy.data(),copy.size())) {
+        rt->fail("Dodge16: escrita RGB565 invalida"); return;
+    }
+    // The instruction at 0x95f0 normally loads the byte stride into r7;
+    // it is inside the skipped loop, so restore that live register here.
+    if (!rt->writeReg(UC_ARM_REG_R7,strideRaw)) {
+        rt->fail("Dodge16: nao atualizou passo ARM32"); return;
+    }
+    ++rt->nativeDodgeRows_;
 }
 
 // Exact Thumb alpha row from Gamevil libdestinia_jni.so (SHA256 recorded in
