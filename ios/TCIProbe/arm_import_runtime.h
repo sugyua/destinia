@@ -62,6 +62,7 @@ private:
     uint32_t nextClass_ = 0x100;
     std::map<uint32_t,std::vector<uint8_t>> arrays_;
     std::map<uint32_t,uint32_t> arrayPointers_;
+    std::map<uint32_t,uint32_t> arrayBufferCapacities_;
     // Buffers JNI desalocados podem ser reutilizados por outras arrays.
     // A chave e a capacidade e o valor e o endereco ARM32.
     std::multimap<uint32_t,uint32_t> reusableJniBuffers_;
