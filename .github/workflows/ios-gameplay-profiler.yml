@@ -63,6 +63,23 @@ jobs:
             test -s "/tmp/destinia-stage-$frame.ppm"
           done
 
+      - name: Compare native ALPHA16 on original character-selection frames
+        run: |
+          set -euo pipefail
+          for frame in 90 130 160 190 220 260; do
+            cp "/tmp/destinia-stage-$frame.ppm" "/tmp/destinia-reference-$frame.ppm"
+          done
+          DESTINIA_FAST_ALPHA16=1 DESTINIA_PROBE_FRAMES=280 \
+            DESTINIA_AUTOTOUCH="65,200,211;120,200,67" \
+            DESTINIA_CAPTURE_FRAMES="90,130,160,190,220,260" \
+            /tmp/destinia-gameplay-test game/lib/armeabi/libdestinia_jni.so \
+            2> /tmp/destinia-alpha.log
+          for frame in 90 130 160 190 220 260; do
+            cmp "/tmp/destinia-reference-$frame.ppm" "/tmp/destinia-stage-$frame.ppm"
+          done
+          echo "Six original game menu frames identical with native ALPHA16"
+          grep 'ARM32_FRAME_PERF frame=220' /tmp/destinia-gameplay.log /tmp/destinia-alpha.log
+
       - name: Compare all original menu frames with optimized alpha renderer
         run: |
           set -euo pipefail
@@ -94,6 +111,7 @@ jobs:
           path: |
             /tmp/destinia-stage-*.ppm
             /tmp/destinia-gameplay.log
+            /tmp/destinia-alpha.log
             /tmp/destinia-menu-baseline.log
             /tmp/destinia-menu-alpha.log
             /tmp/destinia-menu-hashes-baseline.txt
