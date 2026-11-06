@@ -195,6 +195,12 @@ static int destinia_probe_impl(
                 throw std::runtime_error(
                     "Falha no fast fill RGB565: "+runtimeError);
             }
+            if (std::getenv("DESTINIA_FAST_SPRITE") &&
+                !runtime->enableNativeSpriteColumn(
+                    static_cast<uint32_t>(base),runtimeError)) {
+                throw std::runtime_error(
+                    "Falha no native sprite RGB565: "+runtimeError);
+            }
 
             uint32_t originalAddress=0;
             for (size_t i=0; i<image.symbols.size(); ++i) {
