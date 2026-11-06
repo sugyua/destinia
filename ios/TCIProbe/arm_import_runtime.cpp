@@ -917,7 +917,7 @@ bool ArmImportRuntime::runGameFrame(
     if (profileFrame) {
         profileBlocks_.clear();
         const uc_err hooked=uc_hook_add(
-            uc_,&profileHook_,UC_HOOK_BLOCK,
+            uc_,&profileHook_,UC_HOOK_CODE,
             reinterpret_cast<void *>(onProfileBlock),this,
             0x10000000,0x1008ffff);
         if (hooked!=UC_ERR_OK) {
