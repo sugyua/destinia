@@ -57,6 +57,8 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 @property (nonatomic,strong) UIImageView *gameView;
 @property (nonatomic,strong) UILabel *statusLabel;
 @property (nonatomic,copy) void (^touchCallback)(CGPoint point, int type);
+@property (nonatomic,copy) void (^metricsCallback)(void);
+@property (nonatomic,assign) BOOL trackingMetricsGesture;
 @end
 
 @implementation DestiniaViewController
@@ -118,18 +120,34 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 }
 - (void)touchesBegan:(NSSet<UITouch *> *)touches
           withEvent:(UIEvent *)event {
-    [self forwardTouches:touches type:0];
+    if ([[event allTouches] count]>=3) {
+        self.trackingMetricsGesture=YES;
+        if (self.metricsCallback) self.metricsCallback();
+        return;
+    }
+    if (!self.trackingMetricsGesture)
+        [self forwardTouches:touches type:0];
 }
 - (void)touchesMoved:(NSSet<UITouch *> *)touches
           withEvent:(UIEvent *)event {
-    [self forwardTouches:touches type:2];
+    if (!self.trackingMetricsGesture)
+        [self forwardTouches:touches type:2];
 }
 - (void)touchesEnded:(NSSet<UITouch *> *)touches
           withEvent:(UIEvent *)event {
+    if (self.trackingMetricsGesture) {
+        if ([[event allTouches] count] <= [touches count])
+            self.trackingMetricsGesture=NO;
+        return;
+    }
     [self forwardTouches:touches type:1];
 }
 - (void)touchesCancelled:(NSSet<UITouch *> *)touches
               withEvent:(UIEvent *)event {
+    if (self.trackingMetricsGesture) {
+        self.trackingMetricsGesture=NO;
+        return;
+    }
     [self forwardTouches:touches type:1];
 }
 @end
@@ -143,8 +161,13 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     dispatch_source_t _timer;
     DestiniaViewController *_controller;
     std::atomic<bool> _paused;
+    std::atomic<bool> _showMetrics;
     bool _ready;
     uint32_t _frameIndex;
+    std::chrono::steady_clock::time_point _measureStarted;
+    uint32_t _measureFrames;
+    double _totalArmMs;
+    double _totalPreparationMs;
 }
 
 - (void)showStatus:(NSString *)status {
@@ -163,7 +186,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     }
     dispatch_async(dispatch_get_main_queue(), ^{
         self->_controller.gameView.image=image;
-        self->_controller.statusLabel.hidden=YES;
+        self->_controller.statusLabel.hidden=!self->_showMetrics.load();
     });
 }
 
@@ -204,8 +227,39 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         [self showStatus:message];
         return;
     }
+    const auto emulationFinished=std::chrono::steady_clock::now();
     ++_frameIndex;
     [self showPixels:pixels frameNum:_frameIndex];
+    const auto prepared=std::chrono::steady_clock::now();
+    const double armMs=std::chrono::duration<double,std::milli>(
+        emulationFinished-tickStart).count();
+    const double preparationMs=std::chrono::duration<double,std::milli>(
+        prepared-emulationFinished).count();
+    ++_measureFrames;
+    _totalArmMs+=armMs;
+    _totalPreparationMs+=preparationMs;
+    const double sampleMs=std::chrono::duration<double,std::milli>(
+        prepared-_measureStarted).count();
+    if (sampleMs>=2000.0 && _measureFrames>0) {
+        const double fps=1000.0*_measureFrames/sampleMs;
+        const double avgArm=_totalArmMs/_measureFrames;
+        const double avgPrep=_totalPreparationMs/_measureFrames;
+        NSLog(@"Destinia perf FPS=%.1f ARM32=%.1fms RGB565=%.1fms frames=%u",
+              fps,avgArm,avgPrep,_measureFrames);
+        if (_showMetrics.load()) {
+            NSString *summary=[NSString stringWithFormat:
+                @"FPS %.1f | ARM32 %.1fms | RGB %.1fms",
+                fps,avgArm,avgPrep];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self->_controller.statusLabel.hidden=NO;
+                self->_controller.statusLabel.text=summary;
+            });
+        }
+        _measureStarted=prepared;
+        _measureFrames=0;
+        _totalArmMs=0;
+        _totalPreparationMs=0;
+    }
     if (nextMs==0) {
         _ready=false;
         [self showStatus:@"Destinia encerrou a execucao."];
@@ -222,8 +276,13 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)options {
     _paused.store(false);
+    _showMetrics.store(false);
     _ready=false;
     _frameIndex=0;
+    _measureStarted=std::chrono::steady_clock::now();
+    _measureFrames=0;
+    _totalArmMs=0;
+    _totalPreparationMs=0;
     _gameQueue=dispatch_queue_create(
         "com.destinia.arm32.interpreter",DISPATCH_QUEUE_SERIAL);
     _controller=[[DestiniaViewController alloc] init];
@@ -232,6 +291,16 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     [self.window makeKeyAndVisible];
 
     __weak AppDelegate *weakSelf=self;
+    _controller.metricsCallback=^{
+        AppDelegate *owner=weakSelf;
+        if (!owner) return;
+        const bool enable=!owner->_showMetrics.load();
+        owner->_showMetrics.store(enable);
+        owner->_controller.statusLabel.hidden=!enable;
+        if (enable)
+            owner->_controller.statusLabel.text=
+                @"Medindo FPS e custo ARM32...";
+    };
     _controller.touchCallback=^(CGPoint point,int type) {
         AppDelegate *owner=weakSelf;
         if (!owner) return;
@@ -270,6 +339,10 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
             }
             NSLog(@"Destinia iOS: %s",output);
             _ready=true;
+            _measureStarted=std::chrono::steady_clock::now();
+            _measureFrames=0;
+            _totalArmMs=0;
+            _totalPreparationMs=0;
             _frameIndex=4;
             [self showPixels:pixels frameNum:_frameIndex];
             [self armTimer:62];
