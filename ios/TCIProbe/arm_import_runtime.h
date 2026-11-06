@@ -22,6 +22,8 @@ public:
     bool runGameFrame(uint32_t address, uint32_t frameNumber,
                       std::vector<uint8_t> &frameBuffer, uint32_t &nextMs,
                       std::string &error);
+    bool runGameTouch(uint32_t address, uint32_t x, uint32_t y,
+                      uint32_t type, std::string &error);
     unsigned implementedCount() const;
 private:
     static void onCode(uc_engine *, uint64_t, uint32_t, void *);
