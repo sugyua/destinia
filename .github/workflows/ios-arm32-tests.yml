@@ -72,6 +72,10 @@ jobs:
           shasum -a 256 /tmp/destinia-baseline.ppm /tmp/destinia-frame.ppm
           echo "Native RGB565 fill: pixel-identical to original ARM32"
 
+      - name: Profile exact ARM32 sprite-rendering hot instructions
+        run: |
+          DESTINIA_PROFILE_BLOCKS=1 DESTINIA_PROBE_FRAMES=50 /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
+
       - name: Endurance regression beyond iPhone frame 302
         run: |
           set -eux
