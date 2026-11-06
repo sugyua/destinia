@@ -45,6 +45,9 @@ ArmImportRuntime::~ArmImportRuntime() {
     if (profileHook_) uc_hook_del(uc_, profileHook_);
     if (fastFillHook_) uc_hook_del(uc_, fastFillHook_);
     if (fastSpriteHook_) uc_hook_del(uc_, fastSpriteHook_);
+    // Unicorn must release the borrowed host memory before vector storage dies.
+    if (hasDirectHeap_)
+        uc_mem_unmap(uc_,kHeapBase,kHeapSize);
 }
 
 unsigned ArmImportRuntime::implementedCount() const { return implemented_; }
