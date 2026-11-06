@@ -96,10 +96,22 @@ jobs:
           test "$(wc -l < /tmp/destinia-menu-hashes-baseline.txt)" -eq 240
           cmp /tmp/destinia-menu-hashes-baseline.txt /tmp/destinia-menu-hashes-alpha.txt
           echo 'MENU ALPHA: 240/240 game frames byte-identical'
-          echo '=== Before alpha optimization ==='
-          grep '^ARM32_HOT_FUNCTION' /tmp/destinia-menu-baseline.log | head -12
-          echo '=== After alpha optimization ==='
-          grep '^ARM32_HOT_FUNCTION' /tmp/destinia-menu-alpha.log | head -12
+          echo '=== CPU frame 220, without profiler overhead ==='
+          grep 'ARM32_FRAME_PERF frame=220' \
+            /tmp/destinia-menu-baseline.log /tmp/destinia-menu-alpha.log
+          python3 - <<'PY'
+          import re, statistics
+          for label in ("baseline", "alpha"):
+              path=f"/tmp/destinia-menu-{label}.log"
+              samples={}
+              for frame,ms in re.findall(
+                      r"ARM32_FRAME_PERF frame=(\d+) exec_ms=(\d+)",
+                      open(path, encoding="utf8").read()):
+                  samples[int(frame)]=int(ms)
+              vals=[samples[i] for i in range(170,240) if i in samples]
+              assert len(vals)==70, f"{label} lacks gameplay frames"
+              print(f"{label}: menu frames 170..239 median={statistics.median(vals)}ms")
+          PY
 
       - name: Verify combined native alpha function and image-row acceleration
         run: |
