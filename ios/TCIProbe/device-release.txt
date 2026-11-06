@@ -1,13 +1,15 @@
-Destinia iOS ARM32 milestone 0.3.2
+Destinia iOS ARM32 milestone 0.3.3
 Branch: ios/unicorn-poc
-Fix: reusar a memoria do GetByteArrayElements depois do
-ReleaseByteArrayElements (JNI_ABORT, JNI_COMMIT e liberacao normal).
-Corrige o esgotamento do heap ARM32 de 64 MiB observado no iPhone no
-quadro 302, mantendo os pixels RGB565 originais e os controles de toque.
-Testes automatizados aprovados:
-- 450 ciclos de uso/liberacao de buffers JNI de 192 KiB
-- 360 quadros completos do Destinia, incluindo o quadro 302
-- initGame, jniRun, jniTouch, importacoes ARM32 e 213 relocacoes
-A emulacao Unicorn-TCI continua no modo Release otimizado sem JIT.
-Instalar a IPA por cima do app via AltStore para testar, sem desinstalar
-o aplicativo antigo (para evitar apagar dados locais).
+Acceleracao grafica nativa da imagem original:
+- Grp_fillRect: substitui o loop Thumb de preenchimento RGB565
+- Grp_drawClipWImageP: substitui 96000 iteracoes ARM32 por blit de pixels nativo
+- As duas operacoes preservam o buffer de imagem original, inclusive transparencia
+- Compilacao iOS: Unicorn TCI Release, -O3, DESTINIA_NATIVE_GFX=1
+Testes macOS aprovados antes desta release:
+- 360 quadros do jogo com framebuffer final identico byte por byte
+- Quadros normais: ~120-150 ms (sem aceleracao), ~8-14 ms (com aceleracao)
+- initGame, jniRun, jniTouch e operacoes Android/JNI, inclusive o reparo do heap
+- 213/213 relocacoes ARM32 sem tipos desconhecidos
+- O carregamento pesado inicial ainda requer emulacao ARM32 e pode levar segundos
+Valores acima medidos no runner macOS; desempenho real no iPhone requer teste.
+Instalar a nova IPA por cima via AltStore, sem apagar a anterior.
