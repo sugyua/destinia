@@ -42,6 +42,7 @@ ArmImportRuntime::~ArmImportRuntime() {
     if (hook_) uc_hook_del(uc_, hook_);
     if (jniHook_) uc_hook_del(uc_, jniHook_);
     if (profileHook_) uc_hook_del(uc_, profileHook_);
+    if (fastFillHook_) uc_hook_del(uc_, fastFillHook_);
 }
 
 unsigned ArmImportRuntime::implementedCount() const { return implemented_; }
@@ -54,6 +55,54 @@ void ArmImportRuntime::onProfileBlock(
     uc_engine *,uint64_t address,uint32_t,void *user) {
     ++static_cast<ArmImportRuntime *>(user)->profileBlocks_[
         static_cast<uint32_t>(address)&~1u];
+}
+
+// The original Thumb pixel loop at +0xac70 writes one RGB565 pixel
+// per instruction iteration. Replace only that loop (not its clipping,
+// blend mode, bounds checks or caller) with one emulated-memory write.
+// The patch lives in Unicorn RAM; the original .so on disk is unchanged.
+bool ArmImportRuntime::enableNativeFillRect(
+    uint32_t imageBase, std::string &error) {
+    const uint32_t loop=imageBase+0x0000ac70;
+    uint16_t original=0;
+    if (!readBytes(loop,&original,sizeof(original)) ||
+        original!=0x801d) {
+        error="RGB565 hot loop signature mismatch";
+        return false;
+    }
+    const uint16_t skipPixelLoop=0xe002; // Thumb: b +4 (to loop+8).
+    if (!writeBytes(loop,&skipPixelLoop,sizeof(skipPixelLoop))) {
+        error="Nao foi possivel ativar fast fill ARM32";
+        return false;
+    }
+    const uc_err e=uc_hook_add(
+        uc_,&fastFillHook_,UC_HOOK_CODE,
+        reinterpret_cast<void *>(onFastFillRow),this,loop,loop);
+    if (e!=UC_ERR_OK) {
+        writeBytes(loop,&original,sizeof(original));
+        error=std::string("Hook de preenchimento: ")+uc_strerror(e);
+        return false;
+    }
+    return true;
+}
+
+void ArmImportRuntime::onFastFillRow(
+    uc_engine *, uint64_t, uint32_t, void *opaque) {
+    auto *runtime=static_cast<ArmImportRuntime *>(opaque);
+    uint32_t begin=0,end=0,color=0;
+    if (!runtime->readReg(UC_ARM_REG_R3,begin) ||
+        !runtime->readReg(UC_ARM_REG_R2,end) ||
+        !runtime->readReg(UC_ARM_REG_R5,color)) {
+        runtime->fail("RGB565 fill: falha nos registradores"); return;
+    }
+    if (end<=begin || (end-begin)>400u*240u*2u ||
+        ((end-begin)&1u)) {
+        runtime->fail("RGB565 fill: intervalo ARM32 invalido"); return;
+    }
+    std::vector<uint16_t> pixels(
+        (end-begin)/2,static_cast<uint16_t>(color));
+    if (!runtime->writeBytes(begin,pixels.data(),end-begin))
+        runtime->fail("RGB565 fill: destino ARM32 invalido");
 }
 
 bool ArmImportRuntime::readReg(int reg, uint32_t &value) {
