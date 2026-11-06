@@ -4,6 +4,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
+#include <cstring>
 #include <vector>
 
 extern "C" int destinia_game_open(
@@ -16,6 +17,7 @@ extern "C" int destinia_game_touch(
     uint32_t x, uint32_t y, uint32_t type,
     char *message, size_t capacity);
 extern "C" void destinia_game_close(void);
+extern "C" void destinia_game_profile_next(void);
 
 static constexpr size_t kWidth=400;
 static constexpr size_t kHeight=240;
@@ -58,6 +60,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 @property (nonatomic,strong) UILabel *statusLabel;
 @property (nonatomic,copy) void (^touchCallback)(CGPoint point, int type);
 @property (nonatomic,copy) void (^metricsCallback)(void);
+@property (nonatomic,copy) void (^profileCallback)(void);
 @property (nonatomic,assign) BOOL trackingMetricsGesture;
 @end
 
@@ -120,6 +123,11 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 }
 - (void)touchesBegan:(NSSet<UITouch *> *)touches
           withEvent:(UIEvent *)event {
+    if ([[event allTouches] count]>=4) {
+        self.trackingMetricsGesture=YES;
+        if (self.profileCallback) self.profileCallback();
+        return;
+    }
     if ([[event allTouches] count]>=3) {
         self.trackingMetricsGesture=YES;
         if (self.metricsCallback) self.metricsCallback();
@@ -230,6 +238,20 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     const auto emulationFinished=std::chrono::steady_clock::now();
     ++_frameIndex;
     [self showPixels:pixels frameNum:_frameIndex];
+    if (error[0] && std::strncmp(error,"TOP ARM32:",10)==0) {
+        NSString *top=[NSString stringWithUTF8String:error];
+        NSLog(@"Destinia gameplay profile: %@",top);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self->_showMetrics.store(true);
+            self->_controller.statusLabel.numberOfLines=7;
+            const CGRect safe=self->_controller.view.safeAreaLayoutGuide.layoutFrame;
+            self->_controller.statusLabel.frame=CGRectMake(
+                safe.origin.x+10,safe.origin.y+6,
+                MAX(100,safe.size.width-20),140);
+            self->_controller.statusLabel.text=top;
+            self->_controller.statusLabel.hidden=NO;
+        });
+    }
     const auto prepared=std::chrono::steady_clock::now();
     const double armMs=std::chrono::duration<double,std::milli>(
         emulationFinished-tickStart).count();
@@ -291,6 +313,14 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     [self.window makeKeyAndVisible];
 
     __weak AppDelegate *weakSelf=self;
+    _controller.profileCallback=^{
+        AppDelegate *owner=weakSelf;
+        if (!owner) return;
+        [owner showStatus:@"Perfilando 1 quadro ARM32..."];
+        dispatch_async(owner->_gameQueue,^{
+            if (owner->_ready) destinia_game_profile_next();
+        });
+    };
     _controller.metricsCallback=^{
         AppDelegate *owner=weakSelf;
         if (!owner) return;
