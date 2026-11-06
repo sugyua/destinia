@@ -189,6 +189,12 @@ static int destinia_probe_impl(
                 throw std::runtime_error(
                     "Falha no teste de imports ARM32: " + runtimeError);
             }
+            if (std::getenv("DESTINIA_FAST_FILL") &&
+                !runtime->enableNativeFillRect(
+                    static_cast<uint32_t>(base),runtimeError)) {
+                throw std::runtime_error(
+                    "Falha no fast fill RGB565: "+runtimeError);
+            }
 
             uint32_t originalAddress=0;
             for (size_t i=0; i<image.symbols.size(); ++i) {
