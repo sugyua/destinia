@@ -1,6 +1,7 @@
 #pragma once
 #include <unicorn/unicorn.h>
 #include <cstdint>
+#include <cstdio>
 #include <map>
 #include <string>
 
@@ -20,6 +21,7 @@ private:
     void dispatch(uint32_t address);
     bool readCString(uint32_t address, std::string &value);
     bool writeCString(uint32_t address, const std::string &value);
+    bool resolvePath(const std::string &guest, std::string &path);
     bool readReg(int reg, uint32_t &value);
     bool writeReg(int reg, uint32_t value);
     bool readBytes(uint32_t address, void *data, size_t bytes);
@@ -33,6 +35,8 @@ private:
     std::map<std::string, uint32_t> names_;
     std::map<uint32_t, std::string> reverse_;
     uint32_t heapNext_ = 0x30000000;
+    uint32_t nextFile_ = 0x5000;
+    std::map<uint32_t, FILE *> files_;
     std::string lastError_;
     unsigned implemented_ = 0;
 };
