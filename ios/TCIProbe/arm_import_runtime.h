@@ -61,6 +61,10 @@ private:
     std::map<uint32_t,uint64_t> profileBlocks_;
     std::map<std::string, uint32_t> names_;
     std::map<uint32_t, std::string> reverse_;
+    std::vector<uint8_t> directHeap_;
+    bool hasDirectHeap_ = false;
+    uint64_t directSpriteColumns_ = 0;
+    uint64_t directFillRows_ = 0;
     uint32_t heapNext_ = 0x30000000;
     uint32_t nextFile_ = 0x5000;
     uint32_t nextArray_ = 0x1000;
