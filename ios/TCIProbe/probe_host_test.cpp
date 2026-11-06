@@ -4,9 +4,16 @@
 #include <fstream>
 #include <cstdint>
 
-extern "C" int destinia_probe_elf_frame(
+extern "C" int destinia_game_open(
     const char *path, char *out, size_t capacity,
     uint8_t *frameOut, size_t frameCapacity);
+extern "C" int destinia_game_step(
+    uint8_t *frameOut, size_t frameCapacity, uint32_t *nextMs,
+    char *message, size_t capacity);
+extern "C" int destinia_game_touch(
+    uint32_t x, uint32_t y, uint32_t type,
+    char *message, size_t capacity);
+extern "C" void destinia_game_close(void);
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -16,7 +23,7 @@ int main(int argc, char **argv) {
 
     char output[2048] = {};
     std::vector<uint8_t> frame(400u*240u*2u,0);
-    const int ok = destinia_probe_elf_frame(
+    const int ok = destinia_game_open(
         argv[1], output, sizeof(output), frame.data(), frame.size());
     std::printf("=== TESTE AUTOMATICO DO CARREGADOR ARM32 ===\n%s\n", output);
 
@@ -79,6 +86,22 @@ int main(int argc, char **argv) {
         std::fprintf(stderr,"FALHOU: imagem incompleta.\n");
         return 1;
     }
-    std::puts("PASSOU: initGame, jniRun e imagem RGB565 exportada.");
+    char message[512]={};
+    uint32_t waitMs=0;
+    if (!destinia_game_step(
+            frame.data(),frame.size(),&waitMs,message,sizeof(message))) {
+        std::fprintf(stderr,"FALHOU: sessao persistente: %s\n",message);
+        destinia_game_close();
+        return 1;
+    }
+    std::printf("Quadro persistente: OK, espera=%u ms\n",waitMs);
+    if (!destinia_game_touch(200,120,0,message,sizeof(message)) ||
+        !destinia_game_touch(200,120,1,message,sizeof(message))) {
+        std::fprintf(stderr,"FALHOU: toque no jogo: %s\n",message);
+        destinia_game_close();
+        return 1;
+    }
+    destinia_game_close();
+    std::puts("PASSOU: initGame, jniRun, sessao persistente, toque e RGB565.");
     return 0;
 }
