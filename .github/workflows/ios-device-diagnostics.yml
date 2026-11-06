@@ -270,6 +270,7 @@ jobs:
             -I/tmp/unicorn-tci/unicorn-engine-sys-tci/include \
             ios/TCIProbe/probe_host_test.cpp \
             ios/TCIProbe/elf_probe.cpp \
+            ios/TCIProbe/arm_import_runtime.cpp \
             /tmp/unicorn-tci-macos-build/libunicorn-static.a \
             /tmp/unicorn-tci-macos-build/libarm-softmmu.a \
             /tmp/unicorn-tci-macos-build/libunicorn-common.a \
@@ -299,6 +300,7 @@ jobs:
             -I/tmp/unicorn-tci/unicorn-engine-sys-tci/include \
             ios/TCIProbe/main.mm \
             ios/TCIProbe/elf_probe.cpp \
+            ios/TCIProbe/arm_import_runtime.cpp \
             /tmp/unicorn-tci-ios-build/libunicorn-static.a \
             /tmp/unicorn-tci-ios-build/libarm-softmmu.a \
             /tmp/unicorn-tci-ios-build/libunicorn-common.a \
