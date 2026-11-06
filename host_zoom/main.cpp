@@ -1,4 +1,4 @@
-﻿#include "../common/safe_save.h"
+#include "../common/safe_save.h"
 #include "../common/diagnostics_panel.h"
 #include "../common/attribute_sheet.h"
 #include "../common/virtual_controls.h"
@@ -17,6 +17,8 @@ static destinia::SurvivalHost survivalHost;
 static destinia::RefinementHost refinementHost;
 #include "../common/auto_potion.h"
 static destinia::AutoPotionController autoPotion;
+#include "../common/mage_selection_hook.h"
+static destinia::MageSelectionHook mageSelectionHook;
 #include "../common/version_stamp.h"
 
 static bool controllerBackHeld = false;
@@ -390,6 +392,9 @@ static bool codexMenuKey(int key,bool down);
 static bool inventoryMenuKey(int key,bool down);
 static bool fcMenuKey(int key,bool down);
 static void gameKey(int key, bool down) {
+  if (mageSelectionHook.active) {
+    if (mageSelectionHook.handleKey(key, down)) return;
+  }
   if(difficultyMenuKey(key,down) || bossRushUI.handleKey(key,down) || inventoryMenuKey(key,down) || fcMenuKey(key,down) || codexMenuKey(key,down)) return;
   destinia::sessionLog.write("ENTRADA tecla="+std::to_string(key)+(down?" pressionada":" solta"));
   int st = menuState();
@@ -1464,6 +1469,13 @@ static int runHost(int argc, char** argv) {
     bossRushUI.saveDir = saveDir;
   }catch(const std::exception& error){hostReport("[mago] Desativado: %s\n",error.what());}
   fcInstall();
+  if (exportsMap.count("_drawMakeMenu")) {
+    const auto at = exportsMap.at("_drawMakeMenu") & ~1u;
+    uc_hook hkMake;
+    uc_hook_add(uc, &hkMake, UC_HOOK_CODE, (void*)+[](uc_engine*, uint64_t, uint32_t, void*) {
+      mageSelectionHook.notifyDrawMakeMenu();
+    }, nullptr, at, at);
+  }
   u32 fnRun = exportsMap["Java_game_destiniaeng_GameThread_jniRun"];
   u32 fnTouch = exportsMap["Java_game_destiniaeng_GameThread_jniTouch"];
   auto grab = [&](const char* n) { auto it = exportsMap.find(n); return it == exportsMap.end() ? 0u : it->second; };
@@ -1506,6 +1518,7 @@ static int runHost(int argc, char** argv) {
   bool mouseDown=false; int lastTouchX=0,lastTouchY=0;
   auto touch = [&](int x, int y, int type) {
     if(questTrackerUI.handleTouch(x, y, type, SCREEN_W, SCREEN_H)) return;
+    if(mageSelectionHook.handleTouch(x, y, type, SCREEN_W, SCREEN_H)) return;
     if(sharedStashHost.open || bountiesHost.open || weaponsCatalogHost.open || difficultyMenuTouch(x,y,type) || codexMenuTouch(x,y,type)) return;
     lastTouchX=x; lastTouchY=y;
     if(type!=2) destinia::sessionLog.write("ENTRADA toque x="+std::to_string(x)+" y="+std::to_string(y)+" tipo="+std::to_string(type));
@@ -2026,7 +2039,11 @@ static int runHost(int argc, char** argv) {
     }
     diagnosticsPanel.paint(frameBuffer.data(), SCREEN_W, SCREEN_H);
     {destinia::CombatStats attributes{};for(int i=0;i<13;++i)attributes[i]=int16_t(rd16(exportsMap.at("Game")+0x48ba+2*i));attributeSheet.paint(frameBuffer.data(),SCREEN_W,SCREEN_H,attributes);}
-    if (menuState() == 1) destinia::paintVersionStamp(frameBuffer.data(), SCREEN_W, SCREEN_H, DESTINIA_VERSION);
+    if (menuState() == 1) {
+      destinia::paintVersionStamp(frameBuffer.data(), SCREEN_W, SCREEN_H, DESTINIA_VERSION);
+      mageSelectionHook.paint(frameBuffer.data(), SCREEN_W, SCREEN_H);
+      mageSelectionHook.update();
+    }
     const uint8_t* fb = frameBuffer.data();
     if (headlessFrames) {
       if (frame == 1 || frame % 10 == 0) { char nm[64]; snprintf(nm, sizeof nm, "/frame_%05ld.bmp", frame); writeBmp(outDir + nm, fb); }
