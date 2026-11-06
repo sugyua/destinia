@@ -14,8 +14,8 @@
 namespace destinia {
 namespace {
 constexpr uint32_t kHeapBase = 0x30000000;
-constexpr uint32_t kHeapSize = 0x100000;
-constexpr uint32_t kTestBase = 0x300f0000;
+constexpr uint32_t kHeapSize = 0x04000000;
+constexpr uint32_t kTestBase = 0x33ff0000;
 constexpr uint32_t kReturn = 0x20002000;
 constexpr uint32_t kMaxTransfer = 0x100000;
 const char *const kImplemented[] = {
@@ -778,7 +778,7 @@ bool ArmImportRuntime::runGameInit(
         error="Falha ao configurar argumentos do initGame"; return false;
     }
     lastError_.clear();
-    const uc_err e=uc_emu_start(uc_,address,kReturn,0,3000000);
+    const uc_err e=uc_emu_start(uc_,address,kReturn,0,30000000);
     if (!lastError_.empty()) { error=lastError_; return false; }
     if (e!=UC_ERR_OK) {
         error=std::string("initGame ARM32: ")+uc_strerror(e);
@@ -788,7 +788,7 @@ bool ArmImportRuntime::runGameInit(
     if (!readReg(UC_ARM_REG_PC,pc) || pc!=kReturn) {
         char diagnostic[160];
         std::snprintf(diagnostic,sizeof(diagnostic),
-            "initGame excedeu 3000000 instrucoes (PC=0x%08x)",pc);
+            "initGame excedeu 30000000 instrucoes (PC=0x%08x)",pc);
         error=diagnostic;
         return false;
     }
