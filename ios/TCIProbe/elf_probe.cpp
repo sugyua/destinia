@@ -265,7 +265,7 @@ static int destinia_probe_impl(
             bool paced=false;
             if (const char *env=std::getenv("DESTINIA_PROBE_FRAMES")) {
                 const long requested=std::strtol(env,nullptr,10);
-                if (requested>=1 && requested<=160) {
+                if (requested>=1 && requested<=420) {
                     targetFrames=static_cast<uint32_t>(requested);
                     paced=true;
                 }
