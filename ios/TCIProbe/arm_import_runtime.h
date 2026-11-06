@@ -17,6 +17,7 @@ public:
     ~ArmImportRuntime();
     bool install(std::string &error);
     bool enableNativeFillRect(uint32_t imageBase, std::string &error);
+    bool enableNativeSpriteColumn(uint32_t imageBase, std::string &error);
     bool selfTest(std::string &error);
     bool selfTestJniBufferReuse(std::string &error);
     bool runOriginalExport(uint32_t address, uint32_t &result,
@@ -34,6 +35,7 @@ private:
     static void onCode(uc_engine *, uint64_t, uint32_t, void *);
     static void onProfileBlock(uc_engine *, uint64_t, uint32_t, void *);
     static void onFastFillRow(uc_engine *, uint64_t, uint32_t, void *);
+    static void onFastSpriteColumn(uc_engine *, uint64_t, uint32_t, void *);
     static void onJniCode(uc_engine *, uint64_t, uint32_t, void *);
     void dispatchJni(uint32_t address);
     bool installJni(std::string &error);
@@ -55,6 +57,7 @@ private:
     uc_hook jniHook_ = 0;
     uc_hook profileHook_ = 0;
     uc_hook fastFillHook_ = 0;
+    uc_hook fastSpriteHook_ = 0;
     std::map<uint32_t,uint64_t> profileBlocks_;
     std::map<std::string, uint32_t> names_;
     std::map<uint32_t, std::string> reverse_;
