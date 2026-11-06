@@ -1,5 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <CoreGraphics/CoreGraphics.h>
+#import "DestiniaDiagnosticHUD.h"
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -58,6 +59,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 @interface DestiniaViewController : UIViewController
 @property (nonatomic,strong) UIImageView *gameView;
 @property (nonatomic,strong) UILabel *statusLabel;
+@property (nonatomic,strong) DestiniaDiagnosticHUD *debugHUD;
 @property (nonatomic,copy) void (^touchCallback)(CGPoint point, int type);
 @property (nonatomic,copy) void (^metricsCallback)(void);
 @property (nonatomic,copy) void (^profileCallback)(void);
@@ -93,6 +95,11 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     self.statusLabel.layer.cornerRadius=7;
     self.statusLabel.layer.masksToBounds=YES;
     [self.view addSubview:self.statusLabel];
+#if DESTINIA_DIAGNOSTIC_HUD
+    self.debugHUD=[[DestiniaDiagnosticHUD alloc] initWithFrame:CGRectZero];
+    self.debugHUD.hidden=NO;
+    [self.view addSubview:self.debugHUD];
+#endif
 }
 
 - (void)viewDidLayoutSubviews {
@@ -101,6 +108,12 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     self.statusLabel.frame=CGRectMake(
         safe.origin.x+10,safe.origin.y+6,
         MAX(100,safe.size.width-20),38);
+#if DESTINIA_DIAGNOSTIC_HUD
+    // Place the debug panel outside the game HUD's top status region.
+    const CGFloat panelWidth=MIN(236.0,MAX(180.0,safe.size.width*0.39));
+    self.debugHUD.frame=CGRectMake(CGRectGetMaxX(safe)-panelWidth-8,
+        CGRectGetMaxY(safe)-166, panelWidth, 162);
+#endif
 }
 
 - (void)forwardTouches:(NSSet<UITouch *> *)touches type:(int)type {
@@ -176,6 +189,11 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     uint32_t _measureFrames;
     double _totalArmMs;
     double _totalPreparationMs;
+    double _totalFrameMs;
+    double _maxFrameMs;
+    uint64_t _slowFrameCount;
+    std::chrono::steady_clock::time_point _previousFrameStart;
+    bool _hasPreviousFrame;
     NSString *_lastProfile;
 }
 
@@ -226,6 +244,15 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     }
 
     const auto tickStart=std::chrono::steady_clock::now();
+    if (_hasPreviousFrame) {
+        const double elapsedMs=std::chrono::duration<double,std::milli>(
+            tickStart-_previousFrameStart).count();
+        _totalFrameMs+=elapsedMs;
+        _maxFrameMs=std::max(_maxFrameMs,elapsedMs);
+        if (elapsedMs>62.5) ++_slowFrameCount;
+    }
+    _previousFrameStart=tickStart;
+    _hasPreviousFrame=true;
     std::vector<uint8_t> pixels(kFrameBytes);
     uint32_t nextMs=0;
     char error[512]={};
@@ -269,6 +296,17 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         const double fps=1000.0*_measureFrames/sampleMs;
         const double avgArm=_totalArmMs/_measureFrames;
         const double avgPrep=_totalPreparationMs/_measureFrames;
+        const double avgFrame=_totalFrameMs/std::max(1u,_measureFrames);
+        const double peakFrame=_maxFrameMs;
+        const uint64_t slowFrames=_slowFrameCount;
+#if DESTINIA_DIAGNOSTIC_HUD
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self->_controller.debugHUD refreshFPS:fps
+                armMs:avgArm cpuPrepMs:avgPrep
+                avgFrameMs:avgFrame maxFrameMs:peakFrame
+                slowFrames:slowFrames];
+        });
+#endif
         NSLog(@"Destinia perf FPS=%.1f ARM32=%.1fms RGB565=%.1fms frames=%u",
               fps,avgArm,avgPrep,_measureFrames);
         if (_showMetrics.load() && !_lastProfile) {
@@ -284,6 +322,8 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         _measureFrames=0;
         _totalArmMs=0;
         _totalPreparationMs=0;
+        _totalFrameMs=0;
+        _maxFrameMs=0;
     }
     if (nextMs==0) {
         _ready=false;
@@ -301,13 +341,18 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)options {
     _paused.store(false);
-    _showMetrics.store(false);
+    _showMetrics.store(true);
     _ready=false;
     _frameIndex=0;
     _measureStarted=std::chrono::steady_clock::now();
     _measureFrames=0;
     _totalArmMs=0;
     _totalPreparationMs=0;
+    _totalFrameMs=0;
+    _maxFrameMs=0;
+    _slowFrameCount=0;
+    _hasPreviousFrame=false;
+    UIDevice.currentDevice.batteryMonitoringEnabled=YES;
     _gameQueue=dispatch_queue_create(
         "com.destinia.arm32.interpreter",DISPATCH_QUEUE_SERIAL);
     _controller=[[DestiniaViewController alloc] init];
@@ -332,6 +377,9 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         const bool enable=!owner->_showMetrics.load();
         owner->_showMetrics.store(enable);
         owner->_controller.statusLabel.hidden=!enable;
+#if DESTINIA_DIAGNOSTIC_HUD
+        owner->_controller.debugHUD.hidden=!enable;
+#endif
         if (enable)
             owner->_controller.statusLabel.text=
                 @"Medindo FPS e custo ARM32...";
