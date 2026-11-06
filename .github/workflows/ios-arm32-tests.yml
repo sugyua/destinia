@@ -81,9 +81,19 @@ jobs:
           cmp /tmp/destinia-baseline.ppm /tmp/destinia-frame.ppm
           echo "Native RGB565 sprite: pixel-identical to original ARM32"
 
-      - name: Profile exact ARM32 sprite-rendering hot instructions
+      - name: Benchmark and profile original versus native graphics
         run: |
-          DESTINIA_PROFILE_BLOCKS=1 DESTINIA_PROBE_FRAMES=50 /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
+          set -euo pipefail
+          DESTINIA_PROFILE_BLOCKS=1 DESTINIA_PROBE_FRAMES=50 \
+            /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so \
+            2> /tmp/destinia-arm32-baseline.log
+          DESTINIA_PROFILE_BLOCKS=1 DESTINIA_FAST_FILL=1 DESTINIA_FAST_SPRITE=1 \
+            DESTINIA_PROBE_FRAMES=50 \
+            /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so \
+            2> /tmp/destinia-arm32-native.log
+          python3 ios/tools/summarize_arm32_perf.py \
+            /tmp/destinia-arm32-baseline.log /tmp/destinia-arm32-native.log
+          cat /tmp/destinia-arm32-native.log | grep 'ARM32_HOT_FUNCTION' | head -12
 
       - name: Endurance regression beyond iPhone frame 302
         run: |
@@ -101,4 +111,15 @@ jobs:
           name: Destinia-RGB565-preview
           path: /tmp/destinia-frame.ppm
           if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload ARM32 performance logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Destinia-ARM32-Performance
+          path: |
+            /tmp/destinia-arm32-baseline.log
+            /tmp/destinia-arm32-native.log
+          if-no-files-found: ignore
           retention-days: 7
