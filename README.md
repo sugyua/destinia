@@ -1,5 +1,12 @@
 # Destinia 0.17.4 Beta
 
+> **Port iOS (branch experimental):** o aplicativo iPhone usa o motor
+> Android original **1.0.6**, apesar de este repositório documentar os mods
+> Windows **0.17.4 Beta**. Os sistemas de Códex, títulos, Mago, dificuldades,
+> inventário e outras expansões do PC **não estão automaticamente ativos**
+> no iOS. Veja [estado do port iOS](ios/README.md) e
+> [matriz de portabilidade](ios/PORTING_0174.md).
+
 > **Versão 0.17.4 Beta (05/11/2026).** O menu principal mostra a versão atual, lida do arquivo VERSION durante a compilação; inclui sincronização com as releases 0.17.0 a 0.17.4 e atualizações acumuladas 0.13 a 0.17.
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
