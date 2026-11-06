@@ -189,13 +189,22 @@ static int destinia_probe_impl(
                 throw std::runtime_error(
                     "Falha no teste de imports ARM32: " + runtimeError);
             }
-            if (std::getenv("DESTINIA_FAST_FILL") &&
+#if defined(DESTINIA_NATIVE_GFX)
+            const bool nativeFillEnabled=true;
+            const bool nativeSpriteEnabled=true;
+#else
+            const bool nativeFillEnabled=
+                std::getenv("DESTINIA_FAST_FILL")!=nullptr;
+            const bool nativeSpriteEnabled=
+                std::getenv("DESTINIA_FAST_SPRITE")!=nullptr;
+#endif
+            if (nativeFillEnabled &&
                 !runtime->enableNativeFillRect(
                     static_cast<uint32_t>(base),runtimeError)) {
                 throw std::runtime_error(
                     "Falha no fast fill RGB565: "+runtimeError);
             }
-            if (std::getenv("DESTINIA_FAST_SPRITE") &&
+            if (nativeSpriteEnabled &&
                 !runtime->enableNativeSpriteColumn(
                     static_cast<uint32_t>(base),runtimeError)) {
                 throw std::runtime_error(
