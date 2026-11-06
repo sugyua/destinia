@@ -305,6 +305,7 @@ jobs:
             -fobjc-arc \
             -O3 \
             -DDESTINIA_NATIVE_GFX=1 \
+            -DDESTINIA_NATIVE_HEAP=1 \
             -std=c++17 \
             -I/tmp/unicorn-tci/unicorn-engine-sys-tci/include \
             ios/TCIProbe/main.mm \
@@ -335,9 +336,9 @@ jobs:
             <key>CFBundlePackageType</key>
             <string>APPL</string>
             <key>CFBundleShortVersionString</key>
-            <string>0.3.3</string>
+            <string>0.3.4</string>
             <key>CFBundleVersion</key>
-            <string>7</string>
+            <string>8</string>
             <key>MinimumOSVersion</key>
             <string>15.0</string>
             <key>LSRequiresIPhoneOS</key>
