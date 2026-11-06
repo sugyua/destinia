@@ -6,6 +6,7 @@ on:
       - ios/unicorn-poc
     paths:
       - "ios/TCIProbe/**"
+      - "ios/tools/**"
       - "common/elf_image.h"
       - ".github/workflows/ios-arm32-tests.yml"
   workflow_dispatch:
@@ -17,6 +18,11 @@ jobs:
     steps:
       - name: Checkout Destinia
         uses: actions/checkout@v4
+
+      - name: Verify original Android engine version
+        run: |
+          python3 ios/tools/audit_game_source.py /tmp/destinia-game-source.json
+
 
       - name: Compile native iOS game interface
         run: |
