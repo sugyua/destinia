@@ -42,7 +42,14 @@ class InventoryViewTests(unittest.TestCase):
     env=dict(os.environ,SDL_VIDEODRIVER='dummy',SDL_AUDIODRIVER='dummy')
     run=subprocess.run([str(exe),'--game',str(ROOT/'game'),'--settings',str(case/'config.ini'),'--save',str(case/'save'),'--reports',str(case/'reports'),'--headless','1','--out',str(case/'frames'),'--mute','--no-save-preferences'],env=env,capture_output=True,text=True,timeout=60)
     self.assertEqual(run.returncode,0,run.stdout+run.stderr);self.assertIn('INVENTORY_UPGRADE_HOTKEY_ARM_OK',run.stdout)
-    self.assertFalse((case/'save'/'inventory-protect-v1.txt').exists(),'Host criou sidecar fantasma no encerramento')
+    # This native test creates and removes a legitimate protection entry.
+    # The regression is an invalid or EMPTY sidecar, not its existence.
+    protection=case/'save'/'inventory-protect-v1.txt'
+    self.assertTrue(protection.is_file(),'Protecao nativa nao persistida')
+    data=protection.read_bytes()
+    self.assertTrue(data.startswith(b'DESTINIA_INVENTORY_PROTECT_1\n'),
+                    'Protecao foi sobrescrita ou ficou vazia no encerramento')
+    self.assertLessEqual(len(data),100000)
 
  def test_panel_filters_keys_and_scaled_hitboxes(self):
   with tempfile.TemporaryDirectory(prefix='destinia inventory panel ') as folder:
