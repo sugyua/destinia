@@ -4,6 +4,8 @@
 #include <climits>
 #include <cstdio>
 #include <cstring>
+#include <cstdlib>
+#include <filesystem>
 #include <vector>
 
 namespace destinia {
@@ -17,7 +19,8 @@ const char *const kImplemented[] = {
     "__aeabi_idiv", "__aeabi_idivmod", "__aeabi_ldivmod",
     "__aeabi_lmul", "__aeabi_uidiv", "__aeabi_uidivmod",
     "memcpy", "memset", "strlen", "strcpy", "strncmp",
-    "strstr", "malloc", "free", "clock"
+    "strstr", "malloc", "free", "clock",
+    "fopen", "fclose", "fread", "fwrite", "fseek", "ftell", "remove"
 };
 }
 
@@ -31,6 +34,7 @@ ArmImportRuntime::ArmImportRuntime(
 }
 
 ArmImportRuntime::~ArmImportRuntime() {
+    for (const auto &entry : files_) std::fclose(entry.second);
     if (hook_) uc_hook_del(uc_, hook_);
 }
 
@@ -70,6 +74,34 @@ bool ArmImportRuntime::writeCString(
     uint32_t address, const std::string &value) {
     return value.size() < 4096 &&
         writeBytes(address, value.c_str(), value.size() + 1);
+}
+
+bool ArmImportRuntime::resolvePath(
+    const std::string &guest, std::string &path) {
+    static const std::string prefix =
+        "/data/data/game.destiniaeng/files/";
+    std::string relative=guest;
+    if (relative.compare(0,prefix.size(),prefix)==0)
+        relative=relative.substr(prefix.size());
+    else if (!relative.empty() && relative[0]=='/')
+        return false;
+
+    if (relative.empty() || relative.find('\\\\')!=std::string::npos)
+        return false;
+
+    const std::filesystem::path sub(relative);
+    if (sub.is_absolute()) return false;
+    for (const auto &piece:sub) {
+        if (piece=="." || piece==".." || piece.empty()) return false;
+    }
+    const char *home=std::getenv("HOME");
+    if (!home || !*home) return false;
+    const auto sandbox=std::filesystem::path(home)/"Documents"/"Destinia";
+    std::error_code ec;
+    std::filesystem::create_directories(sandbox,ec);
+    if (ec) return false;
+    path=(sandbox/sub).string();
+    return true;
 }
 
 void ArmImportRuntime::fail(const std::string &reason) {
@@ -219,6 +251,77 @@ void ArmImportRuntime::dispatch(uint32_t address) {
         const auto micros=std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::steady_clock::now()-start).count();
         result=static_cast<uint32_t>(micros);
+    } else if (name == "fopen") {
+        std::string guest, mode, path;
+        if (!readCString(a,guest) || !readCString(b,mode)) {
+            fail("fopen: argumentos invalidos"); return;
+        }
+        static const char *const allowed[] = {
+            "rb", "wb", "ab", "r+b", "w+b", "a+b",
+            "r", "w", "a", "rb+", "wb+", "ab+"
+        };
+        bool safeMode=false;
+        for (const auto *candidate : allowed)
+            if (mode==candidate) safeMode=true;
+        if (!safeMode || !resolvePath(guest,path)) {
+            result=0;
+        } else {
+            FILE *file=std::fopen(path.c_str(),mode.c_str());
+            if (!file) result=0;
+            else {
+                result=nextFile_;
+                nextFile_+=16;
+                files_[result]=file;
+            }
+        }
+    } else if (name == "fclose") {
+        auto it=files_.find(a);
+        result=static_cast<uint32_t>(-1);
+        if (it!=files_.end()) {
+            result=static_cast<uint32_t>(std::fclose(it->second));
+            files_.erase(it);
+        }
+    } else if (name == "fread" || name == "fwrite") {
+        auto it=files_.find(d);
+        const uint64_t length=uint64_t(b)*c;
+        if (length>kMaxTransfer) {
+            fail(name+": transferencia excede limite"); return;
+        }
+        if (!b || !c || it==files_.end()) {
+            result=0;
+        } else {
+            std::vector<uint8_t> buffer(static_cast<size_t>(length));
+            if (name=="fwrite") {
+                if (!readBytes(a,buffer.data(),buffer.size())) {
+                    fail("fwrite: origem ARM invalida"); return;
+                }
+                result=static_cast<uint32_t>(
+                    std::fwrite(buffer.data(),b,c,it->second));
+            } else {
+                result=static_cast<uint32_t>(
+                    std::fread(buffer.data(),b,c,it->second));
+                if (result && !writeBytes(a,buffer.data(),size_t(result)*b)) {
+                    fail("fread: destino ARM invalido"); return;
+                }
+            }
+        }
+    } else if (name == "fseek") {
+        auto it=files_.find(a);
+        result=it==files_.end() ? static_cast<uint32_t>(-1) :
+            static_cast<uint32_t>(std::fseek(
+                it->second,static_cast<int32_t>(b),static_cast<int>(c)));
+    } else if (name == "ftell") {
+        auto it=files_.find(a);
+        result=it==files_.end() ? static_cast<uint32_t>(-1) :
+            static_cast<uint32_t>(std::ftell(it->second));
+    } else if (name == "remove") {
+        std::string guest,path;
+        if (!readCString(a,guest)) {
+            fail("remove: string ARM invalida"); return;
+        }
+        result=resolvePath(guest,path) ?
+            static_cast<uint32_t>(std::remove(path.c_str())) :
+            static_cast<uint32_t>(-1);
     } else if (name == "__android_log_print") {
         result=0; // logging nativo sera integrado depois
     } else if (name == "__stack_chk_fail") {
@@ -300,6 +403,42 @@ bool ArmImportRuntime::selfTest(std::string &error) {
         return false;
     }
     if (!invoke("free",kHeapBase,0,0,0,result,error)) return false;
+
+    // Teste completo de arquivo ARM32, isolado no Documents/Destinia.
+    const char guestPath[]=
+        "/data/data/game.destiniaeng/files/arm32-ci-smoke.bin";
+    const char writeMode[]="wb";
+    const char readMode[]="rb";
+    const char fileData[]="ARM32-FILE";
+    if (!writeBytes(kTestBase+256,guestPath,sizeof(guestPath)) ||
+        !writeBytes(kTestBase+384,writeMode,sizeof(writeMode)) ||
+        !writeBytes(kTestBase+400,readMode,sizeof(readMode)) ||
+        !writeBytes(kTestBase+448,fileData,sizeof(fileData))) {
+        error="Falha ao preparar teste de arquivos"; return false;
+    }
+    if (!invoke("fopen",kTestBase+256,kTestBase+384,0,0,result,error))
+        return false;
+    const uint32_t writer=result;
+    if (!writer) { error="Nao abriu arquivo para escrita"; return false; }
+    if (!call("fwrite",kTestBase+448,1,sizeof(fileData),writer,
+              sizeof(fileData)) ||
+        !call("fclose",writer,0,0,0,0))
+        return false;
+    if (!invoke("fopen",kTestBase+256,kTestBase+400,0,0,result,error))
+        return false;
+    const uint32_t reader=result;
+    if (!reader) { error="Nao abriu arquivo para leitura"; return false; }
+    if (!call("fseek",reader,0,0,0,0) ||
+        !call("fread",kTestBase+512,1,sizeof(fileData),reader,
+              sizeof(fileData)) ||
+        !call("fclose",reader,0,0,0,0) ||
+        !call("remove",kTestBase+256,0,0,0,0))
+        return false;
+    char saved[sizeof(fileData)]={};
+    if (!readBytes(kTestBase+512,saved,sizeof(saved)) ||
+        std::memcmp(saved,fileData,sizeof(saved))!=0) {
+        error="Arquivo ARM32 retornou dados incorretos"; return false;
+    }
     return true;
 }
 } // namespace destinia
