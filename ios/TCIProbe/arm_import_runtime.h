@@ -17,9 +17,15 @@ public:
     bool selfTest(std::string &error);
     bool runOriginalExport(uint32_t address, uint32_t &result,
                            std::string &error);
+    bool runGameInit(uint32_t address, const std::string &assetsRoot,
+                     std::string &error);
     unsigned implementedCount() const;
 private:
     static void onCode(uc_engine *, uint64_t, uint32_t, void *);
+    static void onJniCode(uc_engine *, uint64_t, uint32_t, void *);
+    void dispatchJni(uint32_t address);
+    bool installJni(std::string &error);
+    bool readAssetName(uint32_t handle, std::string &name);
     void dispatch(uint32_t address);
     bool readCString(uint32_t address, std::string &value);
     bool writeCString(uint32_t address, const std::string &value);
@@ -34,10 +40,16 @@ private:
                 std::string &error);
     uc_engine *uc_;
     uc_hook hook_ = 0;
+    uc_hook jniHook_ = 0;
     std::map<std::string, uint32_t> names_;
     std::map<uint32_t, std::string> reverse_;
     uint32_t heapNext_ = 0x30000000;
     uint32_t nextFile_ = 0x5000;
+    uint32_t nextArray_ = 0x1000;
+    uint32_t nextClass_ = 0x100;
+    std::map<uint32_t,std::vector<uint8_t>> arrays_;
+    std::map<uint32_t,uint32_t> arrayPointers_;
+    std::string assetsRoot_;
     std::map<uint32_t, FILE *> files_;
     std::string lastError_;
     unsigned implemented_ = 0;
