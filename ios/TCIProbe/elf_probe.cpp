@@ -226,6 +226,18 @@ static int destinia_probe_impl(
             const bool nativeAlphaRowEnabled=
                 std::getenv("DESTINIA_FAST_ALPHA")!=nullptr;
 #endif
+#if defined(DESTINIA_NATIVE_DODGE)
+            const bool nativeDodgeEnabled=true;
+#else
+            const bool nativeDodgeEnabled=
+                std::getenv("DESTINIA_FAST_DODGE")!=nullptr;
+#endif
+            if (nativeDodgeEnabled &&
+                !runtime->enableNativeDodge16(
+                    static_cast<uint32_t>(base),runtimeError)) {
+                throw std::runtime_error(
+                    "Falha no Dodge16 nativo: "+runtimeError);
+            }
             if (nativeAlpha16Enabled &&
                 !runtime->enableNativeAlpha16(
                     static_cast<uint32_t>(base),runtimeError)) {
@@ -491,6 +503,15 @@ static int destinia_probe_impl(
                         std::chrono::milliseconds(
                             std::min(nextFrameMs,1000u)));
                 }
+            }
+            if (nativeDodgeEnabled) {
+                std::fprintf(stderr,
+                    "ARM32_NATIVE_DODGE rows=%llu\n",
+                    static_cast<unsigned long long>(
+                        runtime->nativeDodgeRows()));
+                if (runtime->nativeDodgeRows()==0)
+                    throw std::runtime_error(
+                        "Dodge16 nativo nao executou nenhuma linha");
             }
             if (std::getenv("DESTINIA_DIRECT_HEAP")) {
                 const auto counts=runtime->directAccessCounts();
