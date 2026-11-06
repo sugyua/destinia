@@ -18,6 +18,18 @@ jobs:
       - name: Checkout Destinia
         uses: actions/checkout@v4
 
+      - name: Compile native iOS game interface
+        run: |
+          set -eux
+          SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
+          xcrun --sdk iphoneos clang++ \
+            -target arm64-apple-ios15.0 \
+            -isysroot "$SDK" \
+            -fobjc-arc -std=c++17 -O2 \
+            -c ios/TCIProbe/main.mm \
+            -o /tmp/destinia_main_ios.o
+          file /tmp/destinia_main_ios.o
+
       - name: Clone Unicorn TCI
         run: |
           git clone --depth 1 https://github.com/1rhino2/unicorn-tci.git /tmp/unicorn-tci
