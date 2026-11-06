@@ -46,7 +46,6 @@ ArmImportRuntime::~ArmImportRuntime() {
     if (fastFillHook_) uc_hook_del(uc_, fastFillHook_);
     if (fastSpriteHook_) uc_hook_del(uc_, fastSpriteHook_);
     if (fastAlphaHook_) uc_hook_del(uc_, fastAlphaHook_);
-    if (fastAlphaHook_) uc_hook_del(uc_,fastAlphaHook_);
     if (fastAlpha16Hook_) uc_hook_del(uc_,fastAlpha16Hook_);
     // Unicorn must release the borrowed host memory before vector storage dies.
     if (hasDirectHeap_)
