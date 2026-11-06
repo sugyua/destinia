@@ -2,6 +2,7 @@
 #import <CoreGraphics/CoreGraphics.h>
 #include <algorithm>
 #include <atomic>
+#include <chrono>
 #include <cstdint>
 #include <vector>
 
@@ -59,6 +60,9 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 @end
 
 @implementation DestiniaViewController
+
+- (BOOL)prefersStatusBarHidden { return YES; }
+- (BOOL)prefersHomeIndicatorAutoHidden { return YES; }
 
 - (void)loadView {
     self.view=[[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds];
@@ -145,6 +149,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 
 - (void)showStatus:(NSString *)status {
     dispatch_async(dispatch_get_main_queue(), ^{
+        self->_controller.statusLabel.hidden=NO;
         self->_controller.statusLabel.text=status;
     });
 }
@@ -158,12 +163,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     }
     dispatch_async(dispatch_get_main_queue(), ^{
         self->_controller.gameView.image=image;
-        if (frameNumber%16==0) {
-            self->_controller.statusLabel.text=
-                [NSString stringWithFormat:
-                    @"Destinia ARM32 · quadro %u · toque para jogar",
-                    frameNumber];
-        }
+        self->_controller.statusLabel.hidden=YES;
     });
 }
 
@@ -178,7 +178,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         });
         dispatch_resume(_timer);
     }
-    const uint64_t ms=std::max(16u,std::min(delay,1000u));
+    const uint64_t ms=std::max(1u,std::min(delay,1000u));
     dispatch_source_set_timer(
         _timer,dispatch_time(DISPATCH_TIME_NOW,
                               static_cast<int64_t>(ms)*NSEC_PER_MSEC),
@@ -192,6 +192,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         return;
     }
 
+    const auto tickStart=std::chrono::steady_clock::now();
     std::vector<uint8_t> pixels(kFrameBytes);
     uint32_t nextMs=0;
     char error[512]={};
@@ -210,7 +211,12 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         [self showStatus:@"Destinia encerrou a execucao."];
         return;
     }
-    [self armTimer:nextMs];
+    const auto tickElapsed=std::chrono::duration_cast<
+        std::chrono::milliseconds>(
+            std::chrono::steady_clock::now()-tickStart).count();
+    const uint32_t remaining=tickElapsed>=nextMs
+        ? 1u : nextMs-static_cast<uint32_t>(tickElapsed);
+    [self armTimer:remaining];
 }
 
 - (BOOL)application:(UIApplication *)application
