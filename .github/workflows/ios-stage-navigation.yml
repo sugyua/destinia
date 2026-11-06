@@ -9,7 +9,7 @@ on:
 jobs:
   stage-probe:
     runs-on: macos-15
-    timeout-minutes: 16
+    timeout-minutes: 20
     steps:
       - name: Checkout Destinia
         uses: actions/checkout@v4
@@ -42,7 +42,7 @@ jobs:
       - name: Navigate into original game and capture frame-by-frame scenes
         run: |
           set -euo pipefail
-          DESTINIA_PROBE_FRAMES=420 \
+          DESTINIA_HASH_FRAMES=1 DESTINIA_PROBE_FRAMES=420 \
             DESTINIA_AUTOTOUCH="65,200,211;120,200,67;185,370,211;220,362,17" \
             DESTINIA_CAPTURE_FRAMES="175,210,240,280,340,410" \
             DESTINIA_PROFILE_BLOCKS=1 \
@@ -55,6 +55,33 @@ jobs:
           echo "Original ARM32 stage-navigation screenshots captured"
           grep 'ARM32_TOUCH' /tmp/destinia-stage-profile.log
 
+      - name: Verify 420 original frames and compare combined transparency acceleration
+        run: |
+          set -euo pipefail
+          grep '^ARM32_FRAME_HASH' /tmp/destinia-stage-profile.log > /tmp/destinia-stage-hashes-original.txt
+          test "$(wc -l < /tmp/destinia-stage-hashes-original.txt)" -eq 420
+          DESTINIA_FAST_ALPHA16=1 DESTINIA_FAST_ALPHA=1 \
+            DESTINIA_HASH_FRAMES=1 DESTINIA_PROBE_FRAMES=420 \
+            DESTINIA_AUTOTOUCH="65,200,211;120,200,67;185,370,211;220,362,17" \
+            DESTINIA_CAPTURE_FRAMES="175,210,240,280,340,410" \
+            /tmp/destinia-stage-test game/lib/armeabi/libdestinia_jni.so \
+            2> /tmp/destinia-stage-optimized.log
+          grep '^ARM32_FRAME_HASH' /tmp/destinia-stage-optimized.log > /tmp/destinia-stage-hashes-optimized.txt
+          test "$(wc -l < /tmp/destinia-stage-hashes-optimized.txt)" -eq 420
+          cmp /tmp/destinia-stage-hashes-original.txt /tmp/destinia-stage-hashes-optimized.txt
+          python3 - <<'PY'
+          import re, statistics
+          from pathlib import Path
+          for label, name in [('original', 'profile'), ('optimized', 'optimized')]:
+              data = Path(f'/tmp/destinia-stage-{name}.log').read_text()
+              times = {int(frame):int(ms) for frame,ms in
+                  re.findall(r'ARM32_FRAME_PERF frame=(\d+) exec_ms=(\d+)', data)}
+              samples = [times[frame] for frame in range(300, 420)]
+              print(f'{label}: frames 300..419 median={statistics.median(samples):.1f}ms '
+                    f'p90={sorted(samples)[107]}ms max={max(samples)}ms')
+          PY
+          echo "420 / 420 ARM32 frames identical with both transparency accelerators"
+
       - name: Upload original game scene captures and hotspots
         if: always()
         uses: actions/upload-artifact@v4
@@ -63,5 +90,8 @@ jobs:
           path: |
             /tmp/destinia-stage-*.ppm
             /tmp/destinia-stage-profile.log
+            /tmp/destinia-stage-optimized.log
+            /tmp/destinia-stage-hashes-original.txt
+            /tmp/destinia-stage-hashes-optimized.txt
           if-no-files-found: warn
           retention-days: 7
