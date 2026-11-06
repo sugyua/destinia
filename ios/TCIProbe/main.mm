@@ -1,6 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import "DestiniaDiagnosticHUD.h"
+#include "frame_pacing.h"
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -219,7 +220,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     });
 }
 
-- (void)armTimer:(uint32_t)delay {
+- (void)armTimerNs:(uint64_t)delayNs {
     if (!_timer) {
         _timer=dispatch_source_create(
             DISPATCH_SOURCE_TYPE_TIMER,0,0,_gameQueue);
@@ -230,11 +231,17 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         });
         dispatch_resume(_timer);
     }
-    const uint64_t ms=std::max(1u,std::min(delay,1000u));
+    const uint64_t ns=std::max<uint64_t>(
+        NSEC_PER_MSEC,std::min<uint64_t>(delayNs,1000ULL*NSEC_PER_MSEC));
+    // Tighten the 5ms leeway of 0.3.8 to 0.5ms. The precise 62.5ms
+    // start-to-start target is calculated in nextFrameWait().
     dispatch_source_set_timer(
-        _timer,dispatch_time(DISPATCH_TIME_NOW,
-                              static_cast<int64_t>(ms)*NSEC_PER_MSEC),
-        DISPATCH_TIME_FOREVER,5*NSEC_PER_MSEC);
+        _timer,dispatch_time(DISPATCH_TIME_NOW,static_cast<int64_t>(ns)),
+        DISPATCH_TIME_FOREVER,500000ULL);
+}
+
+- (void)armTimer:(uint32_t)delay {
+    [self armTimerNs:static_cast<uint64_t>(delay)*NSEC_PER_MSEC];
 }
 
 - (void)gameTick {
@@ -332,12 +339,11 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         [self showStatus:@"Destinia encerrou a execucao."];
         return;
     }
-    const auto tickElapsed=std::chrono::duration_cast<
-        std::chrono::milliseconds>(
-            std::chrono::steady_clock::now()-tickStart).count();
-    const uint32_t remaining=tickElapsed>=nextMs
-        ? 1u : nextMs-static_cast<uint32_t>(tickElapsed);
-    [self armTimer:remaining];
+    // Never accelerate gameplay beyond the original 16Hz logic cadence.
+    // Honor larger guest-requested delays, including loading/transitions.
+    const auto wait=destinia::nextFrameWait(
+        tickStart,std::chrono::steady_clock::now(),nextMs);
+    [self armTimerNs:static_cast<uint64_t>(wait.count())];
 }
 
 - (BOOL)application:(UIApplication *)application
@@ -432,7 +438,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
             _totalPreparationMs=0;
             _frameIndex=4;
             [self showPixels:pixels frameNum:_frameIndex];
-            [self armTimer:62];
+            [self armTimerNs:62500000ULL];
         }
     });
     return YES;

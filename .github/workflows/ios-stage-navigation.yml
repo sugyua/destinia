@@ -16,6 +16,14 @@ jobs:
       - name: Checkout Destinia
         uses: actions/checkout@v4
 
+      - name: Verify exact 16Hz scheduling arithmetic
+        run: |
+          set -eux
+          clang++ -std=c++17 -O2 -Wall -Wextra -pedantic \
+            ios/TCIProbe/frame_pacing_test.cpp \
+            -o /tmp/destinia-frame-pacing-test
+          /tmp/destinia-frame-pacing-test
+
       - name: Compile Unicorn TCI Release (Linux ARM64)
         run: |
           set -eux
