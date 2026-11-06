@@ -55,13 +55,13 @@ jobs:
           echo "Original ARM32 stage-navigation screenshots captured"
           grep 'ARM32_TOUCH' /tmp/destinia-stage-profile.log
 
-      - name: Verify 420 original frames and compare combined transparency acceleration
+      - name: Verify 420 original frames against native Dodge16 and transparency
         run: |
           set -euo pipefail
           grep '^ARM32_FRAME_HASH' /tmp/destinia-stage-profile.log > /tmp/destinia-stage-hashes-original.txt
           test "$(wc -l < /tmp/destinia-stage-hashes-original.txt)" -eq 420
           DESTINIA_FAST_ALPHA16=1 DESTINIA_FAST_ALPHA=1 \
-            DESTINIA_HASH_FRAMES=1 DESTINIA_PROBE_FRAMES=420 \
+            DESTINIA_FAST_DODGE=1 DESTINIA_HASH_FRAMES=1 DESTINIA_PROBE_FRAMES=420 \
             DESTINIA_AUTOTOUCH="65,200,211;120,200,67;185,370,211;220,362,17" \
             DESTINIA_CAPTURE_FRAMES="175,210,240,280,340,410" \
             /tmp/destinia-stage-test game/lib/armeabi/libdestinia_jni.so \
@@ -80,7 +80,8 @@ jobs:
               print(f'{label}: frames 300..419 median={statistics.median(samples):.1f}ms '
                     f'p90={sorted(samples)[107]}ms max={max(samples)}ms')
           PY
-          echo "420 / 420 ARM32 frames identical with both transparency accelerators"
+          grep '^ARM32_NATIVE_DODGE rows=' /tmp/destinia-stage-optimized.log
+          echo "420 / 420 ARM32 frames identical with native Dodge16 and transparency"
 
       - name: Upload original game scene captures and hotspots
         if: always()
