@@ -1,0 +1,45 @@
+name: Destinia Obsidian source backup
+on:
+  push:
+    branches: [ios/unicorn-poc]
+    paths: [".github/workflows/obsidian-source-backup.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  export-source:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 20
+    steps:
+      - name: Clone full Destinia history and branches
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Export git bundles and complete source archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p export
+          git bundle create export/destinia-full-history.bundle --all
+          git archive --format=zip --prefix=destinia-ios-unicorn-poc/             --output=export/destinia-ios-unicorn-poc-sources.zip HEAD
+          git archive --format=zip --prefix=destinia-original-main/             --output=export/destinia-original-main-sources.zip origin/main
+          git clone --mirror https://github.com/sugyua/Destinia_IOS.git /tmp/Destinia_IOS.git
+          git --git-dir=/tmp/Destinia_IOS.git bundle create             "$GITHUB_WORKSPACE/export/Destinia_IOS-full-history.bundle" --all
+          git --git-dir=/tmp/Destinia_IOS.git archive             --format=zip --prefix=Destinia_IOS/             --output="$GITHUB_WORKSPACE/export/Destinia_IOS-main-sources.zip"             refs/heads/main
+          {
+            echo "Destinia native checked-out commit: $(git rev-parse HEAD)"
+            echo "Destinia original main commit: $(git rev-parse origin/main)"
+            echo "Destinia_IOS main commit: $(git --git-dir=/tmp/Destinia_IOS.git rev-parse refs/heads/main)"
+            echo "Created UTC: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > export/REVISIONS.txt
+          (cd export && sha256sum *.bundle *.zip > SHA256SUMS.txt)
+          ls -lh export
+          git bundle verify export/destinia-full-history.bundle
+          git --git-dir=/tmp/Destinia_IOS.git bundle verify "$GITHUB_WORKSPACE/export/Destinia_IOS-full-history.bundle" || true
+      - name: Upload portable offline sources
+        uses: actions/upload-artifact@v4
+        with:
+          name: Destinia-Obsidian-Full-Sources
+          path: export/
+          if-no-files-found: error
+          retention-days: 90
