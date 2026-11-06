@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <map>
+#include <array>
 #include <utility>
 #include <vector>
 #include <vector>
@@ -19,6 +20,7 @@ public:
     bool install(std::string &error);
     bool enableNativeFillRect(uint32_t imageBase, std::string &error);
     bool enableNativeSpriteColumn(uint32_t imageBase, std::string &error);
+    bool enableNativeAlpha16(uint32_t imageBase, std::string &error);
     bool enableNativeAlphaRow(uint32_t imageBase, std::string &error);
     bool selfTest(std::string &error);
     bool selfTestJniBufferReuse(std::string &error);
@@ -39,6 +41,7 @@ private:
     static void onProfileBlock(uc_engine *, uint64_t, uint32_t, void *);
     static void onFastFillRow(uc_engine *, uint64_t, uint32_t, void *);
     static void onFastSpriteColumn(uc_engine *, uint64_t, uint32_t, void *);
+    static void onFastAlpha16(uc_engine *, uint64_t, uint32_t, void *);
     static void onFastAlphaRow(uc_engine *, uint64_t, uint32_t, void *);
     static void onJniCode(uc_engine *, uint64_t, uint32_t, void *);
     void dispatchJni(uint32_t address);
@@ -62,6 +65,8 @@ private:
     uc_hook profileHook_ = 0;
     uc_hook fastFillHook_ = 0;
     uc_hook fastSpriteHook_ = 0;
+    uc_hook fastAlphaHook_ = 0;
+    std::array<uint32_t,3> alphaWords_{};
     uc_hook fastAlphaHook_ = 0;
     std::map<uint32_t,uint64_t> profileBlocks_;
     std::map<std::string, uint32_t> names_;
