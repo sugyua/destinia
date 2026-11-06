@@ -9,8 +9,9 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: verify-codex-menu
-  cancel-in-progress: false
+  # Each PR has its own lane. New pushes supersede old CI for the same PR.
+  group: verify-codex-menu-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   # Fast fail: synthetic tests use no original APK/data, no live saves,
   # and no external game packages. Required alongside Windows ARM32 CI.
@@ -30,6 +31,7 @@ jobs:
 
   windows:
     runs-on: windows-2022
+    timeout-minutes: 45
     permissions:
       contents: read
     steps:
