@@ -663,11 +663,23 @@ void ArmImportRuntime::dispatchJni(uint32_t address) {
         else {
             const uint32_t size=static_cast<uint32_t>(it->second.size());
             const uint32_t aligned=(std::max(size,1u)+15u)&~15u;
-            if (aligned>kHeapSize || heapNext_>kHeapBase+kHeapSize-aligned) {
-                fail("JNI sem heap para GetByteArrayElements"); return;
+            // JNI_RELEASE libera a copia ARM32 para reuso: anteriormente,
+            // cada quadro alocava outra area e esgotava os 64 MiB.
+            auto reusable=reusableJniBuffers_.lower_bound(aligned);
+            bool recycled=reusable!=reusableJniBuffers_.end();
+            uint32_t capacity=aligned;
+            if (recycled) {
+                capacity=reusable->first;
+                result=reusable->second;
+                reusableJniBuffers_.erase(reusable);
+            } else {
+                if (aligned>kHeapSize ||
+                    heapNext_>kHeapBase+kHeapSize-aligned) {
+                    fail("JNI sem heap para GetByteArrayElements"); return;
+                }
+                result=heapNext_;
+                heapNext_+=aligned;
             }
-            result=heapNext_;
-            heapNext_+=aligned;
             if (size && !writeBytes(result,it->second.data(),size)) {
                 fail("JNI falhou ao copiar byteArray"); return;
             }
@@ -678,14 +690,31 @@ void ArmImportRuntime::dispatchJni(uint32_t address) {
                 }
             }
             arrayPointers_[result]=b;
+            arrayBufferCapacities_[result]=capacity;
         }
     } else if (index==192) { // ReleaseByteArrayElements
+        const auto ptr=arrayPointers_.find(c);
         const auto it=arrays_.find(b);
-        if (it!=arrays_.end() && d!=2 && !it->second.empty() &&
-            !readBytes(c,it->second.data(),it->second.size())) {
+        if (ptr==arrayPointers_.end() || ptr->second!=b ||
+            it==arrays_.end() || (d!=0 && d!=1 && d!=2)) {
             fail("JNI ReleaseByteArrayElements invalido"); return;
         }
-        if (d!=1) arrayPointers_.erase(c);
+        // JNI_ABORT=2 descarta as alteracoes. JNI_COMMIT=1 copia,
+        // mas o ponteiro continua valido ate o release final.
+        if (d!=2 && !it->second.empty() &&
+            !readBytes(c,it->second.data(),it->second.size())) {
+            fail("JNI ReleaseByteArrayElements: copia invalida"); return;
+        }
+        if (d!=1) {
+            const auto capacity=arrayBufferCapacities_.find(c);
+            if (capacity==arrayBufferCapacities_.end()) {
+                fail("JNI ReleaseByteArrayElements: capacidade ausente");
+                return;
+            }
+            reusableJniBuffers_.emplace(capacity->second,c);
+            arrayBufferCapacities_.erase(capacity);
+            arrayPointers_.erase(ptr);
+        }
         writeResult=false;
     } else if (index==200 || index==208) { // Get/SetByteArrayRegion
         const auto it=arrays_.find(b);
