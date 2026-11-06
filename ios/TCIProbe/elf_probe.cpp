@@ -370,6 +370,16 @@ static int destinia_probe_impl(
                 }
                 ++framesRendered;
                 lastPixels=std::move(pixels);
+                if (std::getenv("DESTINIA_HASH_FRAMES")) {
+                    uint64_t hash=0xcbf29ce484222325ULL;
+                    for (const uint8_t pixel:lastPixels) {
+                        hash^=pixel;
+                        hash*=0x100000001b3ULL;
+                    }
+                    std::fprintf(stderr,
+                        "ARM32_FRAME_HASH frame=%u fnv64=%016llx\n",
+                        frame,static_cast<unsigned long long>(hash));
+                }
                 if (!nextFrameMs) break;
                 if (paced) {
                     std::this_thread::sleep_for(
