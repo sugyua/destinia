@@ -749,6 +749,56 @@ void ArmImportRuntime::dispatchJni(uint32_t address) {
         fail("JNI falhou ao retornar R0");
 }
 
+bool ArmImportRuntime::runGameFrame(
+    uint32_t address,uint32_t frameNumber,
+    std::vector<uint8_t> &frameBuffer,uint32_t &nextMs,
+    std::string &error) {
+    constexpr size_t kFrameBytes=400*240*2;
+    if (!address || assetsRoot_.empty()) {
+        error="jniRun: jogo ainda nao inicializado"; return false;
+    }
+    if (!screenArray_) {
+        screenArray_=nextArray_++;
+        arrays_[screenArray_].assign(kFrameBytes,0);
+    }
+    lastError_.clear();
+    if (!writeReg(UC_ARM_REG_R0,0x40000000) ||
+        !writeReg(UC_ARM_REG_R1,0x10) ||
+        !writeReg(UC_ARM_REG_R2,screenArray_) ||
+        !writeReg(UC_ARM_REG_R3,frameNumber) ||
+        !writeReg(UC_ARM_REG_SP,0x7f01ffc0) ||
+        !writeReg(UC_ARM_REG_LR,kReturn)) {
+        error="jniRun: nao inicializou registradores ARM32";
+        return false;
+    }
+    const uc_err e=uc_emu_start(uc_,address,kReturn,0,30000000);
+    if (!lastError_.empty()) {
+        error="jniRun: "+lastError_; return false;
+    }
+    if (e!=UC_ERR_OK) {
+        error=std::string("jniRun Unicorn: ")+uc_strerror(e);
+        return false;
+    }
+    uint32_t pc=0;
+    if (!readReg(UC_ARM_REG_PC,pc) || pc!=kReturn) {
+        char diagnostic[160];
+        std::snprintf(diagnostic,sizeof(diagnostic),
+            "jniRun excedeu 30000000 instrucoes (PC=0x%08x)",pc);
+        error=diagnostic;
+        return false;
+    }
+    if (!readReg(UC_ARM_REG_R0,nextMs)) {
+        error="jniRun: nao foi possivel ler intervalo do proximo quadro";
+        return false;
+    }
+    frameBuffer=arrays_[screenArray_];
+    if (frameBuffer.size()!=kFrameBytes) {
+        error="jniRun: framebuffer RGB565 inesperado";
+        return false;
+    }
+    return true;
+}
+
 bool ArmImportRuntime::runGameInit(
     uint32_t address,const std::string &assetsRoot,std::string &error) {
     assetsRoot_=assetsRoot;
