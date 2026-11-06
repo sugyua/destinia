@@ -35,6 +35,7 @@ public:
                       uint32_t type, std::string &error);
     unsigned implementedCount() const;
     const std::map<uint32_t,uint64_t> &profiledBlocks() const;
+    void requestGameplayProfile() { profileNextFrame_ = true; }
     std::pair<uint64_t,uint64_t> directAccessCounts() const;
 private:
     static void onCode(uc_engine *, uint64_t, uint32_t, void *);
@@ -69,6 +70,7 @@ private:
     uc_hook fastAlpha16Hook_ = 0;
     std::array<uint32_t,3> alphaWords_{};
     std::map<uint32_t,uint64_t> profileBlocks_;
+    bool profileNextFrame_ = false;
     std::map<std::string, uint32_t> names_;
     std::map<uint32_t, std::string> reverse_;
     std::vector<uint8_t> directHeap_;
