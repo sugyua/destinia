@@ -238,7 +238,8 @@ extern "C" int destinia_probe_elf_frame(
                 if (!runtime.runGameFrame(
                         frameAddress,frame,pixels,nextFrameMs,runtimeError)) {
                     throw std::runtime_error(
-                        "Falha no jniRun original: "+runtimeError);
+                        "Falha no jniRun quadro "+std::to_string(frame)+
+                        ": "+runtimeError);
                 }
                 ++framesRendered;
                 lastPixels=std::move(pixels);
