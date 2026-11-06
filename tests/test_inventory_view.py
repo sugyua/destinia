@@ -42,6 +42,7 @@ class InventoryViewTests(unittest.TestCase):
     env=dict(os.environ,SDL_VIDEODRIVER='dummy',SDL_AUDIODRIVER='dummy')
     run=subprocess.run([str(exe),'--game',str(ROOT/'game'),'--settings',str(case/'config.ini'),'--save',str(case/'save'),'--reports',str(case/'reports'),'--headless','1','--out',str(case/'frames'),'--mute','--no-save-preferences'],env=env,capture_output=True,text=True,timeout=60)
     self.assertEqual(run.returncode,0,run.stdout+run.stderr);self.assertIn('INVENTORY_UPGRADE_HOTKEY_ARM_OK',run.stdout)
+    self.assertFalse((case/'save'/'inventory-protect-v1.txt').exists(),'Host criou sidecar fantasma no encerramento')
 
  def test_panel_filters_keys_and_scaled_hitboxes(self):
   with tempfile.TemporaryDirectory(prefix='destinia inventory panel ') as folder:

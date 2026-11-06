@@ -1,4 +1,4 @@
-﻿#include "../common/safe_save.h"
+#include "../common/safe_save.h"
 #include "../common/diagnostics_panel.h"
 #include "../common/attribute_sheet.h"
 #include "../common/virtual_controls.h"
@@ -27,97 +27,9 @@ static destinia::AttributeSheet attributeSheet;
 
 namespace fs = std::filesystem;
 
-// Salvamento atomico de todos os sidecars para evitar saves divergentes
-static bool saveAllSidecarsAtomic(const fs::path& saveDir) {
-  const std::vector<std::string> sidecarFiles = {
-    "titles-v1.txt",
-    "bounties-v1.txt",
-    "economy-v1.txt",
-    "weapons-catalog-v1.txt",
-    "shared-stash-v1.txt",
-    "inventory-protect-v1.txt",
-    "difficulty-unlocks-v1.txt",
-    "progression-v1.txt",
-    "abyss-v1.txt",
-    "pets-v1.txt",
-    "codex-v1.txt"
-  };
-
-  std::vector<std::pair<fs::path, fs::path>> tempPairs;
-  bool allWritten = true;
-
-  for (const auto& name : sidecarFiles) {
-    fs::path target = saveDir / name;
-    fs::path temp = saveDir / (name + ".atomic.tmp");
-
-    try {
-      std::string content;
-      if (fs::exists(target)) {
-        std::ifstream in(target, std::ios::binary);
-        content = std::string((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-      }
-
-      FILE* out = std::fopen(temp.string().c_str(), "wb");
-      if (!out) {
-        allWritten = false;
-        continue;
-      }
-      std::fwrite(content.data(), 1, content.size(), out);
-      std::fflush(out);
-#ifdef _WIN32
-      if (::_commit(::_fileno(out)) != 0) {
-        std::fclose(out);
-        allWritten = false;
-        continue;
-      }
-#else
-      if (::fsync(::_fileno(out)) != 0) {
-        std::fclose(out);
-        allWritten = false;
-        continue;
-      }
-#endif
-      if (std::fclose(out) != 0) {
-        allWritten = false;
-        continue;
-      }
-      tempPairs.push_back({temp, target});
-    } catch (...) {
-      allWritten = false;
-    }
-  }
-
-  if (!allWritten) {
-    for (const auto& [temp, target] : tempPairs) {
-      std::error_code ec;
-      fs::remove(temp, ec);
-    }
-    return false;
-  }
-
-  bool allCommitted = true;
-  for (const auto& [temp, target] : tempPairs) {
-    try {
-#ifdef _WIN32
-      if (!MoveFileExW(temp.c_str(), target.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) {
-        allCommitted = false;
-      }
-#else
-      if (fs::rename(temp, target) != 0) {
-        allCommitted = false;
-      }
-#endif
-    } catch (...) {
-      allCommitted = false;
-    }
-  }
-
-  for (const auto& [temp, target] : tempPairs) {
-    std::error_code ec;
-    fs::remove(temp, ec);
-  }
-  return allCommitted;
-}
+// Sidecars are persisted by their owning modules, not by a shutdown sweep.
+// The old blanket shutdown writer re-copied files and created empty
+// files for missing modules, corrupting inventory-protect-v1.txt. Disabled.
 
 static void paintControllerGuide(uint8_t* pixels, int width, int height) {
   if (!pixels) return;
@@ -1302,6 +1214,9 @@ static void runtimeLogTick(long frame,double emulationMs) {
 #include "../common/weapons_catalog_host.h"
 #include "../common/shared_stash_host.h"
 #include "../common/bounties_host.h"
+#include "../common/auto_potion_native.h"
+#include "../common/auto_potion_host.h"
+static std::vector<uint8_t> autoPotionItemData;
 #include "../common/quest_tracker_ui.h"
 
 static destinia::QuestTrackerUI questTrackerUI;
@@ -1451,7 +1366,7 @@ static int runHost(int argc, char** argv) {
   uiRenderer.statusBaseScale=1;
   uiRenderer.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,preferences.uiScale,false,soPath);
   dropNamesRenderer.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,soPath);
-  {std::vector<uint8_t> table;if(!readFile(assetsDir+"/item_en.gdt",table))throw std::runtime_error("Tabela de loot ausente");lootQol.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,soPath,table);lootQol.options=preferences.loot;}
+  {std::vector<uint8_t> table;if(!readFile(assetsDir+"/item_en.gdt",table))throw std::runtime_error("Tabela de loot ausente");lootQol.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,soPath,table);lootQol.options=preferences.loot;autoPotionItemData=table;}
   try{bossMage.install(uc,SO_BASE,exportsMap,SCREEN_W,SCREEN_H,assetsDir,soPath,[]{return lootQol.autoTarget<0;});
     bossMage.menu.opener = [&]{ bossRushUI.openMenu(); };
     bossRushUI.getGold = [&]() -> int { return int(callFn(exportsMap["getMyGold"], {})); };
@@ -1995,7 +1910,8 @@ static int runHost(int argc, char** argv) {
     if(preferences.uiScale==100?hudScale!=0:uiRenderer.statusDrawn){std::array<destinia::SkillHintRect,4> hints{};for(size_t i=0;i<hints.size();++i){int16_t r[4]{};if(rd(exportsMap.at("MMain")+0x11a+u32(i)*8,r,8))hints[i]={r[0],r[1],r[2],r[3]};}destinia::paintSkillHints(frameBuffer.data(),SCREEN_W,SCREEN_H,preferences,controls.lastInputDevice(),hints,preferences.uiScale);}
     if(!codexOpen)fcPaint(frameBuffer.data(),preferences.uiScale);
     bossRushUI.currentSlot = rd16(exportsMap.at("Game")+0x4886);
-    autoPotion.update(exportsMap.at("Game"), [](u32 a){return rd16(a);}, [](u32 a, uint16_t v){wr16(a, v);}, playSoundId);
+    hostUpdatePotionFrame(exportsMap.at("Game"),
+      [&](int type){return hostUsePotion(type,autoPotionItemData);});
     if(int16_t(rd16(exportsMap.at("Game")+0x4854))==0) {
       int hX = int16_t(rd16(exportsMap.at("Game")+0x4890));
       int hY = int16_t(rd16(exportsMap.at("Game")+0x4892));
@@ -2086,8 +2002,6 @@ static int runHost(int argc, char** argv) {
     catch(const std::exception& e) { hostReport("[host] Aviso: %s\n",e.what()); }
   }
   if(destinia::lootEconomyReady){destinia::lootEconomy.lastTimestamp=int64_t(std::time(nullptr));try{destinia::saveLootEconomy(fs::path(saveDir),destinia::lootEconomy);}catch(...){}}
-  // Salvamento atomico de todos os sidecars para evitar saves divergentes
-  try{saveAllSidecarsAtomic(fs::path(saveDir));}catch(...){}
   return executionFailed ? 2 : 0;
 }
 

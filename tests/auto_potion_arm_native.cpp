@@ -1,4 +1,4 @@
-﻿#include <unicorn/unicorn.h>
+#include <unicorn/unicorn.h>
 #include <cstdio>
 static uc_err keepPotionEngine(uc_engine*){return UC_ERR_OK;}
 #define uc_close keepPotionEngine
@@ -21,7 +21,7 @@ int main(int argc,char** argv){
   for(unsigned b=1;b<4;++b)wr16(g+0x433c+b*0x92,0);
   wr16(g+0x4854,0);wr16(g+0x48f2,type?10:189);wr16(g+0x48f4,type?1000:500);wr16(g+0x48f6,189);wr16(g+0x48f8,1000);wr32(g+0x7cd4,1000);
   const auto hp=rd16(g+0x48f4),mp=rd16(g+0x48f2);
-  destinia::AutoPotionController controller;
+  destinia::AutoPotionController controller;controller.config.enabled=true;
   auto read=[](u32 a){return uint16_t(rd16(a));};auto write=[](u32 a,uint16_t v){wr16(a,v);};
   auto use=[&](int wanted){return hostUsePotion(wanted,table);};
   if(!controller.update(g,read,write,use,{}) || rd16(g+0x4342)!=2 || rd16(g+0x4a90)!=0x6123 || rd16(g+0x48f4)!=hp || rd16(g+0x48f2)!=mp || rd16(g+(type?0x7cea:0x7ce8))!=(type?5:50))return 3+type;
@@ -34,7 +34,7 @@ int main(int argc,char** argv){
  wr16(g+0x4344,1);wr16(g+0x4346,5);wr16(g+0x4348,4);
  for(unsigned b=1;b<4;++b)wr16(g+0x433c+b*0x92,0);
  wr16(g+0x4854,0);wr16(g+0x48f2,10);wr16(g+0x48f4,500);wr16(g+0x48f6,189);wr16(g+0x48f8,1000);wr16(g+0x48c4,200);wr32(g+0x7cd4,2000);
- destinia::AutoPotionController both;
+ destinia::AutoPotionController both;both.config.enabled=true;
  auto read=[](u32 a){return uint16_t(rd16(a));};auto write=[](u32 a,uint16_t v){wr16(a,v);};
  auto use=[&](int wanted){return hostUsePotion(wanted,table);};
  const bool usedBoth=both.update(g,read,write,use,{});

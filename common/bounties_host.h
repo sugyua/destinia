@@ -16,23 +16,53 @@ public:
 
   void init(const std::filesystem::path& saveDir) {
     saveDirectory = saveDir;
-    manager = loadBounties(saveDir);
-    ready = true;
+    try {
+      manager = loadBounties(saveDir);
+      ready = true;
+    } catch (...) {
+      // Never reset/overwrite a corrupt or unrecognized user's sidecar.
+      manager = BountyManager{};
+      ready = false;
+      open = false;
+    }
   }
 
   bool toggle() {
+    if (!ready) return false;
     open = !open;
     return open;
   }
 
-  void onMonsterKilled(unsigned slot, uint16_t species) {
-    if (!ready || slot >= 10) return;
+  bool onMonsterKilled(unsigned slot, uint16_t species) {
+    if (!ready || slot >= 10) return false;
+    const auto previous=manager;
     manager.onMonsterKilled(slot, species);
-    saveBounties(saveDirectory, manager);
+    if (saveBounties(saveDirectory, manager)) return true;
+    manager=previous; // no unpersisted progress after a write failure
+    return false;
+  }
+
+  // Commit claim flag first. Refuse the reward if persistence failed;
+  // this provides at-most-once credit but not a cross-file exactly-once
+  // transaction with the original ARM32 gold/cash values.
+  bool claim(unsigned slot, size_t index,
+             const std::function<void(uint32_t gold, uint16_t cash)>& onClaim) {
+    if (slot >= 10 || !onClaim) return false;
+    auto& list = manager.getContracts(slot);
+    if (index >= list.size()) return false;
+    auto& c = list[index];
+    if (!c.completed || c.claimed) return false;
+    c.claimed = true;
+    if (!saveBounties(saveDirectory, manager)) {
+      c.claimed = false;
+      return false;
+    }
+    onClaim(c.rewardGold, c.rewardCash);
+    return true;
   }
 
   bool handleKey(int key, bool down, unsigned slot, std::function<void(uint32_t gold, uint16_t cash)> onClaim) {
-    if (!open) return false;
+    if (!open || !ready) return false;
     if (!down) return true;
 
     if (key == 27 || key == 'c' || key == 'C') { // ESC ou C fecha
@@ -51,19 +81,8 @@ public:
 
     // ENTER: Resgatar se completo
     if (key == 13 || key == 1073741912) {
-      auto& list = manager.getContracts(slot);
-      if (ui.selectedContract < int(list.size())) {
-        auto& c = list[ui.selectedContract];
-        if (c.completed && !c.claimed) {
-          c.claimed = true;
-          // Bounty atomico: salvar estado ANTES de creditar ouro
-          // Se o jogo travar entre salvar e creditar, o contrato permanece como claimed
-          // e nao pode ser resgatado novamente. O ouro nao eh creditado, mas nao ha
-          // resgate duplo.
-          saveBounties(saveDirectory, manager);
-          onClaim(c.rewardGold, c.rewardCash);
-        }
-      }
+      if (ui.selectedContract >= 0)
+        claim(slot, static_cast<size_t>(ui.selectedContract), onClaim);
       return true;
     }
 
@@ -71,12 +90,12 @@ public:
   }
 
   bool handleTouch(int x, int y, int phase, int width, int height, unsigned slot, std::function<void(uint32_t gold, uint16_t cash)> onClaim) {
-    if (!open) return false;
+    if (!open || !ready) return false;
     if (phase == 0) {
-      if (!ui.handleTouch(x, y, width, height, slot, manager, onClaim)) {
+      if (slot >= 10) return true;
+      if (!ui.handleTouch(x, y, width, height, slot, manager,
+                         [&](size_t index) { claim(slot, index, onClaim); })) {
         open = false;
-      } else {
-        saveBounties(saveDirectory, manager);
       }
     }
     return true;
