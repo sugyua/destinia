@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
         "Tipos nao suportados: 0",
         "Imports distintos: 26",
         "Memoria Unicorn: OK",
+        "Testes ARM32: OK",
     };
 
     if (ok != 1) {
