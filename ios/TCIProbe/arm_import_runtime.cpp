@@ -45,6 +45,7 @@ ArmImportRuntime::~ArmImportRuntime() {
     if (profileHook_) uc_hook_del(uc_, profileHook_);
     if (fastFillHook_) uc_hook_del(uc_, fastFillHook_);
     if (fastSpriteHook_) uc_hook_del(uc_, fastSpriteHook_);
+    if (fastAlphaHook_) uc_hook_del(uc_, fastAlphaHook_);
     if (fastAlphaHook_) uc_hook_del(uc_,fastAlphaHook_);
     // Unicorn must release the borrowed host memory before vector storage dies.
     if (hasDirectHeap_)
@@ -356,6 +357,84 @@ void ArmImportRuntime::onFastAlphaRow(
         return;
     }
     ++rt->nativeAlphaRows_;
+}
+
+// ALPHA16 is an original Thumb function at offset 0x8a6c. A single call
+// blends RGB565 components and writes three 32-bit temporary words in
+// the original ELF globals. Preserve those stores; the unmodified ELF on
+// disk remains the source of truth. Enabled only by an explicit test flag.
+bool ArmImportRuntime::enableNativeAlpha16(
+    uint32_t imageBase,std::string &error) {
+    const uint32_t entry=imageBase+0x8a6cu;
+    uint16_t op0=0,op1=0;
+    uint32_t literal=0;
+    if (!readBytes(entry,&op0,sizeof(op0)) ||
+        !readBytes(entry+2,&op1,sizeof(op1)) ||
+        !readBytes(imageBase+0x8aa8u,&literal,sizeof(literal)) ||
+        op0!=0xb530u || op1!=0x4b0eu || literal!=0x0003b650u) {
+        error="ALPHA16: assinatura Thumb inesperada";
+        return false;
+    }
+    const uint32_t got=imageBase+0x8a78u+literal;
+    constexpr std::array<uint32_t,3> offsets={0x2bcu,0x20cu,0x264u};
+    for (size_t i=0;i<offsets.size();++i) {
+        uint32_t addr=0,value=0;
+        if (!readBytes(got+offsets[i],&addr,sizeof(addr)) ||
+            addr==0 || !readBytes(addr,&value,sizeof(value))) {
+            error="ALPHA16: ponteiro de estado original invalido";
+            return false;
+        }
+        alphaWords_[i]=addr;
+    }
+    const uint16_t returnToLR=0x4770u; // Thumb bx lr
+    if (!writeBytes(entry,&returnToLR,sizeof(returnToLR))) {
+        error="ALPHA16: falha na substituicao de instrucao";
+        return false;
+    }
+    const uc_err e=uc_hook_add(
+        uc_,&fastAlphaHook_,UC_HOOK_CODE,
+        reinterpret_cast<void *>(onFastAlpha16),this,entry,entry);
+    if (e!=UC_ERR_OK) {
+        writeBytes(entry,&op0,sizeof(op0));
+        error=std::string("ALPHA16: falha no hook: ")+uc_strerror(e);
+        return false;
+    }
+    return true;
+}
+
+void ArmImportRuntime::onFastAlpha16(
+    uc_engine *,uint64_t,uint32_t,void *opaque) {
+    auto *rt=static_cast<ArmImportRuntime *>(opaque);
+    uint32_t colorA=0,colorB=0,alpha=0;
+    if (!rt->readReg(UC_ARM_REG_R0,colorA) ||
+        !rt->readReg(UC_ARM_REG_R1,colorB) ||
+        !rt->readReg(UC_ARM_REG_R2,alpha)) {
+        rt->fail("ALPHA16: registradores ARM32 indisponiveis");return;
+    }
+    constexpr uint32_t mask=0x07e0f81fu;
+    const uint32_t a=(colorA|(colorA<<16))&mask;
+    const uint32_t b=(colorB|(colorB<<16))&mask;
+    const uint32_t product=static_cast<uint32_t>(
+        static_cast<uint64_t>(a-b)*alpha);
+    int32_t signedProduct=0;
+    std::memcpy(&signedProduct,&product,sizeof(product));
+    const uint32_t mixed=
+        (b+static_cast<uint32_t>(signedProduct>>4))&mask;
+    if (!rt->writeBytes(rt->alphaWords_[0],&a,sizeof(a)) ||
+        !rt->writeBytes(rt->alphaWords_[1],&b,sizeof(b)) ||
+        !rt->writeBytes(rt->alphaWords_[2],&mixed,sizeof(mixed))) {
+        rt->fail("ALPHA16: escrita dos globais ARM32 falhou");return;
+    }
+    const uint32_t returned=(mixed|(mixed>>16))&0xffffu;
+    const uint32_t clobberedR1=mixed|(mixed>>16);
+    const uint32_t clobberedR2=0x264u;
+    const uint32_t clobberedR3=rt->alphaWords_[2];
+    if (!rt->writeReg(UC_ARM_REG_R0,returned) ||
+        !rt->writeReg(UC_ARM_REG_R1,clobberedR1) ||
+        !rt->writeReg(UC_ARM_REG_R2,clobberedR2) ||
+        !rt->writeReg(UC_ARM_REG_R3,clobberedR3)) {
+        rt->fail("ALPHA16: retorno ARM32 falhou");
+    }
 }
 
 bool ArmImportRuntime::readReg(int reg, uint32_t &value) {
