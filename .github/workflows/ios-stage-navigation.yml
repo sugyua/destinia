@@ -83,6 +83,39 @@ jobs:
           grep '^ARM32_NATIVE_DODGE rows=' /tmp/destinia-stage-optimized.log
           echo "420 / 420 ARM32 frames identical with native Dodge16 and transparency"
 
+      - name: Compare SimpleClip against the validated 0.3.6 optimized build
+        run: |
+          set -euo pipefail
+          DESTINIA_FAST_ALPHA16=1 DESTINIA_FAST_ALPHA=1 \
+            DESTINIA_FAST_DODGE=1 DESTINIA_FAST_SIMPLECLIP=1 \
+            DESTINIA_HASH_FRAMES=1 DESTINIA_PROBE_FRAMES=420 \
+            DESTINIA_AUTOTOUCH="65,200,211;120,200,67;185,370,211;220,362,17" \
+            /tmp/destinia-stage-test game/lib/armeabi/libdestinia_jni.so \
+            2> /tmp/destinia-stage-simpleclip.log
+          grep '^ARM32_FRAME_HASH' /tmp/destinia-stage-simpleclip.log > /tmp/destinia-stage-hashes-simpleclip.txt
+          test "$(wc -l < /tmp/destinia-stage-hashes-simpleclip.txt)" -eq 420
+          cmp /tmp/destinia-stage-hashes-original.txt /tmp/destinia-stage-hashes-simpleclip.txt
+          cmp /tmp/destinia-stage-hashes-optimized.txt /tmp/destinia-stage-hashes-simpleclip.txt
+          grep '^ARM32_NATIVE_SIMPLECLIP rows=' /tmp/destinia-stage-simpleclip.log
+          python3 - <<'PY'
+          import re, statistics
+          from pathlib import Path
+          samples={}
+          for label, path in [('0.3.6', '/tmp/destinia-stage-optimized.log'),
+                              ('simpleclip', '/tmp/destinia-stage-simpleclip.log')]:
+              data=Path(path).read_text()
+              times={int(frame):int(ms) for frame,ms in re.findall(
+                  r'ARM32_FRAME_PERF frame=(\d+) exec_ms=(\d+)', data)}
+              sample=[times[frame] for frame in range(300,420)]
+              samples[label]=statistics.median(sample)
+              print(f'{label}: mediana={samples[label]:.1f}ms '
+                    f'p90={sorted(sample)[107]}ms max={max(sample)}ms')
+          gain=(samples['0.3.6']-samples['simpleclip'])/samples['0.3.6']*100
+          print(f'SimpleClip vs 0.3.6: {gain:+.1f}% frame-time reduction '
+                '(macOS runner; iPhone must be measured separately)')
+          PY
+          echo "420/420 frame hashes match original, 0.3.6 and SimpleClip"
+
       - name: Upload original game scene captures and hotspots
         if: always()
         uses: actions/upload-artifact@v4
@@ -94,5 +127,7 @@ jobs:
             /tmp/destinia-stage-optimized.log
             /tmp/destinia-stage-hashes-original.txt
             /tmp/destinia-stage-hashes-optimized.txt
+            /tmp/destinia-stage-simpleclip.log
+            /tmp/destinia-stage-hashes-simpleclip.txt
           if-no-files-found: warn
           retention-days: 7
