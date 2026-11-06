@@ -262,6 +262,23 @@ jobs:
             -o /tmp/list_destinia_imports
 
           /tmp/list_destinia_imports
+      - name: Regression test original Destinia ARM32 loader on macOS
+        run: |
+          set -eux
+
+          clang++ -std=c++17 -O2 \
+            -I/tmp/unicorn-tci/unicorn-engine-sys-tci/include \
+            ios/TCIProbe/probe_host_test.cpp \
+            ios/TCIProbe/elf_probe.cpp \
+            /tmp/unicorn-tci-macos-build/libunicorn-static.a \
+            /tmp/unicorn-tci-macos-build/libarm-softmmu.a \
+            /tmp/unicorn-tci-macos-build/libunicorn-common.a \
+            -lm -lpthread \
+            -o /tmp/destinia_probe_host_test
+
+          /tmp/destinia_probe_host_test \
+            game/lib/armeabi/libdestinia_jni.so
+
       - name: Build TCIProbe IPA
         run: |
           set -eux
