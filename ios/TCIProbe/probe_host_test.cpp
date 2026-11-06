@@ -27,6 +27,8 @@ int main(int argc, char **argv) {
         "Testes ARM32: OK",
         "Codigo original: OK",
         "InitGame: OK",
+        "JniRun: OK",
+        "Pixels nao zero:",
     };
 
     if (ok != 1) {
@@ -41,6 +43,6 @@ int main(int argc, char **argv) {
         }
     }
 
-    std::puts("PASSOU: ELF, imports, testes ARM32 e initGame original.");
+    std::puts("PASSOU: ELF, initGame, jniRun e primeiro framebuffer RGB565.");
     return 0;
 }
