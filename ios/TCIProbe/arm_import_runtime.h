@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <map>
 #include <vector>
+#include <vector>
 #include <string>
 
 // Ponte minima entre a ABI ARM32 Android e a memoria isolada do Unicorn.
@@ -16,6 +17,7 @@ public:
     ~ArmImportRuntime();
     bool install(std::string &error);
     bool selfTest(std::string &error);
+    bool selfTestJniBufferReuse(std::string &error);
     bool runOriginalExport(uint32_t address, uint32_t &result,
                            std::string &error);
     bool runGameInit(uint32_t address, const std::string &assetsRoot,
@@ -60,6 +62,9 @@ private:
     uint32_t nextClass_ = 0x100;
     std::map<uint32_t,std::vector<uint8_t>> arrays_;
     std::map<uint32_t,uint32_t> arrayPointers_;
+    // Buffers JNI desalocados podem ser reutilizados por outras arrays.
+    // A chave e a capacidade e o valor e o endereco ARM32.
+    std::multimap<uint32_t,uint32_t> reusableJniBuffers_;
     std::string assetsRoot_;
     std::map<uint32_t, FILE *> files_;
     std::string lastError_;
