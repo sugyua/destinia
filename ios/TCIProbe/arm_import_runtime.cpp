@@ -51,6 +51,9 @@ unsigned ArmImportRuntime::implementedCount() const { return implemented_; }
 const std::map<uint32_t,uint64_t> &ArmImportRuntime::profiledBlocks() const {
     return profileBlocks_;
 }
+std::pair<uint64_t,uint64_t> ArmImportRuntime::directAccessCounts() const {
+    return {directFillRows_,directSpriteColumns_};
+}
 
 void ArmImportRuntime::onProfileBlock(
     uc_engine *,uint64_t address,uint32_t,void *user) {
