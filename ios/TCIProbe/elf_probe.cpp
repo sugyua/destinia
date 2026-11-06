@@ -16,6 +16,8 @@
 #include <map>
 #include <memory>
 #include <utility>
+#include <tuple>
+#include <sstream>
 
 namespace {
 struct ActiveGame {
@@ -291,7 +293,50 @@ static int destinia_probe_impl(
                     paced=true;
                 }
             }
+            // Host-only exploratory inputs, disabled without env variable.
+            std::multimap<uint32_t,std::pair<uint32_t,uint32_t>> scriptedTouches;
+            if (const char *script=std::getenv("DESTINIA_AUTOTOUCH")) {
+                std::istringstream inputScript(script);
+                std::string event;
+                while (std::getline(inputScript,event,';')) {
+                    unsigned frameId=0,x=0,y=0;
+                    if (std::sscanf(event.c_str(),"%u,%u,%u",
+                                    &frameId,&x,&y)!=3 ||
+                        frameId>=targetFrames || x>=400 || y>=240)
+                        throw std::runtime_error("Toque de teste invalido: "+event);
+                    scriptedTouches.emplace(
+                        frameId,std::make_pair(x,y));
+                }
+            }
+            std::set<uint32_t> captureFrames;
+            if (const char *capture=std::getenv("DESTINIA_CAPTURE_FRAMES")) {
+                std::istringstream csv(capture);
+                std::string token;
+                while (std::getline(csv,token,',')) {
+                    unsigned index=0;
+                    if (std::sscanf(token.c_str(),"%u",&index)==1)
+                        captureFrames.insert(index);
+                }
+            }
+            uint32_t profileTarget=48;
+            if (const char *target=std::getenv("DESTINIA_PROFILE_FRAME")) {
+                const long parsed=std::strtol(target,nullptr,10);
+                if (parsed>=0 && parsed<=420)
+                    profileTarget=static_cast<uint32_t>(parsed);
+            }
             for (uint32_t frame=0; frame<targetFrames; ++frame) {
+                for (const auto &event:scriptedTouches) {
+                    if (event.first!=frame) continue;
+                    if (!runtime->runGameTouch(touchAddress,
+                            event.second.first,event.second.second,
+                            0,runtimeError))
+                        throw std::runtime_error(
+                            "Toque ARM32 down quadro "+std::to_string(frame)+
+                            ": "+runtimeError);
+                    std::fprintf(stderr,
+                        "ARM32_TOUCH frame=%u x=%u y=%u down\n",
+                        frame,event.second.first,event.second.second);
+                }
                 std::vector<uint8_t> pixels;
                 const auto frameStart=std::chrono::steady_clock::now();
                 if (!runtime->runGameFrame(
@@ -308,7 +353,7 @@ static int destinia_probe_impl(
                         "ARM32_FRAME_PERF frame=%u exec_ms=%lld wait_ms=%u\n",
                         frame, static_cast<long long>(elapsedMs),nextFrameMs);
                 }
-                if (frame==48 &&
+                if (frame==profileTarget &&
                     std::getenv("DESTINIA_PROFILE_BLOCKS")) {
                     std::map<std::string,uint64_t> totals;
                     std::vector<std::pair<uint32_t,std::string>> exports;
@@ -367,6 +412,38 @@ static int destinia_probe_impl(
                             "ARM32_HOT_PC rank=%zu pc=0x%08x calls=%llu\n",
                             i+1,hotPC[i].first,
                             static_cast<unsigned long long>(hotPC[i].second));
+                }
+                for (const auto &event:scriptedTouches) {
+                    if (event.first!=frame) continue;
+                    if (!runtime->runGameTouch(touchAddress,
+                            event.second.first,event.second.second,
+                            1,runtimeError))
+                        throw std::runtime_error(
+                            "Toque ARM32 up quadro "+std::to_string(frame)+
+                            ": "+runtimeError);
+                }
+                if (captureFrames.count(frame)) {
+                    const std::string destination=
+                        "/tmp/destinia-stage-"+std::to_string(frame)+".ppm";
+                    std::ofstream capture(destination,std::ios::binary);
+                    if (!capture)
+                        throw std::runtime_error(
+                            "Falha ao criar captura de fase");
+                    capture<<"P6\n400 240\n255\n";
+                    for (size_t at=0;at+1<pixels.size();at+=2) {
+                        const uint16_t color=uint16_t(pixels[at]) |
+                            (uint16_t(pixels[at+1])<<8);
+                        const uint8_t rgb[3]={
+                            static_cast<uint8_t>(((color>>11)&31)*255/31),
+                            static_cast<uint8_t>(((color>>5)&63)*255/63),
+                            static_cast<uint8_t>((color&31)*255/31)
+                        };
+                        capture.write(
+                            reinterpret_cast<const char *>(rgb),3);
+                    }
+                    if (!capture)
+                        throw std::runtime_error(
+                            "Captura ARM32 incompleta: "+destination);
                 }
                 ++framesRendered;
                 lastPixels=std::move(pixels);
