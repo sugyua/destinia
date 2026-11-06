@@ -337,6 +337,21 @@ static int destinia_probe_impl(
                             static_cast<unsigned long long>(hot[i].second),
                             hot[i].first.c_str());
                     }
+                    std::vector<std::pair<uint32_t,uint64_t>> hotPC;
+                    for (const auto &block:runtime->profiledBlocks()) {
+                        if (block.first>=static_cast<uint32_t>(base)+0xbb90 &&
+                            block.first<static_cast<uint32_t>(base)+0xc19c)
+                            hotPC.push_back(block);
+                    }
+                    std::sort(hotPC.begin(),hotPC.end(),
+                        [](const auto &x,const auto &y) {
+                            return x.second>y.second;
+                        });
+                    for (size_t i=0;i<std::min<size_t>(25,hotPC.size());++i)
+                        std::fprintf(stderr,
+                            "ARM32_HOT_PC rank=%zu pc=0x%08x calls=%llu\n",
+                            i+1,hotPC[i].first,
+                            static_cast<unsigned long long>(hotPC[i].second));
                 }
                 ++framesRendered;
                 lastPixels=std::move(pixels);
