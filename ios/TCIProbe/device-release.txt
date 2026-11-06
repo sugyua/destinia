@@ -1,40 +1,44 @@
-Destinia iOS ARM32 diagnostic milestone 0.3.7
+Destinia iOS ARM32 diagnostic milestone 0.3.8
 Branch: ios/unicorn-poc
-Build: 11, unsigned IPA (must be signed with AltStore or equivalent)
-Upgrade over native TCIProbe iOS 0.3.6; preserve CFBundleIdentifier
-com.destinia.tcidiagnostic and installed app data. DO NOT uninstall to upgrade.
+Build: 12, unsigned IPA (sign with AltStore or equivalent)
+Upgrade over iOS native 0.3.7 without uninstalling to preserve app data.
+Bundle ID com.destinia.tcidiagnostic is unchanged.
 
-Real iPhone 15 Pro Max gameplay evidence from 0.3.6 (06 Nov 2026):
-- Game progression: completed three tutorial maps and reached first town.
-- 7.2-7.3 FPS in the examined scenes, ARM32 132.6-133.1ms per update.
-- RGB preparation approximately 0.1ms; RAM approximately 119-124MiB.
-- Thermal state transitioned from NORMAL to ELEVADO after longer play.
-- Target remains 16 logical updates/sec (62.5ms); NOT YET VERIFIED.
+Real iPhone screenshots of 0.3.7 (06 Nov 2026):
+- First town: 10.1-10.4 FPS, ARM32 91.5-95.0 ms/frame.
+- 0.3.6 previously measured 7.2 FPS and ARM32 133.1 ms/frame.
+- 0.3.5 previously measured 3.3 FPS and ARM32 296 ms/frame.
+- RGB565 prep 0.1ms; thermal rose from NORMAL to ELEVADO after extended play.
+- Four-finger single-frame profile showed:
+  1. _Grp_pxlMultiply (349488 profiled ARM32 instructions)
+  2. Grp_drawClipWImageP (229371)
+  3. Grp_drawSimpleClipWImageP (95988)
+  4. Grp_drawWPNImage2 (89305)
+  5. _Grp_drawMultiply16 (88240)
+  These are instruction counts, not number of function calls.
 
-0.3.7 changes:
-- Enable the native Grp_drawSimpleClipWImageP RGB565 palette-copy row loop
-  acceleration (DESTINIA_NATIVE_SIMPLECLIP=1), leaving its ARM32 clipping,
-  control flow, original library on disk, and game timing unchanged.
-- Preserve native fill, sprite, heap, ALPHA16, alpha-row, and Dodge16 hooks
-  validated in iOS 0.3.6.
-- Fix profiler banner layout so TOP ARM32 names are not truncated to one line.
-- Keep HUD toggle on three-finger touch and single-frame top-functions
-  profiler on four-finger touch. Profiling intentionally slows one frame.
-- Bundle original Android 1.0.6 libdestinia_jni.so and assets unchanged.
+0.3.8 changes:
+- Keep all validated native graphics acceleration of 0.3.7.
+- Enable native _Grp_pxlMultiply color-component multiplication
+  (DESTINIA_NATIVE_PXLMULTIPLY=1), replacing only the Thumb body in
+  Unicorn guest RAM with a version-checked native RGB565 equivalent.
+- Preserve the original Android 1.0.6 library and all original assets.
+- Keep native diagnostic HUD, three-finger toggle and four-finger profiler.
+- Keep game pacing unmodified; target remains 16 logical frames/s (62.5ms).
+- Keep original bundle identifier and in-place update compatibility.
 
-Reproducible Linux ARM64 GitHub Actions validation:
-- Stage navigation run 42267860632, success, all 420 frame hashes identical
-  across original baseline, 0.3.6 native optimizations and SimpleClip.
-- For frames 300-419, the prior optimized median was 190.0ms and with
-  SimpleClip 130.0ms (31.6% reduction in ARM32 time); p90 195 -> 135ms.
-- The native SimpleClip hook processed 1,200,150 source image rows.
-- These are runner measurements, NOT guaranteed iPhone performance.
+GitHub CI validation:
+- Linux ARM64 stage run 42273899474 passed 420/420 pixel-identical hashes.
+- Frame 300..419 median ARM32 time (0.3.7) 131ms; (PxlMultiply) 125ms.
+- Extra improvement 4.6% on Linux ARM64; p90 136ms -> 129ms.
+- Native _Grp_pxlMultiply invoked 342539 times over the tested sequence.
+- macOS ARM32 regression run 42273899453 passed.
+- No prediction of exact FPS on iPhone; independent measurement required.
 
-Installation and testing:
-1. Preserve app data/saves; install 0.3.7 on top of 0.3.6 (same bundle ID).
-2. Play the same tutorial/city scenes and record three-finger HUD metrics.
-3. Repeat combat, map transitions and saving; inspect artifacts / artifacts
-   missing / sprite transparency, particularly in the first town.
-4. Tap four fingers once for single ARM32 profile and send TOP ARM32 screenshot.
-5. Monitor frame-time peaks, sustained FPS, memory and thermal state.
-No claim of 16 FPS until actual-device measurement.
+User testing:
+1. Install over 0.3.7, never uninstall the current application.
+2. Verify first-town visuals, shadows, blending, character animations.
+3. Capture three-finger HUD FPS, ARM32 ms, thermal state after 1m and 5m.
+4. Tap four fingers once and screenshot TOP ARM32.
+5. Confirm saves, menu navigation, combat and map transitions.
+
