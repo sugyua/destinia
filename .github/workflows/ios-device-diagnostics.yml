@@ -217,14 +217,17 @@ jobs:
           APP="$ROOT/Payload/TCIProbe.app"
 
           mkdir -p "$APP"
+          cp game/lib/armeabi/libdestinia_jni.so "$APP/libdestinia_jni.so"
 
-          xcrun --sdk iphoneos clang \
+          xcrun --sdk iphoneos clang++ \
             -target arm64-apple-ios15.0 \
             -isysroot "$SDK" \
             -fobjc-arc \
             -O2 \
+            -std=c++17 \
             -I/tmp/unicorn-tci/unicorn-engine-sys-tci/include \
-            ios/TCIProbe/main.m \
+            ios/TCIProbe/main.mm \
+            ios/TCIProbe/elf_probe.cpp \
             /tmp/unicorn-tci-ios-build/libunicorn-static.a \
             /tmp/unicorn-tci-ios-build/libarm-softmmu.a \
             /tmp/unicorn-tci-ios-build/libunicorn-common.a \
@@ -265,6 +268,7 @@ jobs:
           </plist>
           PLIST
 
+          test -s "$APP/libdestinia_jni.so"
           plutil -lint "$APP/Info.plist"
           file "$APP/TCIProbe"
           xcrun vtool -show-build "$APP/TCIProbe"

@@ -1,6 +1,9 @@
 #import <UIKit/UIKit.h>
 #import <unicorn/unicorn.h>
 #include <stdint.h>
+#include <stddef.h>
+#include <stdio.h>
+extern "C" int destinia_probe_elf(const char *path, char *out, size_t capacity);
 
 static NSString *runTCI(void) {
     uc_engine *uc = NULL;
@@ -73,7 +76,23 @@ static NSString *runTCI(void) {
     self.window.rootViewController = controller;
     [self.window makeKeyAndVisible];
 
-    label.text = runTCI();
+    NSString *baseline = runTCI();
+
+    NSString *path = [[NSBundle mainBundle]
+        pathForResource:@"libdestinia_jni" ofType:@"so"];
+
+    char details[512] = {};
+
+    if (path) {
+        destinia_probe_elf(
+            [path fileSystemRepresentation], details, sizeof(details));
+    } else {
+        snprintf(details, sizeof(details), "ELF FALHOU\nRecurso ausente");
+    }
+
+    label.text = [NSString stringWithFormat:
+        @"%@\n\n%s", baseline, details];
+
     NSLog(@"TCIProbe: %@", label.text);
 
     return YES;
