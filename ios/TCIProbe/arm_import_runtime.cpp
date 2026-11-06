@@ -789,6 +789,70 @@ void ArmImportRuntime::dispatchJni(uint32_t address) {
         fail("JNI falhou ao retornar R0");
 }
 
+bool ArmImportRuntime::selfTestJniBufferReuse(std::string &error) {
+    constexpr uint32_t kJniGet=0x21000000+184u*4u;
+    constexpr uint32_t kJniRelease=0x21000000+192u*4u;
+    constexpr uint32_t kArrayBytes=400u*240u*2u;
+    const uint32_t handle=nextArray_++;
+    arrays_[handle].assign(kArrayBytes,0x5a);
+    const uint32_t heapBefore=heapNext_;
+    uint32_t firstPointer=0;
+    auto call=[&](uint32_t address,uint32_t ptr,
+                  uint32_t mode,uint32_t &result) {
+        lastError_.clear();
+        if (!writeReg(UC_ARM_REG_R0,0x40000000) ||
+            !writeReg(UC_ARM_REG_R1,handle) ||
+            !writeReg(UC_ARM_REG_R2,ptr) ||
+            !writeReg(UC_ARM_REG_R3,mode) ||
+            !writeReg(UC_ARM_REG_LR,kReturn)) {
+            error="JNI stress: registradores invalidos";
+            return false;
+        }
+        const uc_err status=uc_emu_start(uc_,address,kReturn,0,8);
+        if (!lastError_.empty()) {
+            error="JNI stress: "+lastError_;
+            return false;
+        }
+        if (status!=UC_ERR_OK || !readReg(UC_ARM_REG_R0,result)) {
+            error="JNI stress: execucao ARM32 falhou";
+            return false;
+        }
+        return true;
+    };
+    for (uint32_t i=0; i<450; ++i) {
+        uint32_t ptr=0,ignored=0;
+        if (!call(kJniGet,0,0,ptr) || !ptr) {
+            if (error.empty()) error="JNI stress: GetByteArrayElements nulo";
+            return false;
+        }
+        if (i==0) firstPointer=ptr;
+        else if (ptr!=firstPointer) {
+            error="JNI stress: buffer nao foi reutilizado";
+            return false;
+        }
+        if (i==0) {
+            const uint8_t updated=0xa7;
+            if (!writeBytes(ptr,&updated,1)) {
+                error="JNI stress: nao foi possivel alterar buffer";
+                return false;
+            }
+        }
+        if (!call(kJniRelease,ptr,0,ignored)) return false;
+        if (i==0 && arrays_[handle][0]!=0xa7) {
+            error="JNI stress: release nao copiou para o array";
+            return false;
+        }
+    }
+    const uint32_t allocated=heapNext_-heapBefore;
+    arrays_.erase(handle);
+    if (allocated>kArrayBytes+16) {
+        error="JNI stress: consumo crescente de heap ("+
+            std::to_string(allocated)+")";
+        return false;
+    }
+    return true;
+}
+
 bool ArmImportRuntime::runGameTouch(
     uint32_t address,uint32_t x,uint32_t y,uint32_t type,
     std::string &error) {
