@@ -1,6 +1,11 @@
 name: iOS Device Diagnostics
 
 on:
+  push:
+    branches:
+      - ios/unicorn-poc
+    paths:
+      - "ios/TCIProbe/device-release.txt"
   workflow_dispatch:
 
 jobs:
@@ -321,9 +326,9 @@ jobs:
             <key>CFBundlePackageType</key>
             <string>APPL</string>
             <key>CFBundleShortVersionString</key>
-            <string>0.1.0</string>
+            <string>0.2.0</string>
             <key>CFBundleVersion</key>
-            <string>2</string>
+            <string>3</string>
             <key>MinimumOSVersion</key>
             <string>15.0</string>
             <key>LSRequiresIPhoneOS</key>
@@ -337,6 +342,8 @@ jobs:
           PLIST
 
           test -s "$APP/libdestinia_jni.so"
+          test -d "$APP/assets"
+          test -s "$APP/assets/0_en.ddt"
           plutil -lint "$APP/Info.plist"
           file "$APP/TCIProbe"
           xcrun vtool -show-build "$APP/TCIProbe"
