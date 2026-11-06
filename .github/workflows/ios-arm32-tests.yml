@@ -62,9 +62,15 @@ jobs:
             -lm -lpthread \
             -o /tmp/destinia_arm32_tests
 
-      - name: Execute real ARM32 code through Unicorn TCI
+      - name: Compare native RGB565 fill against original ARM32 renderer
         run: |
-          DESTINIA_PROFILE_BLOCKS=1 DESTINIA_PROBE_FRAMES=50 /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
+          set -eux
+          DESTINIA_PROBE_FRAMES=50 /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
+          cp /tmp/destinia-frame.ppm /tmp/destinia-baseline.ppm
+          DESTINIA_FAST_FILL=1 DESTINIA_PROBE_FRAMES=50 /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
+          cmp /tmp/destinia-baseline.ppm /tmp/destinia-frame.ppm
+          shasum -a 256 /tmp/destinia-baseline.ppm /tmp/destinia-frame.ppm
+          echo "Native RGB565 fill: pixel-identical to original ARM32"
 
       - name: Endurance regression beyond iPhone frame 302
         run: |
