@@ -144,6 +144,8 @@ extern "C" int destinia_probe_elf(
             throw std::runtime_error("Verificacao da memoria falhou");
         }
 
+        size_t nonzeroPixels=0;
+        uint32_t nextFrameMs=0;
         {
             destinia::ArmImportRuntime runtime(uc, stubAddresses);
             std::string runtimeError;
@@ -196,6 +198,27 @@ extern "C" int destinia_probe_elf(
                 throw std::runtime_error(
                     "Falha no initGame original: "+runtimeError);
             }
+
+            uint32_t frameAddress=0;
+            for (size_t i=0; i<image.symbols.size(); ++i) {
+                if (image.symbols[i].shndx!=0 &&
+                    image.names[i]==
+                    "Java_game_destiniaeng_GameThread_jniRun") {
+                    frameAddress=static_cast<uint32_t>(base) +
+                        image.symbols[i].value;
+                    break;
+                }
+            }
+            if (!frameAddress)
+                throw std::runtime_error("jniRun original ausente");
+            std::vector<uint8_t> pixels;
+            if (!runtime.runGameFrame(
+                    frameAddress,0,pixels,nextFrameMs,runtimeError)) {
+                throw std::runtime_error(
+                    "Falha no jniRun original: "+runtimeError);
+            }
+            for (size_t at=0; at+1<pixels.size(); at+=2)
+                if (pixels[at] || pixels[at+1]) ++nonzeroPixels;
         }
 
         uc_close(uc);
@@ -214,14 +237,19 @@ extern "C" int destinia_probe_elf(
             "Memoria Unicorn: OK\n"
             "Testes ARM32: OK\n"
             "Codigo original: OK\n"
-            "InitGame: OK",
+            "InitGame: OK\n"
+            "JniRun: OK\n"
+            "Pixels nao zero: %zu\n"
+            "Proximo quadro: %u ms",
             image.bytes.size() / 1024,
             image.symbols.size(),
             image.relocations.size(),
             applied,
             pending,
             unsupported,
-            imports.size()
+            imports.size(),
+            nonzeroPixels,
+            nextFrameMs
         );
 
         return 1;
