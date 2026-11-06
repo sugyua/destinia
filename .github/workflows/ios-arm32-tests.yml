@@ -86,6 +86,13 @@ jobs:
             2> /tmp/destinia-arm32-direct.log
           cmp /tmp/destinia-baseline.ppm /tmp/destinia-frame.ppm
           echo "Native-mapped guest heap: same original RGB565 pixels"
+          DESTINIA_FAST_ALPHA=1 DESTINIA_FAST_FILL=1 \
+            DESTINIA_FAST_SPRITE=1 DESTINIA_DIRECT_HEAP=1 \
+            DESTINIA_PROBE_FRAMES=50 \
+            /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so \
+            2> /tmp/destinia-arm32-alpha.log
+          cmp /tmp/destinia-baseline.ppm /tmp/destinia-frame.ppm
+          echo "Native alpha: 50-frame original RGB565 match"
 
       - name: Benchmark and profile original versus native graphics
         run: |
@@ -128,6 +135,17 @@ jobs:
           cmp /tmp/destinia-hashes-base.txt /tmp/destinia-hashes-native.txt
           cmp /tmp/destinia-hashes-base.txt /tmp/destinia-hashes-direct.txt
           echo "360 / 360 frames byte-identical in all 3 modes"
+          DESTINIA_HASH_FRAMES=1 DESTINIA_DIRECT_HEAP=1 \
+            DESTINIA_FAST_FILL=1 DESTINIA_FAST_SPRITE=1 \
+            DESTINIA_FAST_ALPHA=1 DESTINIA_PROBE_FRAMES=360 \
+            /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so \
+            2> /tmp/destinia-frames-alpha.log
+          cmp /tmp/destinia-endurance-baseline.ppm /tmp/destinia-frame.ppm
+          grep '^ARM32_FRAME_HASH' /tmp/destinia-frames-alpha.log \
+            > /tmp/destinia-hashes-alpha.txt
+          test "$(wc -l < /tmp/destinia-hashes-alpha.txt)" -eq 360
+          cmp /tmp/destinia-hashes-base.txt /tmp/destinia-hashes-alpha.txt
+          echo "Native alpha: 360/360 frames byte-identical"
           grep 'ARM32_DIRECT_HEAP' /tmp/destinia-frames-direct.log
 
       - name: Upload original game framebuffer
@@ -151,5 +169,7 @@ jobs:
             /tmp/destinia-hashes-base.txt
             /tmp/destinia-hashes-native.txt
             /tmp/destinia-hashes-direct.txt
+            /tmp/destinia-hashes-alpha.txt
+            /tmp/destinia-arm32-alpha.log
           if-no-files-found: ignore
           retention-days: 7
