@@ -377,6 +377,16 @@ static int destinia_probe_impl(
                             std::min(nextFrameMs,1000u)));
                 }
             }
+            if (std::getenv("DESTINIA_DIRECT_HEAP")) {
+                const auto counts=runtime->directAccessCounts();
+                std::fprintf(stderr,
+                    "ARM32_DIRECT_HEAP fill=%llu sprite=%llu\n",
+                    static_cast<unsigned long long>(counts.first),
+                    static_cast<unsigned long long>(counts.second));
+                if (nativeSpriteEnabled && counts.second==0)
+                    throw std::runtime_error(
+                        "Direct guest heap nao acelerou nenhum sprite");
+            }
             std::set<uint16_t> colors;
             for (size_t at=0; at+1<lastPixels.size(); at+=2) {
                 const uint16_t color=uint16_t(lastPixels[at]) |
