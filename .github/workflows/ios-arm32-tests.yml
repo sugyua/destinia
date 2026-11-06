@@ -1,0 +1,54 @@
+name: Destinia ARM32 Emulator Tests
+
+on:
+  push:
+    branches:
+      - ios/unicorn-poc
+    paths:
+      - "ios/TCIProbe/**"
+      - "common/elf_image.h"
+      - ".github/workflows/ios-arm32-tests.yml"
+  workflow_dispatch:
+
+jobs:
+  arm32-regression:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Destinia
+        uses: actions/checkout@v4
+
+      - name: Clone Unicorn TCI
+        run: |
+          git clone --depth 1 https://github.com/1rhino2/unicorn-tci.git /tmp/unicorn-tci
+
+      - name: Build macOS ARM32 interpreter
+        run: |
+          set -eux
+          cmake -S /tmp/unicorn-tci/unicorn-engine-sys-tci \
+            -B /tmp/unicorn-tci-macos-build -G Ninja \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DUNICORN_ARCH=arm \
+            -DUNICORN_INTERPRETER=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DUNICORN_BUILD_TESTS=OFF \
+            -DUNICORN_INSTALL=OFF
+          cmake --build /tmp/unicorn-tci-macos-build --target unicorn --parallel 2
+
+      - name: Compile host regression tests
+        run: |
+          set -eux
+          clang++ -std=c++17 -O2 \
+            -I/tmp/unicorn-tci/unicorn-engine-sys-tci/include \
+            ios/TCIProbe/probe_host_test.cpp \
+            ios/TCIProbe/elf_probe.cpp \
+            ios/TCIProbe/arm_import_runtime.cpp \
+            /tmp/unicorn-tci-macos-build/libunicorn-static.a \
+            /tmp/unicorn-tci-macos-build/libarm-softmmu.a \
+            /tmp/unicorn-tci-macos-build/libunicorn-common.a \
+            -lm -lpthread \
+            -o /tmp/destinia_arm32_tests
+
+      - name: Execute real ARM32 code through Unicorn TCI
+        run: |
+          /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
