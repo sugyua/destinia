@@ -86,7 +86,7 @@ bool ArmImportRuntime::resolvePath(
     else if (!relative.empty() && relative[0]=='/')
         return false;
 
-    if (relative.empty() || relative.find('\\\\')!=std::string::npos)
+    if (relative.empty() || relative.find('\\')!=std::string::npos)
         return false;
 
     const std::filesystem::path sub(relative);
