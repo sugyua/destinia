@@ -41,9 +41,20 @@ ArmImportRuntime::~ArmImportRuntime() {
     for (const auto &entry : files_) std::fclose(entry.second);
     if (hook_) uc_hook_del(uc_, hook_);
     if (jniHook_) uc_hook_del(uc_, jniHook_);
+    if (profileHook_) uc_hook_del(uc_, profileHook_);
 }
 
 unsigned ArmImportRuntime::implementedCount() const { return implemented_; }
+
+const std::map<uint32_t,uint64_t> &ArmImportRuntime::profiledBlocks() const {
+    return profileBlocks_;
+}
+
+void ArmImportRuntime::onProfileBlock(
+    uc_engine *,uint64_t address,uint32_t,void *user) {
+    ++static_cast<ArmImportRuntime *>(user)->profileBlocks_[
+        static_cast<uint32_t>(address)&~1u];
+}
 
 bool ArmImportRuntime::readReg(int reg, uint32_t &value) {
     return uc_reg_read(uc_, reg, &value) == UC_ERR_OK;
@@ -808,8 +819,25 @@ bool ArmImportRuntime::runGameFrame(
         error="jniRun: nao inicializou registradores ARM32";
         return false;
     }
+    const bool profileFrame = frameNumber==48 &&
+        std::getenv("DESTINIA_PROFILE_BLOCKS")!=nullptr;
+    if (profileFrame) {
+        profileBlocks_.clear();
+        const uc_err hooked=uc_hook_add(
+            uc_,&profileHook_,UC_HOOK_BLOCK,
+            reinterpret_cast<void *>(onProfileBlock),this,
+            0x10000000,0x1008ffff);
+        if (hooked!=UC_ERR_OK) {
+            error=std::string("Profiler ARM32: ")+uc_strerror(hooked);
+            return false;
+        }
+    }
     const uc_err e=uc_emu_start(
         uc_,address,kReturn,60000000,2000000000);
+    if (profileHook_) {
+        uc_hook_del(uc_,profileHook_);
+        profileHook_=0;
+    }
     if (!lastError_.empty()) {
         error="jniRun: "+lastError_; return false;
     }
