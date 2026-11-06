@@ -749,6 +749,43 @@ void ArmImportRuntime::dispatchJni(uint32_t address) {
         fail("JNI falhou ao retornar R0");
 }
 
+bool ArmImportRuntime::runGameTouch(
+    uint32_t address,uint32_t x,uint32_t y,uint32_t type,
+    std::string &error) {
+    if (!address || assetsRoot_.empty()) {
+        error="jniTouch: jogo ainda nao inicializado";
+        return false;
+    }
+    constexpr uint32_t stack=0x7f01ffc0;
+    lastError_.clear();
+    if (!writeBytes(stack,&type,sizeof(type)) ||
+        !writeReg(UC_ARM_REG_R0,0x40000000) ||
+        !writeReg(UC_ARM_REG_R1,0x10) ||
+        !writeReg(UC_ARM_REG_R2,x) ||
+        !writeReg(UC_ARM_REG_R3,y) ||
+        !writeReg(UC_ARM_REG_SP,stack) ||
+        !writeReg(UC_ARM_REG_LR,kReturn)) {
+        error="jniTouch: nao configurou argumentos ARM32";
+        return false;
+    }
+    const uc_err e=uc_emu_start(
+        uc_,address,kReturn,5000000,200000000);
+    if (!lastError_.empty()) {
+        error="jniTouch: "+lastError_;
+        return false;
+    }
+    if (e!=UC_ERR_OK) {
+        error=std::string("jniTouch Unicorn: ")+uc_strerror(e);
+        return false;
+    }
+    uint32_t pc=0;
+    if (!readReg(UC_ARM_REG_PC,pc) || pc!=kReturn) {
+        error="jniTouch nao retornou dentro do limite";
+        return false;
+    }
+    return true;
+}
+
 bool ArmImportRuntime::runGameFrame(
     uint32_t address,uint32_t frameNumber,
     std::vector<uint8_t> &frameBuffer,uint32_t &nextMs,
