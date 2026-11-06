@@ -176,6 +176,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     uint32_t _measureFrames;
     double _totalArmMs;
     double _totalPreparationMs;
+    NSString *_lastProfile;
 }
 
 - (void)showStatus:(NSString *)status {
@@ -194,7 +195,8 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     }
     dispatch_async(dispatch_get_main_queue(), ^{
         self->_controller.gameView.image=image;
-        self->_controller.statusLabel.hidden=!self->_showMetrics.load();
+        self->_controller.statusLabel.hidden=
+            !self->_showMetrics.load() && !self->_lastProfile;
     });
 }
 
@@ -240,6 +242,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     [self showPixels:pixels frameNum:_frameIndex];
     if (error[0] && std::strncmp(error,"TOP ARM32:",10)==0) {
         NSString *top=[NSString stringWithUTF8String:error];
+        _lastProfile=top;
         NSLog(@"Destinia gameplay profile: %@",top);
         dispatch_async(dispatch_get_main_queue(), ^{
             self->_showMetrics.store(true);
@@ -268,7 +271,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         const double avgPrep=_totalPreparationMs/_measureFrames;
         NSLog(@"Destinia perf FPS=%.1f ARM32=%.1fms RGB565=%.1fms frames=%u",
               fps,avgArm,avgPrep,_measureFrames);
-        if (_showMetrics.load()) {
+        if (_showMetrics.load() && !_lastProfile) {
             NSString *summary=[NSString stringWithFormat:
                 @"FPS %.1f | ARM32 %.1fms | RGB %.1fms",
                 fps,avgArm,avgPrep];
@@ -324,6 +327,8 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     _controller.metricsCallback=^{
         AppDelegate *owner=weakSelf;
         if (!owner) return;
+        owner->_lastProfile=nil;
+        owner->_controller.statusLabel.numberOfLines=2;
         const bool enable=!owner->_showMetrics.load();
         owner->_showMetrics.store(enable);
         owner->_controller.statusLabel.hidden=!enable;
