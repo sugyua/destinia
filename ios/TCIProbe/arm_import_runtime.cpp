@@ -1335,8 +1335,10 @@ bool ArmImportRuntime::runGameFrame(
         if (parsed>=0 && parsed<=420)
             profileTarget=static_cast<uint32_t>(parsed);
     }
-    const bool profileFrame = frameNumber==profileTarget &&
-        std::getenv("DESTINIA_PROFILE_BLOCKS")!=nullptr;
+    const bool profileFrame = profileNextFrame_ ||
+        (frameNumber==profileTarget &&
+         std::getenv("DESTINIA_PROFILE_BLOCKS")!=nullptr);
+    profileNextFrame_=false;
     if (profileFrame) {
         profileBlocks_.clear();
         const uc_err hooked=uc_hook_add(
