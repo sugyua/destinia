@@ -267,11 +267,20 @@ static int destinia_probe_impl(
             }
             for (uint32_t frame=0; frame<targetFrames; ++frame) {
                 std::vector<uint8_t> pixels;
+                const auto frameStart=std::chrono::steady_clock::now();
                 if (!runtime->runGameFrame(
                         frameAddress,frame,pixels,nextFrameMs,runtimeError)) {
                     throw std::runtime_error(
                         "Falha no jniRun quadro "+std::to_string(frame)+
                         ": "+runtimeError);
+                }
+                const auto elapsedMs=
+                    std::chrono::duration_cast<std::chrono::milliseconds>(
+                        std::chrono::steady_clock::now()-frameStart).count();
+                if (paced) {
+                    std::fprintf(stderr,
+                        "ARM32_FRAME_PERF frame=%u exec_ms=%lld wait_ms=%u\n",
+                        frame, static_cast<long long>(elapsedMs),nextFrameMs);
                 }
                 ++framesRendered;
                 lastPixels=std::move(pixels);
