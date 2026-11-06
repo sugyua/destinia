@@ -331,7 +331,14 @@ bool ArmImportRuntime::install(std::string &error) {
         }
         mapped=uc_mem_map_ptr(
             uc_,kHeapBase,kHeapSize,UC_PROT_ALL,directHeap_.data());
-        if (mapped==UC_ERR_OK) hasDirectHeap_=true;
+        if (mapped==UC_ERR_OK) {
+            hasDirectHeap_=true;
+        } else if (std::getenv("DESTINIA_DIRECT_HEAP")==nullptr) {
+            // Production safety: retain the original mapped heap if this
+            // iOS runtime cannot borrow host pages. Explicit CI tests fail.
+            directHeap_.clear();
+            mapped=uc_mem_map(uc_,kHeapBase,kHeapSize,UC_PROT_ALL);
+        }
     } else {
         mapped=uc_mem_map(uc_,kHeapBase,kHeapSize,UC_PROT_ALL);
     }
