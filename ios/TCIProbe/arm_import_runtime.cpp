@@ -47,6 +47,7 @@ ArmImportRuntime::~ArmImportRuntime() {
     if (fastSpriteHook_) uc_hook_del(uc_, fastSpriteHook_);
     if (fastAlphaHook_) uc_hook_del(uc_, fastAlphaHook_);
     if (fastAlphaHook_) uc_hook_del(uc_,fastAlphaHook_);
+    if (fastAlpha16Hook_) uc_hook_del(uc_,fastAlpha16Hook_);
     // Unicorn must release the borrowed host memory before vector storage dies.
     if (hasDirectHeap_)
         uc_mem_unmap(uc_,kHeapBase,kHeapSize);
@@ -392,7 +393,7 @@ bool ArmImportRuntime::enableNativeAlpha16(
         return false;
     }
     const uc_err e=uc_hook_add(
-        uc_,&fastAlphaHook_,UC_HOOK_CODE,
+        uc_,&fastAlpha16Hook_,UC_HOOK_CODE,
         reinterpret_cast<void *>(onFastAlpha16),this,entry,entry);
     if (e!=UC_ERR_OK) {
         writeBytes(entry,&op0,sizeof(op0));
