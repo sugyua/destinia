@@ -90,16 +90,16 @@ static inline NSString *DestiniaThermalName(NSProcessInfoThermalState state) {
     const unsigned long session = (unsigned long)MAX(0.0, now-self.startTime);
     self.text = [NSString stringWithFormat:
         @" DESTINIA | DEBUG HUD\n"
-         " FPS       %5.1f / 16\n"
-         " FRAME     %5.1f ms (pico %.0f)\n"
-         " ARM32     %5.1f ms\n"
-         " PREP CPU  %5.1f ms\n"
-         " LENTOS    %llu (>62.5ms)\n"
-         " RAM       %@\n"
-         " BATERIA   %@  %@\n"
-         " TERMICO   %@\n"
-         " SESSAO    %02lu:%02lu\n"
-         " 3 dedos: ocultar/mostrar",
+         @" FPS       %5.1f / 16\n"
+         @" FRAME     %5.1f ms (pico %.0f)\n"
+         @" ARM32     %5.1f ms\n"
+         @" PREP CPU  %5.1f ms\n"
+         @" LENTOS    %llu (>62.5ms)\n"
+         @" RAM       %@\n"
+         @" BATERIA   %@  %@\n"
+         @" TERMICO   %@\n"
+         @" SESSAO    %02lu:%02lu\n"
+         @" 3 dedos: ocultar/mostrar",
         fps, frameMs, maxFrameMs, armMs, prepMs,
         (unsigned long long)slowFrames, memoryText,
         batteryText, drainText,
