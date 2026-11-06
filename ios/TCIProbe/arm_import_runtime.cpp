@@ -361,6 +361,48 @@ bool ArmImportRuntime::invoke(
     return true;
 }
 
+bool ArmImportRuntime::runOriginalExport(
+    uint32_t address, uint32_t &result, std::string &error) {
+    if (!address) {
+        error="Endereco de exportacao ARM32 invalido";
+        return false;
+    }
+    const uint32_t stackBase=0x7f000000;
+    const uint32_t stackSize=0x20000;
+    const uc_err mapped=uc_mem_map(
+        uc_,stackBase,stackSize,UC_PROT_ALL);
+    if (mapped!=UC_ERR_OK) {
+        error=std::string("Pilha ARM32: ")+uc_strerror(mapped);
+        return false;
+    }
+    lastError_.clear();
+    if (!writeReg(UC_ARM_REG_R0,0) ||
+        !writeReg(UC_ARM_REG_R1,0) ||
+        !writeReg(UC_ARM_REG_R2,0) ||
+        !writeReg(UC_ARM_REG_R3,0) ||
+        !writeReg(UC_ARM_REG_SP,stackBase+stackSize-16) ||
+        !writeReg(UC_ARM_REG_LR,kReturn)) {
+        error="Nao inicializou os registradores do jogo";
+        return false;
+    }
+    const uc_err e=uc_emu_start(uc_,address,kReturn,0,20000);
+    if (!lastError_.empty()) { error=lastError_; return false; }
+    if (e!=UC_ERR_OK) {
+        error=std::string("Codigo Destinia: ")+uc_strerror(e);
+        return false;
+    }
+    uint32_t pc=0;
+    if (!readReg(UC_ARM_REG_PC,pc) || pc!=kReturn) {
+        error="Funcao original nao retornou dentro do limite";
+        return false;
+    }
+    if (!readReg(UC_ARM_REG_R0,result)) {
+        error="Nao leu retorno do codigo original";
+        return false;
+    }
+    return true;
+}
+
 bool ArmImportRuntime::selfTest(std::string &error) {
     const char hello[]="Destinia";
     const char needle[]="tin";
