@@ -46,6 +46,7 @@ ArmImportRuntime::~ArmImportRuntime() {
     if (fastFillHook_) uc_hook_del(uc_, fastFillHook_);
     if (fastSpriteHook_) uc_hook_del(uc_, fastSpriteHook_);
     if (fastDodgeHook_) uc_hook_del(uc_, fastDodgeHook_);
+    if (fastSimpleClipHook_) uc_hook_del(uc_, fastSimpleClipHook_);
     if (fastAlphaHook_) uc_hook_del(uc_, fastAlphaHook_);
     if (fastAlpha16Hook_) uc_hook_del(uc_,fastAlpha16Hook_);
     // Unicorn must release the borrowed host memory before vector storage dies.
@@ -235,6 +236,85 @@ void ArmImportRuntime::onFastSpriteColumn(
         !runtime->writeReg(UC_ARM_REG_R3,static_cast<uint32_t>(count))) {
         runtime->fail("Sprite ARM32: falha ao atualizar coluna");
     }
+}
+
+// Original Android 1.0.6 Thumb loop at ELF +0xb5f2. Only the opaque
+// palette-copy pixel loop in Grp_drawSimpleClipWImageP is replaced;
+// all clipping, draw modes, row strides and function returns stay in ARM32.
+// The .so file on disk is NEVER modified.
+bool ArmImportRuntime::enableNativeSimpleClipRow(
+    uint32_t imageBase,std::string &error) {
+    const uint32_t loop=imageBase+0x0000b5f2u;
+    uint16_t original=0;
+    if (!readBytes(loop,&original,sizeof(original)) ||
+        original!=0x780du) {
+        error="SimpleClip: assinatura Thumb inesperada";
+        return false;
+    }
+    // Thumb B from 0xb5f2 (PC=b5f6) to 0xb604 (post-pixel row logic).
+    const uint16_t skipPixelLoop=0xe007u;
+    if (!writeBytes(loop,&skipPixelLoop,sizeof(skipPixelLoop))) {
+        error="SimpleClip: nao foi possivel substituir pixel loop";
+        return false;
+    }
+    const uc_err hooked=uc_hook_add(
+        uc_,&fastSimpleClipHook_,UC_HOOK_CODE,
+        reinterpret_cast<void *>(onFastSimpleClipRow),this,loop,loop);
+    if (hooked!=UC_ERR_OK) {
+        writeBytes(loop,&original,sizeof(original));
+        error=std::string("SimpleClip: hook: ")+uc_strerror(hooked);
+        return false;
+    }
+    return true;
+}
+
+void ArmImportRuntime::onFastSimpleClipRow(
+    uc_engine *,uint64_t,uint32_t,void *opaque) {
+    auto *rt=static_cast<ArmImportRuntime *>(opaque);
+    uint32_t src=0,dst=0,palette=0,width=0,col=0;
+    if (!rt->readReg(UC_ARM_REG_R1,src) ||
+        !rt->readReg(UC_ARM_REG_R0,dst) ||
+        !rt->readReg(UC_ARM_REG_R2,palette) ||
+        !rt->readReg(UC_ARM_REG_R4,width) ||
+        !rt->readReg(UC_ARM_REG_R3,col)) {
+        rt->fail("SimpleClip: registradores ARM32 invalidos"); return;
+    }
+    const uint64_t finalSrc=static_cast<uint64_t>(src)+width;
+    const uint64_t finalDst=static_cast<uint64_t>(dst)+width*2u;
+    if (col!=0 || width==0 || width>1024 ||
+        finalSrc>UINT32_MAX || finalDst>UINT32_MAX ||
+        static_cast<uint64_t>(palette)+512u>UINT32_MAX) {
+        rt->fail("SimpleClip: endereco ou largura invalidos"); return;
+    }
+    std::array<uint8_t,1024> indices{};
+    std::array<uint16_t,256> colors{};
+    if (!rt->readBytes(src,indices.data(),width) ||
+        !rt->readBytes(palette,colors.data(),512u)) {
+        rt->fail("SimpleClip: fonte ou paleta invalida"); return;
+    }
+    const bool direct=rt->hasDirectHeap_ &&
+        dst>=kHeapBase &&
+        finalDst<=static_cast<uint64_t>(kHeapBase)+kHeapSize;
+    std::array<uint8_t,2048> copy{};
+    uint8_t *pixels=direct
+        ? rt->directHeap_.data()+(dst-kHeapBase)
+        : copy.data();
+    uint16_t lastColor=0;
+    for (uint32_t i=0;i<width;++i) {
+        lastColor=colors[indices[i]];
+        pixels[i*2]=static_cast<uint8_t>(lastColor);
+        pixels[i*2+1]=static_cast<uint8_t>(lastColor>>8);
+    }
+    if (!direct && !rt->writeBytes(dst,copy.data(),width*2u)) {
+        rt->fail("SimpleClip: escrita RGB565 invalida"); return;
+    }
+    if (!rt->writeReg(UC_ARM_REG_R0,static_cast<uint32_t>(finalDst)) ||
+        !rt->writeReg(UC_ARM_REG_R1,static_cast<uint32_t>(finalSrc)) ||
+        !rt->writeReg(UC_ARM_REG_R3,width) ||
+        !rt->writeReg(UC_ARM_REG_R5,lastColor)) {
+        rt->fail("SimpleClip: nao atualizou os registradores ARM32"); return;
+    }
+    ++rt->nativeSimpleClipRows_;
 }
 
 // Dodge16: blend a full RGB565 row in C++ rather than interpret its original
