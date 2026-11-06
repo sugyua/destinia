@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <map>
+#include <vector>
 #include <string>
 
 // Ponte minima entre a ABI ARM32 Android e a memoria isolada do Unicorn.
@@ -25,8 +26,10 @@ public:
     bool runGameTouch(uint32_t address, uint32_t x, uint32_t y,
                       uint32_t type, std::string &error);
     unsigned implementedCount() const;
+    const std::map<uint32_t,uint64_t> &profiledBlocks() const;
 private:
     static void onCode(uc_engine *, uint64_t, uint32_t, void *);
+    static void onProfileBlock(uc_engine *, uint64_t, uint32_t, void *);
     static void onJniCode(uc_engine *, uint64_t, uint32_t, void *);
     void dispatchJni(uint32_t address);
     bool installJni(std::string &error);
@@ -46,6 +49,8 @@ private:
     uc_engine *uc_;
     uc_hook hook_ = 0;
     uc_hook jniHook_ = 0;
+    uc_hook profileHook_ = 0;
+    std::map<uint32_t,uint64_t> profileBlocks_;
     std::map<std::string, uint32_t> names_;
     std::map<uint32_t, std::string> reverse_;
     uint32_t heapNext_ = 0x30000000;
