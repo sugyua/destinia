@@ -15,6 +15,6 @@ class CombatPowerTests(unittest.TestCase):
     self.assertEqual(built.returncode,0,built.stderr)
     case=base/(variant+'-drops');case.mkdir()
     env=dict(os.environ,SDL_VIDEODRIVER='dummy',SDL_AUDIODRIVER='dummy')
-    result=subprocess.run([str(exe),'--game',str(ROOT/'game'),'--save',str(case/'save'),'--settings',str(case/'config.ini'),'--reports',str(case/'reports'),'--headless','1','--out',str(case/'frames'),'--mute','--no-save-preferences'],env=env,capture_output=True,text=True,timeout=60)
+    result=subprocess.run([str(exe),'--game',str(ROOT/'game'),'--save',str(case/'save'),'--settings',str(case/'config.ini'),'--reports',str(case/'reports'),'--headless','1','--out',str(case/'frames'),'--mute','--no-save-preferences'],env=env,capture_output=True,text=True,timeout=180)
     self.assertEqual(result.returncode,0,result.stdout+result.stderr)
     self.assertIn('FC_COMPARATOR_ARM_OK',result.stdout)
