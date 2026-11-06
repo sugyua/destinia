@@ -1,8 +1,12 @@
-Destinia iOS ARM32 milestone 0.3.0
+Destinia iOS ARM32 milestone 0.3.1
 Branch: ios/unicorn-poc
-Automated regression PASS: 213/213 relocations, native C/JNI import layer,
-original ARM32 initGame, persistent jniRun framebuffer and jniTouch inputs.
-Visual evidence: original Gamevil splash and Destinia title rendered on macOS.
-Native iOS interface: landscape RGB565 presentation with touch forwarding.
-Next device milestone: install Destinia-iOS unsigned IPA using AltStore/AltServer.
-Note: audio and full in-game performance are not yet validated on iPhone.
+Release-candidate goal:
+- Hide the text overlay while rendering gameplay; keep diagnostics for errors.
+- Correct frame pacing by subtracting ARM32 execution time from the game's requested wait.
+- Build the Unicorn TCI ARM32 interpreter in CMake Release mode (optimized).
+Measured on macOS GitHub runner with 56 frames:
+- initial frames: approximately 37 ms instead of 300-400 ms
+- title frames: approximately 93 ms instead of 700-850 ms
+- first heavy graphic asset load: approximately 3.2 s instead of 23.7 s
+Automated ARM32 regression completed successfully.
+These numbers are from the macOS runner; device performance must be verified on iPhone.
