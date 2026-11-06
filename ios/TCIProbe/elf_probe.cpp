@@ -1,4 +1,5 @@
 #include "../../common/elf_image.h"
+#include "arm_import_runtime.h"
 #include <unicorn/unicorn.h>
 #include <cstdio>
 #include <cstring>
@@ -132,15 +133,27 @@ extern "C" int destinia_probe_elf(
             err = uc_mem_read(uc, base, verify, sizeof(verify));
         }
 
-        uc_close(uc);
-
         if (err != UC_ERR_OK) {
+            uc_close(uc);
             throw std::runtime_error(uc_strerror(err));
         }
 
         if (std::memcmp(verify, image.bytes.data(), sizeof(verify))) {
+            uc_close(uc);
             throw std::runtime_error("Verificacao da memoria falhou");
         }
+
+        {
+            destinia::ArmImportRuntime runtime(uc, stubAddresses);
+            std::string runtimeError;
+            if (!runtime.install(runtimeError) ||
+                !runtime.selfTest(runtimeError)) {
+                throw std::runtime_error(
+                    "Falha no teste de imports ARM32: " + runtimeError);
+            }
+        }
+
+        uc_close(uc);
 
         std::snprintf(
             out, capacity,
@@ -153,7 +166,8 @@ extern "C" int destinia_probe_elf(
             "Imports externos vinculados: %zu\n"
             "Tipos nao suportados: %zu\n"
             "Imports distintos: %zu\n"
-            "Memoria Unicorn: OK",
+            "Memoria Unicorn: OK\\n"
+            "Testes ARM32: OK",
             image.bytes.size() / 1024,
             image.symbols.size(),
             image.relocations.size(),
