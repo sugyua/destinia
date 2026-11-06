@@ -1,5 +1,6 @@
 #include "arm_import_runtime.h"
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cctype>
 #include <climits>
@@ -181,9 +182,10 @@ void ArmImportRuntime::onFastSpriteColumn(
         after-first>1024*1024) {
         runtime->fail("Sprite ARM32: framebuffer fora dos limites"); return;
     }
-    std::vector<uint8_t> indices(static_cast<size_t>(count));
-    std::vector<uint16_t> colors(256);
-    if (!runtime->readBytes(src,indices.data(),indices.size()) ||
+    // Hot path: avoid heap allocations for each of hundreds of columns.
+    std::array<uint8_t,1024> indices;
+    std::array<uint16_t,256> colors;
+    if (!runtime->readBytes(src,indices.data(),static_cast<size_t>(count)) ||
         !runtime->readBytes(palette,colors.data(),colors.size()*2)) {
         runtime->fail("Sprite ARM32: leitura de indices/paleta invalida"); return;
     }
