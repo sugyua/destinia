@@ -517,7 +517,7 @@ static int destinia_probe_impl(
                 }
             }
             if (nativeSimpleClipEnabled) {
-                std::fprintf(stderr,"ARM32_NATIVE_SIMPLECLIP rows=%llu\\n",
+                std::fprintf(stderr,"ARM32_NATIVE_SIMPLECLIP rows=%llu\n",
                     static_cast<unsigned long long>(
                         runtime->nativeSimpleClipRows()));
             }
