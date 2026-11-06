@@ -17,6 +17,11 @@ jobs:
       - name: Checkout Destinia
         uses: actions/checkout@v4
 
+      - name: Audit Android game version and Windows-mod parity
+        run: |
+          python3 ios/tools/audit_game_source.py /tmp/destinia-game-source.json
+
+
       - name: Check Xcode and iOS SDK
         run: |
           xcodebuild -version
@@ -291,6 +296,7 @@ jobs:
 
           mkdir -p "$APP"
           cp game/lib/armeabi/libdestinia_jni.so "$APP/libdestinia_jni.so"
+          cp /tmp/destinia-game-source.json "$APP/GameSource.json"
           cp -R game/assets "$APP/assets"
 
           xcrun --sdk iphoneos clang++ \
@@ -350,6 +356,7 @@ jobs:
           PLIST
 
           test -s "$APP/libdestinia_jni.so"
+          test -s "$APP/GameSource.json"
           test -d "$APP/assets"
           test -s "$APP/assets/0_en.ddt"
           plutil -lint "$APP/Info.plist"
