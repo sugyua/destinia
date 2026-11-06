@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <map>
 
 extern "C" int destinia_probe_elf(
     const char *path, char *out, size_t capacity) {
@@ -41,6 +42,10 @@ extern "C" int destinia_probe_elf(
         size_t unsupported = 0;
         std::set<std::string> imports;
 
+        const uint32_t stubBase = 0x20000000;
+        const uint32_t guardAddress = 0x20001000;
+        std::map<std::string, uint32_t> stubAddresses;
+
         for (const auto &r : image.relocations) {
             uint32_t value = 0;
             std::memcpy(&value, image.bytes.data() + r.offset, 4);
@@ -51,8 +56,27 @@ extern "C" int destinia_probe_elf(
                 const auto &sym = image.symbols[r.symbol];
 
                 if (sym.shndx == 0) {
+                    const std::string &name = image.names[r.symbol];
+                    imports.insert(name);
+
+                    uint32_t address = guardAddress;
+                    if (name != "__stack_chk_guard") {
+                        auto it = stubAddresses.find(name);
+                        if (it == stubAddresses.end()) {
+                            address = stubBase +
+                                static_cast<uint32_t>(stubAddresses.size()) * 4;
+                            stubAddresses[name] = address;
+                        } else {
+                            address = it->second;
+                        }
+                    }
+
+                    value = (r.type == 2)
+                        ? value + address : address;
+
                     ++pending;
-                    imports.insert(image.names[r.symbol]);
+                    std::memcpy(image.bytes.data() + r.offset, &value, 4);
+                    ++applied;
                     continue;
                 }
 
@@ -77,6 +101,25 @@ extern "C" int destinia_probe_elf(
         }
 
         err = uc_mem_map(uc, base, image.bytes.size(), UC_PROT_ALL);
+
+        if (err == UC_ERR_OK) {
+            err = uc_mem_map(uc, stubBase, 0x2000, UC_PROT_ALL);
+        }
+
+        if (err == UC_ERR_OK) {
+            std::vector<uint32_t> stubs(
+                stubAddresses.size(), 0xE12FFF1E);
+
+            err = uc_mem_write(
+                uc, stubBase, stubs.data(),
+                stubs.size() * sizeof(uint32_t));
+        }
+
+        if (err == UC_ERR_OK) {
+            const uint32_t guard = 0xA5C3F00D;
+            err = uc_mem_write(
+                uc, guardAddress, &guard, sizeof(guard));
+        }
 
         if (err == UC_ERR_OK) {
             err = uc_mem_write(
@@ -107,7 +150,7 @@ extern "C" int destinia_probe_elf(
             "Simbolos: %zu\n"
             "Relocacoes: %zu\n"
             "Relocacoes aplicadas: %zu\n"
-            "Pendentes: %zu\n"
+            "Imports externos vinculados: %zu\n"
             "Tipos nao suportados: %zu\n"
             "Imports distintos: %zu\n"
             "Memoria Unicorn: OK",
