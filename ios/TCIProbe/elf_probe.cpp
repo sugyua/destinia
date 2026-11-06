@@ -238,6 +238,18 @@ static int destinia_probe_impl(
             const bool nativeSimpleClipEnabled=
                 std::getenv("DESTINIA_FAST_SIMPLECLIP")!=nullptr;
 #endif
+#if defined(DESTINIA_NATIVE_PXLMULTIPLY)
+            const bool nativePxlMultiplyEnabled=true;
+#else
+            const bool nativePxlMultiplyEnabled=
+                std::getenv("DESTINIA_FAST_PXLMULTIPLY")!=nullptr;
+#endif
+            if (nativePxlMultiplyEnabled &&
+                !runtime->enableNativePxlMultiply(
+                    static_cast<uint32_t>(base),runtimeError)) {
+                throw std::runtime_error(
+                    "Falha no PxlMultiply nativo: "+runtimeError);
+            }
             if (nativeSimpleClipEnabled &&
                 !runtime->enableNativeSimpleClipRow(
                     static_cast<uint32_t>(base),runtimeError)) {
@@ -515,6 +527,11 @@ static int destinia_probe_impl(
                         std::chrono::milliseconds(
                             std::min(nextFrameMs,1000u)));
                 }
+            }
+            if (nativePxlMultiplyEnabled) {
+                std::fprintf(stderr,"ARM32_NATIVE_PXLMULTIPLY calls=%llu\n",
+                    static_cast<unsigned long long>(
+                        runtime->nativePxlMultiplyCalls()));
             }
             if (nativeSimpleClipEnabled) {
                 std::fprintf(stderr,"ARM32_NATIVE_SIMPLECLIP rows=%llu\n",

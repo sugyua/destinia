@@ -47,6 +47,7 @@ ArmImportRuntime::~ArmImportRuntime() {
     if (fastSpriteHook_) uc_hook_del(uc_, fastSpriteHook_);
     if (fastDodgeHook_) uc_hook_del(uc_, fastDodgeHook_);
     if (fastSimpleClipHook_) uc_hook_del(uc_, fastSimpleClipHook_);
+    if (fastPxlMultiplyHook_) uc_hook_del(uc_, fastPxlMultiplyHook_);
     if (fastAlphaHook_) uc_hook_del(uc_, fastAlphaHook_);
     if (fastAlpha16Hook_) uc_hook_del(uc_,fastAlpha16Hook_);
     // Unicorn must release the borrowed host memory before vector storage dies.
@@ -236,6 +237,102 @@ void ArmImportRuntime::onFastSpriteColumn(
         !runtime->writeReg(UC_ARM_REG_R3,static_cast<uint32_t>(count))) {
         runtime->fail("Sprite ARM32: falha ao atualizar coluna");
     }
+}
+
+// Original Thumb _Grp_pxlMultiply at Android ELF +0x9014.
+// Only its RGB565 component multiplication is replaced by native C++.
+// Game memory, clipping, scheduling and the original .so remain unchanged.
+// The exact image signature and GOT layout are pinned to Android 1.0.6.
+bool ArmImportRuntime::enableNativePxlMultiply(
+    uint32_t imageBase,std::string &error) {
+    const uint32_t entry=imageBase+0x00009014u;
+    uint16_t op0=0,op1=0;
+    uint32_t literal=0;
+    if (!readBytes(entry,&op0,sizeof(op0)) ||
+        !readBytes(entry+2,&op1,sizeof(op1)) ||
+        !readBytes(imageBase+0x90a4u,&literal,sizeof(literal)) ||
+        op0!=0xb5f0u || op1!=0x464fu || literal!=0x0003b0a2u) {
+        error="PxlMultiply: assinatura Thumb original inesperada";
+        return false;
+    }
+    // Original: add r3,pc at +0x9022 (Thumb PC = +4), plus literal.
+    pxlMultiplyGotBase_=imageBase+0x9026u+literal;
+    const uint16_t returnToLR=0x4770u; // Thumb bx lr
+    if (!writeBytes(entry,&returnToLR,sizeof(returnToLR))) {
+        error="PxlMultiply: nao foi possivel instalar codigo Thumb";
+        return false;
+    }
+    const uc_err hooked=uc_hook_add(
+        uc_,&fastPxlMultiplyHook_,UC_HOOK_CODE,
+        reinterpret_cast<void *>(onFastPxlMultiply),this,entry,entry);
+    if (hooked!=UC_ERR_OK) {
+        writeBytes(entry,&op0,sizeof(op0));
+        error=std::string("PxlMultiply: hook: ")+uc_strerror(hooked);
+        return false;
+    }
+    return true;
+}
+
+void ArmImportRuntime::onFastPxlMultiply(
+    uc_engine *,uint64_t,uint32_t,void *opaque) {
+    auto *rt=static_cast<ArmImportRuntime *>(opaque);
+    // Read the actual original ARM32 RGB565 configuration lazily: those
+    // globals may be initialized by initGame after hooks are installed.
+    if (!rt->pxlMultiplyConfigReady_) {
+        constexpr std::array<uint32_t,8> offsets={
+            0x2b0u,0xbcu,0x1e0u,0x198u,0x118u,0xf8u,0x1e4u,0x170u
+        };
+        for (size_t i=0;i<offsets.size();++i) {
+            uint32_t pointer=0,value=0;
+            if (!rt->readBytes(rt->pxlMultiplyGotBase_+offsets[i],
+                               &pointer,sizeof(pointer)) ||
+                !pointer ||
+                !rt->readBytes(pointer,&value,sizeof(value))) {
+                rt->fail("PxlMultiply: nao leu parametros RGB565");
+                return;
+            }
+            rt->pxlMultiplyConfig_[i]=value;
+        }
+        // This acceleration must not silently change a different source
+        // color model: refuse unexpected masks or shift counts.
+        const auto &x=rt->pxlMultiplyConfig_;
+        if (x[0]!=63u || x[1]!=11u || x[2]!=31u ||
+            x[3]!=31u || x[4]!=5u || x[5]!=5u ||
+            x[6]!=6u || x[7]!=5u) {
+            char buf[200];
+            std::snprintf(buf,sizeof(buf),
+                "PxlMultiply: RGB565 inesperado %u/%u/%u/%u/%u/%u/%u/%u",
+                x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7]);
+            rt->fail(buf);
+            return;
+        }
+        rt->pxlMultiplyConfigReady_=true;
+    }
+    uint32_t a=0,b=0,savedR8=0,savedR9=0;
+    if (!rt->readReg(UC_ARM_REG_R0,a) ||
+        !rt->readReg(UC_ARM_REG_R1,b) ||
+        !rt->readReg(UC_ARM_REG_R8,savedR8) ||
+        !rt->readReg(UC_ARM_REG_R9,savedR9)) {
+        rt->fail("PxlMultiply: argumentos ARM32 invalidos");
+        return;
+    }
+    // Faithful arithmetic order from original Thumb shifts/muls/orrs.
+    const auto &x=rt->pxlMultiplyConfig_;
+    const uint32_t hi=(((a>>x[1])&x[3])*((b>>x[1])&x[3])>>x[4])<<x[1];
+    const uint32_t mid=(((a>>x[5])&x[0])*((b>>x[5])&x[0])>>x[6])<<x[5];
+    const uint32_t low=((a&x[2])*(b&x[2]))>>x[7];
+    const uint32_t result=(hi|mid|low)&0xffffu;
+    // ARM r2/r3 get original r8/r9 during the function's pop sequence.
+    // Original r1 finishes masked; r12 holds the masked second mid-channel.
+    if (!rt->writeReg(UC_ARM_REG_R0,result) ||
+        !rt->writeReg(UC_ARM_REG_R1,b&x[2]) ||
+        !rt->writeReg(UC_ARM_REG_R2,savedR8) ||
+        !rt->writeReg(UC_ARM_REG_R3,savedR9) ||
+        !rt->writeReg(UC_ARM_REG_R12,(b>>x[5])&x[0])) {
+        rt->fail("PxlMultiply: nao atualizou resultado ARM32");
+        return;
+    }
+    ++rt->nativePxlMultiplyCalls_;
 }
 
 // Original Android 1.0.6 Thumb loop at ELF +0xb5f2. Only the opaque

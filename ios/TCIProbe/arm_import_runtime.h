@@ -22,6 +22,7 @@ public:
     bool enableNativeSpriteColumn(uint32_t imageBase, std::string &error);
     bool enableNativeDodge16(uint32_t imageBase, std::string &error);
     bool enableNativeSimpleClipRow(uint32_t imageBase, std::string &error);
+    bool enableNativePxlMultiply(uint32_t imageBase, std::string &error);
     bool enableNativeAlpha16(uint32_t imageBase, std::string &error);
     bool enableNativeAlphaRow(uint32_t imageBase, std::string &error);
     bool selfTest(std::string &error);
@@ -41,6 +42,7 @@ public:
     std::pair<uint64_t,uint64_t> directAccessCounts() const;
     uint64_t nativeDodgeRows() const { return nativeDodgeRows_; }
     uint64_t nativeSimpleClipRows() const { return nativeSimpleClipRows_; }
+    uint64_t nativePxlMultiplyCalls() const { return nativePxlMultiplyCalls_; }
 private:
     static void onCode(uc_engine *, uint64_t, uint32_t, void *);
     static void onProfileBlock(uc_engine *, uint64_t, uint32_t, void *);
@@ -48,6 +50,7 @@ private:
     static void onFastSpriteColumn(uc_engine *, uint64_t, uint32_t, void *);
     static void onFastDodgeRow(uc_engine *, uint64_t, uint32_t, void *);
     static void onFastSimpleClipRow(uc_engine *, uint64_t, uint32_t, void *);
+    static void onFastPxlMultiply(uc_engine *, uint64_t, uint32_t, void *);
     static void onFastAlpha16(uc_engine *, uint64_t, uint32_t, void *);
     static void onFastAlphaRow(uc_engine *, uint64_t, uint32_t, void *);
     static void onJniCode(uc_engine *, uint64_t, uint32_t, void *);
@@ -74,6 +77,7 @@ private:
     uc_hook fastSpriteHook_ = 0;
     uc_hook fastDodgeHook_ = 0;
     uc_hook fastSimpleClipHook_ = 0;
+    uc_hook fastPxlMultiplyHook_ = 0;
     uc_hook fastAlphaHook_ = 0;
     uc_hook fastAlpha16Hook_ = 0;
     std::array<uint32_t,3> alphaWords_{};
@@ -87,6 +91,10 @@ private:
     uint64_t nativeAlphaRows_ = 0;
     uint64_t nativeDodgeRows_ = 0;
     uint64_t nativeSimpleClipRows_ = 0;
+    uint64_t nativePxlMultiplyCalls_ = 0;
+    uint32_t pxlMultiplyGotBase_ = 0;
+    std::array<uint32_t,8> pxlMultiplyConfig_{};
+    bool pxlMultiplyConfigReady_ = false;
     uint64_t directFillRows_ = 0;
     uint32_t heapNext_ = 0x30000000;
     uint32_t nextFile_ = 0x5000;

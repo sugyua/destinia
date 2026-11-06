@@ -119,6 +119,40 @@ jobs:
           PY
           echo "420/420 frame hashes match original, 0.3.6 and SimpleClip"
 
+      - name: Compare native PxlMultiply against validated 0.3.7
+        run: |
+          set -euo pipefail
+          DESTINIA_FAST_ALPHA16=1 DESTINIA_FAST_ALPHA=1 \
+            DESTINIA_FAST_DODGE=1 DESTINIA_FAST_SIMPLECLIP=1 \
+            DESTINIA_FAST_PXLMULTIPLY=1 \
+            DESTINIA_HASH_FRAMES=1 DESTINIA_PROBE_FRAMES=420 \
+            DESTINIA_AUTOTOUCH="65,200,211;120,200,67;185,370,211;220,362,17" \
+            /tmp/destinia-stage-test game/lib/armeabi/libdestinia_jni.so \
+            2> /tmp/destinia-stage-pxlmultiply.log
+          grep '^ARM32_FRAME_HASH' /tmp/destinia-stage-pxlmultiply.log > /tmp/destinia-stage-hashes-pxlmultiply.txt
+          test "$(wc -l < /tmp/destinia-stage-hashes-pxlmultiply.txt)" -eq 420
+          cmp /tmp/destinia-stage-hashes-original.txt /tmp/destinia-stage-hashes-pxlmultiply.txt
+          cmp /tmp/destinia-stage-hashes-simpleclip.txt /tmp/destinia-stage-hashes-pxlmultiply.txt
+          grep '^ARM32_NATIVE_PXLMULTIPLY calls=' /tmp/destinia-stage-pxlmultiply.log
+          python3 - <<'PY'
+          import re, statistics
+          from pathlib import Path
+          samples={}
+          for label, path in [('0.3.7','/tmp/destinia-stage-simpleclip.log'),
+                              ('pxlmultiply','/tmp/destinia-stage-pxlmultiply.log')]:
+              data=Path(path).read_text()
+              times={int(frame):int(ms) for frame,ms in re.findall(
+                  r'ARM32_FRAME_PERF frame=(\d+) exec_ms=(\d+)',data)}
+              sample=[times[frame] for frame in range(300,420)]
+              samples[label]=statistics.median(sample)
+              print(f'{label}: median={samples[label]:.1f}ms '
+                    f'p90={sorted(sample)[107]}ms max={max(sample)}ms')
+          gain=(samples['0.3.7']-samples['pxlmultiply'])/samples['0.3.7']*100
+          print(f'PxlMultiply vs 0.3.7: {gain:+.1f}% frame-time reduction '
+                '(Linux ARM64; verify separately on iPhone)')
+          PY
+          echo "420/420 original RGB565 frame hashes match PxlMultiply"
+
       - name: Upload original game scene captures and hotspots
         if: always()
         uses: actions/upload-artifact@v4
@@ -132,5 +166,7 @@ jobs:
             /tmp/destinia-stage-hashes-optimized.txt
             /tmp/destinia-stage-simpleclip.log
             /tmp/destinia-stage-hashes-simpleclip.txt
+            /tmp/destinia-stage-pxlmultiply.log
+            /tmp/destinia-stage-hashes-pxlmultiply.txt
           if-no-files-found: warn
           retention-days: 7
