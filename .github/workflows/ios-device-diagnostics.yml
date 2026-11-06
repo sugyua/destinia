@@ -1,12 +1,6 @@
 name: iOS Device Diagnostics
 
 on:
-  push:
-    branches:
-      - ios/unicorn-poc
-    paths:
-      - ".github/workflows/ios-device-diagnostics.yml"
-      - "ios/**"
   workflow_dispatch:
 
 jobs:
