@@ -187,7 +187,7 @@ extern "C" int destinia_probe_elf(
             "Tipos nao suportados: %zu\n"
             "Imports distintos: %zu\n"
             "Memoria Unicorn: OK\n"
-            "Testes ARM32: OK\\n"
+            "Testes ARM32: OK\n"
             "Codigo original: OK",
             image.bytes.size() / 1024,
             image.symbols.size(),
