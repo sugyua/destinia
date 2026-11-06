@@ -1,6 +1,7 @@
 #include "arm_import_runtime.h"
 #include <algorithm>
 #include <chrono>
+#include <cctype>
 #include <climits>
 #include <cstdio>
 #include <cstring>
@@ -22,7 +23,8 @@ const char *const kImplemented[] = {
     "__aeabi_lmul", "__aeabi_uidiv", "__aeabi_uidivmod",
     "memcpy", "memset", "strlen", "strcpy", "strncmp",
     "strstr", "malloc", "free", "clock",
-    "fopen", "fclose", "fread", "fwrite", "fseek", "ftell", "remove"
+    "fopen", "fclose", "fread", "fwrite", "fseek", "ftell", "remove",
+    "sprintf"
 };
 }
 
@@ -239,6 +241,125 @@ void ArmImportRuntime::dispatch(uint32_t address) {
                     a+static_cast<uint32_t>(pos);
             }
         }
+    } else if (name == "sprintf") {
+        std::string format, output;
+        if (!readCString(b,format)) {
+            fail("sprintf: formato ARM invalido"); return;
+        }
+        uint32_t argument=2;
+        auto nextArgument = [&](uint32_t &value) {
+            if (argument==2) value=c;
+            else if (argument==3) value=d;
+            else {
+                uint32_t sp=0;
+                if (!readReg(UC_ARM_REG_SP,sp) ||
+                    !readBytes(sp+4*(argument-4),&value,4))
+                    return false;
+            }
+            ++argument;
+            return true;
+        };
+        for (size_t i=0;i<format.size();++i) {
+            if (format[i]!='%') { output.push_back(format[i]); continue; }
+            ++i;
+            if (i==format.size()) {
+                fail("sprintf: formato incompleto"); return;
+            }
+            if (format[i]=='%') { output.push_back('%'); continue; }
+            std::string flags;
+            while (i<format.size() &&
+                   std::strchr("-+ #0",format[i])) flags.push_back(format[i++]);
+            int width=-1, precision=-1;
+            if (i<format.size() && format[i]=='*') {
+                uint32_t v=0;
+                if (!nextArgument(v)) {
+                    fail("sprintf: argumento width invalido"); return;
+                }
+                width=static_cast<int32_t>(v);
+                ++i;
+                if (width<0) {
+                    flags.push_back('-');
+                    if (width==INT_MIN) { fail("sprintf: width invalido"); return; }
+                    width=-width;
+                }
+            } else {
+                while (i<format.size() &&
+                       std::isdigit(static_cast<unsigned char>(format[i]))) {
+                    if (width<0) width=0;
+                    width=width*10+(format[i++]-'0');
+                    if (width>1024) { fail("sprintf: width excessivo"); return; }
+                }
+            }
+            if (i<format.size() && format[i]=='.') {
+                ++i; precision=0;
+                if (i<format.size() && format[i]=='*') {
+                    uint32_t v=0;
+                    if (!nextArgument(v)) {
+                        fail("sprintf: argumento precision invalido"); return;
+                    }
+                    precision=static_cast<int32_t>(v);
+                    ++i;
+                } else {
+                    while (i<format.size() &&
+                           std::isdigit(static_cast<unsigned char>(format[i]))) {
+                        precision=precision*10+(format[i++]-'0');
+                        if (precision>1024) {
+                            fail("sprintf: precision excessiva"); return;
+                        }
+                    }
+                }
+                if (precision<0) precision=-1;
+            }
+            while (i<format.size() &&
+                   std::strchr("hlLzjt",format[i])) ++i;
+            if (i==format.size() || width>1024 || precision>1024) {
+                fail("sprintf: especificador invalido"); return;
+            }
+            const char conv=format[i];
+            std::string spec="%"+flags;
+            if (width>=0) spec+=std::to_string(width);
+            if (precision>=0) spec+="."+std::to_string(precision);
+            char buffer[2048]={};
+            int written=0;
+            uint32_t val=0;
+            if (!nextArgument(val)) {
+                fail("sprintf: argumento invalido"); return;
+            }
+            if (conv=='d' || conv=='i') {
+                written=std::snprintf(buffer,sizeof(buffer),
+                    (spec+"d").c_str(),static_cast<int32_t>(val));
+            } else if (std::strchr("uxXo",conv)) {
+                written=std::snprintf(buffer,sizeof(buffer),
+                    (spec+conv).c_str(),val);
+            } else if (conv=='c') {
+                written=std::snprintf(buffer,sizeof(buffer),
+                    (spec+"c").c_str(),static_cast<int>(val));
+            } else if (conv=='s') {
+                std::string guest;
+                if (val && !readCString(val,guest)) {
+                    fail("sprintf: parametro string invalido"); return;
+                }
+                written=std::snprintf(buffer,sizeof(buffer),
+                    (spec+"s").c_str(),val ? guest.c_str() : "(null)");
+            } else if (conv=='p') {
+                written=std::snprintf(buffer,sizeof(buffer),
+                    "0x%x",val);
+            } else {
+                fail(std::string("sprintf: conversao nao suportada %")+conv);
+                return;
+            }
+            if (written<0 || static_cast<size_t>(written)>=sizeof(buffer)) {
+                fail("sprintf: formatacao excedeu limite"); return;
+            }
+            output.append(buffer,static_cast<size_t>(written));
+            if (output.size()>4095) {
+                fail("sprintf: texto excede 4095 bytes"); return;
+            }
+        }
+        if (!writeCString(a,output)) {
+            fail("sprintf: destino ARM invalido"); return;
+        }
+        result=static_cast<uint32_t>(output.size());
     } else if (name == "malloc") {
         const uint32_t size=(std::max(a,1u)+15u)&~15u;
         if (size>kHeapSize || heapNext_>kHeapBase+kHeapSize-size) {
@@ -747,6 +868,18 @@ bool ArmImportRuntime::selfTest(std::string &error) {
         !call("fclose",reader,0,0,0,0) ||
         !call("remove",kTestBase+256,0,0,0,0))
         return false;
+    const char fmt[]="Score:%04d";
+    if (!writeBytes(kTestBase+640,fmt,sizeof(fmt))) {
+        error="Falha ao preparar sprintf ARM32"; return false;
+    }
+    if (!call("sprintf",kTestBase+704,kTestBase+640,42,0,10))
+        return false;
+    const char expected[]="Score:0042";
+    char formatted[sizeof(expected)]={};
+    if (!readBytes(kTestBase+704,formatted,sizeof(formatted)) ||
+        std::memcmp(formatted,expected,sizeof(expected))!=0) {
+        error="Formatacao sprintf ARM32 incorreta"; return false;
+    }
     char saved[sizeof(fileData)]={};
     if (!readBytes(kTestBase+512,saved,sizeof(saved)) ||
         std::memcmp(saved,fileData,sizeof(saved))!=0) {
