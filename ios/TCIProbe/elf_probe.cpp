@@ -11,10 +11,16 @@
 #include <set>
 #include <map>
 
-extern "C" int destinia_probe_elf(
-    const char *path, char *out, size_t capacity) {
+extern "C" int destinia_probe_elf_frame(
+    const char *path, char *out, size_t capacity,
+    uint8_t *frameOut, size_t frameCapacity) {
 
     if (!path || !out || capacity == 0) return 0;
+    constexpr size_t kFrameBytes=400u*240u*2u;
+    if (frameOut && frameCapacity < kFrameBytes) {
+        std::snprintf(out,capacity,"FRAME FALHOU\nBuffer pequeno");
+        return 0;
+    }
 
     try {
         std::ifstream input(path, std::ios::binary | std::ios::ate);
@@ -145,7 +151,10 @@ extern "C" int destinia_probe_elf(
         }
 
         size_t nonzeroPixels=0;
+        size_t uniqueColors=0;
         uint32_t nextFrameMs=0;
+        uint32_t framesRendered=0;
+        std::vector<uint8_t> lastPixels;
         {
             destinia::ArmImportRuntime runtime(uc, stubAddresses);
             std::string runtimeError;
@@ -211,14 +220,27 @@ extern "C" int destinia_probe_elf(
             }
             if (!frameAddress)
                 throw std::runtime_error("jniRun original ausente");
-            std::vector<uint8_t> pixels;
-            if (!runtime.runGameFrame(
-                    frameAddress,0,pixels,nextFrameMs,runtimeError)) {
-                throw std::runtime_error(
-                    "Falha no jniRun original: "+runtimeError);
+            for (uint32_t frame=0; frame<4; ++frame) {
+                std::vector<uint8_t> pixels;
+                if (!runtime.runGameFrame(
+                        frameAddress,frame,pixels,nextFrameMs,runtimeError)) {
+                    throw std::runtime_error(
+                        "Falha no jniRun original: "+runtimeError);
+                }
+                ++framesRendered;
+                lastPixels=std::move(pixels);
+                if (!nextFrameMs) break;
             }
-            for (size_t at=0; at+1<pixels.size(); at+=2)
-                if (pixels[at] || pixels[at+1]) ++nonzeroPixels;
+            std::set<uint16_t> colors;
+            for (size_t at=0; at+1<lastPixels.size(); at+=2) {
+                const uint16_t color=uint16_t(lastPixels[at]) |
+                    (uint16_t(lastPixels[at+1]) << 8);
+                if (color) ++nonzeroPixels;
+                colors.insert(color);
+            }
+            uniqueColors=colors.size();
+            if (frameOut)
+                std::memcpy(frameOut,lastPixels.data(),kFrameBytes);
         }
 
         uc_close(uc);
@@ -239,7 +261,9 @@ extern "C" int destinia_probe_elf(
             "Codigo original: OK\n"
             "InitGame: OK\n"
             "JniRun: OK\n"
+            "Quadros: %u\n"
             "Pixels nao zero: %zu\n"
+            "Cores distintas: %zu\n"
             "Proximo quadro: %u ms",
             image.bytes.size() / 1024,
             image.symbols.size(),
@@ -248,7 +272,9 @@ extern "C" int destinia_probe_elf(
             pending,
             unsupported,
             imports.size(),
+            framesRendered,
             nonzeroPixels,
+            uniqueColors,
             nextFrameMs
         );
 
@@ -258,4 +284,9 @@ extern "C" int destinia_probe_elf(
         std::snprintf(out, capacity, "ELF FALHOU\n%s", e.what());
         return 0;
     }
+}
+extern "C" int destinia_probe_elf(
+    const char *path, char *out, size_t capacity) {
+    return destinia_probe_elf_frame(
+        path,out,capacity,nullptr,0);
 }
