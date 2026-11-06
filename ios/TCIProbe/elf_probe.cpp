@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstring>
 #include <fstream>
+#include <filesystem>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -171,6 +172,30 @@ extern "C" int destinia_probe_elf(
                 throw std::runtime_error(
                     "Falha ao executar getMyCash original: "+runtimeError);
             }
+
+            uint32_t initAddress=0;
+            for (size_t i=0; i<image.symbols.size(); ++i) {
+                if (image.symbols[i].shndx != 0 &&
+                    image.names[i] ==
+                    "Java_game_destiniaeng_GameThread_initGame") {
+                    initAddress=static_cast<uint32_t>(base) +
+                        image.symbols[i].value;
+                    break;
+                }
+            }
+            if (!initAddress) {
+                throw std::runtime_error("initGame original ausente");
+            }
+            const std::filesystem::path libraryPath(path);
+            auto assets=libraryPath.parent_path()/"assets";
+            if (!std::filesystem::is_directory(assets))
+                assets=libraryPath.parent_path().parent_path()
+                    .parent_path()/"assets";
+            if (!runtime.runGameInit(
+                    initAddress,assets.string(),runtimeError)) {
+                throw std::runtime_error(
+                    "Falha no initGame original: "+runtimeError);
+            }
         }
 
         uc_close(uc);
@@ -188,7 +213,8 @@ extern "C" int destinia_probe_elf(
             "Imports distintos: %zu\n"
             "Memoria Unicorn: OK\n"
             "Testes ARM32: OK\n"
-            "Codigo original: OK",
+            "Codigo original: OK\n"
+            "InitGame: OK",
             image.bytes.size() / 1024,
             image.symbols.size(),
             image.relocations.size(),
