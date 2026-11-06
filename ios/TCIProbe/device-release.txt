@@ -1,15 +1,21 @@
-Destinia iOS ARM32 milestone 0.3.3
+Destinia iOS ARM32 milestone 0.3.4
 Branch: ios/unicorn-poc
-Acceleracao grafica nativa da imagem original:
-- Grp_fillRect: substitui o loop Thumb de preenchimento RGB565
-- Grp_drawClipWImageP: substitui 96000 iteracoes ARM32 por blit de pixels nativo
-- As duas operacoes preservam o buffer de imagem original, inclusive transparencia
-- Compilacao iOS: Unicorn TCI Release, -O3, DESTINIA_NATIVE_GFX=1
-Testes macOS aprovados antes desta release:
-- 360 quadros do jogo com framebuffer final identico byte por byte
-- Quadros normais: ~120-150 ms (sem aceleracao), ~8-14 ms (com aceleracao)
-- initGame, jniRun, jniTouch e operacoes Android/JNI, inclusive o reparo do heap
-- 213/213 relocacoes ARM32 sem tipos desconhecidos
-- O carregamento pesado inicial ainda requer emulacao ARM32 e pode levar segundos
-Valores acima medidos no runner macOS; desempenho real no iPhone requer teste.
-Instalar a nova IPA por cima via AltStore, sem apagar a anterior.
+Experiment verified in macOS ARM64 CI #42156713768:
+- 360 out of 360 rendered RGB565 frame hashes identical in baseline,
+  native accelerated graphics, and native graphics with host-backed ARM heap.
+- Native-mapped Unicorn heap: 64 MiB, fall back to ordinary map if device
+  disallows host-pointer mapping; no altered original Android game assets.
+- Actual native drawing operations validated: 86411 filled rows,
+  150720 sprite columns across 360 frames.
+- Avoid repeated guest-memory RPC and per-column dynamic allocations.
+- On-device performance HUD: three-finger tap toggles FPS, ARM32 execution
+  average milliseconds and RGB565 preparation milliseconds.
+- HUD hidden by default, console metrics every ~2 seconds.
+- ARM32 logic rate unchanged; no fake 60-FPS promise.
+- CI checked original Android engine 1.0.6; PC 0.17.4 mods not ported.
+Test on iPhone:
+1) Install over existing Destinia via AltStore (do not delete saved data).
+2) Let game run past splash/loading into title or active menu.
+3) Three-finger tap once and capture FPS/ARM32/RGB metrics.
+4) If device is slow, compare ARM32 time to ~62.5ms tick budget.
+Desktop macOS benchmarks are not device FPS claims.
