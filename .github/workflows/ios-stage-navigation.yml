@@ -1,0 +1,67 @@
+name: Destinia ARM32 Stage Navigation
+
+on:
+  push:
+    branches: [ios/unicorn-poc]
+    paths: [".github/workflows/ios-stage-navigation.yml"]
+  workflow_dispatch:
+
+jobs:
+  stage-probe:
+    runs-on: macos-15
+    timeout-minutes: 16
+    steps:
+      - name: Checkout Destinia
+        uses: actions/checkout@v4
+
+      - name: Compile Unicorn TCI Release (macOS ARM64)
+        run: |
+          set -eux
+          git clone --depth 1 https://github.com/1rhino2/unicorn-tci.git /tmp/unicorn-tci
+          cmake -S /tmp/unicorn-tci/unicorn-engine-sys-tci \
+            -B /tmp/destinia-stage-tci -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DUNICORN_ARCH=arm \
+            -DUNICORN_INTERPRETER=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DUNICORN_BUILD_TESTS=OFF \
+            -DUNICORN_INSTALL=OFF
+          cmake --build /tmp/destinia-stage-tci --target unicorn --parallel 2
+          clang++ -std=c++17 -O3 -DDESTINIA_NATIVE_GFX=1 \
+            -DDESTINIA_NATIVE_HEAP=1 \
+            -I/tmp/unicorn-tci/unicorn-engine-sys-tci/include \
+            ios/TCIProbe/probe_host_test.cpp \
+            ios/TCIProbe/elf_probe.cpp \
+            ios/TCIProbe/arm_import_runtime.cpp \
+            /tmp/destinia-stage-tci/libunicorn-static.a \
+            /tmp/destinia-stage-tci/libarm-softmmu.a \
+            /tmp/destinia-stage-tci/libunicorn-common.a \
+            -lm -lpthread -o /tmp/destinia-stage-test
+
+      - name: Navigate into original game and capture frame-by-frame scenes
+        run: |
+          set -euo pipefail
+          DESTINIA_PROBE_FRAMES=420 \
+            DESTINIA_AUTOTOUCH="65,200,211;120,200,67;185,370,211" \
+            DESTINIA_CAPTURE_FRAMES="175,210,240,280,340,410" \
+            DESTINIA_PROFILE_BLOCKS=1 \
+            DESTINIA_PROFILE_FRAME=340 \
+            /tmp/destinia-stage-test game/lib/armeabi/libdestinia_jni.so \
+            2> /tmp/destinia-stage-profile.log
+          for index in 175 210 240 280 340 410; do
+            test -s "/tmp/destinia-stage-$index.ppm"
+          done
+          echo "Original ARM32 stage-navigation screenshots captured"
+          grep 'ARM32_TOUCH' /tmp/destinia-stage-profile.log
+
+      - name: Upload original game scene captures and hotspots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Destinia-Stage-Navigation
+          path: |
+            /tmp/destinia-stage-*.ppm
+            /tmp/destinia-stage-profile.log
+          if-no-files-found: warn
+          retention-days: 7
