@@ -1,44 +1,43 @@
-Destinia iOS ARM32 diagnostic milestone 0.3.8
+Destinia iOS native ARM32 diagnostic milestone 0.3.9
 Branch: ios/unicorn-poc
-Build: 12, unsigned IPA (sign with AltStore or equivalent)
-Upgrade over iOS native 0.3.7 without uninstalling to preserve app data.
-Bundle ID com.destinia.tcidiagnostic is unchanged.
+Build: 13; IPA unsigned and must be signed for iPhone installation.
+Replace 0.3.8 in-place. Keep bundle ID com.destinia.tcidiagnostic.
+DO NOT UNINSTALL to update; preserve game saves and app data.
 
-Real iPhone screenshots of 0.3.7 (06 Nov 2026):
-- First town: 10.1-10.4 FPS, ARM32 91.5-95.0 ms/frame.
-- 0.3.6 previously measured 7.2 FPS and ARM32 133.1 ms/frame.
-- 0.3.5 previously measured 3.3 FPS and ARM32 296 ms/frame.
-- RGB565 prep 0.1ms; thermal rose from NORMAL to ELEVADO after extended play.
-- Four-finger single-frame profile showed:
-  1. _Grp_pxlMultiply (349488 profiled ARM32 instructions)
-  2. Grp_drawClipWImageP (229371)
-  3. Grp_drawSimpleClipWImageP (95988)
-  4. Grp_drawWPNImage2 (89305)
-  5. _Grp_drawMultiply16 (88240)
-  These are instruction counts, not number of function calls.
+Measured by user on iPhone, version 0.3.8:
+- Gameplay: 15.5 FPS, ARM32 mean 56.1 ms, frame 64.3 ms (peak 67 ms).
+- RAM: 126 MiB; thermal ELEVADO after roughly four minutes of gameplay.
+- Full native ARM32 TOP profile: Grp_drawClipWImageP (238667),
+  Grp_drawSimpleClipWImageP (96474), Grp_drawWPNImage2 (89305),
+  _drawMiniMap (55506), Grp_fillRect (53941); numbers are executed
+  ARM32 instructions attributed to symbols, NOT function call counts.
+- Exact game design target is 16 logic updates/second = 62.5 ms/tick.
 
-0.3.8 changes:
-- Keep all validated native graphics acceleration of 0.3.7.
-- Enable native _Grp_pxlMultiply color-component multiplication
-  (DESTINIA_NATIVE_PXLMULTIPLY=1), replacing only the Thumb body in
-  Unicorn guest RAM with a version-checked native RGB565 equivalent.
-- Preserve the original Android 1.0.6 library and all original assets.
-- Keep native diagnostic HUD, three-finger toggle and four-finger profiler.
-- Keep game pacing unmodified; target remains 16 logical frames/s (62.5ms).
-- Keep original bundle identifier and in-place update compatibility.
+0.3.9 change (pacing only, not a graphics code change):
+- Move iOS dispatch-source tick deadlines from rounded milliseconds
+  to nanoseconds, computed relative to the beginning of each tick.
+- Apply a minimum update period of 62.5 ms, never higher than 16 Hz.
+- Honor slower game-requested delays, including loading/transitions;
+  do not attempt catch-up when ARM32 processing exceeds a tick budget.
+- Tighten DispatchSource timer leeway from 5ms to 0.5ms for the 16Hz
+  gameplay timer, without busy-waiting.
+- Preserve all already validated native graphics hooks from 0.3.8,
+  original Android ELF/assets, game logic and save compatibility.
+- Preserve 3-finger diagnostics and one-shot 4-finger profiling.
+- Add portable C++ scheduling tests in ios/TCIProbe/frame_pacing_test.cpp;
+  CI stage workflow runs them ahead of its 420-frame equivalence test.
 
-GitHub CI validation:
-- Linux ARM64 stage run 42273899474 passed 420/420 pixel-identical hashes.
-- Frame 300..419 median ARM32 time (0.3.7) 131ms; (PxlMultiply) 125ms.
-- Extra improvement 4.6% on Linux ARM64; p90 136ms -> 129ms.
-- Native _Grp_pxlMultiply invoked 342539 times over the tested sequence.
-- macOS ARM32 regression run 42273899453 passed.
-- No prediction of exact FPS on iPhone; independent measurement required.
+Validation requirements:
+- Portable 16 Hz scheduling arithmetic tests pass.
+- Native iOS main.mm compiles successfully with the updated header.
+- ARM32 regression and 420-frame identity tests pass.
+- Device test still required to confirm sustained 16 FPS and cooler
+  thermal behavior. Tighter timer leeway can increase wake precision
+  and potentially energy use; thermal effect is not yet verified.
 
-User testing:
-1. Install over 0.3.7, never uninstall the current application.
-2. Verify first-town visuals, shadows, blending, character animations.
-3. Capture three-finger HUD FPS, ARM32 ms, thermal state after 1m and 5m.
-4. Tap four fingers once and screenshot TOP ARM32.
-5. Confirm saves, menu navigation, combat and map transitions.
-
+User tests (same scene/device):
+1. Install over 0.3.8 without uninstalling; protect saves.
+2. Capture HUD after 60 seconds and after 5-10 minutes.
+3. Compare FPS, frame time, ARM32, RAM and thermal to 0.3.8.
+4. Check gameplay speed, animation pace, combat, map change and saves.
+5. Send TOP ARM32 profile only if frame time still consistently >62.5ms.
