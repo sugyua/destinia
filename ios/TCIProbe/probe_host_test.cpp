@@ -1,8 +1,12 @@
 #include <cstdio>
 #include <cstring>
+#include <vector>
+#include <fstream>
+#include <cstdint>
 
-extern "C" int destinia_probe_elf(
-    const char *path, char *out, size_t capacity);
+extern "C" int destinia_probe_elf_frame(
+    const char *path, char *out, size_t capacity,
+    uint8_t *frameOut, size_t frameCapacity);
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -11,7 +15,9 @@ int main(int argc, char **argv) {
     }
 
     char output[2048] = {};
-    const int ok = destinia_probe_elf(argv[1], output, sizeof(output));
+    std::vector<uint8_t> frame(400u*240u*2u,0);
+    const int ok = destinia_probe_elf_frame(
+        argv[1], output, sizeof(output), frame.data(), frame.size());
     std::printf("=== TESTE AUTOMATICO DO CARREGADOR ARM32 ===\n%s\n", output);
 
     const char *required[] = {
@@ -28,6 +34,8 @@ int main(int argc, char **argv) {
         "Codigo original: OK",
         "InitGame: OK",
         "JniRun: OK",
+        "Quadros:",
+        "Cores distintas:",
         "Pixels nao zero:",
     };
 
@@ -43,6 +51,34 @@ int main(int argc, char **argv) {
         }
     }
 
-    std::puts("PASSOU: ELF, initGame, jniRun e primeiro framebuffer RGB565.");
+    const char *value=std::strstr(output,"Cores distintas: ");
+    unsigned colors=0;
+    if (!value || std::sscanf(value,"Cores distintas: %u",&colors)!=1) {
+        std::fprintf(stderr,"FALHOU: nao foi possivel ler cores RGB565.\n");
+        return 1;
+    }
+    std::printf("Cores RGB565 diferentes: %u\n",colors);
+    std::ofstream ppm("/tmp/destinia-frame.ppm",std::ios::binary);
+    if (!ppm) {
+        std::fprintf(stderr,"FALHOU: nao foi possivel salvar imagem.\n");
+        return 1;
+    }
+    ppm << "P6\n400 240\n255\n";
+    for (size_t i=0;i<frame.size();i+=2) {
+        const uint16_t rgb=uint16_t(frame[i]) |
+            (uint16_t(frame[i+1]) << 8);
+        const unsigned char pixel[3]={
+            static_cast<unsigned char>(((rgb>>11)&31)*255/31),
+            static_cast<unsigned char>(((rgb>>5)&63)*255/63),
+            static_cast<unsigned char>((rgb&31)*255/31)
+        };
+        ppm.write(reinterpret_cast<const char *>(pixel),3);
+    }
+    ppm.close();
+    if (!ppm) {
+        std::fprintf(stderr,"FALHOU: imagem incompleta.\n");
+        return 1;
+    }
+    std::puts("PASSOU: initGame, jniRun e imagem RGB565 exportada.");
     return 0;
 }
