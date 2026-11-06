@@ -64,6 +64,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 @property (nonatomic,copy) void (^metricsCallback)(void);
 @property (nonatomic,copy) void (^profileCallback)(void);
 @property (nonatomic,assign) BOOL trackingMetricsGesture;
+@property (nonatomic,assign) BOOL profileExpanded;
 @end
 
 @implementation DestiniaViewController
@@ -107,7 +108,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     CGRect safe=self.view.safeAreaLayoutGuide.layoutFrame;
     self.statusLabel.frame=CGRectMake(
         safe.origin.x+10,safe.origin.y+6,
-        MAX(100,safe.size.width-20),38);
+        MAX(100,safe.size.width-20),self.profileExpanded?140:38);
 #if DESTINIA_DIAGNOSTIC_HUD
     // Place the debug panel outside the game HUD's top status region.
     const CGFloat panelWidth=MIN(236.0,MAX(180.0,safe.size.width*0.39));
@@ -273,6 +274,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         NSLog(@"Destinia gameplay profile: %@",top);
         dispatch_async(dispatch_get_main_queue(), ^{
             self->_showMetrics.store(true);
+            self->_controller.profileExpanded=YES;
             self->_controller.statusLabel.numberOfLines=7;
             const CGRect safe=self->_controller.view.safeAreaLayoutGuide.layoutFrame;
             self->_controller.statusLabel.frame=CGRectMake(
@@ -373,7 +375,9 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         AppDelegate *owner=weakSelf;
         if (!owner) return;
         owner->_lastProfile=nil;
+        owner->_controller.profileExpanded=NO;
         owner->_controller.statusLabel.numberOfLines=2;
+        [owner->_controller.view setNeedsLayout];
         const bool enable=!owner->_showMetrics.load();
         owner->_showMetrics.store(enable);
         owner->_controller.statusLabel.hidden=!enable;
