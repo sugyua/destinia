@@ -66,6 +66,11 @@ jobs:
         run: |
           DESTINIA_PROFILE_BLOCKS=1 DESTINIA_PROBE_FRAMES=50 /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
 
+      - name: Endurance regression beyond iPhone frame 302
+        run: |
+          set -eux
+          DESTINIA_PROBE_FRAMES=360 /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
+
       - name: Upload original game framebuffer
         if: success()
         uses: actions/upload-artifact@v4
