@@ -43,6 +43,7 @@ ArmImportRuntime::~ArmImportRuntime() {
     if (jniHook_) uc_hook_del(uc_, jniHook_);
     if (profileHook_) uc_hook_del(uc_, profileHook_);
     if (fastFillHook_) uc_hook_del(uc_, fastFillHook_);
+    if (fastSpriteHook_) uc_hook_del(uc_, fastSpriteHook_);
 }
 
 unsigned ArmImportRuntime::implementedCount() const { return implemented_; }
@@ -103,6 +104,92 @@ void ArmImportRuntime::onFastFillRow(
         (end-begin)/2,static_cast<uint16_t>(color));
     if (!runtime->writeBytes(begin,pixels.data(),end-begin))
         runtime->fail("RGB565 fill: destino ARM32 invalido");
+}
+
+// Optimized version of the Thumb image/palette column at Grp_drawClipWImageP
+// +0x206. The surrounding sprite clipping and rendering modes remain ARM32.
+bool ArmImportRuntime::enableNativeSpriteColumn(
+    uint32_t imageBase, std::string &error) {
+    const uint32_t loop=imageBase+0x0000bd96;
+    uint16_t original=0;
+    if (!readBytes(loop,&original,sizeof(original)) || original!=0x5cf2) {
+        error="Sprite ARM32 hot loop signature mismatch";
+        return false;
+    }
+    const uint16_t skipColumn=0xe00c; // Thumb b to +0x1c, 0xbdb2.
+    if (!writeBytes(loop,&skipColumn,sizeof(skipColumn))) {
+        error="Nao foi possivel ativar native sprite";
+        return false;
+    }
+    const uc_err e=uc_hook_add(
+        uc_,&fastSpriteHook_,UC_HOOK_CODE,
+        reinterpret_cast<void *>(onFastSpriteColumn),this,loop,loop);
+    if (e!=UC_ERR_OK) {
+        writeBytes(loop,&original,sizeof(original));
+        error=std::string("Sprite hook: ")+uc_strerror(e);
+        return false;
+    }
+    return true;
+}
+
+void ArmImportRuntime::onFastSpriteColumn(
+    uc_engine *,uint64_t,uint32_t,void *opaque) {
+    auto *runtime=static_cast<ArmImportRuntime *>(opaque);
+    uint32_t src=0,dst=0,palette=0,grp=0,stack=0,col=0;
+    if (!runtime->readReg(UC_ARM_REG_R6,src) ||
+        !runtime->readReg(UC_ARM_REG_R5,dst) ||
+        !runtime->readReg(UC_ARM_REG_R7,palette) ||
+        !runtime->readReg(UC_ARM_REG_R8,grp) ||
+        !runtime->readReg(UC_ARM_REG_SP,stack) ||
+        !runtime->readReg(UC_ARM_REG_R3,col)) {
+        runtime->fail("Sprite ARM32: registradores invalidos"); return;
+    }
+    uint32_t countRaw=0,stepRaw=0,key=0;
+    if (!runtime->readBytes(stack+0x78,&countRaw,4) ||
+        !runtime->readBytes(stack+0x24,&stepRaw,4) ||
+        !runtime->readBytes(grp+0x50,&key,4)) {
+        runtime->fail("Sprite ARM32: metadados invalidos"); return;
+    }
+    const int32_t count=static_cast<int32_t>(countRaw);
+    const int32_t step=static_cast<int32_t>(stepRaw);
+    if (col!=0 || count<1 || count>1024 || !step) {
+        runtime->fail("Sprite ARM32: coluna fora dos limites"); return;
+    }
+    const int64_t last=static_cast<int64_t>(dst)+
+        static_cast<int64_t>(count-1)*step;
+    const int64_t first=std::min<int64_t>(dst,last);
+    const int64_t after=std::max<int64_t>(dst,last)+2;
+    if (first<1 || after>UINT32_MAX ||
+        after-first>1024*1024) {
+        runtime->fail("Sprite ARM32: framebuffer fora dos limites"); return;
+    }
+    std::vector<uint8_t> indices(static_cast<size_t>(count));
+    std::vector<uint16_t> colors(256);
+    std::vector<uint8_t> pixels(static_cast<size_t>(after-first));
+    if (!runtime->readBytes(src,indices.data(),indices.size()) ||
+        !runtime->readBytes(palette,colors.data(),colors.size()*2) ||
+        !runtime->readBytes(
+            static_cast<uint32_t>(first),pixels.data(),pixels.size())) {
+        runtime->fail("Sprite ARM32: leitura de pixels invalida"); return;
+    }
+    for (int32_t i=0;i<count;++i) {
+        const uint16_t color=colors[indices[static_cast<size_t>(i)]];
+        if (color==key) continue;
+        const auto position=static_cast<size_t>(
+            static_cast<int64_t>(dst)+static_cast<int64_t>(i)*step-first);
+        pixels[position]=static_cast<uint8_t>(color);
+        pixels[position+1]=static_cast<uint8_t>(color>>8);
+    }
+    if (!runtime->writeBytes(
+            static_cast<uint32_t>(first),pixels.data(),pixels.size())) {
+        runtime->fail("Sprite ARM32: escrita de pixels invalida"); return;
+    }
+    const uint32_t nextDst=static_cast<uint32_t>(
+        static_cast<int64_t>(dst)+static_cast<int64_t>(count)*step);
+    if (!runtime->writeReg(UC_ARM_REG_R5,nextDst) ||
+        !runtime->writeReg(UC_ARM_REG_R3,static_cast<uint32_t>(count))) {
+        runtime->fail("Sprite ARM32: falha ao atualizar coluna");
+    }
 }
 
 bool ArmImportRuntime::readReg(int reg, uint32_t &value) {
