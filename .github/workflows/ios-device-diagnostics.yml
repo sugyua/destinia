@@ -284,6 +284,7 @@ jobs:
 
           mkdir -p "$APP"
           cp game/lib/armeabi/libdestinia_jni.so "$APP/libdestinia_jni.so"
+          cp -R game/assets "$APP/assets"
 
           xcrun --sdk iphoneos clang++ \
             -target arm64-apple-ios15.0 \
