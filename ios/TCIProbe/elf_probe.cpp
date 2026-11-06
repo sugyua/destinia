@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <set>
 
 extern "C" int destinia_probe_elf(
     const char *path, char *out, size_t capacity) {
@@ -34,6 +35,40 @@ extern "C" int destinia_probe_elf(
         image.parse(file);
 
         const uint64_t base = 0x10000000;
+
+        size_t applied = 0;
+        size_t pending = 0;
+        size_t unsupported = 0;
+        std::set<std::string> imports;
+
+        for (const auto &r : image.relocations) {
+            uint32_t value = 0;
+            std::memcpy(&value, image.bytes.data() + r.offset, 4);
+
+            if (r.type == 23) {
+                value += static_cast<uint32_t>(base);
+            } else if (r.type == 2 || r.type == 21 || r.type == 22) {
+                const auto &sym = image.symbols[r.symbol];
+
+                if (sym.shndx == 0) {
+                    ++pending;
+                    imports.insert(image.names[r.symbol]);
+                    continue;
+                }
+
+                const uint32_t address =
+                    static_cast<uint32_t>(base) + sym.value;
+
+                value = (r.type == 2) ? value + address : address;
+            } else {
+                ++unsupported;
+                continue;
+            }
+
+            std::memcpy(image.bytes.data() + r.offset, &value, 4);
+            ++applied;
+        }
+
         uc_engine *uc = nullptr;
 
         uc_err err = uc_open(UC_ARCH_ARM, UC_MODE_ARM, &uc);
@@ -71,10 +106,18 @@ extern "C" int destinia_probe_elf(
             "Imagem: %zu KB\n"
             "Simbolos: %zu\n"
             "Relocacoes: %zu\n"
+            "Relocacoes aplicadas: %zu\n"
+            "Pendentes: %zu\n"
+            "Tipos nao suportados: %zu\n"
+            "Imports distintos: %zu\n"
             "Memoria Unicorn: OK",
             image.bytes.size() / 1024,
             image.symbols.size(),
-            image.relocations.size()
+            image.relocations.size(),
+            applied,
+            pending,
+            unsupported,
+            imports.size()
         );
 
         return 1;
