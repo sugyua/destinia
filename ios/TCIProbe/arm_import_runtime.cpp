@@ -238,11 +238,23 @@ bool ArmImportRuntime::writeReg(int reg, uint32_t value) {
 }
 
 bool ArmImportRuntime::readBytes(uint32_t address, void *data, size_t bytes) {
+    const uint64_t offset=static_cast<uint64_t>(address)-kHeapBase;
+    if (hasDirectHeap_ && address>=kHeapBase &&
+        offset<=kHeapSize && bytes<=kHeapSize-offset) {
+        std::memmove(data,directHeap_.data()+offset,bytes);
+        return true;
+    }
     return uc_mem_read(uc_, address, data, bytes) == UC_ERR_OK;
 }
 
 bool ArmImportRuntime::writeBytes(
     uint32_t address, const void *data, size_t bytes) {
+    const uint64_t offset=static_cast<uint64_t>(address)-kHeapBase;
+    if (hasDirectHeap_ && address>=kHeapBase &&
+        offset<=kHeapSize && bytes<=kHeapSize-offset) {
+        std::memmove(directHeap_.data()+offset,data,bytes);
+        return true;
+    }
     return uc_mem_write(uc_, address, data, bytes) == UC_ERR_OK;
 }
 
