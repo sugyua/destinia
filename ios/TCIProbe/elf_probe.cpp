@@ -282,6 +282,51 @@ static int destinia_probe_impl(
                         "ARM32_FRAME_PERF frame=%u exec_ms=%lld wait_ms=%u\n",
                         frame, static_cast<long long>(elapsedMs),nextFrameMs);
                 }
+                if (frame==48 &&
+                    std::getenv("DESTINIA_PROFILE_BLOCKS")) {
+                    std::map<std::string,uint64_t> totals;
+                    std::vector<std::pair<uint32_t,std::string>> exports;
+                    for (size_t j=0;j<image.symbols.size();++j) {
+                        const auto &symbol=image.symbols[j];
+                        if (symbol.shndx!=0 && symbol.value!=0 &&
+                            !image.names[j].empty()) {
+                            exports.emplace_back(
+                                static_cast<uint32_t>(base)+
+                                    (symbol.value&~1u),
+                                image.names[j]);
+                        }
+                    }
+                    std::sort(exports.begin(),exports.end(),
+                        [](const auto &x,const auto &y) {
+                            return x.first<y.first;
+                        });
+                    for (const auto &block:runtime->profiledBlocks()) {
+                        auto it=std::upper_bound(
+                            exports.begin(),exports.end(),block.first,
+                            [](uint32_t address,const auto &exportEntry) {
+                                return address<exportEntry.first;
+                            });
+                        std::string name="[unknown]";
+                        if (it!=exports.begin()) {
+                            --it;
+                            name=it->second;
+                        }
+                        totals[name]+=block.second;
+                    }
+                    std::vector<std::pair<std::string,uint64_t>> hot(
+                        totals.begin(),totals.end());
+                    std::sort(hot.begin(),hot.end(),
+                        [](const auto &x,const auto &y) {
+                            return x.second>y.second;
+                        });
+                    for (size_t i=0;i<std::min<size_t>(25,hot.size());++i) {
+                        std::fprintf(stderr,
+                            "ARM32_HOT_FUNCTION rank=%zu blocks=%llu name=%s\n",
+                            i+1,
+                            static_cast<unsigned long long>(hot[i].second),
+                            hot[i].first.c_str());
+                    }
+                }
                 ++framesRendered;
                 lastPixels=std::move(pixels);
                 if (!nextFrameMs) break;
