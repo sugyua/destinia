@@ -320,19 +320,24 @@ jobs:
             <key>CFBundleName</key>
             <string>TCIProbe</string>
             <key>CFBundleDisplayName</key>
-            <string>TCI Probe</string>
+            <string>Destinia</string>
             <key>CFBundleExecutable</key>
             <string>TCIProbe</string>
             <key>CFBundlePackageType</key>
             <string>APPL</string>
             <key>CFBundleShortVersionString</key>
-            <string>0.2.0</string>
+            <string>0.3.0</string>
             <key>CFBundleVersion</key>
-            <string>3</string>
+            <string>4</string>
             <key>MinimumOSVersion</key>
             <string>15.0</string>
             <key>LSRequiresIPhoneOS</key>
             <true/>
+            <key>UISupportedInterfaceOrientations</key>
+            <array>
+              <string>UIInterfaceOrientationLandscapeLeft</string>
+              <string>UIInterfaceOrientationLandscapeRight</string>
+            </array>
             <key>UIDeviceFamily</key>
             <array><integer>1</integer></array>
             <key>UILaunchScreen</key>
