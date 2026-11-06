@@ -1,5 +1,5 @@
 #include "../../common/elf_image.h"
-#include "arm_import_runtime->h"
+#include "arm_import_runtime.h"
 #include <unicorn/unicorn.h>
 #include <cstdio>
 #include <cstring>
@@ -25,7 +25,7 @@ struct ActiveGame {
     uint32_t touchAddress=0;
     uint32_t nextFrame=0;
     ~ActiveGame() {
-        runtime->reset();
+        runtime.reset();
         if (uc) uc_close(uc);
     }
 };
