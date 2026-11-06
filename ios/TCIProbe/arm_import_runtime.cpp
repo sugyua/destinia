@@ -772,7 +772,7 @@ bool ArmImportRuntime::runGameFrame(
         return false;
     }
     const uc_err e=uc_emu_start(
-        uc_,address,kReturn,7000000,200000000);
+        uc_,address,kReturn,60000000,2000000000);
     if (!lastError_.empty()) {
         error="jniRun: "+lastError_; return false;
     }
@@ -784,7 +784,7 @@ bool ArmImportRuntime::runGameFrame(
     if (!readReg(UC_ARM_REG_PC,pc) || pc!=kReturn) {
         char diagnostic[160];
         std::snprintf(diagnostic,sizeof(diagnostic),
-            "jniRun excedeu limite de 7s ou 200M instrucoes (PC=0x%08x)",pc);
+            "jniRun excedeu limite de 60s ou 2B instrucoes (PC=0x%08x)",pc);
         error=diagnostic;
         return false;
     }
