@@ -52,6 +52,36 @@ As metricas sao atualizadas aproximadamente a cada 2 segundos e tambem
 emitidas no log do aplicativo. A primeira conclusao concreta sobre
 o dispositivo deve usar esses numeros, nao estimativas visuais.
 
+## Medicao real no iPhone — 06/11/2026
+
+Captura fornecida pelo usuario durante a primeira fase do Destinia
+(port 0.3.4, HUD acionado com tres dedos):
+
+- **3,5 FPS** observados
+- **279,6 ms** de tempo medio por quadro no bloco ARM32/JNI
+- **0,1 ms** de preparo RGB565 por quadro
+
+A conversao da imagem NAO e o gargalo. A meta de ~16 FPS exige
+reduzir a emulacao para ~62,5 ms/frame. A tela de titulo nao pode ser
+usada como substituta de um teste de combate/fase.
+
+### Reproducao de navegacao em CI
+
+- [Fluxo titulo/menu #42196461436](https://github.com/sugyua/destinia/actions/runs/42196461436):
+  um toque em 200,211 no quadro 65 abriu a tela de titulo principal.
+- [Fluxo selecao de personagem #42196890025](https://github.com/sugyua/destinia/actions/runs/42196890025):
+  um segundo toque em 200,67 no quadro 120 abriu "Select Character".
+  Frames salvos mostraram o Guerreiro LV 1 e controles originais.
+- [Comparaçao ALPHA16 #42197950722](https://github.com/sugyua/destinia/actions/runs/42197950722):
+  seis capturas RGB565 identicas na selecao com ALPHA16 nativo.
+  O quadro perfilado 220 passou de ~199 ms para ~61 ms no runner macOS.
+  Outro acelerador ("alpha row") preservou os 280/280 hashes de menu.
+
+**Hipotese em verificacao:** os loops de transparencia/cores do ELF
+consomem grande parte do tempo de emulacao nos menus e provavelmente
+tambem na fase. A equivalencia no mundo aberto exige validacao
+independente; nao prometer 16 FPS no iPhone baseado so em menu.
+
 ## Proximos gargalos provaveis
 
 - Custo da interpretacao ARM32 das outras rotinas da logica (sem JIT).
