@@ -1,0 +1,7 @@
+Destinia iOS ARM32 milestone 0.2.0
+Branch: ios/unicorn-poc
+Automated gate: ELF relocated 213/213, guest C runtime, JNI asset bridge,
+original ARM32 getMyCash and Java_game_destiniaeng_GameThread_initGame.
+Next manual device check: install the unsigned IPA via AltStore/AltServer
+and confirm TCIProbe reports "InitGame: OK" on the iPhone.
+This is still a diagnostic executable, not a playable game.
