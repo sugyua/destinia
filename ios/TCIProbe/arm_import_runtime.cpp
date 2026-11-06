@@ -100,10 +100,25 @@ void ArmImportRuntime::onFastFillRow(
         ((end-begin)&1u)) {
         runtime->fail("RGB565 fill: intervalo ARM32 invalido"); return;
     }
-    std::vector<uint16_t> pixels(
-        (end-begin)/2,static_cast<uint16_t>(color));
-    if (!runtime->writeBytes(begin,pixels.data(),end-begin))
-        runtime->fail("RGB565 fill: destino ARM32 invalido");
+    const bool direct=runtime->hasDirectHeap_ &&
+        begin>=kHeapBase &&
+        static_cast<uint64_t>(end)<=
+            static_cast<uint64_t>(kHeapBase)+kHeapSize;
+    if (direct) {
+        uint8_t *dst=runtime->directHeap_.data()+begin-kHeapBase;
+        const uint8_t lo=static_cast<uint8_t>(color);
+        const uint8_t hi=static_cast<uint8_t>(color>>8);
+        for (size_t i=0;i<end-begin;i+=2) {
+            dst[i]=lo;
+            dst[i+1]=hi;
+        }
+        ++runtime->directFillRows_;
+    } else {
+        std::vector<uint16_t> pixels(
+            (end-begin)/2,static_cast<uint16_t>(color));
+        if (!runtime->writeBytes(begin,pixels.data(),end-begin))
+            runtime->fail("RGB565 fill: destino ARM32 invalido");
+    }
 }
 
 // Optimized version of the Thumb image/palette column at Grp_drawClipWImageP
@@ -165,24 +180,43 @@ void ArmImportRuntime::onFastSpriteColumn(
     }
     std::vector<uint8_t> indices(static_cast<size_t>(count));
     std::vector<uint16_t> colors(256);
-    std::vector<uint8_t> pixels(static_cast<size_t>(after-first));
     if (!runtime->readBytes(src,indices.data(),indices.size()) ||
-        !runtime->readBytes(palette,colors.data(),colors.size()*2) ||
-        !runtime->readBytes(
-            static_cast<uint32_t>(first),pixels.data(),pixels.size())) {
-        runtime->fail("Sprite ARM32: leitura de pixels invalida"); return;
+        !runtime->readBytes(palette,colors.data(),colors.size()*2)) {
+        runtime->fail("Sprite ARM32: leitura de indices/paleta invalida"); return;
     }
-    for (int32_t i=0;i<count;++i) {
-        const uint16_t color=colors[indices[static_cast<size_t>(i)]];
-        if (color==key) continue;
-        const auto position=static_cast<size_t>(
-            static_cast<int64_t>(dst)+static_cast<int64_t>(i)*step-first);
-        pixels[position]=static_cast<uint8_t>(color);
-        pixels[position+1]=static_cast<uint8_t>(color>>8);
-    }
-    if (!runtime->writeBytes(
-            static_cast<uint32_t>(first),pixels.data(),pixels.size())) {
-        runtime->fail("Sprite ARM32: escrita de pixels invalida"); return;
+    const bool direct=runtime->hasDirectHeap_ &&
+        first>=kHeapBase &&
+        after<=static_cast<int64_t>(kHeapBase)+kHeapSize;
+    if (direct) {
+        uint8_t *heap=runtime->directHeap_.data();
+        const int64_t base=static_cast<int64_t>(dst)-kHeapBase;
+        for (int32_t i=0;i<count;++i) {
+            const uint16_t color=colors[indices[static_cast<size_t>(i)]];
+            if (color==key) continue;
+            const size_t offset=static_cast<size_t>(
+                base+static_cast<int64_t>(i)*step);
+            heap[offset]=static_cast<uint8_t>(color);
+            heap[offset+1]=static_cast<uint8_t>(color>>8);
+        }
+        ++runtime->directSpriteColumns_;
+    } else {
+        std::vector<uint8_t> pixels(static_cast<size_t>(after-first));
+        if (!runtime->readBytes(
+                static_cast<uint32_t>(first),pixels.data(),pixels.size())) {
+            runtime->fail("Sprite ARM32: leitura de pixels invalida"); return;
+        }
+        for (int32_t i=0;i<count;++i) {
+            const uint16_t color=colors[indices[static_cast<size_t>(i)]];
+            if (color==key) continue;
+            const auto position=static_cast<size_t>(
+                static_cast<int64_t>(dst)+static_cast<int64_t>(i)*step-first);
+            pixels[position]=static_cast<uint8_t>(color);
+            pixels[position+1]=static_cast<uint8_t>(color>>8);
+        }
+        if (!runtime->writeBytes(
+                static_cast<uint32_t>(first),pixels.data(),pixels.size())) {
+            runtime->fail("Sprite ARM32: escrita de pixels invalida"); return;
+        }
     }
     const uint32_t nextDst=static_cast<uint32_t>(
         static_cast<int64_t>(dst)+static_cast<int64_t>(count)*step);
@@ -262,8 +296,25 @@ void ArmImportRuntime::fail(const std::string &reason) {
 }
 
 bool ArmImportRuntime::install(std::string &error) {
-    const uc_err mapped =
-        uc_mem_map(uc_, kHeapBase, kHeapSize, UC_PROT_ALL);
+#if defined(DESTINIA_NATIVE_HEAP)
+    const bool useDirectHeap=true;
+#else
+    const bool useDirectHeap=std::getenv("DESTINIA_DIRECT_HEAP")!=nullptr;
+#endif
+    uc_err mapped=UC_ERR_OK;
+    if (useDirectHeap) {
+        try {
+            directHeap_.resize(kHeapSize,0);
+        } catch (const std::bad_alloc &) {
+            error="Sem memoria para mapear heap ARM32 diretamente";
+            return false;
+        }
+        mapped=uc_mem_map_ptr(
+            uc_,kHeapBase,kHeapSize,UC_PROT_ALL,directHeap_.data());
+        if (mapped==UC_ERR_OK) hasDirectHeap_=true;
+    } else {
+        mapped=uc_mem_map(uc_,kHeapBase,kHeapSize,UC_PROT_ALL);
+    }
     if (mapped != UC_ERR_OK) {
         error = std::string("Heap ARM32: ") + uc_strerror(mapped);
         return false;
