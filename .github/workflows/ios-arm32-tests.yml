@@ -80,6 +80,12 @@ jobs:
           DESTINIA_FAST_FILL=1 DESTINIA_FAST_SPRITE=1 DESTINIA_PROBE_FRAMES=50 /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
           cmp /tmp/destinia-baseline.ppm /tmp/destinia-frame.ppm
           echo "Native RGB565 sprite: pixel-identical to original ARM32"
+          DESTINIA_DIRECT_HEAP=1 DESTINIA_FAST_FILL=1 DESTINIA_FAST_SPRITE=1 \
+            DESTINIA_PROBE_FRAMES=50 \
+            /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so \
+            2> /tmp/destinia-arm32-direct.log
+          cmp /tmp/destinia-baseline.ppm /tmp/destinia-frame.ppm
+          echo "Native-mapped guest heap: same original RGB565 pixels"
 
       - name: Benchmark and profile original versus native graphics
         run: |
@@ -103,6 +109,11 @@ jobs:
           DESTINIA_FAST_FILL=1 DESTINIA_FAST_SPRITE=1 DESTINIA_PROBE_FRAMES=360 /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
           cmp /tmp/destinia-endurance-baseline.ppm /tmp/destinia-frame.ppm
           echo "360-frame ARM32 native sprite and fill: pixel-identical"
+          DESTINIA_DIRECT_HEAP=1 DESTINIA_FAST_FILL=1 \
+            DESTINIA_FAST_SPRITE=1 DESTINIA_PROBE_FRAMES=360 \
+            /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
+          cmp /tmp/destinia-endurance-baseline.ppm /tmp/destinia-frame.ppm
+          echo "360-frame ARM32 direct heap: pixel-identical"
 
       - name: Upload original game framebuffer
         if: success()
@@ -121,5 +132,6 @@ jobs:
           path: |
             /tmp/destinia-arm32-baseline.log
             /tmp/destinia-arm32-native.log
+            /tmp/destinia-arm32-direct.log
           if-no-files-found: ignore
           retention-days: 7
