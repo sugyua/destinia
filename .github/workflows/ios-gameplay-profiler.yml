@@ -1,0 +1,73 @@
+name: Destinia ARM32 Gameplay Profiling
+
+on:
+  push:
+    branches:
+      - ios/unicorn-poc
+    paths:
+      - ".github/workflows/ios-gameplay-profiler.yml"
+  workflow_dispatch:
+
+jobs:
+  menu-navigation-profile:
+    runs-on: macos-15
+    timeout-minutes: 18
+    steps:
+      - name: Checkout original game
+        uses: actions/checkout@v4
+
+      - name: Check original ELF provenance
+        run: python3 ios/tools/audit_game_source.py
+
+      - name: Build Release Unicorn TCI for macOS ARM64
+        run: |
+          set -eux
+          git clone --depth 1 https://github.com/1rhino2/unicorn-tci.git /tmp/unicorn-tci
+          cmake -S /tmp/unicorn-tci/unicorn-engine-sys-tci \
+            -B /tmp/unicorn-tci-gameplay-build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DUNICORN_ARCH=arm \
+            -DUNICORN_INTERPRETER=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DUNICORN_BUILD_TESTS=OFF \
+            -DUNICORN_INSTALL=OFF
+          cmake --build /tmp/unicorn-tci-gameplay-build --target unicorn --parallel 2
+
+      - name: Compile original ARM32 game scenario runner
+        run: |
+          set -eux
+          clang++ -std=c++17 -O3 -DDESTINIA_NATIVE_GFX=1 \
+            -DDESTINIA_NATIVE_HEAP=1 \
+            -I/tmp/unicorn-tci/unicorn-engine-sys-tci/include \
+            ios/TCIProbe/probe_host_test.cpp \
+            ios/TCIProbe/elf_probe.cpp \
+            ios/TCIProbe/arm_import_runtime.cpp \
+            /tmp/unicorn-tci-gameplay-build/libunicorn-static.a \
+            /tmp/unicorn-tci-gameplay-build/libarm-softmmu.a \
+            /tmp/unicorn-tci-gameplay-build/libunicorn-common.a \
+            -lm -lpthread -o /tmp/destinia-gameplay-test
+
+      - name: Touch title and capture intermediate original frames
+        run: |
+          set -euo pipefail
+          DESTINIA_PROBE_FRAMES=230 \
+            DESTINIA_AUTOTOUCH="65,200,211" \
+            DESTINIA_CAPTURE_FRAMES="55,90,130,180,225" \
+            DESTINIA_PROFILE_BLOCKS=1 \
+            DESTINIA_PROFILE_FRAME=180 \
+            /tmp/destinia-gameplay-test game/lib/armeabi/libdestinia_jni.so \
+            2> /tmp/destinia-gameplay.log
+          grep -E "ARM32_TOUCH|ARM32_HOT_FUNCTION|ARM32_FRAME_PERF frame=(65|90|130|180|225)" /tmp/destinia-gameplay.log | tail -50
+          test "$(find /tmp -maxdepth 1 -name 'destinia-stage-*.ppm' | wc -l | tr -d ' ')" -ge 5
+
+      - name: Upload scene progression and hot functions
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Destinia-Gameplay-Profiling
+          path: |
+            /tmp/destinia-stage-*.ppm
+            /tmp/destinia-gameplay.log
+          if-no-files-found: warn
+          retention-days: 7
