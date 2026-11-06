@@ -215,7 +215,18 @@ static int destinia_probe_impl(
                 throw std::runtime_error(
                     "Falha no native sprite RGB565: "+runtimeError);
             }
-            if (std::getenv("DESTINIA_FAST_ALPHA16") &&
+#if defined(DESTINIA_NATIVE_ALPHA)
+            // Native alpha is enabled only for iOS builds after the original
+            // ARM32 framebuffer hashes match across the tested game scenes.
+            const bool nativeAlpha16Enabled=true;
+            const bool nativeAlphaRowEnabled=true;
+#else
+            const bool nativeAlpha16Enabled=
+                std::getenv("DESTINIA_FAST_ALPHA16")!=nullptr;
+            const bool nativeAlphaRowEnabled=
+                std::getenv("DESTINIA_FAST_ALPHA")!=nullptr;
+#endif
+            if (nativeAlpha16Enabled &&
                 !runtime->enableNativeAlpha16(
                     static_cast<uint32_t>(base),runtimeError)) {
                 throw std::runtime_error(
@@ -223,7 +234,7 @@ static int destinia_probe_impl(
             }
             // Additional alpha renderer must pass full game framebuffer
             // equivalence tests before it can ever become an iOS default.
-            if (std::getenv("DESTINIA_FAST_ALPHA") &&
+            if (nativeAlphaRowEnabled &&
                 !runtime->enableNativeAlphaRow(
                     static_cast<uint32_t>(base),runtimeError)) {
                 throw std::runtime_error(
