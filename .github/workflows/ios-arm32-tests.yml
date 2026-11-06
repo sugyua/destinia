@@ -100,21 +100,38 @@ jobs:
           python3 ios/tools/summarize_arm32_perf.py \
             /tmp/destinia-arm32-baseline.log /tmp/destinia-arm32-native.log \
             /tmp/destinia-arm32-direct.log
+            /tmp/destinia-hashes-base.txt
+            /tmp/destinia-hashes-native.txt
+            /tmp/destinia-hashes-direct.txt
           cat /tmp/destinia-arm32-native.log | grep 'ARM32_HOT_FUNCTION' | head -12
 
-      - name: Endurance regression beyond iPhone frame 302
+      - name: Endurance regression and byte-for-byte verification of all 360 frames
         run: |
-          set -eux
-          DESTINIA_PROBE_FRAMES=360 /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
+          set -euo pipefail
+          DESTINIA_HASH_FRAMES=1 DESTINIA_PROBE_FRAMES=360 \
+            /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so \
+            2> /tmp/destinia-frames-base.log
           cp /tmp/destinia-frame.ppm /tmp/destinia-endurance-baseline.ppm
-          DESTINIA_FAST_FILL=1 DESTINIA_FAST_SPRITE=1 DESTINIA_PROBE_FRAMES=360 /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
+          DESTINIA_HASH_FRAMES=1 DESTINIA_FAST_FILL=1 DESTINIA_FAST_SPRITE=1 \
+            DESTINIA_PROBE_FRAMES=360 \
+            /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so \
+            2> /tmp/destinia-frames-native.log
           cmp /tmp/destinia-endurance-baseline.ppm /tmp/destinia-frame.ppm
-          echo "360-frame ARM32 native sprite and fill: pixel-identical"
-          DESTINIA_DIRECT_HEAP=1 DESTINIA_FAST_FILL=1 \
-            DESTINIA_FAST_SPRITE=1 DESTINIA_PROBE_FRAMES=360 \
-            /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
+          DESTINIA_HASH_FRAMES=1 DESTINIA_DIRECT_HEAP=1 \
+            DESTINIA_FAST_FILL=1 DESTINIA_FAST_SPRITE=1 \
+            DESTINIA_PROBE_FRAMES=360 \
+            /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so \
+            2> /tmp/destinia-frames-direct.log
           cmp /tmp/destinia-endurance-baseline.ppm /tmp/destinia-frame.ppm
-          echo "360-frame ARM32 direct heap: pixel-identical"
+          for mode in base native direct; do
+            grep '^ARM32_FRAME_HASH' /tmp/destinia-frames-$mode.log \
+              > /tmp/destinia-hashes-$mode.txt
+            test "$(wc -l < /tmp/destinia-hashes-$mode.txt)" -eq 360
+          done
+          cmp /tmp/destinia-hashes-base.txt /tmp/destinia-hashes-native.txt
+          cmp /tmp/destinia-hashes-base.txt /tmp/destinia-hashes-direct.txt
+          echo "360 / 360 frames byte-identical in all 3 modes"
+          grep 'ARM32_DIRECT_HEAP' /tmp/destinia-frames-direct.log
 
       - name: Upload original game framebuffer
         if: success()
