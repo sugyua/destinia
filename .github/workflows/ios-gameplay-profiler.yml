@@ -101,6 +101,23 @@ jobs:
           echo '=== After alpha optimization ==='
           grep '^ARM32_HOT_FUNCTION' /tmp/destinia-menu-alpha.log | head -12
 
+      - name: Verify combined native alpha function and image-row acceleration
+        run: |
+          set -euo pipefail
+          DESTINIA_FAST_ALPHA16=1 DESTINIA_FAST_ALPHA=1 \
+            DESTINIA_PROBE_FRAMES=280 \
+            DESTINIA_AUTOTOUCH="65,200,211;120,200,67" \
+            DESTINIA_HASH_FRAMES=1 \
+            /tmp/destinia-gameplay-test game/lib/armeabi/libdestinia_jni.so \
+            2> /tmp/destinia-menu-alpha-combined.log
+          grep '^ARM32_FRAME_HASH' /tmp/destinia-menu-alpha-combined.log \
+            > /tmp/destinia-menu-hashes-combined.txt
+          test "$(wc -l < /tmp/destinia-menu-hashes-combined.txt)" -eq 280
+          cmp /tmp/destinia-menu-hashes-baseline.txt \
+              /tmp/destinia-menu-hashes-combined.txt
+          echo 'ALPHA COMBINADO: 280/280 frames identicos ao jogo original'
+          grep 'ARM32_FRAME_PERF frame=220' /tmp/destinia-menu-alpha-combined.log
+
       - name: Upload scene progression and hot functions
         if: always()
         uses: actions/upload-artifact@v4
@@ -114,5 +131,7 @@ jobs:
             /tmp/destinia-menu-alpha.log
             /tmp/destinia-menu-hashes-baseline.txt
             /tmp/destinia-menu-hashes-alpha.txt
+            /tmp/destinia-menu-hashes-combined.txt
+            /tmp/destinia-menu-alpha-combined.log
           if-no-files-found: warn
           retention-days: 7
