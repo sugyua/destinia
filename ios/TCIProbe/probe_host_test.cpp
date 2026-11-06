@@ -25,6 +25,8 @@ int main(int argc, char **argv) {
         "Imports distintos: 26",
         "Memoria Unicorn: OK",
         "Testes ARM32: OK",
+        "Codigo original: OK",
+        "InitGame: OK",
     };
 
     if (ok != 1) {
@@ -39,6 +41,6 @@ int main(int argc, char **argv) {
         }
     }
 
-    std::puts("PASSOU: ELF, relocacoes, imports e memoria emulada.");
+    std::puts("PASSOU: ELF, imports, testes ARM32 e initGame original.");
     return 0;
 }
