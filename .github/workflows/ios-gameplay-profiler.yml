@@ -63,6 +63,29 @@ jobs:
             test -s "/tmp/destinia-stage-$frame.ppm"
           done
 
+      - name: Compare all original menu frames with optimized alpha renderer
+        run: |
+          set -euo pipefail
+          export DESTINIA_PROBE_FRAMES=280
+          export DESTINIA_AUTOTOUCH="65,200,211;120,200,67"
+          export DESTINIA_HASH_FRAMES=1
+          export DESTINIA_PROFILE_BLOCKS=1
+          export DESTINIA_PROFILE_FRAME=220
+          /tmp/destinia-gameplay-test game/lib/armeabi/libdestinia_jni.so \
+            2> /tmp/destinia-menu-baseline.log
+          DESTINIA_FAST_ALPHA=1 \
+            /tmp/destinia-gameplay-test game/lib/armeabi/libdestinia_jni.so \
+            2> /tmp/destinia-menu-alpha.log
+          grep '^ARM32_FRAME_HASH' /tmp/destinia-menu-baseline.log > /tmp/destinia-menu-hashes-baseline.txt
+          grep '^ARM32_FRAME_HASH' /tmp/destinia-menu-alpha.log > /tmp/destinia-menu-hashes-alpha.txt
+          test "$(wc -l < /tmp/destinia-menu-hashes-baseline.txt)" -eq 280
+          cmp /tmp/destinia-menu-hashes-baseline.txt /tmp/destinia-menu-hashes-alpha.txt
+          echo 'MENU ALPHA: 280/280 game frames byte-identical'
+          echo '=== Before alpha optimization ==='
+          grep '^ARM32_HOT_FUNCTION' /tmp/destinia-menu-baseline.log | head -12
+          echo '=== After alpha optimization ==='
+          grep '^ARM32_HOT_FUNCTION' /tmp/destinia-menu-alpha.log | head -12
+
       - name: Upload scene progression and hot functions
         if: always()
         uses: actions/upload-artifact@v4
@@ -71,5 +94,9 @@ jobs:
           path: |
             /tmp/destinia-stage-*.ppm
             /tmp/destinia-gameplay.log
+            /tmp/destinia-menu-baseline.log
+            /tmp/destinia-menu-alpha.log
+            /tmp/destinia-menu-hashes-baseline.txt
+            /tmp/destinia-menu-hashes-alpha.txt
           if-no-files-found: warn
           retention-days: 7
