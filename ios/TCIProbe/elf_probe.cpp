@@ -232,6 +232,18 @@ static int destinia_probe_impl(
             const bool nativeDodgeEnabled=
                 std::getenv("DESTINIA_FAST_DODGE")!=nullptr;
 #endif
+#if defined(DESTINIA_NATIVE_SIMPLECLIP)
+            const bool nativeSimpleClipEnabled=true;
+#else
+            const bool nativeSimpleClipEnabled=
+                std::getenv("DESTINIA_FAST_SIMPLECLIP")!=nullptr;
+#endif
+            if (nativeSimpleClipEnabled &&
+                !runtime->enableNativeSimpleClipRow(
+                    static_cast<uint32_t>(base),runtimeError)) {
+                throw std::runtime_error(
+                    "Falha no SimpleClip nativo: "+runtimeError);
+            }
             if (nativeDodgeEnabled &&
                 !runtime->enableNativeDodge16(
                     static_cast<uint32_t>(base),runtimeError)) {
@@ -503,6 +515,11 @@ static int destinia_probe_impl(
                         std::chrono::milliseconds(
                             std::min(nextFrameMs,1000u)));
                 }
+            }
+            if (nativeSimpleClipEnabled) {
+                std::fprintf(stderr,"ARM32_NATIVE_SIMPLECLIP rows=%llu\\n",
+                    static_cast<unsigned long long>(
+                        runtime->nativeSimpleClipRows()));
             }
             if (nativeDodgeEnabled) {
                 std::fprintf(stderr,
