@@ -83,6 +83,10 @@ jobs:
         run: |
           set -eux
           DESTINIA_PROBE_FRAMES=360 /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
+          cp /tmp/destinia-frame.ppm /tmp/destinia-endurance-baseline.ppm
+          DESTINIA_FAST_FILL=1 DESTINIA_FAST_SPRITE=1 DESTINIA_PROBE_FRAMES=360 /tmp/destinia_arm32_tests game/lib/armeabi/libdestinia_jni.so
+          cmp /tmp/destinia-endurance-baseline.ppm /tmp/destinia-frame.ppm
+          echo "360-frame ARM32 native sprite and fill: pixel-identical"
 
       - name: Upload original game framebuffer
         if: success()
