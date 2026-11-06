@@ -15,6 +15,8 @@ public:
     ~ArmImportRuntime();
     bool install(std::string &error);
     bool selfTest(std::string &error);
+    bool runOriginalExport(uint32_t address, uint32_t &result,
+                           std::string &error);
     unsigned implementedCount() const;
 private:
     static void onCode(uc_engine *, uint64_t, uint32_t, void *);
