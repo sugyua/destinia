@@ -1006,6 +1006,10 @@ static int runHost(int argc, char** argv) {
   installInventoryProtection();
   destinia::initLootEconomy(saveDir);
   weaponsCatalogHost.init(fs::path(saveDir));
+  openWeaponsCatalogCallback = [&]() {
+    weaponsCatalogHost.open = true;
+    weaponsCatalogHost.scanInventory(rd16(exportsMap.at("Game")+0x4886), exportsMap.at("Game"), [](u32 a){return rd16(a);});
+  };
   sharedStashHost.init(fs::path(saveDir));
   bountiesHost.init(fs::path(saveDir));
   g_onMonsterDefeated = [&](int s, int id){ bountiesHost.onMonsterKilled(s, id); };

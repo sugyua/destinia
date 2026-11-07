@@ -4,6 +4,8 @@
 #include "titles.h"
 static destinia::DifficultyProgress difficultyProgress;
 static bool difficultyReady=false,difficultyOpen=false,difficultyButton=false,difficultyTouchHeld=false;
+static int customMenuIndex=0;
+static std::function<void()> openWeaponsCatalogCallback;
 static int difficultySelected=0,difficultyRequest=-1,difficultyRequestSlot=-1;
 static std::set<std::pair<unsigned,unsigned>> difficultyKills;
 static std::unique_ptr<destinia::FileLock> difficultyRemovalLock;
@@ -52,11 +54,11 @@ static void difficultyFlush(){
  }catch(const std::exception& e){difficultyStatus="FALHA AO SALVAR - TENTE NOVAMENTE";difficultyRetry=60;hostReport("[dificuldade] %s\n",e.what());}
  difficultyRequest=-1;
 }
-static void difficultyEnter(){if(!difficultySystem()||difficultySlot()>=10)return;difficultyOpen=true;difficultyButton=true;difficultySelected=int(difficultyProgress.current(difficultySlot()));difficultyStatus.clear();}
+static void difficultyEnter(){if(!difficultySystem()||difficultySlot()>=10)return;difficultyOpen=true;customMenuIndex=1;difficultyButton=true;difficultySelected=int(difficultyProgress.current(difficultySlot()));difficultyStatus.clear();}
 static bool difficultyMenuKey(int key,bool down){
- if(!difficultySystem()){difficultyOpen=difficultyButton=false;return false;}
+ if(!difficultySystem()){difficultyOpen=difficultyButton=false;customMenuIndex=0;return false;}
  if(key>=13&&key<=16){const int keys[]={3,9,5,7};key=keys[key-13];}
- if(!down)return difficultyOpen||difficultyButton;
+ if(!down)return difficultyOpen||customMenuIndex>0;
  if(difficultyOpen){
   if(key==10||key==27){difficultyOpen=false;difficultyStatus.clear();}
   else if(key==3||key==9){difficultySelected=(difficultySelected+(key==3?4:1))%5;difficultyStatus.clear();}
@@ -64,21 +66,46 @@ static bool difficultyMenuKey(int key,bool down){
   return true;
  }
  const auto ui=exportsMap.at("GameUI");const auto state=rd32(ui+0x7c);
- if(difficultyButton){
-  if(key==6||key==17||key==9){difficultyEnter();return true;}
-  difficultyButton=false;if(key==3)return true; // Native selection remains on row 4.
-  return false;
+ if(customMenuIndex>0){
+  if(key==3){
+   customMenuIndex--;
+   difficultyButton=(customMenuIndex==1);
+   if(customMenuIndex==0)wr32(ui+0x7c,0x80000001u);
+   return true;
+  }
+  if(key==9){
+   if(customMenuIndex<2)customMenuIndex++;
+   difficultyButton=(customMenuIndex==1);
+   return true;
+  }
+  if(key==6||key==17){
+   if(customMenuIndex==1)difficultyEnter();
+   else if(customMenuIndex==2&&openWeaponsCatalogCallback)openWeaponsCatalogCallback();
+   return true;
+  }
+  if(key==10||key==27){
+   customMenuIndex=0;difficultyButton=false;
+   wr32(ui+0x7c,0x80000001u);
+   return false;
+  }
+  return true;
  }
- if(state==0x80000001u&&rd16(ui+0x54)==4&&key==9){difficultyButton=true;return true;}
+ if(state==0x80000001u&&rd16(ui+0x54)==4&&key==9){
+  customMenuIndex=1;difficultyButton=true;
+  wr32(ui+0x7c,0x80000002u);
+  return true;
+ }
  return false;
 }
 static bool difficultyMenuTouch(int x,int y,int phase){
  if(difficultyTouchHeld&&phase!=0){if(phase==1)difficultyTouchHeld=false;return true;}
- if(!difficultySystem()){difficultyOpen=difficultyButton=false;return false;}
+ if(!difficultySystem()){difficultyOpen=difficultyButton=false;customMenuIndex=0;return false;}
  const auto p=destinia::nativeCodexTransform(SCREEN_W,SCREEN_H,preferences.uiScale).inverse(x,y);x=p.first;y=p.second;
  auto box=[&](int a,int b,int w,int h){return destinia::nativeCodexRect(a,b,w,h,SCREEN_W,SCREEN_H).contains(x,y);};
  if(difficultyOpen){if(phase==0){difficultyTouchHeld=true;if(box(272,49,34,14)){difficultyOpen=false;return true;}for(int i=0;i<5;++i)if(box(94,62+i*25,212,22)){difficultySelected=i;difficultyMenuKey(17,true);return true;}}return true;}
- if(phase==0&&box(94,177,212,20)){difficultyTouchHeld=true;difficultyEnter();return true;}return false;
+ if(phase==0&&box(94,177,212,18)){difficultyTouchHeld=true;customMenuIndex=1;difficultyButton=true;wr32(exportsMap.at("GameUI")+0x7c,0x80000002u);difficultyEnter();return true;}
+ if(phase==0&&box(94,198,212,18)){difficultyTouchHeld=true;customMenuIndex=2;difficultyButton=false;wr32(exportsMap.at("GameUI")+0x7c,0x80000002u);if(openWeaponsCatalogCallback)openWeaponsCatalogCallback();return true;}
+ return false;
 }
 static void difficultyClassHook(uc_engine*,uint64_t,uint32_t,void*){
  try{if(!difficultyReady||(regLR()&~1u)!=SO_BASE+0x21c7a)return;
@@ -102,21 +129,52 @@ class DifficultyPainter {
  u32 descriptor=0,pixels=0,string=0;
  void call(const char* n,std::initializer_list<u32> a){if(!callFn(exportsMap.at(n),a))throw std::runtime_error("difficulty native drawing failed");}
  void fill(int x,int y,int w,int h,uint16_t c){call("Grp_setDrawOpVal",{0,0xffffffff});call("Grp_setColorPixel",{c});call("Grp_fillRect",{4,u32(x),u32(y),u32(w),u32(h)});}
- void text(int x,int y,std::string value,uint16_t color=0xffff){const auto accent=value.find(u8"\u00ed");if(accent!=std::string::npos)value.replace(accent,2,"i");wr(string,value.c_str(),value.size()+1);call("Font_setColorPixel",{color});call("Font_drawStringChar",{4,string,u32(x),u32(y),208,12,1,0x11});}
+ void text(int x,int y,std::string value,uint16_t color=0xffff){const auto accent=value.find(u8"\u00ed");if(accent!=std::string::npos)value.replace(accent,2,"i");wr(string,value.c_str(),value.size()+1);call("Font_setColorPixel",{color});call("Font_drawStringChar",{4,string,u32(x),u32(y),212,12,1,0x11});}
 public:
  void paint(uint8_t* output){
-  if(!difficultySystem()){difficultyOpen=difficultyButton=false;return;}const int ox=(SCREEN_W-400)/2,oy=(SCREEN_H-240)/2;
+  if(!difficultySystem()){difficultyOpen=difficultyButton=false;customMenuIndex=0;return;}const int ox=(SCREEN_W-400)/2,oy=(SCREEN_H-240)/2;
   if(!descriptor){descriptor=hmalloc(12);pixels=hmalloc(FB_BYTES);string=hmalloc(512);wr32(descriptor,SCREEN_W);wr32(descriptor+4,SCREEN_H);wr32(descriptor+8,pixels);}
   const auto table=exportsMap.at("frameBuffer")+16,old=rd32(table),grp=exportsMap.at("Grp"),font=rd32(exportsMap.at("Font"));std::array<uint8_t,124> graphics{};rd(grp,graphics.data(),graphics.size());wr32(table,descriptor);
   auto restore=[&](){wr32(table,old);wr(grp,graphics.data(),graphics.size());wr32(exportsMap.at("Font"),font);};
-  auto button=[&](int y,std::string label,bool selected,bool enabled){fill(ox+94,oy+y,212,20,selected?0x3186:0x0841);call("Grp_setColorPixel",{selected?0xffc0u:0x528au});call("Grp_drawRoundRect",{4,u32(ox+94),u32(oy+y),212,20,2});text(ox+99,oy+y+4,label,enabled?0xffff:0x738e);};
-  int top=difficultyOpen?49:177,bottom=difficultyOpen?229:197;
+  auto button=[&](int y,std::string label,bool selected,bool enabled){
+   if(selected){
+    fill(ox+94,oy+y,212,16,0xffc0);
+    text(ox+94,oy+y+2,label,0x0841);
+   }else{
+    fill(ox+94,oy+y,212,16,0x2945);
+    text(ox+94,oy+y+2,label,enabled?0xffff:0x738e);
+   }
+  };
+  int top=difficultyOpen?49:177,bottom=difficultyOpen?229:216;
   try{std::vector<uint8_t> blank(FB_BYTES);wr(pixels,blank.data(),blank.size());
-   if(difficultyOpen){fill(ox+90,oy+49,220,180,0x0841);text(ox+98,oy+49,"MUDAR DIFICULDADE");text(ox+272,oy+49,"SAIR");for(int i=0;i<5;++i){auto label=destinia::difficultyLabel(i);if(unsigned(i)==difficultyProgress.current(difficultySlot()))label+=" [ATUAL]";button(62+i*25,label,i==difficultySelected,difficultyProgress.allowed(difficultySlot(),i));}text(ox+98,oy+195,"DIABLO LIBERA A PROXIMA",0xffc0);if(!difficultyStatus.empty())text(ox+98,oy+211,difficultyStatus.substr(0,34),0xce59);}
-   else button(177,"Mudar Dificuldade",difficultyButton,true);
+   if(difficultyOpen){
+    fill(ox+90,oy+49,220,180,0x2945);
+    call("Grp_setColorPixel",{0x528au});
+    call("Grp_drawRoundRect",{4,u32(ox+90),u32(oy+49),220,180,2});
+    text(ox+90,oy+49,"MUDAR DIFICULDADE",0xffc0);
+    text(ox+264,oy+49,"SAIR",0xffff);
+    for(int i=0;i<5;++i){
+     auto label=destinia::difficultyLabel(i);
+     if(unsigned(i)==difficultyProgress.current(difficultySlot()))label+=" [ATUAL]";
+     button(65+i*24,label,i==difficultySelected,difficultyProgress.allowed(difficultySlot(),i));
+    }
+    text(ox+90,oy+190,"DIABLO LIBERA A PROXIMA",0xffc0);
+    if(!difficultyStatus.empty())text(ox+90,oy+206,difficultyStatus.substr(0,34),0xce59);
+   }else{
+    button(177,"Mudar Dificuldade",customMenuIndex==1,true);
+    button(198,"Catalogo de Armas",customMenuIndex==2,true);
+   }
    std::vector<uint8_t> raster(FB_BYTES);rd(pixels,raster.data(),raster.size());restore();
    const auto transform=destinia::nativeCodexTransform(SCREEN_W,SCREEN_H,preferences.uiScale);
-   for(int y=oy+top;y<oy+bottom;++y)for(int x=ox+90;x<ox+310;++x){auto b=transform.rect(x,y,1,1);auto src=(y*SCREEN_W+x)*2;for(int yy=std::max(0,b.y);yy<std::min(SCREEN_H,b.y+b.h);++yy)for(int xx=std::max(0,b.x);xx<std::min(SCREEN_W,b.x+b.w);++xx){auto dst=(yy*SCREEN_W+xx)*2;output[dst]=raster[src];output[dst+1]=raster[src+1];}}
+   for(int y=oy+top;y<oy+bottom;++y)for(int x=ox+90;x<ox+310;++x){
+    auto src=(y*SCREEN_W+x)*2;
+    if(!raster[src]&&!raster[src+1])continue;
+    auto b=transform.rect(x,y,1,1);
+    for(int yy=std::max(0,b.y);yy<std::min(SCREEN_H,b.y+b.h);++yy)for(int xx=std::max(0,b.x);xx<std::min(SCREEN_W,b.x+b.w);++xx){
+     auto dst=(yy*SCREEN_W+xx)*2;
+     output[dst]=raster[src];output[dst+1]=raster[src+1];
+    }
+   }
   }catch(...){restore();throw;}
  }
 };
