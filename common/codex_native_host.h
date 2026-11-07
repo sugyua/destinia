@@ -48,7 +48,6 @@ public:
    image.resize(FB_BYTES);rd(pixels,image.data(),image.size());for(const auto& item:portraits)portrait(image,item.first,item.second);restore();key=next;
   }catch(...){restore();throw;}
  }
- const bool keepHand=!preview&&(rd32(ui+0x7c)&15)==0&&rd16(exportsMap.at("MMain")+0x3920)<=1;const int motion=rd16(ui+0x4e),weight=motion==2?4:motion==1?7:8;
  const auto transform=destinia::nativeCodexTransform(SCREEN_W,SCREEN_H,preferences.uiScale);
  const auto barRect=destinia::nativeCodexBarRect(SCREEN_W,SCREEN_H);
  for(int y=oy;y<oy+(preview?240:25);y++)for(int x=barRect.x;x<barRect.x+barRect.w;x++){
@@ -56,9 +55,11 @@ public:
   const auto box=transform.rect(x,y,1,1);const auto at=(y*SCREEN_W+x)*2;
   for(int yy=std::max(0,box.y);yy<std::min(SCREEN_H,box.y+box.h);yy++)for(int xx=std::max(0,box.x);xx<std::min(SCREEN_W,box.x+box.w);xx++){const auto dest=(yy*SCREEN_W+xx)*2;output[dest]=image[at];output[dest+1]=image[at+1];}
  }
- if(preview||keepHand){
-  const int handX=preview?ox+311:((ox+116+23*int(rd32(ui+0x7c)>>28))*weight+rd16(ui+0x4a)*(8-weight))/8-12;
-  const int handY=preview?oy+19:((oy+19)*weight+rd16(ui+0x4c)*(8-weight))/8-std::min<int>(rd16(ui+0x50),2);
+ // A rotina nativa ARM (GameUI_drawMainMenu) ja renderiza a mao de selecao animada
+ // ao navegar pelas abas normais (0..8). Apenas renderizamos a mao customizada se o Codex estiver aberto/selecionado (aba 9).
+ if(preview){
+  const int handX=ox+311;
+  const int handY=oy+19-std::min<int>(rd16(ui+0x50),2);
   for(int y=0;y<hand.height;y++)for(int x=0;x<hand.width;x++){const auto c=hand.pixels[y*hand.width+x];if(!(c&0x10000))continue;const auto b=transform.rect(handX-handAnchorX+x,handY-handAnchorY+y,1,1);for(int yy=std::max(0,b.y);yy<std::min(SCREEN_H,b.y+b.h);yy++)for(int xx=std::max(0,b.x);xx<std::min(SCREEN_W,b.x+b.w);xx++){auto at=(yy*SCREEN_W+xx)*2;output[at]=c&255;output[at+1]=(c>>8)&255;}}
  }
 
