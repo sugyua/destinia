@@ -232,7 +232,9 @@ static bool codexDrainNativeMenu(){
 // Body cursors and off-screen sprite extraction keep their original ARM path.
 static void codexTopHandHook(uc_engine*,uint64_t,uint32_t,void*){
  const auto oy=(SCREEN_H-240)/2;u32 lr=0;uc_reg_read(uc,UC_ARM_REG_LR,&lr);
- if(R(3)==exportsMap.at("MMain")+12&&int32_t(R(2))>=oy&&int32_t(R(2))<oy+40&&
+ const int32_t y = int32_t(R(2));
+ const bool inTopBar = (y >= 0 && y < 45) || (y >= oy && y < oy + 45);
+ if(R(3)==exportsMap.at("MMain")+12 && inTopBar &&
     (lr&~1u)>=(exportsMap.at("GameUI_drawMainMenu")&~1u)&&(lr&~1u)<(exportsMap.at("GameUI_drawMainMenu")&~1u)+8400)
   uc_reg_write(uc,UC_ARM_REG_PC,&lr);
 }
