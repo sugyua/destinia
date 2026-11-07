@@ -55,12 +55,21 @@ public:
   const auto box=transform.rect(x,y,1,1);const auto at=(y*SCREEN_W+x)*2;
   for(int yy=std::max(0,box.y);yy<std::min(SCREEN_H,box.y+box.h);yy++)for(int xx=std::max(0,box.x);xx<std::min(SCREEN_W,box.x+box.w);xx++){const auto dest=(yy*SCREEN_W+xx)*2;output[dest]=image[at];output[dest+1]=image[at+1];}
  }
- // A rotina nativa ARM (GameUI_drawMainMenu) ja renderiza a mao de selecao animada
- // ao navegar pelas abas normais (0..8). Apenas renderizamos a mao customizada se o Codex estiver aberto/selecionado (aba 9).
- if(preview){
-  const int handX=ox+311;
-  const int handY=oy+19-std::min<int>(rd16(ui+0x50),2);
-  for(int y=0;y<hand.height;y++)for(int x=0;x<hand.width;x++){const auto c=hand.pixels[y*hand.width+x];if(!(c&0x10000))continue;const auto b=transform.rect(handX-handAnchorX+x,handY-handAnchorY+y,1,1);for(int yy=std::max(0,b.y);yy<std::min(SCREEN_H,b.y+b.h);yy++)for(int xx=std::max(0,b.x);xx<std::min(SCREEN_W,b.x+b.w);xx++){auto at=(yy*SCREEN_W+xx)*2;output[at]=c&255;output[at+1]=(c>>8)&255;}}
+ // Renderiza a mao de selecao correspondente a aba ativa (0..9)
+ {
+  const int curTab = preview ? 9 : int(rd32(ui + 0x7c) >> 28);
+  if (curTab >= 0 && curTab <= 9) {
+   const auto tabRect = destinia::nativeCodexTabRect(curTab, SCREEN_W, SCREEN_H);
+   const int handX = tabRect.x + 11;
+   const int handY = oy + 19 - std::min<int>(rd16(ui + 0x50), 2);
+   for(int y=0;y<hand.height;y++)for(int x=0;x<hand.width;x++){
+    const auto c=hand.pixels[y*hand.width+x];if(!(c&0x10000))continue;
+    const auto b=transform.rect(handX-handAnchorX+x,handY-handAnchorY+y,1,1);
+    for(int yy=std::max(0,b.y);yy<std::min(SCREEN_H,b.y+b.h);yy++)for(int xx=std::max(0,b.x);xx<std::min(SCREEN_W,b.x+b.w);xx++){
+     auto at=(yy*SCREEN_W+xx)*2;output[at]=c&255;output[at+1]=(c>>8)&255;
+    }
+   }
+  }
  }
 
 

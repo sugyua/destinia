@@ -234,22 +234,21 @@ static bool codexDrainNativeMenu(){
 // 2) 0x3242a: bl Grp_drawWImage (inactive tab icons)
 // 3) 0x3246a: bl Grp_drawWImage (active tab icon)
 // 4) 0x3248c: bl GameUI_drawPointer (original top-bar selected hand pointer)
+// By replacing these 4 Thumb BL calls with NOPs directly in memory, we guarantee with 100% certainty
+// that ARM never executes them, bypassing any Unicorn TCG basic block hook limitations.
 // NativeCodexPainter then cleanly draws the entire 10-tab expanded bar and pointer with zero overlap.
-static void codexSkipDrawHook(uc_engine*, uint64_t address, uint32_t, void*) {
- const u32 next = u32(address) + 4; // Thumb 32-bit BL instruction is 4 bytes
- uc_reg_write(uc, UC_ARM_REG_PC, &next);
-}
 static void installCodex() {
   std::vector<uint8_t> library,table;
   if(!readFile(soPath,library)) return;
   uint64_t fingerprint=14695981039346656037ull;for(auto b:library) fingerprint=(fingerprint^b)*1099511628211ull;
   if(fingerprint!=0x74b2547839b88777ull || !exportsMap.count("Game")) {hostReport("[codex] Biblioteca diferente da original verificada; observador desativado.\n");return;}
   try {
-    const u32 drawCallsToSkip[] = { SO_BASE + 0x323c8, SO_BASE + 0x3242a, SO_BASE + 0x3246a, SO_BASE + 0x3248c };
-    for(u32 addr : drawCallsToSkip) {
-      uc_hook hook;
-      if(uc_hook_add(uc, &hook, UC_HOOK_CODE, reinterpret_cast<void*>(codexSkipDrawHook), nullptr, addr, addr) != UC_ERR_OK)
-        throw std::runtime_error("Falha ao suprimir desenho nativo das abas.");
+    // 00 bf 00 bf = two 16-bit Thumb NOPs (replaces 32-bit BL instruction)
+    const uint16_t thumbNops[2] = { 0xbf00, 0xbf00 };
+    const u32 drawCallsToNop[] = { SO_BASE + 0x323c8, SO_BASE + 0x3242a, SO_BASE + 0x3246a, SO_BASE + 0x3248c };
+    for(u32 addr : drawCallsToNop) {
+      if(!wr(addr, thumbNops, sizeof(thumbNops)))
+        throw std::runtime_error("Falha ao gravar NOPs nas chamadas de desenho das abas.");
     }
     if(!readFile(assetsDir+"/mon_data_en.gdt",table)) throw std::runtime_error("Tabela de monstros ausente.");
     codex.readNames(table);
