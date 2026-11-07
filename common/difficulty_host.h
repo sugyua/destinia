@@ -100,11 +100,49 @@ static bool difficultyMenuKey(int key,bool down){
 static bool difficultyMenuTouch(int x,int y,int phase){
  if(difficultyTouchHeld&&phase!=0){if(phase==1)difficultyTouchHeld=false;return true;}
  if(!difficultySystem()){difficultyOpen=difficultyButton=false;customMenuIndex=0;return false;}
- const auto p=destinia::nativeCodexTransform(SCREEN_W,SCREEN_H,preferences.uiScale).inverse(x,y);x=p.first;y=p.second;
- auto box=[&](int a,int b,int w,int h){return destinia::nativeCodexRect(a,b,w,h,SCREEN_W,SCREEN_H).contains(x,y);};
- if(difficultyOpen){if(phase==0){difficultyTouchHeld=true;if(box(272,49,34,14)){difficultyOpen=false;return true;}for(int i=0;i<5;++i)if(box(94,62+i*25,212,22)){difficultySelected=i;difficultyMenuKey(17,true);return true;}}return true;}
- if(phase==0&&box(94,177,212,18)){difficultyTouchHeld=true;customMenuIndex=1;difficultyButton=true;wr32(exportsMap.at("GameUI")+0x7c,0x80000002u);difficultyEnter();return true;}
- if(phase==0&&box(94,198,212,18)){difficultyTouchHeld=true;customMenuIndex=2;difficultyButton=false;wr32(exportsMap.at("GameUI")+0x7c,0x80000002u);if(openWeaponsCatalogCallback)openWeaponsCatalogCallback();return true;}
+ const auto transform=destinia::nativeCodexTransform(SCREEN_W,SCREEN_H,preferences.uiScale);
+ const auto p=transform.inverse(x,y);
+ const int ox=(SCREEN_W-400)/2,oy=(SCREEN_H-240)/2;
+ auto inBox=[&](int rx,int ry,int rw,int rh){
+  return p.first>=ox+rx && p.first<ox+rx+rw && p.second>=oy+ry && p.second<oy+ry+rh;
+ };
+ if(difficultyOpen){
+  if(phase==0){
+   difficultyTouchHeld=true;
+   if(inBox(264,49,34,18)){difficultyOpen=false;return true;}
+   for(int i=0;i<5;++i){
+    if(inBox(90,65+i*24,220,20)){
+     difficultySelected=i;
+     difficultyMenuKey(17,true);
+     return true;
+    }
+   }
+  }
+  return true;
+ }
+ if(phase==0){
+  if(inBox(94,177,212,18)){
+   difficultyTouchHeld=true;
+   customMenuIndex=1;
+   difficultyButton=true;
+   wr32(exportsMap.at("GameUI")+0x7c,0x80000002u);
+   difficultyEnter();
+   return true;
+  }
+  if(inBox(94,198,212,18)){
+   difficultyTouchHeld=true;
+   customMenuIndex=2;
+   difficultyButton=false;
+   wr32(exportsMap.at("GameUI")+0x7c,0x80000002u);
+   if(openWeaponsCatalogCallback)openWeaponsCatalogCallback();
+   return true;
+  }
+  // Eat any click inside the custom menu area (below row 4) so ARM never handles it as row 0 (Salvar)
+  if(inBox(84,170,232,55)){
+   difficultyTouchHeld=true;
+   return true;
+  }
+ }
  return false;
 }
 static void difficultyClassHook(uc_engine*,uint64_t,uint32_t,void*){
