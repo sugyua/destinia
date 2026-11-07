@@ -7,6 +7,11 @@
 #include <filesystem>
 #include <algorithm>
 #include <ctime>
+#include <map>
+#include <set>
+#include <stdexcept>
+#include <cstdio>
+#include "safe_save.h"
 
 namespace destinia {
 
@@ -168,35 +173,73 @@ inline std::filesystem::path bountiesFilePath(const std::filesystem::path& dir) 
 }
 
 inline BountyManager loadBounties(const std::filesystem::path& dir) {
-  std::filesystem::path p = bountiesFilePath(dir);
-  if (!std::filesystem::exists(p)) return BountyManager();
-  std::ifstream f(p, std::ios::binary);
-  if (!f.is_open()) return BountyManager();
-  std::string content((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+  namespace fs=std::filesystem;
+  const fs::path p=bountiesFilePath(dir);
+  if (isLink(dir) || isLink(p))
+    throw std::runtime_error("Bounty: link inseguro; arquivo preservado");
+  if (!fs::exists(p)) return BountyManager();
+  if (!fs::is_regular_file(p) || fs::file_size(p)>1048576)
+    throw std::runtime_error("Bounty: arquivo invalido; preservado");
+  std::ifstream f(p,std::ios::binary);
+  if (!f) throw std::runtime_error("Bounty: falha de leitura");
+  const std::string content{std::istreambuf_iterator<char>(f),{}};
+  if (f.bad()) throw std::runtime_error("Bounty: leitura incompleta");
+  std::istringstream ss(content);
+  std::string line,extra;
+  if (!std::getline(ss,line) || line!="bounties_version 1")
+    throw std::runtime_error("Bounty: versao/estrutura invalida; preservada");
+  std::set<std::pair<unsigned,unsigned>> seen;
+  while (std::getline(ss,line)) {
+    if (line.empty() || line[0]=='#') continue;
+    std::istringstream row(line);
+    std::string name;
+    unsigned slot=0,id=0,type=0,target=0,goal=0,progress=0;
+    uint64_t gold=0,cash=0,completed=0,claimed=0;
+    if (!(row>>name>>slot>>id>>type>>target>>goal>>progress
+              >>gold>>cash>>completed>>claimed) || row>>extra ||
+        name!="bounty" || slot>=10 || id<1 || id>3 || type>2 ||
+        target>65535 || goal==0 || goal>65535 || progress>goal ||
+        gold>UINT32_MAX || cash>65535 || completed>1 || claimed>1 ||
+        (claimed && !completed) || (completed && progress!=goal) ||
+        !seen.insert({slot,id}).second)
+      throw std::runtime_error("Bounty: registro invalido; preservado");
+  }
+  if (!ss.eof()) throw std::runtime_error("Bounty: arquivo truncado");
   return BountyManager::deserialize(content);
 }
 
-inline bool saveBounties(const std::filesystem::path& dir, const BountyManager& mgr) {
+inline bool saveBounties(const std::filesystem::path& dir,
+                        const BountyManager& mgr,
+                        const AtomicSaveOps& ops = AtomicSaveOps{}) {
+  namespace fs=std::filesystem;
+  fs::path tmp;
   try {
-    std::filesystem::create_directories(dir);
-    std::filesystem::path target = bountiesFilePath(dir);
-    std::filesystem::path tmp = target;
-    tmp += ".tmp";
-
-    {
-      std::ofstream f(tmp, std::ios::binary | std::ios::trunc);
-      if (!f.is_open()) return false;
-      std::string data = mgr.serialize();
-      f.write(data.data(), data.size());
-      f.flush();
-      if (!f.good()) return false;
-    }
-
-    std::filesystem::rename(tmp, target);
+    if(isLink(dir)||(fs::exists(dir)&&!fs::is_directory(dir)))return false;
+    fs::create_directories(dir);
+    const auto target=bountiesFilePath(dir);
+    if(isLink(target)||(fs::exists(target)&&
+       (!fs::is_regular_file(target)||fs::file_size(target)>1048576)))return false;
+    const std::string data=mgr.serialize();
+    if(data.size()>1048576)return false;
+    tmp=fs::path(target.string()+"."+uniqueId()+".tmp");
+    FILE* f=std::fopen(tmp.string().c_str(),"wb");
+    if(!f)return false;
+    bool okay=std::fwrite(data.data(),1,data.size(),f)==data.size()&&
+              std::fflush(f)==0;
+#ifdef _WIN32
+    if(okay)okay=::_commit(::_fileno(f))==0;
+#else
+    if(okay)okay=::fsync(::fileno(f))==0;
+#endif
+    if(std::fclose(f)!=0)okay=false;
+    if(!okay)throw std::runtime_error("Falha gravando bounty");
+    if(isLink(target)||(fs::exists(target)&&!fs::is_regular_file(target)))
+      throw std::runtime_error("Destino bounty invalido");
+    ops.replace(tmp,target);
     return true;
-  } catch (...) {
+  }catch(...){
+    if(!tmp.empty()) {std::error_code ec;fs::remove(tmp,ec);}
     return false;
   }
 }
-
 } // namespace destinia

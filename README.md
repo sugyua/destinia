@@ -4,7 +4,9 @@
 
 > **O jogo está em versão Beta e pode apresentar diversos bugs, travamentos e funcionalidades incompletas. Faça backup dos saves antes de atualizar.**
 
-**[Baixar Destinia 0.17.4 Beta](https://github.com/sugyua/destinia/releases/tag/v0.17.4-beta.1)** — sincronização com releases 0.17.x, interface original, inicialização segura, confirmação de saves Web e atualizações acumuladas. Consulte **Dependências**.
+**[Baixar Destinia 0.17.4 Beta PC (pacote verificado)](https://github.com/sugyua/destinia/releases/tag/v0.17.4-beta)** — sincronização com releases 0.17.x, interface original, inicialização segura, confirmação de saves Web e atualizações acumuladas. Consulte **Dependências**.
+
+> **Atenção (fontes do branch `main`):** correções posteriores ao pacote 0.17.4-beta estão em revisão e ainda não fazem parte do download publicado. A tag `v0.17.4-beta.1` não contém arquivos de instalação.
 
 [Instalação e dependências](INSTALL.md) · [Releases e histórico de mudanças](https://github.com/sugyua/destinia/releases) · [Teste web privado](https://destinia-web-experimental.leafyheron257.chatgpt.site).
 

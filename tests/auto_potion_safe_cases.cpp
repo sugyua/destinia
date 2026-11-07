@@ -1,4 +1,4 @@
-﻿#include "../common/auto_potion.h"
+#include "../common/auto_potion.h"
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -7,7 +7,7 @@ struct Fixture {
   std::map<uint32_t,uint16_t> memory;
   destinia::AutoPotionController potion;
   int calls[2]={0,0}, writes=0; bool available[2]={false,false};
-  Fixture(){memory[g+0x4854]=0;memory[g+0x48f2]=189;memory[g+0x48f4]=500;memory[g+0x48f6]=189;memory[g+0x48f8]=1000;}
+  Fixture(){potion.config.enabled=true;memory[g+0x4854]=0;memory[g+0x48f2]=189;memory[g+0x48f4]=500;memory[g+0x48f6]=189;memory[g+0x48f8]=1000;}
   bool run(){return potion.update(g,[&](uint32_t a){return memory[a];},[&](uint32_t a,uint16_t v){++writes;memory[a]=v;},[&](int type){++calls[type];return available[type];},{});}
 };
 int main(){

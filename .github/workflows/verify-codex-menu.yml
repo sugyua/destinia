@@ -9,11 +9,29 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: verify-codex-menu
-  cancel-in-progress: false
+  # Each PR has its own lane. New pushes supersede old CI for the same PR.
+  group: verify-codex-menu-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
+  # Fast fail: synthetic tests use no original APK/data, no live saves,
+  # and no external game packages. Required alongside Windows ARM32 CI.
+  regression-portable:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject ghost sidecars and bounty reward loss/duplication
+        run: python3 -m unittest discover -s tests -p test_regression_economy_saves.py -v
+      - name: Validate native-only Auto-Potion, cooldown and ARM guards
+        run: python3 -m unittest discover -s tests -p test_auto_potion.py -v
+      - name: Validate recovery journal and protected inventory metadata
+        run: |
+          python3 -m unittest discover -s tests -p test_safe_save.py -v
+          python3 -m unittest discover -s tests -p test_inventory_view.py -v
+
   windows:
     runs-on: windows-2022
+    timeout-minutes: 45
     permissions:
       contents: read
     steps:
@@ -65,11 +83,22 @@ jobs:
           SDL_VIDEODRIVER: dummy
           SDL_AUDIODRIVER: dummy
         run: |
-          set -eu
-          for pattern in test_inventory_view.py test_combat_power.py test_auto_potion.py test_auto_potion_arm.py test_boss_gold_native.py test_shutdown_failures.py test_original_ui.py test_original_companions.py test_drop_names.py test_runtime.py test_preferences.py test_preferences_host.py test_codex.py test_codex_native.py test_codex_details.py test_codex_details_ui.py test_codex_portraits.py test_zoom_camera.py test_zoom_menu_view.py test_zoom_menu_native.py test_safe_save.py test_offline_store.py test_save_modes.py test_touch_controls.py test_ui_transform.py test_text_labels.py test_release_coherence.py test_package_release.py test_package_windows.py; do
-            python -m unittest discover -s tests -p "$pattern" -v
+          set -u
+          failures=0
+          for pattern in test_regression_economy_saves.py test_inventory_view.py test_combat_power.py test_auto_potion.py test_auto_potion_arm.py test_boss_gold_native.py test_shutdown_failures.py test_original_ui.py test_original_companions.py test_drop_names.py test_runtime.py test_preferences.py test_preferences_host.py test_codex.py test_codex_native.py test_codex_details.py test_codex_details_ui.py test_codex_portraits.py test_zoom_camera.py test_zoom_menu_view.py test_zoom_menu_native.py test_safe_save.py test_offline_store.py test_save_modes.py test_touch_controls.py test_ui_transform.py test_text_labels.py test_release_coherence.py test_package_release.py test_package_windows.py; do
+            if ! python -m unittest discover -s tests -p "$pattern" -v; then
+              echo "::error title=Destinia regression::Suite $pattern failed"
+              failures=$((failures + 1))
+            fi
           done
-          DESTINIA_ZOOM_EXE="$PWD/host_zoom/build/destinia_host.exe" python -m unittest discover -s tests -p test_zoom_render.py -v
+          if ! DESTINIA_ZOOM_EXE="$PWD/host_zoom/build/destinia_host.exe" python -m unittest discover -s tests -p test_zoom_render.py -v; then
+            echo "::error title=Destinia regression::Suite test_zoom_render.py failed"
+            failures=$((failures + 1))
+          fi
+          if [ "$failures" -ne 0 ]; then
+            echo "::error title=Destinia regression::$failures test suites failed"
+            exit 1
+          fi
       - name: Verificar configuradores e diagnostico PowerShell
         shell: powershell
         run: |

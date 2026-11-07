@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <cstdint>
 #include <string>
 #include <algorithm>
@@ -21,7 +21,7 @@ struct AutoPotionConfig {
   bool enabled = false;
   int hpThresholdPercent = 50; // auto cura se HP <= 50%
   int mpThresholdPercent = 25; // auto mana se MP < 25%
-  int cooldownFrames = 60;     // 1 segundo a 60fps entre consumos
+  int cooldownFrames = 60;     // 60 ticks (3,75 segundos a 16 FPS)
 };
 
 class AutoPotionController {
@@ -46,83 +46,45 @@ public:
     if (noticeTimer > 0) --noticeTimer;
   }
 
-  // Verifica condicoes e executa consumo
+  // Use the game's original item-selection/consumption function via the
+  // checked native ARM32 adapter. Never decrement a guessed inventory ID or
+  // write synthetic HP/MP: unknown IDs are dangerous for real saves.
   bool update(uint32_t gameBase,
               const std::function<uint16_t(uint32_t)>& rd16,
-              const std::function<void(uint32_t, uint16_t)>& wr16,
+              const std::function<void(uint32_t,uint16_t)>& wr16,
+              const std::function<bool(int type)>& useNative,
               const std::function<void(int)>& playSound = {}) {
     tick();
-    if (!config.enabled || !gameBase || !rd16 || !wr16) return false;
-
-    // Verificar se o jogador esta vivo e em gameplay ativo (0x4854 == 0)
-    uint16_t gameState = rd16(gameBase + 0x4854);
-    if (gameState != 0) return false;
-
-    // Offsets ARM confirmados via dump de memoria:
-    //   0x48f2 = MP atual
-    //   0x48f4 = HP atual
-    //   0x48f6 = MP maximo
-    //   0x48f8 = HP maximo
-    //   0x48c4 = stat 5 (PV maximos)
-    //   0x48c6 = stat 6 (PM maximos)
-    uint16_t curHp = rd16(gameBase + 0x48f4);  // HP atual
-    uint16_t maxHp = rd16(gameBase + 0x48c4);  // stat 5 (PV maximos)
-
-    uint16_t curMp = rd16(gameBase + 0x48f2);  // MP atual
-    uint16_t maxMp = rd16(gameBase + 0x48c6);  // stat 6 (PM maximos)
-
-    if (curHp == 0 || maxHp == 0) return false;
-
-    bool used = false;
-
-    // Funcao auxiliar para buscar e consumir um item pelo ID na Bolsa 1
-    auto consumeItem = [&](uint16_t targetId) -> bool {
-      uint32_t bag1 = gameBase + 0x433c + 0x92; // bolsa 1 (consumiveis)
-      uint16_t count = rd16(bag1);
-      for (int i = 0; i < count && i < 24; ++i) {
-        uint32_t rec = bag1 + 2 + 6 * i;
-        uint16_t id = rd16(rec + 0);     // Offset 0: ID do item (pool)
-        uint16_t qty = rd16(rec + 4);    // Offset 4: Quantidade
-        if (id == targetId && qty > 0) {
-          wr16(rec + 4, qty - 1);        // Consome 1 unidade
-          return true;
-        }
-      }
-      return false;
-    };
-
-    // 1. HP Potion check
-    if (cooldownHpTimer == 0 && curHp < maxHp &&
-        (uint32_t(curHp) * 100 <= uint32_t(maxHp) * uint32_t(config.hpThresholdPercent))) {
-      if (consumeItem(HP_POTION_ID)) {
-        uint16_t heal = std::max<uint16_t>(50, maxHp * 40 / 100);
-        uint16_t newHp = std::min<uint16_t>(maxHp, curHp + heal);
-        wr16(gameBase + 0x48f4, newHp);
-        cooldownHpTimer = config.cooldownFrames;
-        totalHpUsed++;
-        used = true;
-        lastNotice = "AUTO-POCAO: PV RECUPERADO!";
-        noticeTimer = 60;
-        if (playSound) playSound(1); // eff01.ogg
+    if (!config.enabled || !gameBase || !rd16 || !wr16 || !useNative) return false;
+    if (rd16(gameBase+0x4854) != 0) return false;
+    const uint16_t curHp=rd16(gameBase+0x48f4);
+    const uint16_t maxHp=rd16(gameBase+0x48f8);
+    const uint16_t curMp=rd16(gameBase+0x48f2);
+    const uint16_t maxMp=rd16(gameBase+0x48f6);
+    if(curHp==0 || curHp==UINT16_MAX) return false;
+    bool used=false;
+    if(cooldownHpTimer==0 && maxHp>0 && curHp<maxHp &&
+       uint32_t(curHp)*100<=uint32_t(maxHp)*uint32_t(config.hpThresholdPercent)) {
+      const bool consumed=useNative(0);
+      cooldownHpTimer=config.cooldownFrames; // throttle unsuccessful attempts
+      if(consumed) {
+        ++totalHpUsed;used=true;
+        lastNotice="AUTO-POCAO: PV RECUPERADO!";noticeTimer=60;
+        if(playSound)playSound(1);
       }
     }
-
-    // 2. MP Potion check
-    if (cooldownMpTimer == 0 && maxMp > 0 && 
-        (uint32_t(curMp) * 100 <= uint32_t(maxMp) * uint32_t(config.mpThresholdPercent))) {
-      if (consumeItem(MP_POTION_ID)) {
-        uint16_t healMp = std::max<uint16_t>(30, maxMp * 35 / 100);
-        uint16_t newMp = std::min<uint16_t>(maxMp, curMp + healMp);
-        wr16(gameBase + 0x48f2, newMp);
-        cooldownMpTimer = config.cooldownFrames;
-        totalMpUsed++;
-        used = true;
-        lastNotice = "AUTO-POCAO: PM RECUPERADO!";
-        noticeTimer = 60;
-        if (playSound) playSound(1);
+    // The native callback may disable automatic use on an ARM access failure.
+    if(!config.enabled)return used;
+    if(cooldownMpTimer==0 && maxMp>0 && curMp<maxMp &&
+       uint32_t(curMp)*100<=uint32_t(maxMp)*uint32_t(config.mpThresholdPercent)) {
+      const bool consumed=useNative(1);
+      cooldownMpTimer=config.cooldownFrames; // throttle unsuccessful attempts
+      if(consumed) {
+        ++totalMpUsed;used=true;
+        lastNotice="AUTO-POCAO: PM RECUPERADO!";noticeTimer=60;
+        if(playSound)playSound(1);
       }
     }
-
     return used;
   }
 

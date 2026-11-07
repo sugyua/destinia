@@ -32,7 +32,7 @@ public:
     return { c.x + c.w - 85, c.y + 12, 78, 24 };
   }
 
-  bool handleTouch(int x, int y, int width, int height, unsigned slot, BountyManager& mgr, std::function<void(uint32_t gold, uint16_t cash)> onClaim) {
+  bool handleTouch(int x, int y, int width, int height, unsigned slot, BountyManager& mgr, std::function<void(size_t index)> requestClaim) {
     if (closeButton(width, height).contains(x, y)) {
       return false; // Fecha a UI
     }
@@ -41,10 +41,8 @@ public:
       if (claimButton(int(i), width, height).contains(x, y)) {
         selectedContract = int(i);
         auto& c = list[i];
-        if (c.completed && !c.claimed) {
-          c.claimed = true;
-          onClaim(c.rewardGold, c.rewardCash);
-        }
+        // UI only selects the contract; host exclusively commits the claim.
+        if (c.completed && !c.claimed && requestClaim) requestClaim(i);
         return true;
       }
       if (contractCardRect(int(i), width, height).contains(x, y)) {
