@@ -1,0 +1,29 @@
+name: Destinia weapon catalog regression
+on:
+  pull_request:
+    paths:
+      - "common/weapons_catalog*.h"
+      - "tests/weapons_catalog_ui_test.cpp"
+      - ".github/workflows/verify-catalog-regression.yml"
+  push:
+    branches: [main]
+    paths:
+      - "common/weapons_catalog*.h"
+      - "tests/weapons_catalog_ui_test.cpp"
+      - ".github/workflows/verify-catalog-regression.yml"
+permissions:
+  contents: read
+jobs:
+  catalog-cpp-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify 32 weapons, 32 armors, all four classes, tab/mouse and persistence
+        run: |
+          set -euo pipefail
+          tmp=$(mktemp -d)
+          trap 'rm -rf "$tmp"' EXIT
+          g++ -std=c++17 -O1 -I . tests/weapons_catalog_test.cpp -o "$tmp/catalog-model"
+          g++ -std=c++17 -O1 -I . tests/weapons_catalog_ui_test.cpp -o "$tmp/catalog-ui"
+          (cd "$tmp" && ./catalog-model && ./catalog-ui)

@@ -114,7 +114,13 @@ inline const std::vector<EquipmentCatalogDef>& allCatalogEquipment() {
 }
 
 inline const std::vector<EquipmentCatalogDef>& allCatalogWeapons() {
-  return allCatalogEquipment();
+  static const std::vector<EquipmentCatalogDef> weapons = [] {
+    std::vector<EquipmentCatalogDef> result;
+    for(const auto& entry : allCatalogEquipment())
+      if(entry.category == CatalogItemCategory::Weapon) result.push_back(entry);
+    return result;
+  }();
+  return weapons;
 }
 
 inline const EquipmentCatalogDef* findCatalogEquipment(uint16_t baseId) {

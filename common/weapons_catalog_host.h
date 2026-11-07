@@ -83,7 +83,7 @@ public:
       ui.prevPage();
       return true;
     }
-    if (key == 9 || key == 1073741903) { // Direita
+    if (key == 1073741903) { // Seta para direita (9 e TAB sao troca de classe)
       auto list = getCatalogItems(ui.selectedClass, ui.selectedCategory);
       ui.nextPage(list.size());
       return true;
@@ -99,6 +99,7 @@ public:
     if (key == '1') { ui.selectedClass = 1; ui.page = 0; return true; }
     if (key == '2') { ui.selectedClass = 2; ui.page = 0; return true; }
     if (key == '3') { ui.selectedClass = 3; ui.page = 0; return true; }
+    if (key == '4') { ui.selectedClass = 4; ui.page = 0; return true; }
 
     return true; // Consome todas as outras teclas enquanto aberto
   }

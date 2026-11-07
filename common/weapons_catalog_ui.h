@@ -40,7 +40,7 @@ public:
 
   inline CatalogRect tabRect(int index, int width, int height) const {
     auto p = panelRect(width, height);
-    return { p.x + 12 + index * 112, p.y + 26, 108, 18 };
+    return { p.x + 12 + index * 84, p.y + 26, 80, 18 };
   }
 
   inline CatalogRect prevButton(int width, int height) const {
@@ -59,12 +59,12 @@ public:
   }
 
   void nextTab() {
-    selectedClass = (selectedClass % 3) + 1;
+    selectedClass = (selectedClass % 4) + 1;
     page = 0;
   }
 
   void prevTab() {
-    selectedClass = (selectedClass == 1) ? 3 : (selectedClass - 1);
+    selectedClass = (selectedClass == 1) ? 4 : (selectedClass - 1);
     page = 0;
   }
 
@@ -86,7 +86,7 @@ public:
       toggleCategory();
       return true;
     }
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 4; ++i) {
       if (tabRect(i, width, height).contains(x, y)) {
         selectedClass = uint8_t(i + 1);
         page = 0;
@@ -227,13 +227,13 @@ public:
     }
 
     // Abas de Classes
-    const char* tabNames[3] = { "1. GUERREIRO", "2. ATIRADOR", "3. LADINO" };
-    for (int i = 0; i < 3; ++i) {
+    const char* tabNames[4] = { "1. GUER.", "2. ATIR.", "3. LADINO", "4. MAGO" };
+    for (int i = 0; i < 4; ++i) {
       auto tr = tabRect(i, width, height);
       bool active = (selectedClass == (i + 1));
       panel(tr.x, tr.y, tr.w, tr.h, active ? tabActive : bgDark);
       frame(tr.x, tr.y, tr.w, tr.h, active ? gold : borderCol);
-      text(tr.x + 14, tr.y + 4, tabNames[i], active ? gold : muted, 1);
+      text(tr.x + 7, tr.y + 4, tabNames[i], active ? gold : muted, 1);
     }
 
     // Lista de Armas na Página Atual
