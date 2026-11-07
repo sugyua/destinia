@@ -16,6 +16,7 @@
 - O Mago dos Bosses lê o saldo real de ouro. O rastreador de missões no Zoom foi afastado da faixa superior.
 - Os resets pagos de atributos e habilidades do Mago ficam temporariamente indisponíveis por segurança e não cobram ouro.
 - Esta versão não corrige automaticamente a mana já acima do máximo, nem o crédito de contratos ou recompensas antigas. Barra de abas duplicada e escala de inventário/status continuam em investigação.
+- **Quarta classe jogável (Mago):** Investigação e ensaio experimental concluídos como inviáveis na estrutura original da ROM (`libdestinia_jni.so`). O motor ARM possui tabelas estáticas de exatamente três classes (273 bytes para habilidades e 252 bytes para atributos), seletor em módulo 3 e rotinas de renderização rígidas. Qualquer tentativa de estender para uma 4ª classe gera conflitos de layout, corrupção de offsets de memória ou sobreposição artificial no framebuffer. O jogo mantém seu escopo estável com as 3 classes originais.
 - A Web não foi alterada nesta entrega de PC.
 
 ## Novidade 0.17.3 Beta
