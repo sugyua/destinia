@@ -228,15 +228,16 @@ static bool codexDrainNativeMenu(){
  catch(...){codexNativeMenuDraining=false;throw;}
  codexNativeMenuDraining=false;return ok;
 }
-// Suppress only the original top-bar hand. The painter relocates the same sprite.
-// Body cursors and off-screen sprite extraction keep their original ARM path.
-static void codexTopHandHook(uc_engine*,uint64_t,uint32_t,void*){
- const auto oy=(SCREEN_H-240)/2;u32 lr=0;uc_reg_read(uc,UC_ARM_REG_LR,&lr);
- const int32_t y = int32_t(R(2));
- const bool inTopBar = (y >= 0 && y < 45) || (y >= oy && y < oy + 45);
- if(R(3)==exportsMap.at("MMain")+12 && inTopBar &&
-    (lr&~1u)>=(exportsMap.at("GameUI_drawMainMenu")&~1u)&&(lr&~1u)<(exportsMap.at("GameUI_drawMainMenu")&~1u)+8400)
-  uc_reg_write(uc,UC_ARM_REG_PC,&lr);
+// Suppress the original top-bar background, tab icons, and hand pointer.
+// The native ARM loop (0x323aa..0x32498) updates registers/state, while our hooks skip the 4 bl draw calls:
+// 1) 0x323c8: bl _drawRefelctBox (original 9-tab background bar)
+// 2) 0x3242a: bl Grp_drawWImage (inactive tab icons)
+// 3) 0x3246a: bl Grp_drawWImage (active tab icon)
+// 4) 0x3248c: bl GameUI_drawPointer (original top-bar selected hand pointer)
+// NativeCodexPainter then cleanly draws the entire 10-tab expanded bar and pointer with zero overlap.
+static void codexSkipDrawHook(uc_engine*, uint64_t address, uint32_t, void*) {
+ const u32 next = u32(address) + 4; // Thumb 32-bit BL instruction is 4 bytes
+ uc_reg_write(uc, UC_ARM_REG_PC, &next);
 }
 static void installCodex() {
   std::vector<uint8_t> library,table;
@@ -244,7 +245,12 @@ static void installCodex() {
   uint64_t fingerprint=14695981039346656037ull;for(auto b:library) fingerprint=(fingerprint^b)*1099511628211ull;
   if(fingerprint!=0x74b2547839b88777ull || !exportsMap.count("Game")) {hostReport("[codex] Biblioteca diferente da original verificada; observador desativado.\n");return;}
   try {
-    {uc_hook hook;const auto at=exportsMap.at("Grp_drawWImage")&~1u;if(uc_hook_add(uc,&hook,UC_HOOK_CODE,reinterpret_cast<void*>(codexTopHandHook),nullptr,at,at)!=UC_ERR_OK)throw std::runtime_error("Falha ao alinhar cursor da barra.");}
+    const u32 drawCallsToSkip[] = { SO_BASE + 0x323c8, SO_BASE + 0x3242a, SO_BASE + 0x3246a, SO_BASE + 0x3248c };
+    for(u32 addr : drawCallsToSkip) {
+      uc_hook hook;
+      if(uc_hook_add(uc, &hook, UC_HOOK_CODE, reinterpret_cast<void*>(codexSkipDrawHook), nullptr, addr, addr) != UC_ERR_OK)
+        throw std::runtime_error("Falha ao suprimir desenho nativo das abas.");
+    }
     if(!readFile(assetsDir+"/mon_data_en.gdt",table)) throw std::runtime_error("Tabela de monstros ausente.");
     codex.readNames(table);
     try {codex.load(fs::path(saveDir)/"codex-v1.txt");}
