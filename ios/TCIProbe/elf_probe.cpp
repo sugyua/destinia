@@ -250,6 +250,24 @@ static int destinia_probe_impl(
                 throw std::runtime_error(
                     "Falha no PxlMultiply nativo: "+runtimeError);
             }
+#if defined(DESTINIA_NATIVE_SCREEN)
+            const bool nativeScreenEnabled=true;
+#else
+            const bool nativeScreenEnabled=
+                std::getenv("DESTINIA_FAST_SCREEN")!=nullptr;
+#endif
+            if (nativeScreenEnabled) {
+                if (!runtime->enableNativeDrawScreen16(
+                        static_cast<uint32_t>(base),runtimeError)) {
+                    throw std::runtime_error(
+                        "Falha no native drawScreen16: "+runtimeError);
+                }
+                if (!runtime->enableNativeDrawAlpScreen16(
+                        static_cast<uint32_t>(base),runtimeError)) {
+                    throw std::runtime_error(
+                        "Falha no native drawAlpScreen16: "+runtimeError);
+                }
+            }
             if (nativeSimpleClipEnabled &&
                 !runtime->enableNativeSimpleClipRow(
                     static_cast<uint32_t>(base),runtimeError)) {

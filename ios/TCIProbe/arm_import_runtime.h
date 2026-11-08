@@ -25,6 +25,8 @@ public:
     bool enableNativePxlMultiply(uint32_t imageBase, std::string &error);
     bool enableNativeAlpha16(uint32_t imageBase, std::string &error);
     bool enableNativeAlphaRow(uint32_t imageBase, std::string &error);
+    bool enableNativeDrawScreen16(uint32_t imageBase, std::string &error);
+    bool enableNativeDrawAlpScreen16(uint32_t imageBase, std::string &error);
     bool selfTest(std::string &error);
     bool selfTestJniBufferReuse(std::string &error);
     bool runOriginalExport(uint32_t address, uint32_t &result,
@@ -53,6 +55,8 @@ private:
     static void onFastPxlMultiply(uc_engine *, uint64_t, uint32_t, void *);
     static void onFastAlpha16(uc_engine *, uint64_t, uint32_t, void *);
     static void onFastAlphaRow(uc_engine *, uint64_t, uint32_t, void *);
+    static void onFastDrawScreen16(uc_engine *, uint64_t, uint32_t, void *);
+    static void onFastDrawAlpScreen16(uc_engine *, uint64_t, uint32_t, void *);
     static void onJniCode(uc_engine *, uint64_t, uint32_t, void *);
     void dispatchJni(uint32_t address);
     bool installJni(std::string &error);
@@ -80,6 +84,9 @@ private:
     uc_hook fastPxlMultiplyHook_ = 0;
     uc_hook fastAlphaHook_ = 0;
     uc_hook fastAlpha16Hook_ = 0;
+    uc_hook fastDrawScreenHook_ = 0;
+    uc_hook fastDrawAlpScreenHook_ = 0;
+    uint32_t drawScreenGrpCtxPtr_ = 0;
     std::array<uint32_t,3> alphaWords_{};
     std::map<uint32_t,uint64_t> profileBlocks_;
     bool profileNextFrame_ = false;
@@ -94,6 +101,8 @@ private:
     uint64_t nativeDodgeRows_ = 0;
     uint64_t nativeSimpleClipRows_ = 0;
     uint64_t nativePxlMultiplyCalls_ = 0;
+    uint64_t nativeDrawScreen16Calls_ = 0;
+    uint64_t nativeDrawAlpScreen16Calls_ = 0;
     uint32_t pxlMultiplyGotBase_ = 0;
     std::array<uint32_t,8> pxlMultiplyConfig_{};
     bool pxlMultiplyConfigReady_ = false;

@@ -50,6 +50,8 @@ ArmImportRuntime::~ArmImportRuntime() {
     if (fastPxlMultiplyHook_) uc_hook_del(uc_, fastPxlMultiplyHook_);
     if (fastAlphaHook_) uc_hook_del(uc_, fastAlphaHook_);
     if (fastAlpha16Hook_) uc_hook_del(uc_,fastAlpha16Hook_);
+    if (fastDrawScreenHook_) uc_hook_del(uc_,fastDrawScreenHook_);
+    if (fastDrawAlpScreenHook_) uc_hook_del(uc_,fastDrawAlpScreenHook_);
     // Unicorn must release the borrowed host memory before vector storage dies.
     if (hasDirectHeap_)
         uc_mem_unmap(uc_,kHeapBase,kHeapSize);
@@ -1829,4 +1831,296 @@ bool ArmImportRuntime::selfTest(std::string &error) {
     }
     return true;
 }
+
+// Native acceleration for _Grp_drawScreen16 (Android ELF Thumb +0x9868)
+// Screen blend mode used during critical hits, flash effects, and overlays.
+// Directly executes row-by-row RGB565 screen blending in native C++.
+bool ArmImportRuntime::enableNativeDrawScreen16(
+    uint32_t imageBase, std::string &error) {
+    const uint32_t entry = imageBase + 0x9868u;
+    uint16_t op0 = 0, op1 = 0;
+    uint32_t literal = 0;
+    if (!readBytes(entry, &op0, sizeof(op0)) ||
+        !readBytes(entry + 2, &op1, sizeof(op1)) ||
+        !readBytes(imageBase + 0x99d8u, &literal, sizeof(literal)) ||
+        op0 != 0xb5f0u || op1 != 0x465fu || literal != 0x0003a848u) {
+        error = "_Grp_drawScreen16: assinatura Thumb inesperada";
+        return false;
+    }
+    // Grp context pointer is stored in GOT at entry + 0x18 + literal + 0x164:
+    // pc at 0x987c is 0x9880. 0x9880 + 0x3a848 = GOT base 0x440c8.
+    const uint32_t got = imageBase + 0x9880u + literal;
+    const uint32_t grpGotEntry = got + 0x164u;
+    if (!readBytes(grpGotEntry, &drawScreenGrpCtxPtr_, sizeof(drawScreenGrpCtxPtr_)) ||
+        !drawScreenGrpCtxPtr_) {
+        error = "_Grp_drawScreen16: ponteiro de contexto Grp invalido no GOT";
+        return false;
+    }
+    const uint16_t returnToLR = 0x4770u; // Thumb bx lr
+    if (!writeBytes(entry, &returnToLR, sizeof(returnToLR))) {
+        error = "_Grp_drawScreen16: falha ao escrever instrucao Thumb";
+        return false;
+    }
+    const uc_err hooked = uc_hook_add(
+        uc_, &fastDrawScreenHook_, UC_HOOK_CODE,
+        reinterpret_cast<void *>(onFastDrawScreen16), this, entry, entry);
+    if (hooked != UC_ERR_OK) {
+        writeBytes(entry, &op0, sizeof(op0));
+        error = std::string("_Grp_drawScreen16 hook: ") + uc_strerror(hooked);
+        return false;
+    }
+    return true;
+}
+
+void ArmImportRuntime::onFastDrawScreen16(
+    uc_engine *, uint64_t, uint32_t, void *opaque) {
+    auto *rt = static_cast<ArmImportRuntime *>(opaque);
+    uint32_t dst = 0, src = 0, palettePtr = 0, width = 0, sp = 0;
+    if (!rt->readReg(UC_ARM_REG_R0, dst) ||
+        !rt->readReg(UC_ARM_REG_R1, src) ||
+        !rt->readReg(UC_ARM_REG_R2, palettePtr) ||
+        !rt->readReg(UC_ARM_REG_R3, width) ||
+        !rt->readReg(UC_ARM_REG_SP, sp)) {
+        rt->fail("_Grp_drawScreen16: registradores invalidos");
+        return;
+    }
+    uint32_t height = 0, strideSrc = 0, stepDst = 0, strideDst = 0;
+    if (!rt->readBytes(sp, &height, 4) ||
+        !rt->readBytes(sp + 4, &strideSrc, 4) ||
+        !rt->readBytes(sp + 8, &stepDst, 4) ||
+        !rt->readBytes(sp + 12, &strideDst, 4)) {
+        rt->fail("_Grp_drawScreen16: leitura da pilha falhou");
+        return;
+    }
+    if (width == 0 || height == 0 || width > 2048 || height > 2048 || !palettePtr) {
+        return;
+    }
+    uint32_t grpCtx = 0, key = 0;
+    if (!rt->readBytes(rt->drawScreenGrpCtxPtr_, &grpCtx, 4) || !grpCtx ||
+        !rt->readBytes(grpCtx + 0x50u, &key, 4)) {
+        rt->fail("_Grp_drawScreen16: leitura do contexto Grp/key falhou");
+        return;
+    }
+
+    std::array<uint16_t, 256> palette{};
+    if (!rt->readBytes(palettePtr, palette.data(), palette.size() * sizeof(uint16_t))) {
+        rt->fail("_Grp_drawScreen16: leitura da paleta falhou");
+        return;
+    }
+
+    const int32_t stepDstBytes = static_cast<int32_t>(stepDst) * 2;
+    const int32_t strideDstBytes = static_cast<int32_t>(strideDst) * 2;
+    const uint16_t keyColor = static_cast<uint16_t>(key);
+
+    std::vector<uint8_t> rowIndices(width);
+    for (uint32_t y = 0; y < height; ++y) {
+        if (!rt->readBytes(src, rowIndices.data(), width)) {
+            rt->fail("_Grp_drawScreen16: leitura dos indices da linha falhou");
+            return;
+        }
+        uint32_t curDst = dst;
+        for (uint32_t x = 0; x < width; ++x) {
+            const uint16_t color = palette[rowIndices[x]];
+            if (color != keyColor) {
+                uint16_t dstPixel = 0;
+                if (rt->hasDirectHeap_ && curDst >= kHeapBase &&
+                    (curDst + 2) <= (kHeapBase + kHeapSize)) {
+                    uint8_t *p = rt->directHeap_.data() + (curDst - kHeapBase);
+                    dstPixel = static_cast<uint16_t>(p[0] | (static_cast<uint16_t>(p[1]) << 8));
+                    const uint32_t dstR = dstPixel >> 11;
+                    const uint32_t srcR = color >> 11;
+                    const uint32_t resR = 31u - (((31u - dstR) * (31u - srcR)) >> 5);
+
+                    const uint32_t dstG = (dstPixel >> 5) & 63u;
+                    const uint32_t srcG = (color >> 5) & 63u;
+                    const uint32_t resG = 63u - (((63u - dstG) * (63u - srcG)) >> 6);
+
+                    const uint32_t dstB = dstPixel & 31u;
+                    const uint32_t srcB = color & 31u;
+                    const uint32_t resB = 31u - (((31u - dstB) * (31u - srcB)) >> 5);
+
+                    const uint16_t blended = static_cast<uint16_t>(
+                        ((resR & 31u) << 11) | ((resG & 63u) << 5) | (resB & 31u));
+                    p[0] = static_cast<uint8_t>(blended);
+                    p[1] = static_cast<uint8_t>(blended >> 8);
+                } else {
+                    if (rt->readBytes(curDst, &dstPixel, 2)) {
+                        const uint32_t dstR = dstPixel >> 11;
+                        const uint32_t srcR = color >> 11;
+                        const uint32_t resR = 31u - (((31u - dstR) * (31u - srcR)) >> 5);
+
+                        const uint32_t dstG = (dstPixel >> 5) & 63u;
+                        const uint32_t srcG = (color >> 5) & 63u;
+                        const uint32_t resG = 63u - (((63u - dstG) * (63u - srcG)) >> 6);
+
+                        const uint32_t dstB = dstPixel & 31u;
+                        const uint32_t srcB = color & 31u;
+                        const uint32_t resB = 31u - (((31u - dstB) * (31u - srcB)) >> 5);
+
+                        const uint16_t blended = static_cast<uint16_t>(
+                            ((resR & 31u) << 11) | ((resG & 63u) << 5) | (resB & 31u));
+                        rt->writeBytes(curDst, &blended, 2);
+                    }
+                }
+            }
+            curDst = static_cast<uint32_t>(static_cast<int32_t>(curDst) + stepDstBytes);
+        }
+        src = static_cast<uint32_t>(static_cast<int32_t>(src) + static_cast<int32_t>(width) + static_cast<int32_t>(strideSrc));
+        dst = static_cast<uint32_t>(static_cast<int32_t>(dst) + static_cast<int32_t>(width) * stepDstBytes + strideDstBytes);
+    }
+    ++rt->nativeDrawScreen16Calls_;
+}
+
+// Native acceleration for _Grp_drawAlpScreen16 (Android ELF Thumb +0x9a00)
+// Screen blend mode with secondary alpha layer.
+bool ArmImportRuntime::enableNativeDrawAlpScreen16(
+    uint32_t imageBase, std::string &error) {
+    const uint32_t entry = imageBase + 0x9a00u;
+    uint16_t op0 = 0, op1 = 0;
+    uint32_t literal = 0;
+    if (!readBytes(entry, &op0, sizeof(op0)) ||
+        !readBytes(entry + 2, &op1, sizeof(op1)) ||
+        !readBytes(imageBase + 0x9b8cu, &literal, sizeof(literal)) ||
+        op0 != 0xb5f0u || op1 != 0x465fu || literal != 0x0003a6b0u) {
+        error = "_Grp_drawAlpScreen16: assinatura Thumb inesperada";
+        return false;
+    }
+    const uint32_t got = imageBase + 0x9a18u + literal;
+    const uint32_t grpGotEntry = got + 0x164u;
+    if (!readBytes(grpGotEntry, &drawScreenGrpCtxPtr_, sizeof(drawScreenGrpCtxPtr_)) ||
+        !drawScreenGrpCtxPtr_) {
+        error = "_Grp_drawAlpScreen16: ponteiro de contexto Grp invalido no GOT";
+        return false;
+    }
+    const uint16_t returnToLR = 0x4770u; // Thumb bx lr
+    if (!writeBytes(entry, &returnToLR, sizeof(returnToLR))) {
+        error = "_Grp_drawAlpScreen16: falha ao escrever instrucao Thumb";
+        return false;
+    }
+    const uc_err hooked = uc_hook_add(
+        uc_, &fastDrawAlpScreenHook_, UC_HOOK_CODE,
+        reinterpret_cast<void *>(onFastDrawAlpScreen16), this, entry, entry);
+    if (hooked != UC_ERR_OK) {
+        writeBytes(entry, &op0, sizeof(op0));
+        error = std::string("_Grp_drawAlpScreen16 hook: ") + uc_strerror(hooked);
+        return false;
+    }
+    return true;
+}
+
+void ArmImportRuntime::onFastDrawAlpScreen16(
+    uc_engine *, uint64_t, uint32_t, void *opaque) {
+    auto *rt = static_cast<ArmImportRuntime *>(opaque);
+    uint32_t dst = 0, src = 0, palettePtr = 0, width = 0, sp = 0;
+    if (!rt->readReg(UC_ARM_REG_R0, dst) ||
+        !rt->readReg(UC_ARM_REG_R1, src) ||
+        !rt->readReg(UC_ARM_REG_R2, palettePtr) ||
+        !rt->readReg(UC_ARM_REG_R3, width) ||
+        !rt->readReg(UC_ARM_REG_SP, sp)) {
+        rt->fail("_Grp_drawAlpScreen16: registradores invalidos");
+        return;
+    }
+    uint32_t height = 0, strideSrc = 0, stepDst = 0, strideDst = 0;
+    if (!rt->readBytes(sp, &height, 4) ||
+        !rt->readBytes(sp + 4, &strideSrc, 4) ||
+        !rt->readBytes(sp + 8, &stepDst, 4) ||
+        !rt->readBytes(sp + 12, &strideDst, 4)) {
+        rt->fail("_Grp_drawAlpScreen16: leitura da pilha falhou");
+        return;
+    }
+    if (width == 0 || height == 0 || width > 2048 || height > 2048 || !palettePtr) {
+        return;
+    }
+    uint32_t grpCtx = 0, key = 0, alpha = 0;
+    if (!rt->readBytes(rt->drawScreenGrpCtxPtr_, &grpCtx, 4) || !grpCtx ||
+        !rt->readBytes(grpCtx + 0x50u, &key, 4) ||
+        !rt->readBytes(grpCtx + 0x68u, &alpha, 4)) {
+        rt->fail("_Grp_drawAlpScreen16: leitura do contexto Grp/key/alpha falhou");
+        return;
+    }
+
+    std::array<uint16_t, 256> palette{};
+    if (!rt->readBytes(palettePtr, palette.data(), palette.size() * sizeof(uint16_t))) {
+        rt->fail("_Grp_drawAlpScreen16: leitura da paleta falhou");
+        return;
+    }
+
+    const int32_t stepDstBytes = static_cast<int32_t>(stepDst) * 2;
+    const int32_t strideDstBytes = static_cast<int32_t>(strideDst) * 2;
+    const uint16_t keyColor = static_cast<uint16_t>(key);
+    constexpr uint32_t alphaMask = 0x07e0f81fu;
+
+    std::vector<uint8_t> rowIndices(width);
+    for (uint32_t y = 0; y < height; ++y) {
+        if (!rt->readBytes(src, rowIndices.data(), width)) {
+            rt->fail("_Grp_drawAlpScreen16: leitura dos indices da linha falhou");
+            return;
+        }
+        uint32_t curDst = dst;
+        for (uint32_t x = 0; x < width; ++x) {
+            const uint16_t color = palette[rowIndices[x]];
+            if (color != keyColor) {
+                uint16_t dstPixel = 0;
+                if (rt->hasDirectHeap_ && curDst >= kHeapBase &&
+                    (curDst + 2) <= (kHeapBase + kHeapSize)) {
+                    uint8_t *p = rt->directHeap_.data() + (curDst - kHeapBase);
+                    dstPixel = static_cast<uint16_t>(p[0] | (static_cast<uint16_t>(p[1]) << 8));
+                    const uint32_t dstR = dstPixel >> 11;
+                    const uint32_t srcR = color >> 11;
+                    const uint32_t resR = 31u - (((31u - dstR) * (31u - srcR)) >> 5);
+
+                    const uint32_t dstG = (dstPixel >> 5) & 63u;
+                    const uint32_t srcG = (color >> 5) & 63u;
+                    const uint32_t resG = 63u - (((63u - dstG) * (63u - srcG)) >> 6);
+
+                    const uint32_t dstB = dstPixel & 31u;
+                    const uint32_t srcB = color & 31u;
+                    const uint32_t resB = 31u - (((31u - dstB) * (31u - srcB)) >> 5);
+
+                    const uint32_t blended = ((resR & 31u) << 11) | ((resG & 63u) << 5) | (resB & 31u);
+                    const uint32_t a = (dstPixel | (dstPixel << 16)) & alphaMask;
+                    const uint32_t b = (blended | (blended << 16)) & alphaMask;
+                    const uint32_t prod = static_cast<uint32_t>(static_cast<uint64_t>(a - b) * alpha);
+                    int32_t signedProd = 0;
+                    std::memcpy(&signedProd, &prod, sizeof(prod));
+                    const uint32_t mixed = (b + static_cast<uint32_t>(signedProd >> 4)) & alphaMask;
+                    const uint16_t finalColor = static_cast<uint16_t>(mixed | (mixed >> 16));
+
+                    p[0] = static_cast<uint8_t>(finalColor);
+                    p[1] = static_cast<uint8_t>(finalColor >> 8);
+                } else {
+                    if (rt->readBytes(curDst, &dstPixel, 2)) {
+                        const uint32_t dstR = dstPixel >> 11;
+                        const uint32_t srcR = color >> 11;
+                        const uint32_t resR = 31u - (((31u - dstR) * (31u - srcR)) >> 5);
+
+                        const uint32_t dstG = (dstPixel >> 5) & 63u;
+                        const uint32_t srcG = (color >> 5) & 63u;
+                        const uint32_t resG = 63u - (((63u - dstG) * (63u - srcG)) >> 6);
+
+                        const uint32_t dstB = dstPixel & 31u;
+                        const uint32_t srcB = color & 31u;
+                        const uint32_t resB = 31u - (((31u - dstB) * (31u - srcB)) >> 5);
+
+                        const uint32_t blended = ((resR & 31u) << 11) | ((resG & 63u) << 5) | (resB & 31u);
+                        const uint32_t a = (dstPixel | (dstPixel << 16)) & alphaMask;
+                        const uint32_t b = (blended | (blended << 16)) & alphaMask;
+                        const uint32_t prod = static_cast<uint32_t>(static_cast<uint64_t>(a - b) * alpha);
+                        int32_t signedProd = 0;
+                        std::memcpy(&signedProd, &prod, sizeof(prod));
+                        const uint32_t mixed = (b + static_cast<uint32_t>(signedProd >> 4)) & alphaMask;
+                        const uint16_t finalColor = static_cast<uint16_t>(mixed | (mixed >> 16));
+
+                        rt->writeBytes(curDst, &finalColor, 2);
+                    }
+                }
+            }
+            curDst = static_cast<uint32_t>(static_cast<int32_t>(curDst) + stepDstBytes);
+        }
+        src = static_cast<uint32_t>(static_cast<int32_t>(src) + static_cast<int32_t>(width) + static_cast<int32_t>(strideSrc));
+        dst = static_cast<uint32_t>(static_cast<int32_t>(dst) + static_cast<int32_t>(width) * stepDstBytes + strideDstBytes);
+    }
+    ++rt->nativeDrawAlpScreen16Calls_;
+}
+
 } // namespace destinia
