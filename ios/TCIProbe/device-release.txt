@@ -1,8 +1,19 @@
-Destinia iOS ARM32 diagnostic milestone 0.5.2
+Destinia iOS ARM32 diagnostic milestone 0.5.3
 Branch: ios/unicorn-poc
-Build: 19, unsigned IPA (sign with AltStore or equivalent)
+Build: 20, unsigned IPA (sign with AltStore or equivalent)
 Upgrade over iOS native 0.3.9 without uninstalling to preserve app data.
 Bundle ID com.destinia.tcidiagnostic is unchanged.
+
+0.5.3 features:
+- Ocultação dos botões virtuais da tela (100% transparentes) com supressão de toque durante o uso de controle físico.
+- Mapeamento refinado de controle 100% idêntico à versão de PC (layout DualSense / USB-C):
+  * Ataque: X (Cruz / buttonA)
+  * Voltar/Fechar: Círculo (buttonB)
+  * Poção HP: L1 (leftShoulder)
+  * Poção Mana: R1 (rightShoulder)
+  * Habilidades: Analógico Direito (RS <, RS v, RS >, RS ^)
+  * Menu: Start (buttonMenu)
+  * Salvar: Select / Options (buttonOptions)
 
 0.5.2 features:
 - Mapeamento de controle 100% idêntico à versão de PC (layout DualSense):
@@ -35,46 +46,3 @@ Bundle ID com.destinia.tcidiagnostic is unchanged.
 - Official Destinia app icons embedded into IPA bundle and Info.plist.
 - Fast-path sprite palette caching in Grp_drawClipWImageP eliminating hundreds of redundant memory copies per frame.
 - Targeted CPU thermal reduction on real device.
-Destinia iOS native ARM32 diagnostic milestone 0.3.9
-Branch: ios/unicorn-poc
-Build: 13; IPA unsigned and must be signed for iPhone installation.
-Replace 0.3.8 in-place. Keep bundle ID com.destinia.tcidiagnostic.
-DO NOT UNINSTALL to update; preserve game saves and app data.
-
-Measured by user on iPhone, version 0.3.8:
-- Gameplay: 15.5 FPS, ARM32 mean 56.1 ms, frame 64.3 ms (peak 67 ms).
-- RAM: 126 MiB; thermal ELEVADO after roughly four minutes of gameplay.
-- Full native ARM32 TOP profile: Grp_drawClipWImageP (238667),
-  Grp_drawSimpleClipWImageP (96474), Grp_drawWPNImage2 (89305),
-  _drawMiniMap (55506), Grp_fillRect (53941); numbers are executed
-  ARM32 instructions attributed to symbols, NOT function call counts.
-- Exact game design target is 16 logic updates/second = 62.5 ms/tick.
-
-0.3.9 change (pacing only, not a graphics code change):
-- Move iOS dispatch-source tick deadlines from rounded milliseconds
-  to nanoseconds, computed relative to the beginning of each tick.
-- Apply a minimum update period of 62.5 ms, never higher than 16 Hz.
-- Honor slower game-requested delays, including loading/transitions;
-  do not attempt catch-up when ARM32 processing exceeds a tick budget.
-- Tighten DispatchSource timer leeway from 5ms to 0.5ms for the 16Hz
-  gameplay timer, without busy-waiting.
-- Preserve all already validated native graphics hooks from 0.3.8,
-  original Android ELF/assets, game logic and save compatibility.
-- Preserve 3-finger diagnostics and one-shot 4-finger profiling.
-- Add portable C++ scheduling tests in ios/TCIProbe/frame_pacing_test.cpp;
-  CI stage workflow runs them ahead of its 420-frame equivalence test.
-
-Validation requirements:
-- Portable 16 Hz scheduling arithmetic tests pass.
-- Native iOS main.mm compiles successfully with the updated header.
-- ARM32 regression and 420-frame identity tests pass.
-- Device test still required to confirm sustained 16 FPS and cooler
-  thermal behavior. Tighter timer leeway can increase wake precision
-  and potentially energy use; thermal effect is not yet verified.
-
-User tests (same scene/device):
-1. Install over 0.3.8 without uninstalling; protect saves.
-2. Capture HUD after 60 seconds and after 5-10 minutes.
-3. Compare FPS, frame time, ARM32, RAM and thermal to 0.3.8.
-4. Check gameplay speed, animation pace, combat, map change and saves.
-5. Send TOP ARM32 profile only if frame time still consistently >62.5ms.
