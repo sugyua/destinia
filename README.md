@@ -76,17 +76,23 @@
   - 5 abas integradas ([CHEFES], [TORRE], [MASCOTES], [SANTUARIO], [TITULOS]).
   - Gerenciamento completo de títulos desbloqueados com aplicação imediata dos buffs no herói.
 
-## Destinia iOS Nativo (ARM64 / Unicorn TCI) — v0.4.2 (Build 16)
+## Destinia iOS Nativo (ARM64 / Unicorn TCI) — v0.5.3 (Build 20)
 
-- **Port Nativo para iPhone / iOS (IPA Não Assinada)**:
-  - Execução híbrida do binário Android ARM32 via emulador Unicorn TCI com acelerações nativas C++ para Apple Silicon.
-  - **Ícones Oficiais do Destinia**: Empacotamento completo de ícones em todas as resoluções de tela (AppIcon20x20 até 1024x1024) no bundle IPA e Info.plist.
+- **Port Nativo para iPhone / iOS (IPA)**:
+  - Execução do binário Android ARM32 via emulador Unicorn TCI com acelerações nativas C++ para Apple Silicon.
+  - **Suporte Completo a Controles Físicos USB-C, Lightning e Bluetooth (v0.5.1 - v0.5.3)**:
+    - Integração nativa com `GameController.framework`.
+    - Mapeamento idêntico à versão de PC (DualSense): Ataque no `X`, Voltar no `Círculo`, Poções no `L1` (HP) e `R1` (Mana), Menu no `Start`, Salvar no `Select` e Habilidades no `Analógico Direito (RS)`.
+    - Ocultação dos botões virtuais da tela (100% transparentes) com bloqueio de toque quando o controle está conectado.
+  - **Tradução Completa em Português (PT-BR) (v0.5.0)**:
+    - Textos da história, diálogos, itens, monstros, habilidades e menus 100% em português brasileiro, injetados no carregador de assets nativo C++ (`portuguese_text.h`).
   - **Aceleração Nativa C++ para Dano Crítico (_Grp_drawScreen16 e _Grp_drawAlpScreen16)**:
     - Elimina o gargalo crítico de **1,75 milhão de instruções interpretadas por frame**, reduzindo o tempo de renderização de ~168 ms para microssegundos em memória direta.
     - Dano crítico, brilhos e overlays executam a **16 FPS cravados (41.9 ms ARM32)** sem quedas ou congelamentos.
   - **Pipeline de Gráficos e Cache de Paleta**: Acelerações diretas em memória RAM/Heap para cópia de colunas de sprites, Alpha Row, Dodge16 e FillRect.
   - **Temporização Precisa de 16 Hz**: Agendamento em nanossegundos via GCD e CADisplayLink com tolerância de 0,5 ms.
   - **HUD de Diagnóstico em Tempo Real**: Métricas completas de FPS, tempo de frame, ARM32, memória RAM, temperatura do dispositivo e Top 5 funções ARM32 mais lentas.
+  - **Ícones Oficiais do Destinia**: Empacotamento de ícones em todas as resoluções de tela (AppIcon20x20 até 1024x1024) no bundle IPA e Info.plist.
 
 ## Novidades da Versão 0.11.0 Beta — Catálogo de Armamentos, Baú Compartilhado e Contratos Offline (Bounties)
 
