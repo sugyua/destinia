@@ -5,14 +5,16 @@
 // Virtual touch mapping for Destinia (native 400x240 screen coordinates):
 // D-Pad / Left Thumbstick:
 // Center: (52, 185) with radius ~28
-// Action Buttons (100% matched to PC DualSense layout):
-// - Ataque: X (Cruz / buttonA no ExtendedGamepad): (360, 200)
-// - Voltar / Cancelar: Circulo (buttonB no ExtendedGamepad): (384, 16) ou botão voltar/escape
-// - Pocao HP: L1 (leftShoulder): (384, 52)
-// - Pocao Mana (MP): R1 (rightShoulder): (350, 52)
-// - Menu Principal: Start (buttonMenu): (384, 16)
-// - Salvar Jogo / Opcoes: Select / Options: (16, 16)
-// - Habilidades: Analogico Direito (Right Thumbstick):
+// Action Buttons (GameSir X5 Lite & MFi / ExtendedGamepad):
+// - Ataque: Botão A (físico e MFi buttonA) -> (360, 200)
+// - Voltar / Cancelar / Ação secundária: Botão B (buttonB) -> (384, 16)
+// - Ataque alternativo / Interagir: Botão X (buttonX) -> (360, 200)
+// - Menu / Bag: Botão Y (buttonY) -> (384, 16)
+// - Pocao HP (Vida): L1 (leftShoulder) -> Botão HP na HUD de jogo (316, 172)
+// - Pocao MP (Mana): R1 (rightShoulder) -> Botão MP na HUD de jogo (356, 140)
+// - Menu Principal: Start / Menu (buttonMenu) -> (384, 16)
+// - Salvar Jogo / Save: Select / Options / Back -> (270, 16)
+// - Habilidades: Analógico Direito (Right Thumbstick):
 //     RS <- (Esquerda): (316, 172) [Slot 0]
 //     RS v  (Baixo):    (316, 216) [Slot 1]
 //     RS -> (Direita):  (356, 140) [Slot 2]
@@ -84,10 +86,10 @@ private:
         GCExtendedGamepad *gamepad = controller.extendedGamepad;
         if (!gamepad) return;
 
-        // 1. Analógico Esquerdo (Movimento 360 graus):
+        // 1. Analógico Esquerdo (Movimento 360 graus com deadzone de 0.20):
         gamepad.leftThumbstick.valueChangedHandler = ^(GCControllerDirectionPad *dpad, float xValue, float yValue) {
             float dist = std::sqrt(xValue * xValue + yValue * yValue);
-            constexpr float deadzone = 0.25f;
+            constexpr float deadzone = 0.20f;
             if (dist < deadzone) {
                 if (leftStickActive_) {
                     sendTouch_(currentLeftStickPoint_, 1); // Release touch
@@ -129,14 +131,14 @@ private:
             triggerButton(104, CGPointMake(79, 185), pressed);
         };
 
-        // 3. Analógico Direito -> HABILIDADES (Exatamente igual ao PC!):
+        // 3. Analógico Direito -> HABILIDADES (Slots 0, 1, 2, 3):
         // RS <- (Esquerda): Slot 0 (316, 172)
         // RS v  (Baixo):    Slot 1 (316, 216)
         // RS -> (Direita):  Slot 2 (356, 140)
         // RS ^  (Cima):     Slot 3 (388, 140)
         gamepad.rightThumbstick.valueChangedHandler = ^(GCControllerDirectionPad *dpad, float xValue, float yValue) {
             float dist = std::sqrt(xValue * xValue + yValue * yValue);
-            constexpr float deadzone = 0.40f;
+            constexpr float deadzone = 0.25f; // Sensibilidade responsiva
             if (dist < deadzone) {
                 if (currentRightSkillSlot_ != -1) {
                     sendTouch_(currentRightSkillPoint_, 1); // Solta toque da habilidade
@@ -175,35 +177,53 @@ private:
             }
         };
 
-        // 4. Ataque: X (Cruz / buttonA):
+        // 4. Ataque Principal: Botão A (Solicitado pelo usuário: ataque no botão A!)
         gamepad.buttonA.pressedChangedHandler = ^(GCControllerButtonInput *btn, float val, BOOL pressed) {
             triggerButton(201, CGPointMake(360, 200), pressed);
         };
 
-        // 5. Voltar / Cancelar: Círculo (buttonB):
-        // Aciona o botão de voltar/fechar menus ou cancelamento
+        // 5. Voltar / Cancelar / Ação secundária: Botão B
         gamepad.buttonB.pressedChangedHandler = ^(GCControllerButtonInput *btn, float val, BOOL pressed) {
             triggerButton(202, CGPointMake(384, 16), pressed);
         };
 
-        // 6. Poções:
-        // L1 (leftShoulder): Poção de Vida (HP)
+        // 6. Botão X: Também configurado para Ataque / Interação (para compatibilidade com GameSir X5 Lite)
+        gamepad.buttonX.pressedChangedHandler = ^(GCControllerButtonInput *btn, float val, BOOL pressed) {
+            triggerButton(203, CGPointMake(360, 200), pressed);
+        };
+
+        // 7. Botão Y: Menu / Inventário
+        gamepad.buttonY.pressedChangedHandler = ^(GCControllerButtonInput *btn, float val, BOOL pressed) {
+            triggerButton(204, CGPointMake(384, 16), pressed);
+        };
+
+        // 8. Gatilhos e Ombros (L1, R1, L2, R2):
+        // L1 (leftShoulder): Acesso rápido a Poção de HP (Slot 0: 316, 172)
         gamepad.leftShoulder.pressedChangedHandler = ^(GCControllerButtonInput *btn, float val, BOOL pressed) {
-            triggerButton(206, CGPointMake(384, 52), pressed);
+            triggerButton(206, CGPointMake(316, 172), pressed);
         };
 
-        // R1 (rightShoulder): Poção de Mana (MP)
+        // R1 (rightShoulder): Acesso rápido a Poção de MP (Slot 2: 356, 140)
         gamepad.rightShoulder.pressedChangedHandler = ^(GCControllerButtonInput *btn, float val, BOOL pressed) {
-            triggerButton(207, CGPointMake(350, 52), pressed);
+            triggerButton(207, CGPointMake(356, 140), pressed);
         };
 
-        // 7. Menu: Start (buttonMenu):
+        // L2 (leftTrigger): Habilidade Slot 1 (316, 216)
+        gamepad.leftTrigger.pressedChangedHandler = ^(GCControllerButtonInput *btn, float val, BOOL pressed) {
+            triggerButton(208, CGPointMake(316, 216), pressed);
+        };
+
+        // R2 (rightTrigger): Habilidade Slot 3 (388, 140)
+        gamepad.rightTrigger.pressedChangedHandler = ^(GCControllerButtonInput *btn, float val, BOOL pressed) {
+            triggerButton(209, CGPointMake(388, 140), pressed);
+        };
+
+        // 9. Menu Principal: Start (buttonMenu)
         gamepad.buttonMenu.pressedChangedHandler = ^(GCControllerButtonInput *btn, float val, BOOL pressed) {
             triggerButton(301, CGPointMake(384, 16), pressed);
         };
 
-        // 8. Salvar Jogo / Menu de Save: Select / Options / Back:
-        // Na tela principal do jogo, o botão "SAVE" fica no topo em (270, 16)
+        // 10. Salvar Jogo: Select / Options / Back (botão SAVE em 270, 16)
         if (@available(iOS 13.0, *)) {
             if (gamepad.buttonOptions) {
                 gamepad.buttonOptions.pressedChangedHandler = ^(GCControllerButtonInput *btn, float val, BOOL pressed) {
