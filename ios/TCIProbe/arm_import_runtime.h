@@ -31,6 +31,7 @@ public:
     bool selfTestJniBufferReuse(std::string &error);
     bool runOriginalExport(uint32_t address, uint32_t &result,
                            std::string &error);
+    void setPortugueseText(bool enabled) { portugueseTextEnabled_ = enabled; }
     bool runGameInit(uint32_t address, const std::string &assetsRoot,
                      std::string &error);
     bool runGameFrame(uint32_t address, uint32_t frameNumber,
@@ -119,6 +120,8 @@ private:
     // A chave e a capacidade e o valor e o endereco ARM32.
     std::multimap<uint32_t,uint32_t> reusableJniBuffers_;
     std::string assetsRoot_;
+    bool portugueseTextEnabled_ = true;
+    std::map<std::string, std::vector<uint8_t>> translatedAssetCache_;
     std::map<uint32_t, FILE *> files_;
     std::string lastError_;
     unsigned implemented_ = 0;

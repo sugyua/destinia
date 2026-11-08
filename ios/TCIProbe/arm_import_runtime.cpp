@@ -1,4 +1,5 @@
 #include "arm_import_runtime.h"
+#include "portuguese_text.h"
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -1480,26 +1481,50 @@ void ArmImportRuntime::dispatchJni(uint32_t address) {
             fail("JNI: nome do asset invalido"); return;
         }
         const auto source=std::filesystem::path(assetsRoot_)/asset;
+        auto getOrLoadAssetData = [&]() -> std::vector<uint8_t> {
+            auto it = translatedAssetCache_.find(asset);
+            if (it != translatedAssetCache_.end()) {
+                return it->second;
+            }
+            std::ifstream stream(source, std::ios::binary | std::ios::ate);
+            if (!stream) return {};
+            const auto length = stream.tellg();
+            if (length < 0 || length > static_cast<std::streamoff>(kMaxTransfer)) return {};
+            std::vector<uint8_t> data(static_cast<size_t>(length));
+            stream.seekg(0);
+            if (!data.empty() && !stream.read(reinterpret_cast<char *>(data.data()), length)) {
+                return {};
+            }
+            if (portugueseTextEnabled_ && destinia::isPortugueseAsset(asset)) {
+                auto logNote = [](const std::string &) {};
+                destinia::applyPortugueseText(true, asset, data, logNote);
+            }
+            translatedAssetCache_[asset] = data;
+            return data;
+        };
+
         if (index==129 && c==3) {
-            std::error_code ec;
-            const auto n=std::filesystem::file_size(source,ec);
-            result=ec || n>UINT32_MAX ? 0 : static_cast<uint32_t>(n);
+            if (portugueseTextEnabled_ && destinia::isPortugueseAsset(asset)) {
+                const auto data = getOrLoadAssetData();
+                result = static_cast<uint32_t>(data.size());
+            } else {
+                std::error_code ec;
+                const auto n = std::filesystem::file_size(source, ec);
+                result = ec || n > UINT32_MAX ? 0 : static_cast<uint32_t>(n);
+            }
         } else if (index==114 && c==4) {
-            std::ifstream stream(source,std::ios::binary|std::ios::ate);
-            if (!stream) result=0;
-            else {
-                const auto length=stream.tellg();
-                if (length<0 || length>static_cast<std::streamoff>(kMaxTransfer)) {
-                    fail("Asset maior que 1 MiB"); return;
+            std::vector<uint8_t> data = getOrLoadAssetData();
+            if (data.empty()) {
+                std::error_code ec;
+                if (std::filesystem::exists(source, ec) && std::filesystem::file_size(source, ec) == 0) {
+                    result = nextArray_++;
+                    arrays_[result] = std::move(data);
+                } else {
+                    result = 0;
                 }
-                std::vector<uint8_t> data(static_cast<size_t>(length));
-                stream.seekg(0);
-                if (!data.empty() && !stream.read(
-                    reinterpret_cast<char *>(data.data()),length)) {
-                    fail("Falha na leitura de asset"); return;
-                }
-                result=nextArray_++;
-                arrays_[result]=std::move(data);
+            } else {
+                result = nextArray_++;
+                arrays_[result] = std::move(data);
             }
         } else {
             fail("JNI: assinatura de acesso a asset inesperada");
