@@ -345,7 +345,7 @@ jobs:
             <key>CFBundleShortVersionString</key>
             <string>0.5.4</string>
             <key>CFBundleVersion</key>
-            <string>22</string>
+            <string>23</string>
             <key>MinimumOSVersion</key>
             <string>15.0</string>
             <key>LSRequiresIPhoneOS</key>
