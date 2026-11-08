@@ -191,12 +191,19 @@ void ArmImportRuntime::onFastSpriteColumn(
         runtime->fail("Sprite ARM32: framebuffer fora dos limites"); return;
     }
     // Hot path: avoid heap allocations for each of hundreds of columns.
+    // Optimization: Cache palette lookup if palette pointer has not changed,
+    // avoiding redundant 512-byte copies per column across the frame.
     std::array<uint8_t,1024> indices;
-    std::array<uint16_t,256> colors;
-    if (!runtime->readBytes(src,indices.data(),static_cast<size_t>(count)) ||
-        !runtime->readBytes(palette,colors.data(),colors.size()*2)) {
-        runtime->fail("Sprite ARM32: leitura de indices/paleta invalida"); return;
+    if (!runtime->readBytes(src,indices.data(),static_cast<size_t>(count))) {
+        runtime->fail("Sprite ARM32: leitura de indices invalida"); return;
     }
+    if (runtime->lastSpritePalettePtr_ != palette) {
+        if (!runtime->readBytes(palette,runtime->cachedSpriteColors_.data(),runtime->cachedSpriteColors_.size()*2)) {
+            runtime->fail("Sprite ARM32: leitura de paleta invalida"); return;
+        }
+        runtime->lastSpritePalettePtr_ = palette;
+    }
+    const auto &colors = runtime->cachedSpriteColors_;
     const bool direct=runtime->hasDirectHeap_ &&
         first>=kHeapBase &&
         after<=static_cast<int64_t>(kHeapBase)+kHeapSize;

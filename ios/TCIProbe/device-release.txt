@@ -1,3 +1,13 @@
+Destinia iOS ARM32 diagnostic milestone 0.4.0
+Branch: ios/unicorn-poc
+Build: 14, unsigned IPA (sign with AltStore or equivalent)
+Upgrade over iOS native 0.3.9 without uninstalling to preserve app data.
+Bundle ID com.destinia.tcidiagnostic is unchanged.
+
+0.4.0 optimizations:
+- Official Destinia app icons embedded into IPA bundle and Info.plist.
+- Fast-path sprite palette caching in Grp_drawClipWImageP eliminating hundreds of redundant memory copies per frame.
+- Targeted CPU thermal reduction on real device.
 Destinia iOS native ARM32 diagnostic milestone 0.3.9
 Branch: ios/unicorn-poc
 Build: 13; IPA unsigned and must be signed for iPhone installation.

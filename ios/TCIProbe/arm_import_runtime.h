@@ -88,6 +88,8 @@ private:
     std::vector<uint8_t> directHeap_;
     bool hasDirectHeap_ = false;
     uint64_t directSpriteColumns_ = 0;
+    uint32_t lastSpritePalettePtr_ = 0;
+    std::array<uint16_t, 256> cachedSpriteColors_{};
     uint64_t nativeAlphaRows_ = 0;
     uint64_t nativeDodgeRows_ = 0;
     uint64_t nativeSimpleClipRows_ = 0;
