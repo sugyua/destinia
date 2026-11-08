@@ -183,15 +183,16 @@ private:
         };
 
         // 5. Voltar / Cancelar: Botão B (Solicitado pelo usuário: B volta!)
+        // No menu aberto, a seta Voltar fica em (327, 60); no gameplay/HUD, o botão voltar/menu fica em (384, 16).
         gamepad.buttonB.pressedChangedHandler = ^(GCControllerButtonInput *btn, float val, BOOL pressed) {
-            triggerButton(202, CGPointMake(384, 16), pressed);
+            triggerButton(202, CGPointMake(327, 60), pressed);
+            triggerButton(205, CGPointMake(384, 16), pressed);
         };
 
-        // 6. Organizar Inventário: Botão X (Solicitado pelo usuário: X organiza quando inventario aberto!)
-        // Na tela nativa do inventário (400x240), o hitbox de Organizar Mochila (Key 12 / sortBag)
-        // fica exatamente em X:[150..250], Y:[165..185] (centro: 200, 175).
+        // 6. Organizar Inventário: Botão X (Solicitado pelo usuário: X organiza a mochila!)
+        // No inventário aberto (400x240), o botão [ SORT ] fica exatamente em (348, 111).
         gamepad.buttonX.pressedChangedHandler = ^(GCControllerButtonInput *btn, float val, BOOL pressed) {
-            triggerButton(203, CGPointMake(200, 175), pressed);
+            triggerButton(203, CGPointMake(348, 111), pressed);
         };
 
         // 7. Menu / Inventário: Botão Y (Solicitado pelo usuário: Y e Start abrem o menu!)
@@ -220,18 +221,25 @@ private:
             triggerButton(209, CGPointMake(388, 140), pressed);
         };
 
-        // 9. Menu Principal: Start (buttonMenu) (Solicitado pelo usuário: Y e Start abrem o menu!)
+        // 9. Menu Principal: Start (buttonMenu e controllerPausedHandler) (Solicitado: Y e Start abrem o menu!)
         gamepad.buttonMenu.pressedChangedHandler = ^(GCControllerButtonInput *btn, float val, BOOL pressed) {
             triggerButton(301, CGPointMake(384, 16), pressed);
         };
 
-        // 10. Salvar Jogo:
-        // Na HUD superior, o botão [ SAVE ] fica em X:[150..200], Y:[0..25] (centro: 175, 12).
-        // Disparamos o clique de Save via Select / Options (buttonOptions).
+        controller.controllerPausedHandler = ^(GCController *c) {
+            if (!self->sendTouch_) return;
+            self->sendTouch_(CGPointMake(384, 16), 0);
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(50 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
+                self->sendTouch_(CGPointMake(384, 16), 1);
+            });
+        };
+
+        // 10. Salvar Jogo: Select / Options (buttonOptions)
+        // Na HUD superior, [ SHOP ] fica em (175, 12) e [ SAVE ] fica exatamente em (240, 12).
         if (@available(iOS 13.0, *)) {
             if (gamepad.buttonOptions) {
                 gamepad.buttonOptions.pressedChangedHandler = ^(GCControllerButtonInput *btn, float val, BOOL pressed) {
-                    triggerButton(302, CGPointMake(175, 12), pressed);
+                    triggerButton(302, CGPointMake(240, 12), pressed);
                 };
             }
         }
@@ -240,12 +248,12 @@ private:
         if (@available(iOS 12.1, *)) {
             if (gamepad.leftThumbstickButton) {
                 gamepad.leftThumbstickButton.pressedChangedHandler = ^(GCControllerButtonInput *btn, float val, BOOL pressed) {
-                    triggerButton(303, CGPointMake(175, 12), pressed);
+                    triggerButton(303, CGPointMake(240, 12), pressed);
                 };
             }
             if (gamepad.rightThumbstickButton) {
                 gamepad.rightThumbstickButton.pressedChangedHandler = ^(GCControllerButtonInput *btn, float val, BOOL pressed) {
-                    triggerButton(304, CGPointMake(175, 12), pressed);
+                    triggerButton(304, CGPointMake(240, 12), pressed);
                 };
             }
         }

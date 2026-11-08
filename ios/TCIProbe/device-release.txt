@@ -1,19 +1,19 @@
 Destinia iOS ARM32 diagnostic milestone 0.5.4
 Branch: ios/unicorn-poc
-Build: 23, unsigned IPA (sign with AltStore or equivalent)
+Build: 24, unsigned IPA (sign with AltStore or equivalent)
 Upgrade over iOS native 0.3.9 without uninstalling to preserve app data.
 Bundle ID com.destinia.tcidiagnostic is unchanged.
 
-0.5.4 (Build 23) features:
-- Mapeamento refinado para GameSir X5 Lite e controles físicos Xbox / MFi:
-  * Botão A: Bate (Ataque principal exclusivo)
-  * Botão X: Organiza o inventário quando aberto (hitbox Key 12 / sortBag)
-  * Botão B: Volta / Cancela
-  * Botão Y & Start: Abrem o Menu / Inventário
-  * L1 & R1: Poções (HP e MP)
-  * Analógico Direito (RS): Habilidades nos 4 slots (<- slot 0, v slot 1, -> slot 2, ^ slot 3)
-  * Select / Options (e cliques L3/R3): Salvar o jogo (botão SAVE da HUD)
-- Preservação da fidelidade visual e estabilidade do framebuffer RGB565 sem distorção de cores.
+0.5.4 (Build 24) features:
+- Correcao precisa dos mapeamentos do GameSir X5 Lite:
+  * Start: Suporte a controllerPausedHandler e buttonMenu para abrir o Menu.
+  * Select / Options: Alinhado no botao [ SAVE ] em (240, 12).
+  * Botao X: Alinhado no botao [ SORT ] da mochila em (348, 111).
+  * Botao B: Volta no menu em (327, 60) e no HUD em (384, 16).
+  * Botao A: Ataque principal exclusivo.
+  * L1 / R1: Pocoes HP / MP.
+  * Analogico Direito: 4 habilidades.
+- Estabilidade e correcao de pacing.
 
 0.5.3 features:
 - Ocultação dos botões virtuais da tela (100% transparentes) com supressão de toque durante o uso de controle físico.
