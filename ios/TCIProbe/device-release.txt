@@ -1,8 +1,11 @@
-Destinia iOS ARM32 diagnostic milestone 0.4.1
+Destinia iOS ARM32 diagnostic milestone 0.4.2
 Branch: ios/unicorn-poc
-Build: 15, unsigned IPA (sign with AltStore or equivalent)
+Build: 16, unsigned IPA (sign with AltStore or equivalent)
 Upgrade over iOS native 0.3.9 without uninstalling to preserve app data.
 Bundle ID com.destinia.tcidiagnostic is unchanged.
+
+0.4.2 fix:
+- Fix Grp context pointer dereference in _Grp_drawScreen16 and _Grp_drawAlpScreen16 (resolved Quadro 117 freeze).
 
 0.4.1 optimizations:
 - Native C++ acceleration for _Grp_drawScreen16 and _Grp_drawAlpScreen16 (screen blend pixel pipeline).

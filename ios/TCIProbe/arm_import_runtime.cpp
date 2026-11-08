@@ -1895,10 +1895,9 @@ void ArmImportRuntime::onFastDrawScreen16(
     if (width == 0 || height == 0 || width > 2048 || height > 2048 || !palettePtr) {
         return;
     }
-    uint32_t grpCtx = 0, key = 0;
-    if (!rt->readBytes(rt->drawScreenGrpCtxPtr_, &grpCtx, 4) || !grpCtx ||
-        !rt->readBytes(grpCtx + 0x50u, &key, 4)) {
-        rt->fail("_Grp_drawScreen16: leitura do contexto Grp/key falhou");
+    uint32_t key = 0;
+    if (!rt->readBytes(rt->drawScreenGrpCtxPtr_ + 0x50u, &key, 4)) {
+        rt->fail("_Grp_drawScreen16: leitura da cor chave (key) falhou");
         return;
     }
 
@@ -2031,11 +2030,10 @@ void ArmImportRuntime::onFastDrawAlpScreen16(
     if (width == 0 || height == 0 || width > 2048 || height > 2048 || !palettePtr) {
         return;
     }
-    uint32_t grpCtx = 0, key = 0, alpha = 0;
-    if (!rt->readBytes(rt->drawScreenGrpCtxPtr_, &grpCtx, 4) || !grpCtx ||
-        !rt->readBytes(grpCtx + 0x50u, &key, 4) ||
-        !rt->readBytes(grpCtx + 0x68u, &alpha, 4)) {
-        rt->fail("_Grp_drawAlpScreen16: leitura do contexto Grp/key/alpha falhou");
+    uint32_t key = 0, alpha = 0;
+    if (!rt->readBytes(rt->drawScreenGrpCtxPtr_ + 0x50u, &key, 4) ||
+        !rt->readBytes(rt->drawScreenGrpCtxPtr_ + 0x68u, &alpha, 4)) {
+        rt->fail("_Grp_drawAlpScreen16: leitura da cor chave/alpha falhou");
         return;
     }
 
