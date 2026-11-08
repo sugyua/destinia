@@ -1,8 +1,18 @@
-Destinia iOS ARM32 diagnostic milestone 0.5.1
+Destinia iOS ARM32 diagnostic milestone 0.5.2
 Branch: ios/unicorn-poc
-Build: 18, unsigned IPA (sign with AltStore or equivalent)
+Build: 19, unsigned IPA (sign with AltStore or equivalent)
 Upgrade over iOS native 0.3.9 without uninstalling to preserve app data.
 Bundle ID com.destinia.tcidiagnostic is unchanged.
+
+0.5.2 features:
+- Mapeamento de controle 100% idêntico à versão de PC (layout DualSense):
+  * Ataque: X (Cruz)
+  * Voltar/Fechar: Círculo
+  * Poção HP: L1
+  * Poção Mana: R1
+  * Habilidades: Analógico Direito (RS <, RS v, RS >, RS ^)
+  * Menu: Start
+  * Salvar: Select / Options
 
 0.5.1 features:
 - Suporte completo a Controles Físicos (USB-C / Lightning / Bluetooth) via Apple GameController framework.
