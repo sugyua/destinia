@@ -227,10 +227,9 @@ private:
         };
 
         controller.controllerPausedHandler = ^(GCController *c) {
-            if (!self->sendTouch_) return;
-            self->sendTouch_(CGPointMake(384, 16), 0);
+            triggerButton(301, CGPointMake(384, 16), YES);
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(50 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
-                self->sendTouch_(CGPointMake(384, 16), 1);
+                triggerButton(301, CGPointMake(384, 16), NO);
             });
         };
 
