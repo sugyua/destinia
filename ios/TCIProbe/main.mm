@@ -1,6 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import "DestiniaDiagnosticHUD.h"
+#import "DestiniaControllerBridge.h"
 #include "frame_pacing.h"
 #include <algorithm>
 #include <atomic>
@@ -394,23 +395,26 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
             owner->_controller.statusLabel.text=
                 @"Medindo FPS e custo ARM32...";
     };
-    _controller.touchCallback=^(CGPoint point,int type) {
-        AppDelegate *owner=weakSelf;
+    auto sendTouchAction = ^(CGPoint point, int type) {
+        AppDelegate *owner = weakSelf;
         if (!owner) return;
-        dispatch_async(owner->_gameQueue,^{
+        dispatch_async(owner->_gameQueue, ^{
             if (!owner->_ready) return;
-            char error[512]={};
+            char error[512] = {};
             if (!destinia_game_touch(
                     static_cast<uint32_t>(point.x),
                     static_cast<uint32_t>(point.y),
                     static_cast<uint32_t>(type),
-                    error,sizeof(error))) {
-                NSString *message=[NSString stringWithFormat:
-                    @"Falha no toque ARM32: %s",error];
+                    error, sizeof(error))) {
+                NSString *message = [NSString stringWithFormat:
+                    @"Falha no toque ARM32: %s", error];
                 [owner showStatus:message];
             }
         });
     };
+
+    _controller.touchCallback = sendTouchAction;
+    DestiniaGameControllerBridge::instance().setup(sendTouchAction);
 
     dispatch_async(_gameQueue,^{
         @autoreleasepool {
