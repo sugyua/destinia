@@ -19,119 +19,188 @@ struct EquipmentCatalogDef {
   const char* typeDesc;
 };
 
-// Aliases para compatibilidade
 using WeaponCatalogDef = EquipmentCatalogDef;
 
 inline const std::vector<EquipmentCatalogDef>& allCatalogEquipment() {
   static const std::vector<EquipmentCatalogDef> list = {
-    // =========================================================================
-    // --- ARMAS (Categoria 0) ---
-    // =========================================================================
-    // Guerreiro (Job 1)
-    { 1001, 1,   1, CatalogItemCategory::Weapon, "Espada de Madeira",     "Espada Curta" },
-    { 1002, 10,  1, CatalogItemCategory::Weapon, "Espada de Ferro",       "Espada Longa" },
-    { 1003, 20,  1, CatalogItemCategory::Weapon, "Espada Larga",          "Montante" },
-    { 1004, 35,  1, CatalogItemCategory::Weapon, "Lamina Bastarda",       "Espada Pesada" },
-    { 1005, 50,  1, CatalogItemCategory::Weapon, "Gladio de Aco",         "Gladio" },
-    { 1006, 65,  1, CatalogItemCategory::Weapon, "Montante Real",         "Montante" },
-    { 1007, 80,  1, CatalogItemCategory::Weapon, "Destruidora Draconica", "Lamina Sagrada" },
-    { 1008, 100, 1, CatalogItemCategory::Weapon, "Lamina do Destino",     "Arma Lendaria" },
-
-    // Atirador (Job 2)
-    { 2001, 1,   2, CatalogItemCategory::Weapon, "Pistola de Treino",     "Pistola" },
-    { 2002, 10,  2, CatalogItemCategory::Weapon, "Revolver de Aco",       "Revolver" },
-    { 2003, 20,  2, CatalogItemCategory::Weapon, "Pistolas Duplas",       "Arma Dupla" },
-    { 2004, 35,  2, CatalogItemCategory::Weapon, "Carabina de Caca",      "Carabina" },
-    { 2005, 50,  2, CatalogItemCategory::Weapon, "Fuzil de Precisao",     "Fuzil Sniper" },
-    { 2006, 65,  2, CatalogItemCategory::Weapon, "Canhao Portatil",       "Canhao Pesado" },
-    { 2007, 80,  2, CatalogItemCategory::Weapon, "Canhao do Trovao",      "Arma Eletrica" },
-    { 2008, 100, 2, CatalogItemCategory::Weapon, "Juizo Final",           "Arma Lendaria" },
-
-    // Ladino (Job 3)
-    { 3001, 1,   3, CatalogItemCategory::Weapon, "Adaga Gasta",           "Adaga Basica" },
-    { 3002, 10,  3, CatalogItemCategory::Weapon, "Adaga de Aco",          "Adaga Afiada" },
-    { 3003, 20,  3, CatalogItemCategory::Weapon, "Estilete Veloz",        "Estilete" },
-    { 3004, 35,  3, CatalogItemCategory::Weapon, "Garras Sombrias",       "Garras Duplas" },
-    { 3005, 50,  3, CatalogItemCategory::Weapon, "Laminas Gemeas",        "Adagas Gemeas" },
-    { 3006, 65,  3, CatalogItemCategory::Weapon, "Adaga Espectral",       "Lamina Espiritual" },
-    { 3007, 80,  3, CatalogItemCategory::Weapon, "Presa da Noite",        "Adaga Toxica" },
-    { 3008, 100, 3, CatalogItemCategory::Weapon, "Beijo da Morte",        "Arma Lendaria" },
-
-    // Mago (Job 4)
-    { 4001, 1,   4, CatalogItemCategory::Weapon, "Cajado de Madeira",     "Cajado Basico" },
-    { 4002, 10,  4, CatalogItemCategory::Weapon, "Cajado de Aco",         "Cajado Simples" },
-    { 4003, 20,  4, CatalogItemCategory::Weapon, "Varinha de Cristal",    "Varinha Mágica" },
-    { 4004, 35,  4, CatalogItemCategory::Weapon, "Bastao de Fogo",        "Cajado Igneo" },
-    { 4005, 50,  4, CatalogItemCategory::Weapon, "Orbe do Vazio",         "Orbe Arcano" },
-    { 4006, 65,  4, CatalogItemCategory::Weapon, "Cajado da Tempestade",  "Cajado Eletrico" },
-    { 4007, 80,  4, CatalogItemCategory::Weapon, "Grimoario Sombrio",     "Livro Sombrio" },
-    { 4008, 100, 4, CatalogItemCategory::Weapon, "Cajado do Arquimago",   "Arma Lendaria" },
-
-    // =========================================================================
-    // --- ARMADURAS / PEITORAIS (Categoria 1) ---
-    // =========================================================================
-    // Guerreiro (Job 1)
-    { 1101, 1,   1, CatalogItemCategory::Armor,  "Tunica de Recruta",     "Armadura Leve" },
-    { 1102, 10,  1, CatalogItemCategory::Armor,  "Cota de Ferro",         "Armadura de Malha" },
-    { 1103, 20,  1, CatalogItemCategory::Armor,  "Peitoral de Aco",       "Placas de Aco" },
-    { 1104, 35,  1, CatalogItemCategory::Armor,  "Armadura de Infantaria","Placas Reforcadas" },
-    { 1105, 50,  1, CatalogItemCategory::Armor,  "Placas do Comandante",  "Armadura Pesada" },
-    { 1106, 65,  1, CatalogItemCategory::Armor,  "Armadura Real",         "Armadura Guardiana" },
-    { 1107, 80,  1, CatalogItemCategory::Armor,  "Carapaca Draconica",    "Escamas Draconicas" },
-    { 1108, 100, 1, CatalogItemCategory::Armor,  "Armadura do Destino",   "Armadura Lendaria" },
-
-    // Atirador (Job 2)
-    { 2101, 1,   2, CatalogItemCategory::Armor,  "Traje de Cacador",      "Couro Basico" },
-    { 2102, 10,  2, CatalogItemCategory::Armor,  "Gibao de Couro",        "Couro Tratado" },
-    { 2103, 20,  2, CatalogItemCategory::Armor,  "Colete do Atirador",    "Couro Reforcado" },
-    { 2104, 35,  2, CatalogItemCategory::Armor,  "Jaqueta Balistica",     "Couro Pesado" },
-    { 2105, 50,  2, CatalogItemCategory::Armor,  "Colete do Ranger",      "Camuflagem Tatica" },
-    { 2106, 65,  2, CatalogItemCategory::Armor,  "Armadura de Caca Real", "Vestimenta Nobre" },
-    { 2107, 80,  2, CatalogItemCategory::Armor,  "Manto do Trovao",       "Couro Elemental" },
-    { 2108, 100, 2, CatalogItemCategory::Armor,  "Carapaca do Juizo",     "Traje Lendario" },
-
-    // Ladino (Job 3)
-    { 3101, 1,   3, CatalogItemCategory::Armor,  "Roupas Velhas",         "Tecido Gasto" },
-    { 3102, 10,  3, CatalogItemCategory::Armor,  "Tunica de Couro",       "Couro Leve" },
-    { 3103, 20,  3, CatalogItemCategory::Armor,  "Traje Sombrio",         "Tecido Sombrio" },
-    { 3104, 35,  3, CatalogItemCategory::Armor,  "Colete do Espiao",      "Couro Furtivo" },
-    { 3105, 50,  3, CatalogItemCategory::Armor,  "Manto do Assassino",    "Vestes Noturnas" },
-    { 3106, 65,  3, CatalogItemCategory::Armor,  "Tunica Espectral",      "Tecido Espiritual" },
-    { 3107, 80,  3, CatalogItemCategory::Armor,  "Vestes do Vazio",       "Sombra Toxica" },
-    { 3108, 100, 3, CatalogItemCategory::Armor,  "Manto da Morte",        "Vestimenta Lendaria" },
-
-    // Mago (Job 4)
-    { 4101, 1,   4, CatalogItemCategory::Armor,  "Tunica de Aprendiz",    "Tecido Simples" },
-    { 4102, 10,  4, CatalogItemCategory::Armor,  "Vestes de Lino",        "Vestimenta Leve" },
-    { 4103, 20,  4, CatalogItemCategory::Armor,  "Manto do Estudioso",    "Tecido Reforcado" },
-    { 4104, 35,  4, CatalogItemCategory::Armor,  "Batas do Erudito",      "Tecido Runico" },
-    { 4105, 50,  4, CatalogItemCategory::Armor,  "Vestes do Arcanista",   "Vestes Mágicas" },
-    { 4106, 65,  4, CatalogItemCategory::Armor,  "Manto do Elementalista","Tecido Elemental" },
-    { 4107, 80,  4, CatalogItemCategory::Armor,  "Vestes do Sombra",      "Vestes Sombrias" },
-    { 4108, 100, 4, CatalogItemCategory::Armor,  "Manto do Arquimago",    "Vestimenta Lendaria" }
+    // --- Guerreiro (Job 1) ---
+    {  1000,   1, 1, CatalogItemCategory::Weapon, "Lamina de Novato", "Espada Grande" },
+    {  1001,   5, 1, CatalogItemCategory::Weapon, "Lamina Antiga", "Espada Grande" },
+    {  1002,  10, 1, CatalogItemCategory::Weapon, "Espada Longa", "Espada Grande" },
+    {  1003,  15, 1, CatalogItemCategory::Weapon, "Sabre", "Espada Grande" },
+    {  1004,  20, 1, CatalogItemCategory::Weapon, "Espada de Duas Maos", "Espada Grande" },
+    {  1005,  25, 1, CatalogItemCategory::Weapon, "Bastard Sword", "Espada Grande" },
+    {  1006,  30, 1, CatalogItemCategory::Weapon, "Quebrador", "Espada Grande" },
+    {  1007,  35, 1, CatalogItemCategory::Weapon, "Nodachi", "Espada Grande" },
+    {  1008,  40, 1, CatalogItemCategory::Weapon, "Jagged Sword", "Espada Grande" },
+    {  1009,  45, 1, CatalogItemCategory::Weapon, "Lamina da Lua", "Espada Grande" },
+    {  1010,  50, 1, CatalogItemCategory::Weapon, "Destruidor", "Espada Grande" },
+    {  1011,  55, 1, CatalogItemCategory::Weapon, "Espada Grande", "Espada Grande" },
+    {  1012,  60, 1, CatalogItemCategory::Weapon, "Matador de Veneno", "Espada Grande" },
+    {  1013,  65, 1, CatalogItemCategory::Weapon, "Yaksha Sword", "Espada Grande" },
+    {  1014,  70, 1, CatalogItemCategory::Weapon, "Lamina Sombria", "Espada Grande" },
+    {  1015,  75, 1, CatalogItemCategory::Weapon, "Matador Sombrio", "Espada Grande" },
+    {  1016,  80, 1, CatalogItemCategory::Weapon, "Master Sword", "Espada Grande" },
+    {  1017,  85, 1, CatalogItemCategory::Weapon, "Lamina do Ar", "Espada Grande" },
+    {  1018,  90, 1, CatalogItemCategory::Weapon, "Divine Sword", "Espada Grande" },
+    {  1019,  95, 1, CatalogItemCategory::Weapon, "Cruzado", "Espada Grande" },
+    {  1020, 100, 1, CatalogItemCategory::Weapon, "Sabre Antigo", "Espada Grande" },
+    // --- Atirador (Job 2) ---
+    {  2000,   1, 2, CatalogItemCategory::Weapon, "Noob Gun", "Arma de Fogo" },
+    {  2001,   5, 2, CatalogItemCategory::Weapon, "Arma Velha", "Arma de Fogo" },
+    {  2002,  10, 2, CatalogItemCategory::Weapon, "Hand Gun", "Arma de Fogo" },
+    {  2003,  15, 2, CatalogItemCategory::Weapon, "Small Cannon", "Arma de Fogo" },
+    {  2004,  20, 2, CatalogItemCategory::Weapon, "Revolver", "Arma de Fogo" },
+    {  2005,  25, 2, CatalogItemCategory::Weapon, "Besta", "Arma de Fogo" },
+    {  2006,  30, 2, CatalogItemCategory::Weapon, "Mosquete", "Arma de Fogo" },
+    {  2007,  35, 2, CatalogItemCategory::Weapon, "Hand Cannon", "Arma de Fogo" },
+    {  2008,  40, 2, CatalogItemCategory::Weapon, "Cavaleiro do Sol", "Arma de Fogo" },
+    {  2009,  45, 2, CatalogItemCategory::Weapon, "Olho Morto", "Arma de Fogo" },
+    {  2010,  50, 2, CatalogItemCategory::Weapon, "Tazzler Gun", "Arma de Fogo" },
+    {  2011,  55, 2, CatalogItemCategory::Weapon, "Disparador", "Arma de Fogo" },
+    {  2012,  60, 2, CatalogItemCategory::Weapon, "Wyatt Gun", "Arma de Fogo" },
+    {  2013,  65, 2, CatalogItemCategory::Weapon, "Atirador Perfurador", "Arma de Fogo" },
+    {  2014,  70, 2, CatalogItemCategory::Weapon, "Tilt Machine", "Arma de Fogo" },
+    {  2015,  75, 2, CatalogItemCategory::Weapon, "Dildred", "Arma de Fogo" },
+    {  2016,  80, 2, CatalogItemCategory::Weapon, "Mega Disparador", "Arma de Fogo" },
+    {  2017,  85, 2, CatalogItemCategory::Weapon, "Shield Gun", "Arma de Fogo" },
+    {  2018,  90, 2, CatalogItemCategory::Weapon, "Heaven Cannon", "Arma de Fogo" },
+    {  2019,  95, 2, CatalogItemCategory::Weapon, "Atirador Giga", "Arma de Fogo" },
+    {  2020, 100, 2, CatalogItemCategory::Weapon, "Ancient Gun", "Arma de Fogo" },
+    // --- Ladino (Job 3) ---
+    {  3000,   1, 3, CatalogItemCategory::Weapon, "Noob Sword", "Espada" },
+    {  3001,   5, 3, CatalogItemCategory::Weapon, "Old Sword", "Espada" },
+    {  3002,  10, 3, CatalogItemCategory::Weapon, "Lamina", "Espada" },
+    {  3003,  15, 3, CatalogItemCategory::Weapon, "Lamina de Ferro", "Espada" },
+    {  3004,  20, 3, CatalogItemCategory::Weapon, "Espada Larga", "Espada" },
+    {  3005,  25, 3, CatalogItemCategory::Weapon, "Rapieira", "Espada" },
+    {  3006,  30, 3, CatalogItemCategory::Weapon, "Gladio", "Espada" },
+    {  3007,  35, 3, CatalogItemCategory::Weapon, "Cimitarra", "Espada" },
+    {  3008,  40, 3, CatalogItemCategory::Weapon, "Katana", "Espada" },
+    {  3009,  45, 3, CatalogItemCategory::Weapon, "Battle Sword", "Espada" },
+    {  3010,  50, 3, CatalogItemCategory::Weapon, "Berserk Sword", "Espada" },
+    {  3011,  55, 3, CatalogItemCategory::Weapon, "Lamina de Aco", "Espada" },
+    {  3012,  60, 3, CatalogItemCategory::Weapon, "Knight Sword", "Espada" },
+    {  3013,  65, 3, CatalogItemCategory::Weapon, "Espada Glacial", "Espada" },
+    {  3014,  70, 3, CatalogItemCategory::Weapon, "Espada Vulcanica", "Espada" },
+    {  3015,  75, 3, CatalogItemCategory::Weapon, "Lamina Fantasma", "Espada" },
+    {  3016,  80, 3, CatalogItemCategory::Weapon, "Espada da Tempestade", "Espada" },
+    {  3017,  85, 3, CatalogItemCategory::Weapon, "Espada Tornado", "Espada" },
+    {  3018,  90, 3, CatalogItemCategory::Weapon, "Dark Sword", "Espada" },
+    {  3019,  95, 3, CatalogItemCategory::Weapon, "Flame Sword", "Espada" },
+    {  3020, 100, 3, CatalogItemCategory::Weapon, "Ancient Sword", "Espada" },
+    // --- Mago (Job 4) ---
+    {  4000,   1, 4, CatalogItemCategory::Weapon, "Chapeu de Novato", "Cajado/Elmo" },
+    {  4001,   5, 4, CatalogItemCategory::Weapon, "Old Hood", "Cajado/Elmo" },
+    {  4002,  10, 4, CatalogItemCategory::Weapon, "Capacete", "Cajado/Elmo" },
+    {  4003,  15, 4, CatalogItemCategory::Weapon, "Iron Helmet", "Cajado/Elmo" },
+    {  4004,  20, 4, CatalogItemCategory::Weapon, "Scale Hood", "Cajado/Elmo" },
+    {  4005,  25, 4, CatalogItemCategory::Weapon, "Suede Hood", "Cajado/Elmo" },
+    {  4006,  30, 4, CatalogItemCategory::Weapon, "Chain Helm", "Cajado/Elmo" },
+    {  4007,  35, 4, CatalogItemCategory::Weapon, "Refined Hood", "Cajado/Elmo" },
+    {  4008,  40, 4, CatalogItemCategory::Weapon, "Bone Helm", "Cajado/Elmo" },
+    {  4009,  45, 4, CatalogItemCategory::Weapon, "Silver Helm", "Cajado/Elmo" },
+    {  4010,  50, 4, CatalogItemCategory::Weapon, "Hunting Helm", "Cajado/Elmo" },
+    {  4011,  55, 4, CatalogItemCategory::Weapon, "Gold Helm", "Cajado/Elmo" },
+    {  4012,  60, 4, CatalogItemCategory::Weapon, "Fighter Helm", "Cajado/Elmo" },
+    {  4013,  65, 4, CatalogItemCategory::Weapon, "Great Helm", "Cajado/Elmo" },
+    {  4014,  70, 4, CatalogItemCategory::Weapon, "Rune Hood", "Cajado/Elmo" },
+    {  4015,  75, 4, CatalogItemCategory::Weapon, "Battle Helm", "Cajado/Elmo" },
+    {  4016,  80, 4, CatalogItemCategory::Weapon, "War Helm", "Cajado/Elmo" },
+    {  4017,  85, 4, CatalogItemCategory::Weapon, "Savage Helm", "Cajado/Elmo" },
+    {  4018,  90, 4, CatalogItemCategory::Weapon, "Divine Helm", "Cajado/Elmo" },
+    {  4019,  95, 4, CatalogItemCategory::Weapon, "Holy Helm", "Cajado/Elmo" },
+    {  4020, 100, 4, CatalogItemCategory::Weapon, "Ancient Helm", "Cajado/Elmo" },
+    // --- Guerreiro (Armaduras) ---
+    {  1100,   1, 1, CatalogItemCategory::Armor, "Noob Armor", "Armadura" },
+    {  1101,   5, 1, CatalogItemCategory::Armor, "Crude Armor", "Armadura" },
+    {  1102,  10, 1, CatalogItemCategory::Armor, "Simple Armor", "Armadura" },
+    {  1103,  15, 1, CatalogItemCategory::Armor, "Iron Armor", "Armadura" },
+    {  1104,  20, 1, CatalogItemCategory::Armor, "Scale Armor", "Armadura" },
+    {  1105,  25, 1, CatalogItemCategory::Armor, "Suede Armor", "Armadura" },
+    {  1106,  30, 1, CatalogItemCategory::Armor, "Chain Armor", "Armadura" },
+    {  1107,  35, 1, CatalogItemCategory::Armor, "Refined Armor", "Armadura" },
+    {  1108,  40, 1, CatalogItemCategory::Armor, "Bone Armor", "Armadura" },
+    {  1109,  45, 1, CatalogItemCategory::Armor, "Silvery Armor", "Armadura" },
+    {  1110,  50, 1, CatalogItemCategory::Armor, "Hunting Armor", "Armadura" },
+    {  1111,  55, 1, CatalogItemCategory::Armor, "Golden Armor", "Armadura" },
+    {  1112,  60, 1, CatalogItemCategory::Armor, "Fighter Armor", "Armadura" },
+    {  1113,  65, 1, CatalogItemCategory::Armor, "Great Armor", "Armadura" },
+    {  1114,  70, 1, CatalogItemCategory::Armor, "Rune Armor", "Armadura" },
+    {  1115,  75, 1, CatalogItemCategory::Armor, "Battle Armor", "Armadura" },
+    {  1116,  80, 1, CatalogItemCategory::Armor, "War Armor", "Armadura" },
+    {  1117,  85, 1, CatalogItemCategory::Armor, "Savage Armor", "Armadura" },
+    {  1118,  90, 1, CatalogItemCategory::Armor, "Divine Armor", "Armadura" },
+    {  1119,  95, 1, CatalogItemCategory::Armor, "Holy Armor", "Armadura" },
+    {  1120, 100, 1, CatalogItemCategory::Armor, "Ancient Armor", "Armadura" },
+    // --- Atirador (Armaduras) ---
+    {  2100,   1, 2, CatalogItemCategory::Armor, "Noob Armor", "Armadura" },
+    {  2101,   5, 2, CatalogItemCategory::Armor, "Crude Armor", "Armadura" },
+    {  2102,  10, 2, CatalogItemCategory::Armor, "Simple Armor", "Armadura" },
+    {  2103,  15, 2, CatalogItemCategory::Armor, "Iron Armor", "Armadura" },
+    {  2104,  20, 2, CatalogItemCategory::Armor, "Scale Armor", "Armadura" },
+    {  2105,  25, 2, CatalogItemCategory::Armor, "Suede Armor", "Armadura" },
+    {  2106,  30, 2, CatalogItemCategory::Armor, "Chain Armor", "Armadura" },
+    {  2107,  35, 2, CatalogItemCategory::Armor, "Refined Armor", "Armadura" },
+    {  2108,  40, 2, CatalogItemCategory::Armor, "Bone Armor", "Armadura" },
+    {  2109,  45, 2, CatalogItemCategory::Armor, "Silvery Armor", "Armadura" },
+    {  2110,  50, 2, CatalogItemCategory::Armor, "Hunting Armor", "Armadura" },
+    {  2111,  55, 2, CatalogItemCategory::Armor, "Golden Armor", "Armadura" },
+    {  2112,  60, 2, CatalogItemCategory::Armor, "Fighter Armor", "Armadura" },
+    {  2113,  65, 2, CatalogItemCategory::Armor, "Great Armor", "Armadura" },
+    {  2114,  70, 2, CatalogItemCategory::Armor, "Rune Armor", "Armadura" },
+    {  2115,  75, 2, CatalogItemCategory::Armor, "Battle Armor", "Armadura" },
+    {  2116,  80, 2, CatalogItemCategory::Armor, "War Armor", "Armadura" },
+    {  2117,  85, 2, CatalogItemCategory::Armor, "Savage Armor", "Armadura" },
+    {  2118,  90, 2, CatalogItemCategory::Armor, "Divine Armor", "Armadura" },
+    {  2119,  95, 2, CatalogItemCategory::Armor, "Holy Armor", "Armadura" },
+    {  2120, 100, 2, CatalogItemCategory::Armor, "Ancient Armor", "Armadura" },
+    // --- Ladino (Armaduras) ---
+    {  3100,   1, 3, CatalogItemCategory::Armor, "Noob Armor", "Armadura" },
+    {  3101,   5, 3, CatalogItemCategory::Armor, "Crude Armor", "Armadura" },
+    {  3102,  10, 3, CatalogItemCategory::Armor, "Simple Armor", "Armadura" },
+    {  3103,  15, 3, CatalogItemCategory::Armor, "Iron Armor", "Armadura" },
+    {  3104,  20, 3, CatalogItemCategory::Armor, "Scale Armor", "Armadura" },
+    {  3105,  25, 3, CatalogItemCategory::Armor, "Suede Armor", "Armadura" },
+    {  3106,  30, 3, CatalogItemCategory::Armor, "Chain Armor", "Armadura" },
+    {  3107,  35, 3, CatalogItemCategory::Armor, "Refined Armor", "Armadura" },
+    {  3108,  40, 3, CatalogItemCategory::Armor, "Bone Armor", "Armadura" },
+    {  3109,  45, 3, CatalogItemCategory::Armor, "Silvery Armor", "Armadura" },
+    {  3110,  50, 3, CatalogItemCategory::Armor, "Hunting Armor", "Armadura" },
+    {  3111,  55, 3, CatalogItemCategory::Armor, "Golden Armor", "Armadura" },
+    {  3112,  60, 3, CatalogItemCategory::Armor, "Fighter Armor", "Armadura" },
+    {  3113,  65, 3, CatalogItemCategory::Armor, "Great Armor", "Armadura" },
+    {  3114,  70, 3, CatalogItemCategory::Armor, "Rune Armor", "Armadura" },
+    {  3115,  75, 3, CatalogItemCategory::Armor, "Battle Armor", "Armadura" },
+    {  3116,  80, 3, CatalogItemCategory::Armor, "War Armor", "Armadura" },
+    {  3117,  85, 3, CatalogItemCategory::Armor, "Savage Armor", "Armadura" },
+    {  3118,  90, 3, CatalogItemCategory::Armor, "Divine Armor", "Armadura" },
+    {  3119,  95, 3, CatalogItemCategory::Armor, "Holy Armor", "Armadura" },
+    {  3120, 100, 3, CatalogItemCategory::Armor, "Ancient Armor", "Armadura" },
+    // --- Mago (Armaduras) ---
+    {  4100,   1, 4, CatalogItemCategory::Armor, "Noob Armor", "Armadura" },
+    {  4101,   5, 4, CatalogItemCategory::Armor, "Crude Armor", "Armadura" },
+    {  4102,  10, 4, CatalogItemCategory::Armor, "Simple Armor", "Armadura" },
+    {  4103,  15, 4, CatalogItemCategory::Armor, "Iron Armor", "Armadura" },
+    {  4104,  20, 4, CatalogItemCategory::Armor, "Scale Armor", "Armadura" },
+    {  4105,  25, 4, CatalogItemCategory::Armor, "Suede Armor", "Armadura" },
+    {  4106,  30, 4, CatalogItemCategory::Armor, "Chain Armor", "Armadura" },
+    {  4107,  35, 4, CatalogItemCategory::Armor, "Refined Armor", "Armadura" },
+    {  4108,  40, 4, CatalogItemCategory::Armor, "Bone Armor", "Armadura" },
+    {  4109,  45, 4, CatalogItemCategory::Armor, "Silvery Armor", "Armadura" },
+    {  4110,  50, 4, CatalogItemCategory::Armor, "Hunting Armor", "Armadura" },
+    {  4111,  55, 4, CatalogItemCategory::Armor, "Golden Armor", "Armadura" },
+    {  4112,  60, 4, CatalogItemCategory::Armor, "Fighter Armor", "Armadura" },
+    {  4113,  65, 4, CatalogItemCategory::Armor, "Great Armor", "Armadura" },
+    {  4114,  70, 4, CatalogItemCategory::Armor, "Rune Armor", "Armadura" },
+    {  4115,  75, 4, CatalogItemCategory::Armor, "Battle Armor", "Armadura" },
+    {  4116,  80, 4, CatalogItemCategory::Armor, "War Armor", "Armadura" },
+    {  4117,  85, 4, CatalogItemCategory::Armor, "Savage Armor", "Armadura" },
+    {  4118,  90, 4, CatalogItemCategory::Armor, "Divine Armor", "Armadura" },
+    {  4119,  95, 4, CatalogItemCategory::Armor, "Holy Armor", "Armadura" },
+    {  4120, 100, 4, CatalogItemCategory::Armor, "Ancient Armor", "Armadura" },
   };
   return list;
-}
-
-inline const std::vector<EquipmentCatalogDef>& allCatalogWeapons() {
-  static const std::vector<EquipmentCatalogDef> weapons = [] {
-    std::vector<EquipmentCatalogDef> result;
-    for(const auto& entry : allCatalogEquipment())
-      if(entry.category == CatalogItemCategory::Weapon) result.push_back(entry);
-    return result;
-  }();
-  return weapons;
-}
-
-inline const EquipmentCatalogDef* findCatalogEquipment(uint16_t baseId) {
-  for (const auto& w : allCatalogEquipment()) {
-    if (w.baseId == baseId) return &w;
-  }
-  return nullptr;
-}
-
-inline const EquipmentCatalogDef* findCatalogWeapon(uint16_t baseId) {
-  return findCatalogEquipment(baseId);
 }
 
 inline std::vector<EquipmentCatalogDef> getCatalogItems(uint8_t jobClass, CatalogItemCategory category) {

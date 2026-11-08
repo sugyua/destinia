@@ -70,7 +70,6 @@ static bool difficultyMenuKey(int key,bool down){
   if(key==3){
    customMenuIndex--;
    difficultyButton=(customMenuIndex==1);
-   if(customMenuIndex==0)wr32(ui+0x7c,0x80000001u);
    return true;
   }
   if(key==9){
@@ -85,14 +84,12 @@ static bool difficultyMenuKey(int key,bool down){
   }
   if(key==10||key==27){
    customMenuIndex=0;difficultyButton=false;
-   wr32(ui+0x7c,0x80000001u);
    return false;
   }
   return true;
  }
  if(state==0x80000001u&&rd16(ui+0x54)==4&&key==9){
   customMenuIndex=1;difficultyButton=true;
-  wr32(ui+0x7c,0x80000002u);
   return true;
  }
  return false;
@@ -125,7 +122,6 @@ static bool difficultyMenuTouch(int x,int y,int phase){
    difficultyTouchHeld=true;
    customMenuIndex=1;
    difficultyButton=true;
-   wr32(exportsMap.at("GameUI")+0x7c,0x80000002u);
    difficultyEnter();
    return true;
   }
@@ -133,7 +129,6 @@ static bool difficultyMenuTouch(int x,int y,int phase){
    difficultyTouchHeld=true;
    customMenuIndex=2;
    difficultyButton=false;
-   wr32(exportsMap.at("GameUI")+0x7c,0x80000002u);
    if(openWeaponsCatalogCallback)openWeaponsCatalogCallback();
    return true;
   }
@@ -157,17 +152,49 @@ static void difficultyClassHook(uc_engine*,uint64_t,uint32_t,void*){
  // The class font/color is restored by the original caller (white).
  }catch(const std::exception& e){hostReport("[dificuldade] Indicador recusado: %s\n",e.what());}
 }
+static void difficultyLoopHook(uc_engine*,uint64_t,uint32_t,void*){
+ if(customMenuIndex>0){
+  u32 neg1=0xffffffff;
+  uc_reg_write(uc,UC_ARM_REG_R11,&neg1);
+ }
+}
+static void difficultyPointerHook(uc_engine*,uint64_t,uint32_t,void*){
+ if(customMenuIndex>0){
+  // Skip ARM's early pointer draw so DifficultyPainter can draw the hand cleanly on top of custom buttons
+  u32 skipPc = (SO_BASE + 0x27bc4) | 1;
+  uc_reg_write(uc, UC_ARM_REG_PC, &skipPc);
+ }
+}
 static void installDifficulty(){
  if(!codexAvailable)return; // Same verified ARM fingerprint as the native menu.
- try{difficultyProgress=destinia::loadDifficulty(fs::path(saveDir),preferences.gameMode=="expandido"?destinia::progression::Mode::Expanded:destinia::progression::Mode::Classic);difficultyString=hmalloc(512);uc_hook hook;auto at=exportsMap.at("Font_drawStringChar")&~1u;
- if(uc_hook_add(uc,&hook,UC_HOOK_CODE,reinterpret_cast<void*>(difficultyClassHook),nullptr,at,at)!=UC_ERR_OK)throw std::runtime_error("cannot install difficulty label");difficultyReady=true;
+ try{difficultyProgress=destinia::loadDifficulty(fs::path(saveDir),preferences.gameMode=="expandido"?destinia::progression::Mode::Expanded:destinia::progression::Mode::Classic);difficultyString=hmalloc(512);
+ uc_hook hook;auto at=exportsMap.at("Font_drawStringChar")&~1u;
+ if(uc_hook_add(uc,&hook,UC_HOOK_CODE,reinterpret_cast<void*>(difficultyClassHook),nullptr,at,at)!=UC_ERR_OK)throw std::runtime_error("cannot install difficulty label");
+ uc_hook loopHk;
+ if(uc_hook_add(uc,&loopHk,UC_HOOK_CODE,reinterpret_cast<void*>(difficultyLoopHook),nullptr,SO_BASE+0x27b56,SO_BASE+0x27b56)!=UC_ERR_OK)throw std::runtime_error("cannot install menu loop hook");
+ uc_hook ptrHk;
+ if(uc_hook_add(uc,&ptrHk,UC_HOOK_CODE,reinterpret_cast<void*>(difficultyPointerHook),nullptr,SO_BASE+0x27c00,SO_BASE+0x27c00)!=UC_ERR_OK)throw std::runtime_error("cannot install menu pointer hook");
+ difficultyReady=true;
  }catch(const std::exception& e){difficultyReady=false;hostReport("[dificuldade] Dados preservados; recurso desativado: %s\n",e.what());}
 }
 class DifficultyPainter {
  u32 descriptor=0,pixels=0,string=0;
  void call(const char* n,std::initializer_list<u32> a){if(!callFn(exportsMap.at(n),a))throw std::runtime_error("difficulty native drawing failed");}
  void fill(int x,int y,int w,int h,uint16_t c){call("Grp_setDrawOpVal",{0,0xffffffff});call("Grp_setColorPixel",{c});call("Grp_fillRect",{4,u32(x),u32(y),u32(w),u32(h)});}
- void text(int x,int y,std::string value,uint16_t color=0xffff){const auto accent=value.find(u8"\u00ed");if(accent!=std::string::npos)value.replace(accent,2,"i");wr(string,value.c_str(),value.size()+1);call("Font_setColorPixel",{color});call("Font_drawStringChar",{4,string,u32(x),u32(y),212,12,1,0x11});}
+ void fillRound(int x,int y,int w,int h,uint16_t c){
+  call("Grp_setDrawOpVal",{0,0xffffffff});
+  call("Grp_setColorPixel",{c});
+  // Native Destinia rounded button: 1-pixel inset corners
+  call("Grp_fillRect",{4,u32(x+1),u32(y),u32(w-2),1});
+  call("Grp_fillRect",{4,u32(x),u32(y+1),u32(w),u32(h-2)});
+  call("Grp_fillRect",{4,u32(x+1),u32(y+h-1),u32(w-2),1});
+ }
+ void text(int x,int y,std::string value,uint16_t color=0xffff,int flags=0x11){
+  const auto accent=value.find(u8"\u00ed");if(accent!=std::string::npos)value.replace(accent,2,"i");
+  wr(string,value.c_str(),value.size()+1);
+  call("Font_setColorPixel",{color});
+  call("Font_drawStringChar",{4,string,u32(x),u32(y),212,12,1,u32(flags)});
+ }
 public:
  void paint(uint8_t* output){
   if(!difficultySystem()){difficultyOpen=difficultyButton=false;customMenuIndex=0;return;}const int ox=(SCREEN_W-400)/2,oy=(SCREEN_H-240)/2;
@@ -176,11 +203,11 @@ public:
   auto restore=[&](){wr32(table,old);wr(grp,graphics.data(),graphics.size());wr32(exportsMap.at("Font"),font);};
   auto button=[&](int y,std::string label,bool selected,bool enabled){
    if(selected){
-    fill(ox+94,oy+y,212,16,0xffc0);
-    text(ox+94,oy+y+2,label,0x0841);
+    fillRound(ox+94,oy+y,212,16,0xfff0);
+    text(ox+94+106,oy+y+3,label,0x0000,0x14); // Exactly centered with native ALIGN_CENTER (0x14)
    }else{
-    fill(ox+94,oy+y,212,16,0x2945);
-    text(ox+94,oy+y+2,label,enabled?0xffff:0x738e);
+    fillRound(ox+94,oy+y,212,16,0x2945);
+    text(ox+94+106,oy+y+3,label,enabled?0xffff:0x738e,0x14); // Exactly centered with native ALIGN_CENTER (0x14)
    }
   };
   int top=difficultyOpen?49:177,bottom=difficultyOpen?229:216;
@@ -189,22 +216,29 @@ public:
     fill(ox+90,oy+49,220,180,0x2945);
     call("Grp_setColorPixel",{0x528au});
     call("Grp_drawRoundRect",{4,u32(ox+90),u32(oy+49),220,180,2});
-    text(ox+90,oy+49,"MUDAR DIFICULDADE",0xffc0);
-    text(ox+264,oy+49,"SAIR",0xffff);
+    text(ox+90+110,oy+49,"MUDAR DIFICULDADE",0xffc0,0x14);
+    text(ox+264,oy+49,"SAIR",0xffff,0x11);
     for(int i=0;i<5;++i){
      auto label=destinia::difficultyLabel(i);
      if(unsigned(i)==difficultyProgress.current(difficultySlot()))label+=" [ATUAL]";
      button(65+i*24,label,i==difficultySelected,difficultyProgress.allowed(difficultySlot(),i));
     }
-    text(ox+90,oy+190,"DIABLO LIBERA A PROXIMA",0xffc0);
-    if(!difficultyStatus.empty())text(ox+90,oy+206,difficultyStatus.substr(0,34),0xce59);
+    text(ox+90+110,oy+190,"DIABLO LIBERA A PROXIMA",0xffc0,0x14);
+    if(!difficultyStatus.empty())text(ox+90+110,oy+206,difficultyStatus.substr(0,34),0xce59,0x14);
    }else{
     button(177,"Mudar Dificuldade",customMenuIndex==1,true);
     button(198,"Catalogo de Armas",customMenuIndex==2,true);
+    if(customMenuIndex==1){
+     call("GameUI_drawPointer",{exportsMap.at("GameUI"),u32(ox+90+0xbd),u32(oy+49+0x3b+21*5)});
+    }else if(customMenuIndex==2){
+     call("GameUI_drawPointer",{exportsMap.at("GameUI"),u32(ox+90+0xbd),u32(oy+49+0x3b+21*6)});
+    }
    }
    std::vector<uint8_t> raster(FB_BYTES);rd(pixels,raster.data(),raster.size());restore();
    const auto transform=destinia::nativeCodexTransform(SCREEN_W,SCREEN_H,preferences.uiScale);
-   for(int y=oy+top;y<oy+bottom;++y)for(int x=ox+90;x<ox+310;++x){
+   int right=(customMenuIndex>0&&!difficultyOpen)?320:310;
+   int bottomEx=(customMenuIndex>0&&!difficultyOpen)?236:bottom;
+   for(int y=oy+top;y<oy+bottomEx;++y)for(int x=ox+90;x<ox+right;++x){
     auto src=(y*SCREEN_W+x)*2;
     if(!raster[src]&&!raster[src+1])continue;
     auto b=transform.rect(x,y,1,1);

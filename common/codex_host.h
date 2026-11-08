@@ -96,7 +96,7 @@ static int codexNativeTouchX=0,codexNativeTouchY=0;
 static bool codexMenuVisible() {
  if(!codexAvailable || !exportsMap.count("Game") || !exportsMap.count("GameUI"))return false;
  const auto ui=exportsMap.at("GameUI");const auto state=rd32(ui+0x7c);
- return rd16(exportsMap.at("Game")+0x4854)==16 && rd16(ui+0x76)>=2 && (state&0x0fffffff)<=1 && (state>>28)<=8;
+ return rd16(exportsMap.at("Game")+0x4854)==16 && rd16(ui+0x76)>=2 && (state&0x0fffffff)<=2 && (state>>28)<=8;
 }
 static bool codexSelectNativeTab(int tab){
  CodexNativeMenuGuard bypass;

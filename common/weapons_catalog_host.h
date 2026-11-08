@@ -26,7 +26,44 @@ public:
     if (!ready || slot >= 10 || !gameBase) return;
     bool changed = false;
 
-    // Varre as 4 bolsas de itens (0 a 3)
+    auto registerItem = [&](uint16_t header) {
+      uint8_t itemType = (header >> 5) & 7;
+      // 0: Espada 2M (Guerreiro)
+      // 1: Espada 1M (Ladino / Guerreiro)
+      // 2: Arma de Fogo (Atirador)
+      // 3: Cajado / Mago
+      // 4: Armadura (Peitoral)
+      CatalogItemCategory cat = (itemType == 4) ? CatalogItemCategory::Armor : CatalogItemCategory::Weapon;
+      uint8_t job = (itemType == 0) ? 1 : (itemType == 2) ? 2 : (itemType == 1) ? 3 : (itemType == 3) ? 4 : 0;
+      if (cat == CatalogItemCategory::Weapon && job == 0) return;
+
+      uint8_t rank = (header >> 8) & 7; // 0..4
+      if (rank > 4) return;
+
+      uint8_t levelIdx = uint8_t(header & 0x1f);
+      int equipLevel = (levelIdx * 5 > 0) ? (levelIdx * 5) : 1;
+
+      for (const auto& item : allCatalogEquipment()) {
+        if (item.category == cat && (cat == CatalogItemCategory::Armor || item.jobClass == job) && item.minLevel == equipLevel) {
+          if (catalog.record(slot, item.baseId, item.minLevel, rank, item.jobClass)) {
+            changed = true;
+          }
+        }
+      }
+    };
+
+    // 1. Escaneia equipamentos atualmente equipados no personagem (6 slots)
+    for (int w = 0; w < 6; ++w) {
+      uint32_t low = rd16(gameBase + 0x4584 + 4 * w);
+      uint32_t high = rd16(gameBase + 0x4584 + 4 * w + 2);
+      uint32_t p = low | (high << 16);
+      if (p >= gameBase + 0x2ed6 && p < gameBase + 0x2ed6 + 200 * 20) {
+        uint16_t header = rd16(p);
+        registerItem(header);
+      }
+    }
+
+    // 2. Escaneia as 4 bolsas de itens (0 a 3)
     for (int b = 0; b < 4; ++b) {
       int count = rd16(gameBase + 0x433c + b * 0x92);
       if (count > 24) continue;
@@ -39,22 +76,7 @@ public:
         if (pool >= 200) continue;
 
         uint16_t header = rd16(gameBase + 0x2ed6 + 20 * pool);
-        uint8_t itemType = (header >> 5) & 7; // 0 = Arma, 1 = Armadura (Peitoral)
-        if (itemType != 0 && itemType != 1) continue;
-
-        uint8_t rank = (header >> 8) & 7;     // 0..4 (Raridade)
-        if (rank > 4) continue;
-
-        uint8_t minLevel = uint8_t(header & 0x1f); // bitmask de level base
-        CatalogItemCategory cat = (itemType == 0) ? CatalogItemCategory::Weapon : CatalogItemCategory::Armor;
-
-        for (const auto& item : allCatalogEquipment()) {
-          if (item.category == cat && item.minLevel <= minLevel) {
-            if (catalog.record(slot, item.baseId, item.minLevel, rank, item.jobClass)) {
-              changed = true;
-            }
-          }
-        }
+        registerItem(header);
       }
     }
 

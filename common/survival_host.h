@@ -57,7 +57,7 @@ class SurvivalHost {
  }
  void spawn(){
   const auto plan=survival::wave(arena.currentWave);instances.clear();
-  call("Map_freeData");call("Map_freeTile");call("Map_loadData",{0,1,1});call("Map_loadTile",{0});arenaMap=map();
+  call("Map_freeData");call("Map_freeTile");call("Map_loadData",{1,6,1});call("Map_loadTile",{0});arenaMap=map();
   for(U i=0;i<=20;++i)call("Monster_freeMonster",{i});call("Monster_freeBoss");
   const auto points=positions(plan.count);std::array<uint8_t,136*20> blank{};
   if(uc_mem_write(engine,game+0x14fc,blank.data(),blank.size())!=UC_ERR_OK)throw std::runtime_error("Sobrevivencia: pool invalido");
@@ -94,7 +94,11 @@ public:
   if(!ready||arena.active||!error.empty())return false;const auto s=slot();
   if(s>=10||!alive()||read<int16_t>(game+0x4854)!=0){message="ENTRE NO JOGO PRIMEIRO";return false;}
   originalArea=read<uint16_t>(game+0x4870);originalMap=read<uint16_t>(game+0x4872);originalX=read<uint16_t>(game+0x4890);originalY=read<uint16_t>(game+0x4892);owner=s;ownedMap=true;
-  try{if(!arena.start(s,++runSequence,1))return false;spawn();flush();return true;}catch(const std::exception&e){message=e.what();stop(true);return false;}
+  try{
+   call("Map_freeData");call("Map_freeTile");call("Map_loadData",{1,6,1});call("Map_loadTile",{0});arenaMap=map();
+   if(!arena.start(s,++runSequence,arenaMap))return false;
+   spawn();flush();return true;
+  }catch(const std::exception&e){message=e.what();stop(true);return false;}
  }
  void clearArenaMonsters(){if(map()!=arenaMap)return;for(U i=0;i<=20;++i)call("Monster_freeMonster",{i});call("Monster_freeBoss");instances.clear();}
  void stop(bool restore){
