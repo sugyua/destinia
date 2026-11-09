@@ -1,3 +1,10 @@
+Destinia iOS 0.5.5 Build 25 — compilacao de teste para diagnostico
+Bundle ID: com.destinia.tcidiagnostic. IPA nao assinado.
+Inclui coleta de tempos de emulacao e atrasos, e evita acumular quadros de exibicao atrasados.
+Nao comprova correcao das quedas durante golpes criticos. Teste em iPhone pendente.
+Cadencia permanece em 16 Hz nesta candidata; a cadencia original ainda sera investigada.
+Audio ainda nao restaurado. Nao e uma release final.
+
 Destinia iOS ARM32 diagnostic milestone 0.5.4
 Branch: ios/unicorn-poc
 Build: 24, unsigned IPA (sign with AltStore or equivalent)
