@@ -25,5 +25,10 @@ int main() {
                 assert(microseconds(us)+pending>=microseconds(62500));
         }
     }
+    assert(!destinia::isNoticeablySlowFrame(62.5));
+    assert(!destinia::isNoticeablySlowFrame(63.4));
+    assert(!destinia::isNoticeablySlowFrame(70.0));
+    assert(destinia::isNoticeablySlowFrame(70.6));
+    assert(destinia::isNoticeablySlowFrame(726.1));
     std::cout<<"frame_pacing: PASS: original 16Hz cap and longer pauses\n";
 }
