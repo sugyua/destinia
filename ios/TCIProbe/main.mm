@@ -3,6 +3,7 @@
 #import "DestiniaDiagnosticHUD.h"
 #import "DestiniaControllerBridge.h"
 #include "frame_pacing.h"
+#include "diagnostic_log.h"
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -65,6 +66,9 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 @property (nonatomic,copy) void (^touchCallback)(CGPoint point, int type);
 @property (nonatomic,copy) void (^metricsCallback)(void);
 @property (nonatomic,copy) void (^profileCallback)(void);
+@property (nonatomic,copy) void (^reportCallback)(void);
+@property (nonatomic,strong) UIButton *profileButton;
+@property (nonatomic,strong) UIButton *reportButton;
 @property (nonatomic,assign) BOOL trackingMetricsGesture;
 @property (nonatomic,assign) BOOL profileExpanded;
 @end
@@ -77,6 +81,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 - (void)loadView {
     self.view=[[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.view.backgroundColor=[UIColor blackColor];
+    self.view.multipleTouchEnabled=YES;
 
     self.gameView=[[UIImageView alloc] initWithFrame:self.view.bounds];
     self.gameView.autoresizingMask=
@@ -98,6 +103,19 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     self.statusLabel.layer.cornerRadius=7;
     self.statusLabel.layer.masksToBounds=YES;
     [self.view addSubview:self.statusLabel];
+    self.profileButton=[UIButton buttonWithType:UIButtonTypeSystem];
+    [self.profileButton setTitle:@"PERFIL" forState:UIControlStateNormal];
+    [self.profileButton addTarget:self action:@selector(requestProfile) forControlEvents:UIControlEventTouchUpInside];
+    self.reportButton=[UIButton buttonWithType:UIButtonTypeSystem];
+    [self.reportButton setTitle:@"RELATORIO" forState:UIControlStateNormal];
+    [self.reportButton addTarget:self action:@selector(requestReport) forControlEvents:UIControlEventTouchUpInside];
+    for (UIButton *button in @[self.profileButton,self.reportButton]) {
+        button.titleLabel.font=[UIFont boldSystemFontOfSize:11];
+        [button setTitleColor:UIColor.whiteColor forState:UIControlStateNormal];
+        button.backgroundColor=[[UIColor blackColor] colorWithAlphaComponent:0.8];
+        button.layer.cornerRadius=5;
+        [self.view addSubview:button];
+    }
 #if DESTINIA_DIAGNOSTIC_HUD
     self.debugHUD=[[DestiniaDiagnosticHUD alloc] initWithFrame:CGRectZero];
     self.debugHUD.hidden=NO;
@@ -105,9 +123,13 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 #endif
 }
 
+- (void)requestProfile { if (self.profileCallback) self.profileCallback(); }
+- (void)requestReport { if (self.reportCallback) self.reportCallback(); }
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
     CGRect safe=self.view.safeAreaLayoutGuide.layoutFrame;
+    self.profileButton.frame=CGRectMake(safe.origin.x+8,CGRectGetMaxY(safe)-78,70,32);
+    self.reportButton.frame=CGRectMake(safe.origin.x+84,CGRectGetMaxY(safe)-78,92,32);
     self.statusLabel.frame=CGRectMake(
         safe.origin.x+10,safe.origin.y+6,
         MAX(100,safe.size.width-20),self.profileExpanded?140:38);
@@ -206,6 +228,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     std::chrono::steady_clock::time_point _previousFrameStart;
     bool _hasPreviousFrame;
     NSString *_lastProfile;
+    DestiniaDiagnosticLog _diagnosticLog;
 }
 
 - (void)showStatus:(NSString *)status {
@@ -302,6 +325,8 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     if (error[0] && std::strncmp(error,"TOP ARM32:",10)==0) {
         NSString *top=[NSString stringWithUTF8String:error];
         _lastProfile=top;
+        NSString *profileEntry=[NSString stringWithFormat:@"PROFILE frame=%u (instrumentado, pode reduzir FPS)\n%@",_frameIndex,top];
+        _diagnosticLog.add([profileEntry UTF8String]);
         NSLog(@"Destinia gameplay profile: %@",top);
         dispatch_async(dispatch_get_main_queue(), ^{
             self->_showMetrics.store(true);
@@ -343,6 +368,11 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         const double avgFrame=_totalFrameMs/std::max(1u,_measureFrames);
         const double peakFrame=_maxFrameMs;
         const uint64_t slowFrames=_slowFrameCount;
+        NSString *entry=[NSString stringWithFormat:
+            @"SAMPLE uptime=%.1fs frame=%u fps=%.2f arm_avg_ms=%.2f arm_peak_ms=%.2f prep_ms=%.2f gap_avg_ms=%.2f gap_peak_ms=%.2f timer_late_peak_ms=%.2f guest_delay_ms=%u slow_total=%llu thermal=%ld",
+            NSProcessInfo.processInfo.systemUptime,_frameIndex,fps,avgArm,_peakArmMs,avgPrep,avgFrame,peakFrame,_peakTimerLateMs,nextMs,
+            (unsigned long long)slowFrames,(long)NSProcessInfo.processInfo.thermalState];
+        _diagnosticLog.add([entry UTF8String]);
 #if DESTINIA_DIAGNOSTIC_HUD
         dispatch_async(dispatch_get_main_queue(), ^{
             [self->_controller.debugHUD refreshFPS:fps
@@ -421,6 +451,30 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         [owner showStatus:@"Perfilando 1 quadro ARM32..."];
         dispatch_async(owner->_gameQueue,^{
             if (owner->_ready) destinia_game_profile_next();
+        });
+    };
+    _controller.reportCallback=^{
+        AppDelegate *owner=weakSelf;
+        if (!owner) return;
+        dispatch_async(owner->_gameQueue,^{
+            std::string text="Destinia iOS 0.5.5 diagnostico build 26\n"
+                "Amostras recentes; PROFILE conta blocos ARM32, nao tempo por funcao, e pode reduzir FPS.\n"
+                "Sem saves, nomes de personagem ou toques. Tempo uptime em segundos.\n\n";
+            text+=owner->_diagnosticLog.text();
+            NSData *data=[NSData dataWithBytes:text.data() length:text.size()];
+            NSString *filename=[NSString stringWithFormat:@"Destinia-diagnostico-%@.txt",NSUUID.UUID.UUIDString];
+            NSURL *url=[NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:filename]];
+            NSError *writeError=nil;
+            if (![data writeToURL:url options:NSDataWritingAtomic error:&writeError]) {
+                [owner showStatus:@"Nao foi possivel criar o relatorio."];
+                return;
+            }
+            dispatch_async(dispatch_get_main_queue(),^{
+                UIActivityViewController *sheet=[[UIActivityViewController alloc] initWithActivityItems:@[url] applicationActivities:nil];
+                sheet.popoverPresentationController.sourceView=owner->_controller.reportButton;
+                sheet.popoverPresentationController.sourceRect=owner->_controller.reportButton.bounds;
+                [owner->_controller presentViewController:sheet animated:YES completion:nil];
+            });
         });
     };
     _controller.metricsCallback=^{

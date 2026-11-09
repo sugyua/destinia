@@ -5,6 +5,7 @@ on:
     branches:
       - ios/unicorn-poc
       - codex/ios-055-diagnostico
+      - codex/ios-diagnostico-exportavel
     paths:
       - "ios/TCIProbe/device-release.txt"
   workflow_dispatch:
@@ -287,6 +288,13 @@ jobs:
           /tmp/destinia_probe_host_test \
             game/lib/armeabi/libdestinia_jni.so
 
+      - name: Test diagnostic report buffer and frame pacing
+        run: |
+          set -euo pipefail
+          clang++ -std=c++17 -O2 -Wall -Wextra -Werror ios/TCIProbe/diagnostic_log_test.cpp -o /tmp/diagnostic-log-test
+          /tmp/diagnostic-log-test
+          clang++ -std=c++17 -O2 -Wall -Wextra -Werror ios/TCIProbe/frame_pacing_test.cpp -o /tmp/frame-pacing-test
+          /tmp/frame-pacing-test
       - name: Build TCIProbe IPA
         run: |
           set -eux
@@ -346,7 +354,7 @@ jobs:
             <key>CFBundleShortVersionString</key>
             <string>0.5.5</string>
             <key>CFBundleVersion</key>
-            <string>25</string>
+            <string>26</string>
             <key>MinimumOSVersion</key>
             <string>15.0</string>
             <key>LSRequiresIPhoneOS</key>
