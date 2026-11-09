@@ -1,3 +1,7 @@
+Destinia 0.5.5 diagnostico Build 27: DADOS, PERFIL e RELATORIO por botoes.
+Gestos de 3 e 4 dedos removidos; os dados sao mantidos em memoria ate a exportacao.
+Teste no iPhone pendente.
+
 Destinia 0.5.5 diagnostico Build 26: amostras de desempenho e exportacao manual de relatorio.
 PERFIL coleta um quadro instrumentado; RELATORIO compartilha arquivo de texto.
 Sem saves, nomes de personagem, coordenadas de toque ou envio automatico.

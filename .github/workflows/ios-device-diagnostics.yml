@@ -6,6 +6,7 @@ on:
       - ios/unicorn-poc
       - codex/ios-055-diagnostico
       - codex/ios-diagnostico-exportavel
+      - codex/ios-diagnostico-botoes
     paths:
       - "ios/TCIProbe/device-release.txt"
   workflow_dispatch:
@@ -354,7 +355,7 @@ jobs:
             <key>CFBundleShortVersionString</key>
             <string>0.5.5</string>
             <key>CFBundleVersion</key>
-            <string>26</string>
+            <string>27</string>
             <key>MinimumOSVersion</key>
             <string>15.0</string>
             <key>LSRequiresIPhoneOS</key>

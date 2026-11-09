@@ -67,9 +67,9 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 @property (nonatomic,copy) void (^metricsCallback)(void);
 @property (nonatomic,copy) void (^profileCallback)(void);
 @property (nonatomic,copy) void (^reportCallback)(void);
+@property (nonatomic,strong) UIButton *metricsButton;
 @property (nonatomic,strong) UIButton *profileButton;
 @property (nonatomic,strong) UIButton *reportButton;
-@property (nonatomic,assign) BOOL trackingMetricsGesture;
 @property (nonatomic,assign) BOOL profileExpanded;
 @end
 
@@ -103,13 +103,16 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     self.statusLabel.layer.cornerRadius=7;
     self.statusLabel.layer.masksToBounds=YES;
     [self.view addSubview:self.statusLabel];
+    self.metricsButton=[UIButton buttonWithType:UIButtonTypeSystem];
+    [self.metricsButton setTitle:@"DADOS" forState:UIControlStateNormal];
+    [self.metricsButton addTarget:self action:@selector(toggleMetrics) forControlEvents:UIControlEventTouchUpInside];
     self.profileButton=[UIButton buttonWithType:UIButtonTypeSystem];
     [self.profileButton setTitle:@"PERFIL" forState:UIControlStateNormal];
     [self.profileButton addTarget:self action:@selector(requestProfile) forControlEvents:UIControlEventTouchUpInside];
     self.reportButton=[UIButton buttonWithType:UIButtonTypeSystem];
     [self.reportButton setTitle:@"RELATORIO" forState:UIControlStateNormal];
     [self.reportButton addTarget:self action:@selector(requestReport) forControlEvents:UIControlEventTouchUpInside];
-    for (UIButton *button in @[self.profileButton,self.reportButton]) {
+    for (UIButton *button in @[self.metricsButton,self.profileButton,self.reportButton]) {
         button.titleLabel.font=[UIFont boldSystemFontOfSize:11];
         [button setTitleColor:UIColor.whiteColor forState:UIControlStateNormal];
         button.backgroundColor=[[UIColor blackColor] colorWithAlphaComponent:0.8];
@@ -123,13 +126,17 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 #endif
 }
 
+- (void)toggleMetrics { if (self.metricsCallback) self.metricsCallback(); }
 - (void)requestProfile { if (self.profileCallback) self.profileCallback(); }
 - (void)requestReport { if (self.reportCallback) self.reportCallback(); }
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
     CGRect safe=self.view.safeAreaLayoutGuide.layoutFrame;
-    self.profileButton.frame=CGRectMake(safe.origin.x+8,CGRectGetMaxY(safe)-78,70,32);
-    self.reportButton.frame=CGRectMake(safe.origin.x+84,CGRectGetMaxY(safe)-78,92,32);
+    const CGFloat buttonX=CGRectGetMidX(safe)-122;
+    const CGFloat buttonY=safe.origin.y+48;
+    self.metricsButton.frame=CGRectMake(buttonX,buttonY,70,40);
+    self.profileButton.frame=CGRectMake(buttonX+76,buttonY,70,40);
+    self.reportButton.frame=CGRectMake(buttonX+152,buttonY,92,40);
     self.statusLabel.frame=CGRectMake(
         safe.origin.x+10,safe.origin.y+6,
         MAX(100,safe.size.width-20),self.profileExpanded?140:38);
@@ -159,43 +166,19 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         MAX(0,MIN(kHeight-1,y)));
     self.touchCallback(converted,type);
 }
-- (void)touchesBegan:(NSSet<UITouch *> *)touches
-          withEvent:(UIEvent *)event {
-    if ([[event allTouches] count]>=4) {
-        self.trackingMetricsGesture=YES;
-        if (self.profileCallback) self.profileCallback();
-        return;
-    }
-    if ([[event allTouches] count]>=3) {
-        self.trackingMetricsGesture=YES;
-        if (self.metricsCallback) self.metricsCallback();
-        return;
-    }
-    if (!self.trackingMetricsGesture)
-        [self forwardTouches:touches type:0];
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    [self forwardTouches:touches type:0];
 }
-- (void)touchesMoved:(NSSet<UITouch *> *)touches
-          withEvent:(UIEvent *)event {
-    if (!self.trackingMetricsGesture)
-        [self forwardTouches:touches type:2];
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    [self forwardTouches:touches type:2];
 }
-- (void)touchesEnded:(NSSet<UITouch *> *)touches
-          withEvent:(UIEvent *)event {
-    if (self.trackingMetricsGesture) {
-        if ([[event allTouches] count] <= [touches count])
-            self.trackingMetricsGesture=NO;
-        return;
-    }
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     [self forwardTouches:touches type:1];
 }
-- (void)touchesCancelled:(NSSet<UITouch *> *)touches
-              withEvent:(UIEvent *)event {
-    if (self.trackingMetricsGesture) {
-        self.trackingMetricsGesture=NO;
-        return;
-    }
+- (void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     [self forwardTouches:touches type:1];
 }
+
 @end
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
@@ -457,7 +440,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         AppDelegate *owner=weakSelf;
         if (!owner) return;
         dispatch_async(owner->_gameQueue,^{
-            std::string text="Destinia iOS 0.5.5 diagnostico build 26\n"
+            std::string text="Destinia iOS 0.5.5 diagnostico build 27\n"
                 "Amostras recentes; PROFILE conta blocos ARM32, nao tempo por funcao, e pode reduzir FPS.\n"
                 "Sem saves, nomes de personagem ou toques. Tempo uptime em segundos.\n\n";
             text+=owner->_diagnosticLog.text();
