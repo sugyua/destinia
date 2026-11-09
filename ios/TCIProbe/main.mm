@@ -186,6 +186,8 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     DestiniaViewController *_controller;
     std::atomic<bool> _paused;
     std::atomic<bool> _showMetrics;
+    std::atomic<bool> _framePresentationPending;
+    std::vector<uint8_t> _reusablePixels;
     bool _ready;
     uint32_t _frameIndex;
     std::chrono::steady_clock::time_point _measureStarted;
@@ -195,6 +197,12 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     double _totalFrameMs;
     double _maxFrameMs;
     uint64_t _slowFrameCount;
+    double _peakArmMs;
+    double _peakTimerLateMs;
+    uint32_t _previousGuestDelayMs;
+    std::chrono::steady_clock::time_point _timerDeadline;
+    std::chrono::steady_clock::time_point _lastSlowLog;
+    bool _hasTimerDeadline;
     std::chrono::steady_clock::time_point _previousFrameStart;
     bool _hasPreviousFrame;
     NSString *_lastProfile;
@@ -209,8 +217,11 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 
 - (void)showPixels:(const std::vector<uint8_t> &)pixels
           frameNum:(uint32_t)frameNumber {
+    // Drop stale presentation submissions, never ARM32 gameplay ticks.
+    if (_framePresentationPending.exchange(true)) return;
     UIImage *image=DestiniaImageFromRGB565(pixels.data());
     if (!image) {
+        _framePresentationPending.store(false);
         [self showStatus:@"Erro ao converter RGB565"];
         return;
     }
@@ -218,6 +229,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         self->_controller.gameView.image=image;
         self->_controller.statusLabel.hidden=
             !self->_showMetrics.load() && !self->_lastProfile;
+        self->_framePresentationPending.store(false);
     });
 }
 
@@ -228,7 +240,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         __weak AppDelegate *weakSelf=self;
         dispatch_source_set_event_handler(_timer,^{
             AppDelegate *owner=weakSelf;
-            if (owner) [owner gameTick];
+            if (owner) @autoreleasepool { [owner gameTick]; }
         });
         dispatch_resume(_timer);
     }
@@ -236,6 +248,9 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         NSEC_PER_MSEC,std::min<uint64_t>(delayNs,1000ULL*NSEC_PER_MSEC));
     // Tighten the 5ms leeway of 0.3.8 to 0.5ms. The precise 62.5ms
     // start-to-start target is calculated in nextFrameWait().
+    _timerDeadline=std::chrono::steady_clock::now()+
+        std::chrono::nanoseconds(ns);
+    _hasTimerDeadline=true;
     dispatch_source_set_timer(
         _timer,dispatch_time(DISPATCH_TIME_NOW,static_cast<int64_t>(ns)),
         DISPATCH_TIME_FOREVER,500000ULL);
@@ -249,24 +264,32 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     if (!_ready) return;
     if (_paused.load()) {
         [self armTimer:250];
+        _hasPreviousFrame=false;
+        _hasTimerDeadline=false;
         return;
     }
 
     const auto tickStart=std::chrono::steady_clock::now();
+    const double timerLateMs=_hasTimerDeadline
+        ? std::max(0.0,std::chrono::duration<double,std::milli>(
+              tickStart-_timerDeadline).count())
+        : 0.0;
+    _peakTimerLateMs=std::max(_peakTimerLateMs,timerLateMs);
+    double frameGapMs=0.0;
     if (_hasPreviousFrame) {
-        const double elapsedMs=std::chrono::duration<double,std::milli>(
+        frameGapMs=std::chrono::duration<double,std::milli>(
             tickStart-_previousFrameStart).count();
-        _totalFrameMs+=elapsedMs;
-        _maxFrameMs=std::max(_maxFrameMs,elapsedMs);
-        if (elapsedMs>62.5) ++_slowFrameCount;
+        _totalFrameMs+=frameGapMs;
+        _maxFrameMs=std::max(_maxFrameMs,frameGapMs);
+        if (destinia::isNoticeablySlowFrame(frameGapMs))
+            ++_slowFrameCount;
     }
     _previousFrameStart=tickStart;
     _hasPreviousFrame=true;
-    std::vector<uint8_t> pixels(kFrameBytes);
     uint32_t nextMs=0;
     char error[512]={};
     if (!destinia_game_step(
-            pixels.data(),pixels.size(),&nextMs,error,sizeof(error))) {
+            _reusablePixels.data(),_reusablePixels.size(),&nextMs,error,sizeof(error))) {
         _ready=false;
         NSString *message=[NSString stringWithFormat:
             @"Erro no quadro ARM32:\n%s",error];
@@ -275,7 +298,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     }
     const auto emulationFinished=std::chrono::steady_clock::now();
     ++_frameIndex;
-    [self showPixels:pixels frameNum:_frameIndex];
+    [self showPixels:_reusablePixels frameNum:_frameIndex];
     if (error[0] && std::strncmp(error,"TOP ARM32:",10)==0) {
         NSString *top=[NSString stringWithUTF8String:error];
         _lastProfile=top;
@@ -297,6 +320,17 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         emulationFinished-tickStart).count();
     const double preparationMs=std::chrono::duration<double,std::milli>(
         prepared-emulationFinished).count();
+    _peakArmMs=std::max(_peakArmMs,armMs);
+    // Rate limit anomaly logs to avoid amplifying a performance incident.
+    if ((armMs>90.0 || frameGapMs>120.0 || timerLateMs>50.0) &&
+        tickStart-_lastSlowLog>std::chrono::seconds(3)) {
+        _lastSlowLog=tickStart;
+        NSLog(@"DESTINIA_STALL gap=%.1fms arm=%.1fms timerLate=%.1fms "
+               "previousGuestDelay=%ums thermal=%ld frame=%u",
+              frameGapMs,armMs,timerLateMs,_previousGuestDelayMs,
+              static_cast<long>([NSProcessInfo processInfo].thermalState),
+              _frameIndex);
+    }
     ++_measureFrames;
     _totalArmMs+=armMs;
     _totalPreparationMs+=preparationMs;
@@ -317,8 +351,9 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
                 slowFrames:slowFrames];
         });
 #endif
-        NSLog(@"Destinia perf FPS=%.1f ARM32=%.1fms RGB565=%.1fms frames=%u",
-              fps,avgArm,avgPrep,_measureFrames);
+        NSLog(@"Destinia perf FPS=%.1f ARM32=%.1fms ARM32_PEAK=%.1fms "
+               "RGB565=%.1fms TIMER_LATE_PEAK=%.1fms frames=%u",
+              fps,avgArm,_peakArmMs,avgPrep,_peakTimerLateMs,_measureFrames);
         if (_showMetrics.load() && !_lastProfile) {
             NSString *summary=[NSString stringWithFormat:
                 @"FPS %.1f | ARM32 %.1fms | RGB %.1fms",
@@ -334,6 +369,8 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         _totalPreparationMs=0;
         _totalFrameMs=0;
         _maxFrameMs=0;
+        _peakArmMs=0;
+        _peakTimerLateMs=0;
     }
     if (nextMs==0) {
         _ready=false;
@@ -344,6 +381,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     // Honor larger guest-requested delays, including loading/transitions.
     const auto wait=destinia::nextFrameWait(
         tickStart,std::chrono::steady_clock::now(),nextMs);
+    _previousGuestDelayMs=nextMs;
     [self armTimerNs:static_cast<uint64_t>(wait.count())];
 }
 
@@ -351,6 +389,8 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     didFinishLaunchingWithOptions:(NSDictionary *)options {
     _paused.store(false);
     _showMetrics.store(true);
+    _framePresentationPending.store(false);
+    _reusablePixels.resize(kFrameBytes);
     _ready=false;
     _frameIndex=0;
     _measureStarted=std::chrono::steady_clock::now();
@@ -360,7 +400,12 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     _totalFrameMs=0;
     _maxFrameMs=0;
     _slowFrameCount=0;
+    _peakArmMs=0;
+    _peakTimerLateMs=0;
+    _previousGuestDelayMs=0;
     _hasPreviousFrame=false;
+    _hasTimerDeadline=false;
+    _lastSlowLog=std::chrono::steady_clock::now();
     UIDevice.currentDevice.batteryMonitoringEnabled=YES;
     _gameQueue=dispatch_queue_create(
         "com.destinia.arm32.interpreter",DISPATCH_QUEUE_SERIAL);
