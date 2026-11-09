@@ -240,7 +240,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         __weak AppDelegate *weakSelf=self;
         dispatch_source_set_event_handler(_timer,^{
             AppDelegate *owner=weakSelf;
-            if (owner) @autoreleasepool { [owner gameTick]; }
+            if (owner) { @autoreleasepool { [owner gameTick]; } }
         });
         dispatch_resume(_timer);
     }
@@ -326,7 +326,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         tickStart-_lastSlowLog>std::chrono::seconds(3)) {
         _lastSlowLog=tickStart;
         NSLog(@"DESTINIA_STALL gap=%.1fms arm=%.1fms timerLate=%.1fms "
-               "previousGuestDelay=%ums thermal=%ld frame=%u",
+               @"previousGuestDelay=%ums thermal=%ld frame=%u",
               frameGapMs,armMs,timerLateMs,_previousGuestDelayMs,
               static_cast<long>([NSProcessInfo processInfo].thermalState),
               _frameIndex);
@@ -352,7 +352,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         });
 #endif
         NSLog(@"Destinia perf FPS=%.1f ARM32=%.1fms ARM32_PEAK=%.1fms "
-               "RGB565=%.1fms TIMER_LATE_PEAK=%.1fms frames=%u",
+               @"RGB565=%.1fms TIMER_LATE_PEAK=%.1fms frames=%u",
               fps,avgArm,_peakArmMs,avgPrep,_peakTimerLateMs,_measureFrames);
         if (_showMetrics.load() && !_lastProfile) {
             NSString *summary=[NSString stringWithFormat:
