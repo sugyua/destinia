@@ -27,6 +27,8 @@ public:
     bool enableNativeAlphaRow(uint32_t imageBase, std::string &error);
     bool enableNativeDrawScreen16(uint32_t imageBase, std::string &error);
     bool enableNativeDrawAlpScreen16(uint32_t imageBase, std::string &error);
+    bool enableStallFunctionCheckpoints(const std::vector<uint32_t> &entries,
+                                        std::string &error);
     bool selfTest(std::string &error);
     bool selfTestJniBufferReuse(std::string &error);
     bool runOriginalExport(uint32_t address, uint32_t &result,
@@ -49,6 +51,7 @@ public:
 private:
     static void onCode(uc_engine *, uint64_t, uint32_t, void *);
     static void onProfileBlock(uc_engine *, uint64_t, uint32_t, void *);
+    static void onStallFunctionEntry(uc_engine *, uint64_t, uint32_t, void *);
     static void onFastFillRow(uc_engine *, uint64_t, uint32_t, void *);
     static void onFastSpriteColumn(uc_engine *, uint64_t, uint32_t, void *);
     static void onFastDodgeRow(uc_engine *, uint64_t, uint32_t, void *);
@@ -78,6 +81,7 @@ private:
     uc_hook hook_ = 0;
     uc_hook jniHook_ = 0;
     uc_hook profileHook_ = 0;
+    std::vector<uc_hook> stallEntryHooks_;
     uc_hook fastFillHook_ = 0;
     uc_hook fastSpriteHook_ = 0;
     uc_hook fastDodgeHook_ = 0;

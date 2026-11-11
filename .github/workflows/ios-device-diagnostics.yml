@@ -10,6 +10,7 @@ on:
     paths:
       - "ios/TCIProbe/device-release.txt"
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   ios-diagnostics:
@@ -19,6 +20,9 @@ jobs:
     steps:
       - name: Checkout Destinia
         uses: actions/checkout@v4
+        with:
+          repository: sugyua/destinia
+          ref: codex/ios-055-freeze-watchdog-b29
 
       - name: Audit Android game version and Windows-mod parity
         run: |
@@ -296,6 +300,8 @@ jobs:
           /tmp/diagnostic-log-test
           clang++ -std=c++17 -O2 -Wall -Wextra -Werror ios/TCIProbe/frame_pacing_test.cpp -o /tmp/frame-pacing-test
           /tmp/frame-pacing-test
+          clang++ -std=c++17 -O2 -Wall -Wextra -Werror ios/TCIProbe/stall_watchdog_test.cpp -o /tmp/stall-watchdog-test
+          /tmp/stall-watchdog-test
       - name: Build TCIProbe IPA
         run: |
           set -eux
@@ -322,6 +328,7 @@ jobs:
             -DDESTINIA_NATIVE_SIMPLECLIP=1 \
             -DDESTINIA_NATIVE_PXLMULTIPLY=1 \
             -DDESTINIA_NATIVE_SCREEN=1 \
+            -DDESTINIA_STALL_DIAGNOSTICS=1 \
             -std=c++17 \
             -I/tmp/unicorn-tci/unicorn-engine-sys-tci/include \
             ios/TCIProbe/main.mm \
@@ -355,7 +362,7 @@ jobs:
             <key>CFBundleShortVersionString</key>
             <string>0.5.5</string>
             <key>CFBundleVersion</key>
-            <string>27</string>
+            <string>29</string>
             <key>MinimumOSVersion</key>
             <string>15.0</string>
             <key>LSRequiresIPhoneOS</key>
