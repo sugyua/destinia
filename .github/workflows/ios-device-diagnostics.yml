@@ -19,10 +19,10 @@ jobs:
 
     steps:
       - name: Checkout Destinia
-        uses: actions/checkout@v4
-        with:
-          repository: sugyua/destinia
-          ref: codex/ios-055-freeze-watchdog-b29
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch codex/ios-055-freeze-watchdog-b29 https://github.com/sugyua/destinia.git .
+          git rev-parse HEAD
 
       - name: Audit Android game version and Windows-mod parity
         run: |
