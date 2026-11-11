@@ -481,14 +481,14 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         if (!owner) return;
         // Snapshot on the main thread: exporting must work even if ARM32 is blocked.
         {
-            std::string text="Destinia iOS 0.5.5 diagnostico build 29\\n"
+            std::string text="Destinia iOS 0.5.5 diagnostico build 29\n"
                 "Amostras recentes; PROFILE conta blocos ARM32, nao tempo por funcao, e pode reduzir FPS.\n"
                 "Sem saves, nomes de personagem ou toques. Tempo uptime em segundos.\n\n";
             text+=owner->_diagnosticLog.text();
             const auto stall=owner->_stallWatchdog.snapshot();
             if (stall.active) {
                 NSString *live=[NSString stringWithFormat:
-                    @"WATCHDOG_EXPORT frame=%u active_ms=%.1f phase=%u previous_guest_delay_ms=%u last_guest_entry_pc=0x%08x\\n",
+                    @"WATCHDOG_EXPORT frame=%u active_ms=%.1f phase=%u previous_guest_delay_ms=%u last_guest_entry_pc=0x%08x\n",
                     stall.frame,stall.elapsedMs,static_cast<unsigned>(stall.phase),
                     stall.previousGuestDelayMs,stall.lastGuestFunctionEntryPc];
                 text += [live UTF8String];
