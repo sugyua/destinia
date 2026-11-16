@@ -483,7 +483,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         if (!owner) return;
         // Snapshot on the main thread: exporting must work even if ARM32 is blocked.
         {
-            std::string text="Destinia iOS 0.5.5 diagnostico build 29\n"
+            std::string text="Destinia iOS 0.5.5 diagnostico build 30\n"
                 "Amostras recentes; PROFILE conta blocos ARM32, nao tempo por funcao, e pode reduzir FPS.\n"
                 "Sem saves, nomes de personagem ou toques. Tempo uptime em segundos.\n\n";
             if (owner->_checkpointSymbols) {
