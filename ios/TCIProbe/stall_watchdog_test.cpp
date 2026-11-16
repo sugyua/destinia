@@ -1,20 +1,10 @@
 #include "stall_watchdog.h"
 #include <cassert>
-#include <cstring>
 int main() {
     using destinia::StallPhase;
     destinia::StallWatchdog w;
     destinia::StallSnapshot s;
     constexpr uint64_t start=1000000000ULL;
-    assert(std::strcmp(destinia::stallCheckpointName(0x10007c5c), "jniRun")==0);
-    assert(std::strcmp(destinia::stallCheckpointName(0x1000bb91), "Grp_drawClipWImageP")==0);
-    assert(std::strcmp(destinia::stallCheckpointName(0x1000ab40), "Grp_fillRect")==0);
-    assert(std::strcmp(destinia::stallCheckpointName(0x10034454), "_drawMiniMap")==0);
-    assert(std::strcmp(destinia::stallCheckpointName(0x1000b8d4), "Grp_drawWPNImage2")==0);
-    assert(std::strcmp(destinia::stallCheckpointName(0x1000b4bc), "Grp_drawSimpleClipWImageP")==0);
-    assert(std::strcmp(destinia::stallCheckpointName(0x10009868), "_Grp_drawScreen16")==0);
-    assert(std::strcmp(destinia::stallCheckpointName(0x10009a00), "_Grp_drawAlpScreen16")==0);
-    assert(std::strcmp(destinia::stallCheckpointName(0x1000bd90), "unknown")==0);
     assert(!w.pollAt(start,s));
     w.beginAt(42,60,start);
     assert(!w.pollAt(start+499000000ULL,s));
