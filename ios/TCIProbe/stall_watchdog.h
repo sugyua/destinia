@@ -6,22 +6,6 @@
 #include <cstdint>
 
 namespace destinia {
-// Canonical Gamevil 1.0.6 ARM32 ELF symbol entries (image base 0x10000000).
-// This identifies the most recent instrumented function ENTRY, never the live
-// PC or a proven bottleneck. The original binary is unchanged.
-inline const char *stallCheckpointName(uint32_t pc) noexcept {
-    switch (pc & ~1u) {
-        case 0x10007c5cu: return "jniRun";
-        case 0x10009868u: return "_Grp_drawScreen16";
-        case 0x10009a00u: return "_Grp_drawAlpScreen16";
-        case 0x1000ab40u: return "Grp_fillRect";
-        case 0x1000b4bcu: return "Grp_drawSimpleClipWImageP";
-        case 0x1000b8d4u: return "Grp_drawWPNImage2";
-        case 0x1000bb90u: return "Grp_drawClipWImageP";
-        case 0x10034454u: return "_drawMiniMap";
-        default: return "unknown";
-    }
-}
 inline std::atomic<uint32_t> g_lastGuestFunctionEntryPc{0};
 enum class StallPhase : uint32_t { Idle=0, Arm32=1, Pixels=2, Diagnostics=3 };
 struct StallSnapshot {
