@@ -23,6 +23,7 @@ extern "C" int destinia_game_touch(
     char *message, size_t capacity);
 extern "C" void destinia_game_close(void);
 extern "C" void destinia_game_profile_next(void);
+extern "C" int destinia_game_stall_symbol_map(char *out,size_t capacity);
 
 static constexpr size_t kWidth=400;
 static constexpr size_t kHeight=240;
@@ -214,6 +215,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     bool _hasPreviousFrame;
     NSString *_lastProfile;
     DestiniaDiagnosticLog _diagnosticLog;
+    NSString *_checkpointSymbols; // Written and read only on main UIKit queue.
     destinia::StallWatchdog _stallWatchdog;
 }
 
@@ -430,7 +432,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     _previousGuestDelayMs=nextMs;
     if (nextMs>=500u) {
         NSString *entry=[NSString stringWithFormat:
-            @"GUEST_WAIT frame=%u requested_ms=%u arm_ms=%.1f (request, not time spent in ARM32)",
+            @"GUEST_WAIT frame=%u requested_ms=%u arm_ms=%.1f (requested_ms is NEXT-frame delay; arm_ms is CURRENT-frame wall time)",
             _frameIndex,nextMs,armMs];
         _diagnosticLog.add([entry UTF8String]);
     }
@@ -484,6 +486,9 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
             std::string text="Destinia iOS 0.5.5 diagnostico build 29\n"
                 "Amostras recentes; PROFILE conta blocos ARM32, nao tempo por funcao, e pode reduzir FPS.\n"
                 "Sem saves, nomes de personagem ou toques. Tempo uptime em segundos.\n\n";
+            if (owner->_checkpointSymbols) {
+                text += [owner->_checkpointSymbols UTF8String];
+            }
             text+=owner->_diagnosticLog.text();
             const auto stall=owner->_stallWatchdog.snapshot();
             if (stall.active) {
@@ -565,6 +570,13 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
                 return;
             }
             NSLog(@"Destinia iOS: %s",output);
+            char symbolMap[2048]={};
+            if (destinia_game_stall_symbol_map(symbolMap,sizeof(symbolMap))) {
+                NSString *checkpointText=[NSString stringWithUTF8String:symbolMap];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    self->_checkpointSymbols=checkpointText;
+                });
+            }
             _ready=true;
             _measureStarted=std::chrono::steady_clock::now();
             _measureFrames=0;
