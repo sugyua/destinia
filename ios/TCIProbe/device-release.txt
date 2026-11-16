@@ -1,3 +1,10 @@
+Destinia iOS 0.5.5 Diagnostic Build 30 — mapa de checkpoints por simbolo
+- Carrega os nomes/PCs dos checkpoints ARM32 a partir da tabela de simbolos do ELF ja carregado.
+- RELATORIO inclui CHECKPOINT_SYMBOL antes da amostra circular, inclusive apos 20 min.
+- GUEST_WAIT diferencia atraso requisitado para o proximo quadro da duracao real do quadro atual.
+- Instrumentacao read-only: nenhum efeito em saves, controles, audio, cadencia e renderizacao.
+- IPA privado de diagnostico, nao e uma correcao comprovada dos travamentos.
+
 Destinia iOS 0.5.5 Diagnostic Build 29 — experimental freeze watchdog
 - Monitor de 500 ms / 2 s / 5 s independente da fila serial ARM32.
 - RELATORIO funciona mesmo com jniRun preso; buffer de diagnostico com mutex.
