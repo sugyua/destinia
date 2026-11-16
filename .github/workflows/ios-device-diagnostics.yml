@@ -21,7 +21,7 @@ jobs:
       - name: Checkout Destinia
         run: |
           set -euo pipefail
-          git clone --depth 1 --branch codex/ios-055-freeze-watchdog-b29 https://github.com/sugyua/destinia.git .
+          git clone --depth 1 --branch codex/ios-055-checkpoint-symbols-20261116 https://github.com/sugyua/destinia.git .
           git rev-parse HEAD
 
       - name: Audit Android game version and Windows-mod parity
@@ -362,7 +362,7 @@ jobs:
             <key>CFBundleShortVersionString</key>
             <string>0.5.5</string>
             <key>CFBundleVersion</key>
-            <string>29</string>
+            <string>30</string>
             <key>MinimumOSVersion</key>
             <string>15.0</string>
             <key>LSRequiresIPhoneOS</key>
