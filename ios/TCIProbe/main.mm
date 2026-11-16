@@ -254,11 +254,10 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         destinia::StallSnapshot stall;
         if (!owner->_stallWatchdog.poll(stall)) return;
         NSString *entry=[NSString stringWithFormat:
-            @"WATCHDOG severity=%u frame=%u active_ms=%.1f phase=%u previous_guest_delay_ms=%u last_guest_entry_pc=0x%08x checkpoint=%s thermal=%ld",
+            @"WATCHDOG severity=%u frame=%u active_ms=%.1f phase=%u previous_guest_delay_ms=%u last_guest_entry_pc=0x%08x thermal=%ld",
             stall.severity,stall.frame,stall.elapsedMs,
             static_cast<unsigned>(stall.phase),stall.previousGuestDelayMs,
             stall.lastGuestFunctionEntryPc,
-            destinia::stallCheckpointName(stall.lastGuestFunctionEntryPc),
             static_cast<long>(NSProcessInfo.processInfo.thermalState)];
         owner->_diagnosticLog.add([entry UTF8String]);
         NSLog(@"%@",entry);
@@ -431,7 +430,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     _previousGuestDelayMs=nextMs;
     if (nextMs>=500u) {
         NSString *entry=[NSString stringWithFormat:
-            @"GUEST_WAIT frame=%u requested_ms=%u arm_ms=%.1f (requested_ms: espera futura; arm_ms: duracao medida desta chamada)",
+            @"GUEST_WAIT frame=%u requested_ms=%u arm_ms=%.1f (request, not time spent in ARM32)",
             _frameIndex,nextMs,armMs];
         _diagnosticLog.add([entry UTF8String]);
     }
@@ -484,16 +483,14 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         {
             std::string text="Destinia iOS 0.5.5 diagnostico build 29\n"
                 "Amostras recentes; PROFILE conta blocos ARM32, nao tempo por funcao, e pode reduzir FPS.\n"
-                "Sem saves, nomes de personagem ou toques. Tempo uptime em segundos.\n"
-                "checkpoint = ultima entrada de funcao monitorada, NAO PC atual ou prova de gargalo.\n\n";
+                "Sem saves, nomes de personagem ou toques. Tempo uptime em segundos.\n\n";
             text+=owner->_diagnosticLog.text();
             const auto stall=owner->_stallWatchdog.snapshot();
             if (stall.active) {
                 NSString *live=[NSString stringWithFormat:
-                    @"WATCHDOG_EXPORT frame=%u active_ms=%.1f phase=%u previous_guest_delay_ms=%u last_guest_entry_pc=0x%08x checkpoint=%s\n",
+                    @"WATCHDOG_EXPORT frame=%u active_ms=%.1f phase=%u previous_guest_delay_ms=%u last_guest_entry_pc=0x%08x\n",
                     stall.frame,stall.elapsedMs,static_cast<unsigned>(stall.phase),
-                    stall.previousGuestDelayMs,stall.lastGuestFunctionEntryPc,
-                    destinia::stallCheckpointName(stall.lastGuestFunctionEntryPc)];
+                    stall.previousGuestDelayMs,stall.lastGuestFunctionEntryPc];
                 text += [live UTF8String];
             }
             NSData *data=[NSData dataWithBytes:text.data() length:text.size()];
