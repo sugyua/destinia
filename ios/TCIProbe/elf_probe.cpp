@@ -690,6 +690,30 @@ extern "C" int destinia_game_open(
         path,out,capacity,frameOut,frameCapacity,true);
 }
 
+// Snapshot the symbol-to-address map from the already loaded ELF. This does not
+// touch Unicorn and is called on the game queue once after initialization.
+extern "C" int destinia_game_stall_symbol_map(char *out,size_t capacity) {
+    if (!out || !capacity || !activeGame) return 0;
+    const std::set<std::string> watched={
+        "Grp_drawClipWImageP","Grp_drawSimpleClipWImageP",
+        "Grp_drawWPNImage2","_drawMiniMap","Grp_fillRect",
+        "_Grp_drawScreen16","_Grp_drawAlpScreen16",
+        "Java_game_destiniaeng_GameThread_jniRun"
+    };
+    std::string map;
+    for (const auto &entry:activeGame->exports) {
+        if (!watched.count(entry.second)) continue;
+        char line[192];
+        std::snprintf(line,sizeof(line),
+                      "CHECKPOINT_SYMBOL pc=0x%08x name=%s\\n",
+                      entry.first,entry.second.c_str());
+        map += line;
+    }
+    if (map.empty() || map.size()>=capacity) return 0;
+    std::memcpy(out,map.c_str(),map.size()+1);
+    return 1;
+}
+
 extern "C" int destinia_game_step(
     uint8_t *frameOut, size_t frameCapacity, uint32_t *nextMs,
     char *message, size_t capacity) {
