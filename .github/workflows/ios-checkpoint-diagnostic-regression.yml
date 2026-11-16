@@ -1,0 +1,44 @@
+name: iOS checkpoint diagnostic regression
+
+on:
+  push:
+    branches:
+      - codex/ios-055-checkpoint-symbols-20261116
+    paths:
+      - "ios/TCIProbe/main.mm"
+      - "ios/TCIProbe/elf_probe.cpp"
+      - ".github/workflows/ios-checkpoint-diagnostic-regression.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ios-checkpoint-syntax:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Watchdog C++ regression
+        run: |
+          set -euo pipefail
+          clang++ -std=c++17 -O2 -Wall -Wextra -Werror ios/TCIProbe/stall_watchdog_test.cpp -o /tmp/destinia-stall-test
+          /tmp/destinia-stall-test
+      - name: Fetch compatible Unicorn TCI headers (no game assets)
+        run: |
+          git clone --depth 1 https://github.com/1rhino2/unicorn-tci.git /tmp/unicorn-tci
+          test -f /tmp/unicorn-tci/unicorn-engine-sys-tci/include/unicorn/unicorn.h
+      - name: Compile changed files for iOS ARM64 without linking IPA
+        run: |
+          set -euo pipefail
+          SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
+          xcrun --sdk iphoneos clang++ -x objective-c++ -std=c++17 -fobjc-arc -O2 \
+            -DDESTINIA_DIAGNOSTIC_HUD=1 -DDESTINIA_STALL_DIAGNOSTICS=1 \
+            -target arm64-apple-ios15.0 -isysroot "$SDK" \
+            -c ios/TCIProbe/main.mm -o /tmp/destinia-ios-main.o
+          xcrun --sdk iphoneos clang++ -x c++ -std=c++17 -O2 \
+            -DDESTINIA_STALL_DIAGNOSTICS=1 \
+            -target arm64-apple-ios15.0 -isysroot "$SDK" \
+            -I/tmp/unicorn-tci/unicorn-engine-sys-tci/include \
+            -c ios/TCIProbe/elf_probe.cpp -o /tmp/destinia-elf-probe.o
+          file /tmp/destinia-ios-main.o /tmp/destinia-elf-probe.o
