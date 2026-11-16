@@ -484,7 +484,8 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         {
             std::string text="Destinia iOS 0.5.5 diagnostico build 29\n"
                 "Amostras recentes; PROFILE conta blocos ARM32, nao tempo por funcao, e pode reduzir FPS.\n"
-                "Sem saves, nomes de personagem ou toques. Tempo uptime em segundos.\n"\n                "checkpoint = ultima entrada de funcao monitorada, NAO PC atual ou prova de gargalo.\n\n";
+                "Sem saves, nomes de personagem ou toques. Tempo uptime em segundos.\n"
+                "checkpoint = ultima entrada de funcao monitorada, NAO PC atual ou prova de gargalo.\n\n";
             text+=owner->_diagnosticLog.text();
             const auto stall=owner->_stallWatchdog.snapshot();
             if (stall.active) {
