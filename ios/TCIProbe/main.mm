@@ -4,6 +4,7 @@
 #import "DestiniaControllerBridge.h"
 #include "frame_pacing.h"
 #include "diagnostic_log.h"
+#include "stall_watchdog.h"
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -188,6 +189,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 @implementation AppDelegate {
     dispatch_queue_t _gameQueue;
     dispatch_source_t _timer;
+    dispatch_source_t _freezeMonitor;
     DestiniaViewController *_controller;
     std::atomic<bool> _paused;
     std::atomic<bool> _showMetrics;
@@ -212,6 +214,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     bool _hasPreviousFrame;
     NSString *_lastProfile;
     DestiniaDiagnosticLog _diagnosticLog;
+    destinia::StallWatchdog _stallWatchdog;
 }
 
 - (void)showStatus:(NSString *)status {
@@ -239,6 +242,31 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     });
 }
 
+// Runs on the UIKit/main queue, independently of the serial ARM32 game queue.
+- (void)startFreezeMonitor {
+    if (_freezeMonitor) return;
+    _freezeMonitor=dispatch_source_create(
+        DISPATCH_SOURCE_TYPE_TIMER,0,0,dispatch_get_main_queue());
+    __weak AppDelegate *weakSelf=self;
+    dispatch_source_set_event_handler(_freezeMonitor,^{
+        AppDelegate *owner=weakSelf;
+        if (!owner) return;
+        destinia::StallSnapshot stall;
+        if (!owner->_stallWatchdog.poll(stall)) return;
+        NSString *entry=[NSString stringWithFormat:
+            @"WATCHDOG severity=%u frame=%u active_ms=%.1f phase=%u previous_guest_delay_ms=%u last_guest_entry_pc=0x%08x thermal=%ld",
+            stall.severity,stall.frame,stall.elapsedMs,
+            static_cast<unsigned>(stall.phase),stall.previousGuestDelayMs,
+            stall.lastGuestFunctionEntryPc,
+            static_cast<long>(NSProcessInfo.processInfo.thermalState)];
+        owner->_diagnosticLog.add([entry UTF8String]);
+        NSLog(@"%@",entry);
+    });
+    dispatch_source_set_timer(
+        _freezeMonitor,dispatch_time(DISPATCH_TIME_NOW,250*NSEC_PER_MSEC),
+        250*NSEC_PER_MSEC,25*NSEC_PER_MSEC);
+    dispatch_resume(_freezeMonitor);
+}
 - (void)armTimerNs:(uint64_t)delayNs {
     if (!_timer) {
         _timer=dispatch_source_create(
@@ -292,10 +320,12 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     }
     _previousFrameStart=tickStart;
     _hasPreviousFrame=true;
+    _stallWatchdog.begin(_frameIndex+1,_previousGuestDelayMs);
     uint32_t nextMs=0;
     char error[512]={};
     if (!destinia_game_step(
             _reusablePixels.data(),_reusablePixels.size(),&nextMs,error,sizeof(error))) {
+        _stallWatchdog.complete();
         _ready=false;
         NSString *message=[NSString stringWithFormat:
             @"Erro no quadro ARM32:\n%s",error];
@@ -303,9 +333,11 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         return;
     }
     const auto emulationFinished=std::chrono::steady_clock::now();
+    _stallWatchdog.phase(destinia::StallPhase::Pixels);
     ++_frameIndex;
     [self showPixels:_reusablePixels frameNum:_frameIndex];
     if (error[0] && std::strncmp(error,"TOP ARM32:",10)==0) {
+        _stallWatchdog.phase(destinia::StallPhase::Diagnostics);
         NSString *top=[NSString stringWithUTF8String:error];
         _lastProfile=top;
         NSString *profileEntry=[NSString stringWithFormat:@"PROFILE frame=%u (instrumentado, pode reduzir FPS)\n%@",_frameIndex,top];
@@ -386,6 +418,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         _peakTimerLateMs=0;
     }
     if (nextMs==0) {
+        _stallWatchdog.complete();
         _ready=false;
         [self showStatus:@"Destinia encerrou a execucao."];
         return;
@@ -395,6 +428,13 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     const auto wait=destinia::nextFrameWait(
         tickStart,std::chrono::steady_clock::now(),nextMs);
     _previousGuestDelayMs=nextMs;
+    if (nextMs>=500u) {
+        NSString *entry=[NSString stringWithFormat:
+            @"GUEST_WAIT frame=%u requested_ms=%u arm_ms=%.1f (request, not time spent in ARM32)",
+            _frameIndex,nextMs,armMs];
+        _diagnosticLog.add([entry UTF8String]);
+    }
+    _stallWatchdog.complete();
     [self armTimerNs:static_cast<uint64_t>(wait.count())];
 }
 
@@ -439,11 +479,20 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     _controller.reportCallback=^{
         AppDelegate *owner=weakSelf;
         if (!owner) return;
-        dispatch_async(owner->_gameQueue,^{
-            std::string text="Destinia iOS 0.5.5 diagnostico build 27\n"
+        // Snapshot on the main thread: exporting must work even if ARM32 is blocked.
+        {
+            std::string text="Destinia iOS 0.5.5 diagnostico build 29\n"
                 "Amostras recentes; PROFILE conta blocos ARM32, nao tempo por funcao, e pode reduzir FPS.\n"
                 "Sem saves, nomes de personagem ou toques. Tempo uptime em segundos.\n\n";
             text+=owner->_diagnosticLog.text();
+            const auto stall=owner->_stallWatchdog.snapshot();
+            if (stall.active) {
+                NSString *live=[NSString stringWithFormat:
+                    @"WATCHDOG_EXPORT frame=%u active_ms=%.1f phase=%u previous_guest_delay_ms=%u last_guest_entry_pc=0x%08x\n",
+                    stall.frame,stall.elapsedMs,static_cast<unsigned>(stall.phase),
+                    stall.previousGuestDelayMs,stall.lastGuestFunctionEntryPc];
+                text += [live UTF8String];
+            }
             NSData *data=[NSData dataWithBytes:text.data() length:text.size()];
             NSString *filename=[NSString stringWithFormat:@"Destinia-diagnostico-%@.txt",NSUUID.UUID.UUIDString];
             NSURL *url=[NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:filename]];
@@ -452,13 +501,11 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
                 [owner showStatus:@"Nao foi possivel criar o relatorio."];
                 return;
             }
-            dispatch_async(dispatch_get_main_queue(),^{
-                UIActivityViewController *sheet=[[UIActivityViewController alloc] initWithActivityItems:@[url] applicationActivities:nil];
-                sheet.popoverPresentationController.sourceView=owner->_controller.reportButton;
-                sheet.popoverPresentationController.sourceRect=owner->_controller.reportButton.bounds;
-                [owner->_controller presentViewController:sheet animated:YES completion:nil];
-            });
-        });
+            UIActivityViewController *sheet=[[UIActivityViewController alloc] initWithActivityItems:@[url] applicationActivities:nil];
+            sheet.popoverPresentationController.sourceView=owner->_controller.reportButton;
+            sheet.popoverPresentationController.sourceRect=owner->_controller.reportButton.bounds;
+            [owner->_controller presentViewController:sheet animated:YES completion:nil];
+        }
     };
     _controller.metricsCallback=^{
         AppDelegate *owner=weakSelf;
@@ -495,6 +542,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         });
     };
 
+    [self startFreezeMonitor];
     _controller.touchCallback = sendTouchAction;
     DestiniaGameControllerBridge::instance().setup(sendTouchAction);
 
@@ -538,6 +586,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 }
 - (void)applicationWillTerminate:(UIApplication *)application {
     _paused.store(true);
+    if (_freezeMonitor) dispatch_source_cancel(_freezeMonitor);
     dispatch_async(_gameQueue,^{ destinia_game_close(); });
 }
 @end

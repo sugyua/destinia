@@ -1,3 +1,12 @@
+Destinia iOS 0.5.5 Diagnostic Build 29 — experimental freeze watchdog
+- Monitor de 500 ms / 2 s / 5 s independente da fila serial ARM32.
+- RELATORIO funciona mesmo com jniRun preso; buffer de diagnostico com mutex.
+- Hooks leves apenas em entradas de funcoes importantes (ultimo checkpoint, nao PC exato).
+- Diferencia GUEST_WAIT 1000 ms de tempo efetivo de emulacao.
+- Nao altera 16 Hz atual, nao adiciona audio e nao toca nos saves.
+- IPA nao assinado; preserva bundle ID com.destinia.tcidiagnostic.
+- Nao publicar IPA contendo assets de terceiros em release publica.
+
 Destinia 0.5.5 diagnostico Build 27: DADOS, PERFIL e RELATORIO por botoes.
 Gestos de 3 e 4 dedos removidos; os dados sao mantidos em memoria ate a exportacao.
 Teste no iPhone pendente.

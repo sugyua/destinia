@@ -1,4 +1,5 @@
 #include "arm_import_runtime.h"
+#include "stall_watchdog.h"
 #include "portuguese_text.h"
 #include <algorithm>
 #include <array>
@@ -11,6 +12,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <set>
 #include <vector>
 
 namespace destinia {
@@ -44,6 +46,7 @@ ArmImportRuntime::~ArmImportRuntime() {
     if (hook_) uc_hook_del(uc_, hook_);
     if (jniHook_) uc_hook_del(uc_, jniHook_);
     if (profileHook_) uc_hook_del(uc_, profileHook_);
+    for (uc_hook hook:stallEntryHooks_) uc_hook_del(uc_,hook);
     if (fastFillHook_) uc_hook_del(uc_, fastFillHook_);
     if (fastSpriteHook_) uc_hook_del(uc_, fastSpriteHook_);
     if (fastDodgeHook_) uc_hook_del(uc_, fastDodgeHook_);
@@ -71,6 +74,34 @@ void ArmImportRuntime::onProfileBlock(
     uc_engine *,uint64_t address,uint32_t,void *user) {
     ++static_cast<ArmImportRuntime *>(user)->profileBlocks_[
         static_cast<uint32_t>(address)&~1u];
+}
+
+// Only selected guest function entries are observed; no per-block profiler is left enabled.
+// An observed entry PC is a checkpoint, NOT the precise current PC during a freeze.
+void ArmImportRuntime::onStallFunctionEntry(
+    uc_engine *,uint64_t address,uint32_t,void *) {
+    g_lastGuestFunctionEntryPc.store(
+        static_cast<uint32_t>(address)&~1u,std::memory_order_relaxed);
+}
+bool ArmImportRuntime::enableStallFunctionCheckpoints(
+    const std::vector<uint32_t> &entries,std::string &error) {
+    std::set<uint32_t> unique;
+    for(uint32_t pc:entries) {
+        pc&=~1u;
+        if (!unique.insert(pc).second) continue;
+        uc_hook hook=0;
+        const uc_err e=uc_hook_add(
+            uc_,&hook,UC_HOOK_CODE,
+            reinterpret_cast<void *>(onStallFunctionEntry),this,pc,pc);
+        if (e!=UC_ERR_OK) {
+            error=std::string("Stall entry hook: ")+uc_strerror(e);
+            for (uc_hook old:stallEntryHooks_) uc_hook_del(uc_,old);
+            stallEntryHooks_.clear();
+            return false;
+        }
+        stallEntryHooks_.push_back(hook);
+    }
+    return true;
 }
 
 // The original Thumb pixel loop at +0xac70 writes one RGB565 pixel

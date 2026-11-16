@@ -607,6 +607,23 @@ static int destinia_probe_impl(
                       [](const auto &x,const auto &y) {
                           return x.first<y.first;
                       });
+#if defined(DESTINIA_STALL_DIAGNOSTICS)
+            // Limited entry-only hooks; never touch Unicorn from the UI/watchdog.
+            const std::set<std::string> watched={
+                "Grp_drawClipWImageP","Grp_drawSimpleClipWImageP",
+                "Grp_drawWPNImage2","_drawMiniMap","Grp_fillRect",
+                "_Grp_drawScreen16","_Grp_drawAlpScreen16",
+                "Java_game_destiniaeng_GameThread_jniRun"
+            };
+            std::vector<uint32_t> entryAddresses;
+            for (const auto &symbol:game->exports)
+                if (watched.count(symbol.second))
+                    entryAddresses.push_back(symbol.first);
+            std::string stallHookError;
+            if (!game->runtime->enableStallFunctionCheckpoints(
+                    entryAddresses,stallHookError))
+                throw std::runtime_error("Stall checkpoints: "+stallHookError);
+#endif
             activeGame=std::move(game);
         } else {
             runtime.reset();
