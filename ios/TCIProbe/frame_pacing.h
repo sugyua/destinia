@@ -4,6 +4,10 @@
 #include <cstdint>
 
 namespace destinia {
+// The 16Hz deadline is 62.5ms; ordinary dispatch jitter is not a stutter.
+inline bool isNoticeablySlowFrame(double startToStartMs) {
+    return startToStartMs > 70.0;
+}
 // Preserve original 16Hz gameplay pace, honor longer ARM32 pauses,
 // and never attempt catch-up updates that could accelerate game logic.
 inline std::chrono::nanoseconds nextFrameWait(

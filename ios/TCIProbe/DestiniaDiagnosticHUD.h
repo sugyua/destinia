@@ -94,7 +94,7 @@ static inline NSString *DestiniaThermalName(NSProcessInfoThermalState state) {
          @" FRAME     %5.1f ms (pico %.0f)\n"
          @" ARM32     %5.1f ms\n"
          @" PREP CPU  %5.1f ms\n"
-         @" LENTOS    %llu (>62.5ms)\n"
+         @" LENTOS    %llu (>70ms)\n"
          @" RAM       %@\n"
          @" BATERIA   %@  %@\n"
          @" TERMICO   %@\n"

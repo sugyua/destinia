@@ -1,0 +1,40 @@
+name: iOS frame-stall PR validation
+
+on:
+  pull_request:
+    branches:
+      - ios/unicorn-poc
+    paths:
+      - "ios/TCIProbe/main.mm"
+      - "ios/TCIProbe/frame_pacing.h"
+      - "ios/TCIProbe/frame_pacing_test.cpp"
+      - "ios/TCIProbe/DestiniaDiagnosticHUD.h"
+      - ".github/workflows/ios-frame-stall-pr.yml"
+  workflow_dispatch:
+
+jobs:
+  ios-objective-cpp:
+    runs-on: macos-15
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Testar cadencia e limiar dos quadros lentos
+        run: |
+          set -euo pipefail
+          clang++ -std=c++17 -O2 -Wall -Wextra -Werror \
+            ios/TCIProbe/frame_pacing_test.cpp -o /tmp/destinia-frame-pacing-test
+          /tmp/destinia-frame-pacing-test
+
+      - name: Compilar Objective-C++ para iOS ARM64 (sem IPA)
+        run: |
+          set -euo pipefail
+          SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
+          xcrun --sdk iphoneos clang++ -x objective-c++ \
+            -std=c++17 -fobjc-arc -O2 \
+            -DDESTINIA_DIAGNOSTIC_HUD=1 \
+            -target arm64-apple-ios15.0 -isysroot "$SDK" \
+            -c ios/TCIProbe/main.mm -o /tmp/destinia-ios-main.o
+          file /tmp/destinia-ios-main.o
