@@ -705,7 +705,7 @@ extern "C" int destinia_game_stall_symbol_map(char *out,size_t capacity) {
         if (!watched.count(entry.second)) continue;
         char line[192];
         std::snprintf(line,sizeof(line),
-                      "CHECKPOINT_SYMBOL pc=0x%08x name=%s\\n",
+                      "CHECKPOINT_SYMBOL pc=0x%08x name=%s\n",
                       entry.first,entry.second.c_str());
         map += line;
     }
