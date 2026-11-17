@@ -1,3 +1,17 @@
+Destinia iOS 0.5.5 Diagnostic Build 31 — deep telemetry for long iPhone sessions
+- Retains the last 4096 completed frames (time, ARM32 wall time, RGB preparation, timer scheduling,
+  frame gaps, next/previous requested delays, latest guest-function checkpoint).
+- Includes the iOS main queue presentation wait and number of coalesced visual submissions;
+  these never discard ARM32 logic ticks.
+- Keeps 2000 watchdog/SAMPLE events and per-frame session histogram plus recent P50/P95/P99.
+- Reports resident RAM, battery, thermal state, UI queue delay and process uptime.
+- Only manual local TXT export via RELATORIO; no automatic transmission, coordinates, save data
+  or character names. PERFIL remains an explicit heavyweight one-frame action, not always enabled.
+- Bounded memory; diagnostics do not change engine, saves, graphics, input, audio or 16Hz pacing.
+- Unsigned private IPA; use the same bundle ID to update an existing personal installation.
+- Monitoring itself may have some overhead; do not assume a passing build proves performance.
+- Build 30 remains the control baseline.
+
 Destinia iOS 0.5.5 Diagnostic Build 30 — mapa de checkpoints por simbolo
 - Carrega os nomes/PCs dos checkpoints ARM32 a partir da tabela de simbolos do ELF ja carregado.
 - RELATORIO inclui CHECKPOINT_SYMBOL antes da amostra circular, inclusive apos 20 min.

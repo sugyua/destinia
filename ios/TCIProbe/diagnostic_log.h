@@ -8,7 +8,7 @@ class DestiniaDiagnosticLog {
     std::deque<std::string> entries_;
     mutable std::mutex mutex_;
 public:
-    DestiniaDiagnosticLog() : limit_(400) {}
+    DestiniaDiagnosticLog() : limit_(2000) {}
     explicit DestiniaDiagnosticLog(std::size_t limit) : limit_(limit) {}
     void add(const std::string &entry) {
         std::lock_guard<std::mutex> guard(mutex_);

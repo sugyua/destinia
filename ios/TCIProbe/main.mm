@@ -5,6 +5,7 @@
 #include "frame_pacing.h"
 #include "diagnostic_log.h"
 #include "stall_watchdog.h"
+#include "deep_telemetry.h"
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -217,6 +218,9 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     DestiniaDiagnosticLog _diagnosticLog;
     NSString *_checkpointSymbols; // Written and read only on main UIKit queue.
     destinia::StallWatchdog _stallWatchdog;
+    destinia::DeepTelemetry _deepTelemetry;
+    std::atomic<uint64_t> _presentationDrops;
+    std::atomic<uint32_t> _lastUiQueueDelayUs;
 }
 
 - (void)showStatus:(NSString *)status {
@@ -229,14 +233,24 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
 - (void)showPixels:(const std::vector<uint8_t> &)pixels
           frameNum:(uint32_t)frameNumber {
     // Drop stale presentation submissions, never ARM32 gameplay ticks.
-    if (_framePresentationPending.exchange(true)) return;
+    if (_framePresentationPending.exchange(true)) {
+        _presentationDrops.fetch_add(1,std::memory_order_relaxed);
+        return;
+    }
     UIImage *image=DestiniaImageFromRGB565(pixels.data());
     if (!image) {
         _framePresentationPending.store(false);
         [self showStatus:@"Erro ao converter RGB565"];
         return;
     }
+    const auto queuedAt=std::chrono::steady_clock::now();
     dispatch_async(dispatch_get_main_queue(), ^{
+        const auto startedAt=std::chrono::steady_clock::now();
+        const double delayUs=std::chrono::duration<double,std::micro>(
+            startedAt-queuedAt).count();
+        self->_lastUiQueueDelayUs.store(
+            static_cast<uint32_t>(std::max(0.0,std::min(delayUs,10000000.0))),
+            std::memory_order_relaxed);
         self->_controller.gameView.image=image;
         self->_controller.statusLabel.hidden=
             !self->_showMetrics.load() && !self->_lastProfile;
@@ -363,6 +377,23 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     const double preparationMs=std::chrono::duration<double,std::milli>(
         prepared-emulationFinished).count();
     _peakArmMs=std::max(_peakArmMs,armMs);
+    destinia::DeepFrame sample;
+    sample.uptimeMs=static_cast<uint64_t>(
+        NSProcessInfo.processInfo.systemUptime*1000.0);
+    sample.frame=_frameIndex;
+    sample.armMs=static_cast<float>(armMs);
+    sample.preparationMs=static_cast<float>(preparationMs);
+    sample.gapMs=static_cast<float>(frameGapMs);
+    sample.timerLateMs=static_cast<float>(timerLateMs);
+    sample.requestedNextMs=nextMs;
+    sample.previousRequestMs=_previousGuestDelayMs;
+    sample.lastGuestEntryPc=destinia::g_lastGuestFunctionEntryPc.load(
+        std::memory_order_relaxed);
+    sample.presentationDrops=_presentationDrops.load(std::memory_order_relaxed);
+    sample.uiQueueDelayMs=static_cast<float>(
+        _lastUiQueueDelayUs.load(std::memory_order_relaxed)/1000.0);
+    sample.profiled=(error[0] && std::strncmp(error,"TOP ARM32:",10)==0);
+    _deepTelemetry.record(sample);
     // Rate limit anomaly logs to avoid amplifying a performance incident.
     if ((armMs>90.0 || frameGapMs>120.0 || timerLateMs>50.0) &&
         tickStart-_lastSlowLog>std::chrono::seconds(3)) {
@@ -386,9 +417,10 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         const double peakFrame=_maxFrameMs;
         const uint64_t slowFrames=_slowFrameCount;
         NSString *entry=[NSString stringWithFormat:
-            @"SAMPLE uptime=%.1fs frame=%u fps=%.2f arm_avg_ms=%.2f arm_peak_ms=%.2f prep_ms=%.2f gap_avg_ms=%.2f gap_peak_ms=%.2f timer_late_peak_ms=%.2f guest_delay_ms=%u slow_total=%llu thermal=%ld",
+            @"SAMPLE uptime=%.1fs frame=%u fps=%.2f arm_avg_ms=%.2f arm_peak_ms=%.2f prep_ms=%.2f gap_avg_ms=%.2f gap_peak_ms=%.2f timer_late_peak_ms=%.2f guest_delay_ms=%u slow_total=%llu thermal=%ld ram_mib=%.1f",
             NSProcessInfo.processInfo.systemUptime,_frameIndex,fps,avgArm,_peakArmMs,avgPrep,avgFrame,peakFrame,_peakTimerLateMs,nextMs,
-            (unsigned long long)slowFrames,(long)NSProcessInfo.processInfo.thermalState];
+            (unsigned long long)slowFrames,(long)NSProcessInfo.processInfo.thermalState,
+            DestiniaResidentMemoryMiB()];
         _diagnosticLog.add([entry UTF8String]);
 #if DESTINIA_DIAGNOSTIC_HUD
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -445,6 +477,8 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
     _paused.store(false);
     _showMetrics.store(true);
     _framePresentationPending.store(false);
+    _presentationDrops.store(0);
+    _lastUiQueueDelayUs.store(0);
     _reusablePixels.resize(kFrameBytes);
     _ready=false;
     _frameIndex=0;
@@ -483,13 +517,24 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         if (!owner) return;
         // Snapshot on the main thread: exporting must work even if ARM32 is blocked.
         {
-            std::string text="Destinia iOS 0.5.5 diagnostico build 30\n"
+            std::string text="Destinia iOS 0.5.5 diagnostico build 31 - deep telemetry\n"
                 "Amostras recentes; PROFILE conta blocos ARM32, nao tempo por funcao, e pode reduzir FPS.\n"
                 "Sem saves, nomes de personagem ou toques. Tempo uptime em segundos.\n\n";
             if (owner->_checkpointSymbols) {
                 text += [owner->_checkpointSymbols UTF8String];
             }
+            NSString *environment=[NSString stringWithFormat:
+                @"ENV_EXPORT uptime_s=%.1f battery_pct=%.1f thermal=%ld ram_mib=%.1f ui_drops=%llu ui_last_delay_ms=%.2f\n",
+                NSProcessInfo.processInfo.systemUptime,
+                UIDevice.currentDevice.batteryLevel*100.0f,
+                (long)NSProcessInfo.processInfo.thermalState,
+                DestiniaResidentMemoryMiB(),
+                (unsigned long long)owner->_presentationDrops.load(std::memory_order_relaxed),
+                owner->_lastUiQueueDelayUs.load(std::memory_order_relaxed)/1000.0];
+            text += [environment UTF8String];
             text+=owner->_diagnosticLog.text();
+            text+="\n";
+            text+=owner->_deepTelemetry.reportText();
             const auto stall=owner->_stallWatchdog.snapshot();
             if (stall.active) {
                 NSString *live=[NSString stringWithFormat:

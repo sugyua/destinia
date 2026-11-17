@@ -21,7 +21,7 @@ jobs:
       - name: Checkout Destinia
         run: |
           set -euo pipefail
-          git clone --depth 1 --branch codex/ios-055-checkpoint-symbols-20261116 https://github.com/sugyua/destinia.git .
+          git clone --depth 1 --branch codex/ios-056-deep-telemetry-b31-20261116 https://github.com/sugyua/destinia.git .
           git rev-parse HEAD
 
       - name: Audit Android game version and Windows-mod parity
@@ -302,6 +302,8 @@ jobs:
           /tmp/frame-pacing-test
           clang++ -std=c++17 -O2 -Wall -Wextra -Werror ios/TCIProbe/stall_watchdog_test.cpp -o /tmp/stall-watchdog-test
           /tmp/stall-watchdog-test
+          clang++ -std=c++17 -O2 -Wall -Wextra -Werror ios/TCIProbe/deep_telemetry_test.cpp -o /tmp/deep-telemetry-test
+          /tmp/deep-telemetry-test
       - name: Build TCIProbe IPA
         run: |
           set -eux
@@ -362,7 +364,7 @@ jobs:
             <key>CFBundleShortVersionString</key>
             <string>0.5.5</string>
             <key>CFBundleVersion</key>
-            <string>30</string>
+            <string>31</string>
             <key>MinimumOSVersion</key>
             <string>15.0</string>
             <key>LSRequiresIPhoneOS</key>
