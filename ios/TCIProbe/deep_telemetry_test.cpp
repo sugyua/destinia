@@ -10,6 +10,7 @@ int main() {
     f.lastGuestEntryPc=0x1000bb90u; f.uiQueueDelayMs=3.5f;
     hist.record(f);
     f.frame=3; f.armMs=2300; f.gapMs=2310; f.profiled=true;
+    f.requestedNextMs=60; // This frame did not request another one-second pause.
     hist.record(f);
     std::string out=hist.reportText();
     assert(out.find("frames_total=3")!=std::string::npos);
