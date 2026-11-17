@@ -417,9 +417,10 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
         const double peakFrame=_maxFrameMs;
         const uint64_t slowFrames=_slowFrameCount;
         NSString *entry=[NSString stringWithFormat:
-            @"SAMPLE uptime=%.1fs frame=%u fps=%.2f arm_avg_ms=%.2f arm_peak_ms=%.2f prep_ms=%.2f gap_avg_ms=%.2f gap_peak_ms=%.2f timer_late_peak_ms=%.2f guest_delay_ms=%u slow_total=%llu thermal=%ld",
+            @"SAMPLE uptime=%.1fs frame=%u fps=%.2f arm_avg_ms=%.2f arm_peak_ms=%.2f prep_ms=%.2f gap_avg_ms=%.2f gap_peak_ms=%.2f timer_late_peak_ms=%.2f guest_delay_ms=%u slow_total=%llu thermal=%ld ram_mib=%.1f",
             NSProcessInfo.processInfo.systemUptime,_frameIndex,fps,avgArm,_peakArmMs,avgPrep,avgFrame,peakFrame,_peakTimerLateMs,nextMs,
-            (unsigned long long)slowFrames,(long)NSProcessInfo.processInfo.thermalState];
+            (unsigned long long)slowFrames,(long)NSProcessInfo.processInfo.thermalState,
+            DestiniaResidentMemoryMiB()];
         _diagnosticLog.add([entry UTF8String]);
 #if DESTINIA_DIAGNOSTIC_HUD
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -523,7 +524,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
                 text += [owner->_checkpointSymbols UTF8String];
             }
             NSString *environment=[NSString stringWithFormat:
-                @"ENV_EXPORT uptime_s=%.1f battery_pct=%.1f thermal=%ld ram_mib=%.1f ui_drops=%llu ui_last_delay_ms=%.2f\\n",
+                @"ENV_EXPORT uptime_s=%.1f battery_pct=%.1f thermal=%ld ram_mib=%.1f ui_drops=%llu ui_last_delay_ms=%.2f\n",
                 NSProcessInfo.processInfo.systemUptime,
                 UIDevice.currentDevice.batteryLevel*100.0f,
                 (long)NSProcessInfo.processInfo.thermalState,
@@ -532,7 +533,7 @@ static UIImage *DestiniaImageFromRGB565(const uint8_t *pixels) {
                 owner->_lastUiQueueDelayUs.load(std::memory_order_relaxed)/1000.0];
             text += [environment UTF8String];
             text+=owner->_diagnosticLog.text();
-            text+="\\n";
+            text+="\n";
             text+=owner->_deepTelemetry.reportText();
             const auto stall=owner->_stallWatchdog.snapshot();
             if (stall.active) {
