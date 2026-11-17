@@ -1,0 +1,40 @@
+name: iOS Build 31 deep telemetry regression
+on:
+  push:
+    branches:
+      - codex/ios-056-deep-telemetry-b31-20261116
+    paths:
+      - "ios/TCIProbe/deep_telemetry.h"
+      - "ios/TCIProbe/deep_telemetry_test.cpp"
+      - "ios/TCIProbe/main.mm"
+      - "ios/TCIProbe/diagnostic_log.h"
+      - ".github/workflows/ios-deep-telemetry-ci.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ios-arm64-syntax:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check bounded ring buffer and watchdog invariants
+        run: |
+          set -euo pipefail
+          clang++ -std=c++17 -O2 -Wall -Wextra -Werror ios/TCIProbe/deep_telemetry_test.cpp -o /tmp/deep-telemetry-test
+          /tmp/deep-telemetry-test
+          clang++ -std=c++17 -O2 -Wall -Wextra -Werror ios/TCIProbe/diagnostic_log_test.cpp -o /tmp/diagnostic-log-test
+          /tmp/diagnostic-log-test
+          clang++ -std=c++17 -O2 -Wall -Wextra -Werror ios/TCIProbe/stall_watchdog_test.cpp -o /tmp/stall-watchdog-test
+          /tmp/stall-watchdog-test
+          clang++ -std=c++17 -O2 -Wall -Wextra -Werror ios/TCIProbe/frame_pacing_test.cpp -o /tmp/frame-pacing-test
+          /tmp/frame-pacing-test
+      - name: Compile iOS ARM64 Objective-C++ (no assets or IPA)
+        run: |
+          set -euo pipefail
+          SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
+          xcrun --sdk iphoneos clang++ -x objective-c++ -std=c++17 -fobjc-arc -O2 \
+            -DDESTINIA_DIAGNOSTIC_HUD=1 -DDESTINIA_STALL_DIAGNOSTICS=1 \
+            -target arm64-apple-ios15.0 -isysroot "$SDK" \
+            -c ios/TCIProbe/main.mm -o /tmp/destinia-ios-build31.o
+          file /tmp/destinia-ios-build31.o
